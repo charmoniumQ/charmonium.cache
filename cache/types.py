@@ -1,6 +1,6 @@
 from __future__ import annotations
 from pathlib import PurePath
-from typing import Iterable, Union, Any, IO, TYPE_CHECKING
+from typing import Iterable, Union, Any, IO, TYPE_CHECKING, ContextManager
 from collections import UserDict as _UserDict
 from typing_extensions import Protocol
 
@@ -57,3 +57,6 @@ class Serializer(Protocol):
         ...
     def dump(self, obj: Serializable, fil: IO[bytes]) -> None:
         ...
+
+
+RLockLike = ContextManager[Any]

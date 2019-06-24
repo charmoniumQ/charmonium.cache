@@ -7,10 +7,12 @@ import urllib.parse
 from .types import PathLike
 
 
-unix_ts_zero = datetime.datetime(1970, 1, 1)
-def to_unix_ts(dt: datetime.datetime) -> float:
+UNIX_TS_ZERO = datetime.datetime(1970, 1, 1)
+
+
+def to_unix_ts(dtm: datetime.datetime) -> float:
     '''returns the seconds since the Unix epoch for dt'''
-    return (dt - unix_ts_zero).total_seconds()
+    return (dtm - UNIX_TS_ZERO).total_seconds()
 
 
 def unix_ts_now() -> float:

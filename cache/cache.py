@@ -5,11 +5,14 @@ import contextlib
 import functools
 import threading
 from typing import (
-    Callable, Any, TypeVar, cast, Tuple, Dict, Optional, Hashable, Generator
+    Callable, Any, TypeVar, cast, Tuple, Dict,
+    Optional, Hashable, Generator,
 )
 import logging
-from .types import UserDict, Serializable, Serializer
-from .util import pathify, PathLike, PotentiallyPathLike, to_hashable, injective_str
+from .types import UserDict, Serializable, Serializer, RLockLike
+from .util import (
+    pathify, PathLike, PotentiallyPathLike, to_hashable, injective_str
+)
 
 
 CacheKey = TypeVar('CacheKey')
@@ -31,7 +34,9 @@ Cache(f)(args) at a time for the same Cache(f).
 
     @classmethod
     def decor(
-            cls, obj_store: Callable[[str], ObjectStore[CacheKey, CacheReturn]],
+            cls,
+            obj_store: Callable[[str], ObjectStore[CacheKey, CacheReturn]],
+            lock: Optional[RLockLike] = None,
     ) -> Callable[[CacheFunc], CacheFunc]:
         '''Decorator that creates a cached function
 
@@ -40,11 +45,13 @@ Cache(f)(args) at a time for the same Cache(f).
             ...     pass
 
         '''
+
+        _lock = lock if lock is not None else threading.RLock()
         def decor_(function: CacheFunc) -> CacheFunc:
             return cast(
                 CacheFunc,
                 functools.wraps(function)(
-                    cls(obj_store, function)
+                    cls(function, obj_store, _lock)
                 )
             )
         return decor_
@@ -52,8 +59,9 @@ Cache(f)(args) at a time for the same Cache(f).
     #pylint: disable=too-many-arguments
     def __init__(
             self,
-            obj_store: Callable[[str], ObjectStore[CacheKey, CacheReturn]],
             function: CacheFunc,
+            obj_store: Callable[[str], ObjectStore[CacheKey, CacheReturn]],
+            lock: RLockLike,
     ) -> None:
         '''Cache a function in the given ObjectStore
 
@@ -69,7 +77,7 @@ functions of different versions will not collide.
             '.{self.function.version}' if hasattr(self.function, 'version') else '',
         )
         self.obj_store = obj_store(self.name)
-        self._sem = threading.RLock()
+        self.lock = lock
         self.__qualname__ = f'Cache({self.name})'
         self.__name__ = self.__qualname__
         self._disable = False
@@ -78,7 +86,7 @@ functions of different versions will not collide.
         if self._disable:
             return self.function(*pos_args, **kwargs)
         else:
-            with self._sem:
+            with self.lock:
                 args_key = self.obj_store.args2key(pos_args, kwargs)
                 if args_key in self.obj_store:
                     logging.getLogger(f'{self.name}.hit').debug(
@@ -114,9 +122,6 @@ functions of different versions will not collide.
         self._disable = previously_disabled
 
 
-# TODO: add a with ObjectStore.lock() so that multiprocessing programs
-# accessing the same underyling fs resources lock each other out when
-# necessary
 ObjectStoreKey = TypeVar('ObjectStoreKey')
 ObjectStoreValue = TypeVar('ObjectStoreValue')
 class ObjectStore(UserDict[ObjectStoreKey, ObjectStoreValue], abc.ABC):
