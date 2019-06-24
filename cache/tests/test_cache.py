@@ -1,6 +1,7 @@
 from typing import cast, List
 from pathlib import Path
 import threading
+import time
 import tempfile
 from cache import Cache, MemoryStore, FileStore, DirectoryStore
 from cache.util import unix_ts_now, loop_for_duration
@@ -54,7 +55,7 @@ def test_cache() -> None:
 
             # test del explicitly
             # no good way to test it no normal functionality
-            del square_.obj_store[square_.obj_store.args2key((7,), {})]
+            del square_.obj_store[square_.obj_store.args2key((7,), {}, [])]
             assert square(7) == 49
 
             # test disabling feature
@@ -74,7 +75,7 @@ def test_multithreaded_cache() -> None:
         return x**2
 
     def worker():
-        for _ in loop_for_duration(3):
+        for _ in loop_for_duration(2):
             seconds = int(unix_ts_now() * 10)
             # everyone will be trying to square the same thing,
             # at the same time
@@ -94,5 +95,35 @@ def test_multithreaded_cache() -> None:
     assert len(set(calls)) == len(calls)
 
 
+def test_files() -> None:
+    with tempfile.TemporaryDirectory() as work_dir_:
+        work_dir = Path(work_dir_)
+        file_path = work_dir / 'file1'
+        calls: List[str] = []
+
+        @Cache.decor(MemoryStore.create(), files=[work_dir])
+        def open_(filename: str) -> str: # pylint: disable=invalid-name
+            calls.append(filename)
+            with open(filename) as fil:
+                return fil.read()
+
+        with file_path.open('w') as fil:
+            fil.write('text')
+
+        assert open_(str(file_path)) == 'text' # miss
+        assert open_(str(file_path)) == 'text' # hit
+
+        time.sleep(0.5)
+
+        with file_path.open('w') as fil:
+            fil.write('more text')
+
+        assert open_(str(file_path)) == 'more text' # miss
+        assert open_(str(file_path)) == 'more text' # hit
+
+        assert len(calls) == 2
+        # I should only have to read the file twice
+
+
 if __name__ == '__main__':
-    test_multithreaded_cache()
+    test_files()

@@ -39,6 +39,10 @@ Another way to customize this is to use `FileStore` or
 `DirectoryStore` with an object conforming to the `Serializer`
 interface (e.g. pickle, cloudpickle, dill, messagepack).
 
+## CLI usage
+
+    cache --files main.c -- gcc main.c -o main
+
 '''
 
 from .cache import Cache, ObjectStore, MemoryStore, FileStore, DirectoryStore

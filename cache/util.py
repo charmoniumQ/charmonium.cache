@@ -15,6 +15,11 @@ def to_unix_ts(dtm: datetime.datetime) -> float:
     return (dtm - UNIX_TS_ZERO).total_seconds()
 
 
+def from_unix_ts(unix_ts: float) -> datetime.datetime:
+    '''returns the seconds since the Unix epoch for dt'''
+    return UNIX_TS_ZERO + datetime.timedelta(seconds=unix_ts)
+
+
 def unix_ts_now() -> float:
     '''returns the seconds since the Unix epoch'''
     return to_unix_ts(datetime.datetime.now())
@@ -113,3 +118,30 @@ def is_pathlike(obj: Any) -> bool:
         '__truediv__', 'mkdir', 'exists', 'unlink', 'iterdir', 'open', 'parent'
     ]
     return all(hasattr(obj, attr) for attr in path_attrs)
+
+
+# consider using recursive hashing
+def modtime(path: PathLike) -> datetime.datetime:
+    if hasattr(path, 'modtime'):
+        return getattr(path, 'modtime')()
+    elif hasattr(path, 'stat'):
+        stat = getattr(path, 'stat')()
+        latest_timestamp = max(stat.st_mtime, stat.st_ctime)
+        return from_unix_ts(latest_timestamp)
+    else:
+        raise TypeError(f'Your path type does not support modtime: {path!r}')
+
+
+def is_dir(path: PathLike) -> bool:
+    if hasattr(path, 'is_dir'):
+        return getattr(path, 'is_dir')()
+    else:
+        return False
+
+
+def modtime_recursive(path: PathLike) -> datetime.datetime:
+    if is_dir(path):
+        candidates = [modtime(path)] + [modtime_recursive(entry) for entry in path.iterdir()]
+        return max(candidates)
+    else:
+        return modtime(path)
