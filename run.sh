@@ -20,7 +20,9 @@ then
     pip3 install -r dev-requirements.txt -r requirements.txt
     echo "${modtime}" > "${cache_requirements}"
 fi
-python3 -m mypy -p ${package}
-python3 -m pytest tests
-python3 -m pylint ${package} tests
-scc ${package} tests
+# I have chosen to make tests a subdirectory of code so that the next
+# four lines are simpler
+mypy -p ${package}
+python -m pytest  --pyargs ${package}.tests
+pylint ${package}
+scc ${package}

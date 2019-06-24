@@ -3,27 +3,7 @@ from pathlib import Path
 import threading
 import tempfile
 from cache import Cache, MemoryStore, FileStore, DirectoryStore
-
-
-import datetime
-
-
-unix_ts_zero = datetime.datetime(1970, 1, 1)
-def to_unix_ts(dt: datetime.datetime) -> float:
-    return (dt - unix_ts_zero).total_seconds()
-
-
-def unix_ts_now() -> float:
-    return to_unix_ts(datetime.datetime.now())
-
-
-from typing import Generator
-import datetime
-def loop_for_duration(duration: float) -> Generator[None, float, None]:
-    start = datetime.datetime.now()
-    end = start + datetime.timedelta(seconds=duration)
-    while datetime.datetime.now() < end:
-        yield (end - datetime.datetime.now()).total_seconds()
+from cache.util import unix_ts_now, loop_for_duration
 
 
 def test_cache() -> None:
