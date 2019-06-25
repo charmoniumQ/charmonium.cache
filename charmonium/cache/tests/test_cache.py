@@ -74,7 +74,7 @@ def test_multithreaded_cache() -> None:
         calls.append(x)
         return x**2
 
-    def worker():
+    def worker() -> None:
         for _ in loop_for_duration(2):
             seconds = int(unix_ts_now() * 10)
             # everyone will be trying to square the same thing,
@@ -104,7 +104,7 @@ def test_files() -> None:
         @Cache.decor(
             MemoryStore.create(), state_fn=make_file_state_fn(work_dir)
         )
-        def open_(filename: str) -> str: # pylint: disable=invalid-name
+        def open_(filename: str) -> str:
             calls.append(filename)
             with open(filename) as fil:
                 return fil.read()

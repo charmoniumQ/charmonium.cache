@@ -10,15 +10,15 @@ from typing import (
     Optional, Hashable, Generator,
 )
 import logging
-from .types import UserDict, Serializable, Serializer, RLockLike
+from .types import UserDict, Serializable, Serializer, RLockLike, PathLike
 from .util import (
-    pathify, PathLike, PotentiallyPathLike, to_hashable,
+    pathify, PotentiallyPathLike, to_hashable,
     injective_str, modtime_recursive,
 )
 
 
 CacheKey = TypeVar('CacheKey')
-CacheReturn = Any # pylint: disable=invalid-name
+CacheReturn = TypeVar('CacheReturn')
 CacheFunc = TypeVar('CacheFunc', bound=Callable[..., CacheReturn])
 class Cache:
     @classmethod
@@ -236,7 +236,7 @@ class MemoryStore(ObjectStore[Hashable, Any]):
             self, args: Tuple[Any, ...], kwargs: Dict[str, Any],
     ) -> Hashable:
         # pylint: disable=no-self-use
-        return cast(Hashable, to_hashable((args, kwargs)))
+        return to_hashable((args, kwargs))
 
 
 class FileStore(ObjectStore[Hashable, Serializable]):
@@ -386,20 +386,20 @@ file.
     '''
 
     paths = list(map(pathify, files))
-    def state_fn(*_args, **_kwargs) -> datetime.datetime:
+    def state_fn(*_args: Any, **_kwargs: Any) -> datetime.datetime:
         return max(map(modtime_recursive, paths))
     return state_fn
 
 
 def make_code_state_fn(function: Callable[..., Any]) -> Callable[..., bytes]:
     code = function.__code__.co_code
-    def state_fn(*_args, **_kwargs) -> bytes:
+    def state_fn(*_args: Any, **_kwargs: Any) -> bytes:
         return code
     return state_fn
 
 
 def make_combined_state_fn(*state_fns: Callable[..., Any]) -> Any:
-    def state_fn(*args, **kwargs) -> Tuple[Any, ...]:
+    def state_fn(*args: Any, **kwargs: Any) -> Tuple[Any, ...]:
         return tuple(
             state_fn(*args, **kwargs) for state_fn in state_fns
         )
