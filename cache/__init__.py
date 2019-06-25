@@ -1,5 +1,4 @@
-'''
-# Caching decorator
+'''# Caching decorator
 
 This package provides a decorator that caches a function. It stores
 the arguments and the returned object. The next time the function is
@@ -39,10 +38,22 @@ Another way to customize this is to use `FileStore` or
 `DirectoryStore` with an object conforming to the `Serializer`
 interface (e.g. pickle, cloudpickle, dill, messagepack).
 
+If you are reading data from external files, consider using
+`make_file_state_fn`. It will recompute the entry when the file
+changes on the disk.
+
 ## CLI usage
 
-    cache --files main.c -- gcc main.c -o main
+    # cache a commandline function based on its args
+    read n
+    cache -- compute_prime ${n}
+
+    # cache based on args AND file-modtime
+    # recompiles when main.c is newer than the most recent compile
+    cache --file main.c -- gcc main.c -o main
 
 '''
 
-from .cache import Cache, ObjectStore, MemoryStore, FileStore, DirectoryStore
+from .cache import (
+    Cache, ObjectStore, MemoryStore, FileStore, DirectoryStore, make_file_state_fn
+)

@@ -3,7 +3,7 @@ from pathlib import Path
 import threading
 import time
 import tempfile
-from cache import Cache, MemoryStore, FileStore, DirectoryStore
+from cache import Cache, MemoryStore, FileStore, DirectoryStore, make_file_state_fn
 from cache.util import unix_ts_now, loop_for_duration
 
 
@@ -55,7 +55,7 @@ def test_cache() -> None:
 
             # test del explicitly
             # no good way to test it no normal functionality
-            del square_.obj_store[square_.obj_store.args2key((7,), {}, [])]
+            del square_.obj_store[square_.obj_store.args2key((7,), {})]
             assert square(7) == 49
 
             # test disabling feature
@@ -101,7 +101,9 @@ def test_files() -> None:
         file_path = work_dir / 'file1'
         calls: List[str] = []
 
-        @Cache.decor(MemoryStore.create(), files=[work_dir])
+        @Cache.decor(
+            MemoryStore.create(), state_fn=make_file_state_fn(work_dir)
+        )
         def open_(filename: str) -> str: # pylint: disable=invalid-name
             calls.append(filename)
             with open(filename) as fil:
@@ -121,8 +123,11 @@ def test_files() -> None:
         assert open_(str(file_path)) == 'more text' # miss
         assert open_(str(file_path)) == 'more text' # hit
 
-        assert len(calls) == 2
         # I should only have to read the file twice
+        assert len(calls) == 2
+
+        # I should only have the newer-state version cached
+        assert len(cast(Cache, open_).obj_store) == 1
 
 
 if __name__ == '__main__':
