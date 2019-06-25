@@ -3,8 +3,8 @@ from pathlib import Path
 import threading
 import time
 import tempfile
-from cache import Cache, MemoryStore, FileStore, DirectoryStore, make_file_state_fn
-from cache.util import unix_ts_now, loop_for_duration
+from charmonium.cache import Cache, MemoryStore, FileStore, DirectoryStore, make_file_state_fn
+from charmonium.cache.util import unix_ts_now, loop_for_duration
 
 
 def test_cache() -> None:
