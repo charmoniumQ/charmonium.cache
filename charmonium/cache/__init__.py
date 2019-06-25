@@ -1,4 +1,5 @@
-'''# Caching decorator
+'''
+# charmonium.cache
 
 This package provides a decorator that caches a function. It stores
 the arguments and the returned object. The next time the function is
@@ -54,6 +55,7 @@ changes on the disk.
 
 '''
 
-from .cache import (
+from .core import (
     Cache, ObjectStore, MemoryStore, FileStore, DirectoryStore, make_file_state_fn
 )
+VERSION = '0.1.0'

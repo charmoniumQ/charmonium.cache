@@ -123,7 +123,7 @@ def is_pathlike(obj: Any) -> bool:
 # consider using recursive hashing
 def modtime(path: PathLike) -> datetime.datetime:
     if hasattr(path, 'modtime'):
-        return getattr(path, 'modtime')()
+        return cast(datetime.datetime, getattr(path, 'modtime')())
     elif hasattr(path, 'stat'):
         stat = getattr(path, 'stat')()
         latest_timestamp = max(stat.st_mtime, stat.st_ctime)
@@ -134,7 +134,7 @@ def modtime(path: PathLike) -> datetime.datetime:
 
 def is_dir(path: PathLike) -> bool:
     if hasattr(path, 'is_dir'):
-        return getattr(path, 'is_dir')()
+        return cast(bool, getattr(path, 'is_dir')())
     else:
         return False
 
