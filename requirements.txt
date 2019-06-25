@@ -1,1 +1,3 @@
+# TODO: make these optional dependencies
 typing_extensions
+click
