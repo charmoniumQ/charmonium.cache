@@ -58,4 +58,4 @@ changes on the disk.
 from .core import (
     Cache, ObjectStore, MemoryStore, FileStore, DirectoryStore, make_file_state_fn
 )
-version = '0.1.0'
+version = '0.1.1'
