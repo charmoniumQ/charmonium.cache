@@ -55,11 +55,11 @@ def path_from_parts(parts):
         base = base / part
     return base
 
-console_scripts = {
-    package: f'{package}.__main__ [cli]'
+console_scripts = [
+    f'{package}={package}.__main__:cli_main [cli]'
     for package in packages
     if (source_dir / path_from_parts(package.split('.')) / '__main__.py').exists()
-}
+]
 
 entry_points = dict(console_scripts=console_scripts)
 

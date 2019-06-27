@@ -387,9 +387,14 @@ file.
     '''
 
     paths = list(map(pathify, files))
-    def state_fn(*_args: Any, **_kwargs: Any) -> datetime.datetime:
-        return max(map(modtime_recursive, paths))
-    return state_fn
+    if paths:
+        def state_fn(*_args: Any, **_kwargs: Any) -> datetime.datetime:
+            return max(map(modtime_recursive, paths))
+        return state_fn
+    else:
+        def state_fn(*_args: Any, **_kwargs: Any) -> None:
+            pass
+        return state_fn
 
 
 def make_code_state_fn(function: Callable[..., Any]) -> Callable[..., bytes]:

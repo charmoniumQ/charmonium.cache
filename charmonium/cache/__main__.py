@@ -12,6 +12,7 @@ def make_exec_cached(
         cache_path: PotentiallyPathLike,
         files: List[PotentiallyPathLike],
         extra_state: Any,
+        verbose: bool,
 ) -> str:
     '''Executes `command` or recalls its cached output
 
@@ -33,6 +34,7 @@ you could pass $(date +%j) to trigger invalidation once per day.
             command: List[str],
             extra_state: Any, # pylint: disable=unused-argument
     ) -> str:
+        print('cache miss')
         return cast(str, subprocess.run(
             command, capture_output=True, text=True
         ).stdout)
@@ -67,14 +69,21 @@ def printy(func: Callable[..., str]) -> Callable[..., None]:
     '--extra-state', type=str, default='',
     help='invalidates the cache if this option is different',
 )
+@click.option(
+    '-v', '--verbose', is_flag=True,
+    help='prints when the command is a cache miss',
+)
 @functools.wraps(make_exec_cached)
-def main(
+def cli_main(
         command: List[str],
         cache_path: Path,
-        files: Tuple[Path],
+        file: Tuple[Path],
         extra_state: str,
+        verbose: bool,
 ) -> None:
-    print(make_exec_cached(command, cache_path, list(files), extra_state))
+    if not command:
+        raise ValueError('no command given')
+    print(make_exec_cached(command, cache_path, list(file), extra_state, verbose))
 
 if __name__ == '__main__':
-    main()
+    cli_main()
