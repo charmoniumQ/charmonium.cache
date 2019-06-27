@@ -1,7 +1,7 @@
 import functools
 import subprocess
 from pathlib import Path
-from typing import List, Callable, Tuple, Any, cast
+from typing import List, Tuple, Any, cast
 import click
 from .core import Cache, FileStore, make_file_state_fn
 from .util import PotentiallyPathLike
@@ -34,19 +34,13 @@ you could pass $(date +%j) to trigger invalidation once per day.
             command: List[str],
             extra_state: Any, # pylint: disable=unused-argument
     ) -> str:
-        print('cache miss')
+        if verbose:
+            print('cache miss')
         return cast(str, subprocess.run(
             command, capture_output=True, text=True
         ).stdout)
 
     return exec_cached(command, extra_state)
-
-
-def printy(func: Callable[..., str]) -> Callable[..., None]:
-    @functools.wraps(func)
-    def new_func(*args: Any, **kwargs: Any) -> None:
-        print(func(*args, **kwargs), end='')
-    return new_func
 
 
 # pylint: disable=no-value-for-parameter

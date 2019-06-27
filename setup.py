@@ -37,6 +37,7 @@ tests_require = [
     'mypy',
     'pylint',
     'pytest',
+    'pytest-cov',
     'typing_extensions',
     'bumpversion',
 ]

@@ -1,8 +1,8 @@
 #!/bin/sh
 
-source_dir=charmonium
-namespace=charmonium
-package=charmonium.cache
+source_dir=$(python3 -c 'import setup; print(setup.source_dir)')
+package=$(python3 -c 'import setup; print(setup.main_package)')
+namespace=$(python3 -c 'import setup; print(setup.main_package.split(".")[0] if "." in setup.main_package else "")')
 
 if [ ! -d env/ ]
 then
@@ -24,23 +24,23 @@ set -e -x
 # files in order to determine the fully-qualified module/package
 # name."
 # [1]: https://mypy.readthedocs.io/en/latest/command_line.html#import-discovery
-[ -n "${namespace}" ] && touch ${namespace}/__init__.py
+[ -n "${namespace}" ] && touch "${namespace}/__init__.py"
 mypy -p ${package} --strict
-[ -n "${namespace}" ] && rm ${namespace}/__init__.py
+[ -n "${namespace}" ] && rm "${namespace}/__init__.py"
 
-python -m pytest --pyargs ${package}.tests
+python -m pytest --pyargs "${package}.tests" "--cov=${package}"
 
-[ -n "${namespace}" ] && touch ${namespace}/__init__.py
+[ -n "${namespace}" ] && touch "${namespace}/__init__.py"
 pylint ${package} --exit-zero
-[ -n "${namespace}" ] && rm ${namespace}/__init__.py
+[ -n "${namespace}" ] && rm "${namespace}/__init__.py"
 
-scc ${source_dir}
+scc "${source_dir}"
 
 # autoconfigure files
 
-main_file=$(python3 -c "import setup; print(setup.source_dir / setup.path_from_parts(setup.main_package.split('.')))")
+package_init=$(python3 -c "import setup; print(setup.source_dir / setup.path_from_parts(setup.main_package.split('.')))")
 cat <<EOF >> setup.cfg
-[bumpversion:file:${main_file}]
+[bumpversion:file:${package_init}]
 EOF
 uniq setup.cfg > setup.cfg
 

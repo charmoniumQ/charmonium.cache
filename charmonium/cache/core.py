@@ -13,7 +13,7 @@ import logging
 from .types import UserDict, Serializable, Serializer, RLockLike, PathLike
 from .util import (
     pathify, PotentiallyPathLike, to_hashable,
-    injective_str, modtime_recursive,
+    injective_str, modtime_recursive, UNIX_TS_ZERO,
 )
 
 
@@ -392,8 +392,8 @@ file.
             return max(map(modtime_recursive, paths))
         return state_fn
     else:
-        def state_fn(*_args: Any, **_kwargs: Any) -> None:
-            pass
+        def state_fn(*_args: Any, **_kwargs: Any) -> datetime.datetime:
+            return UNIX_TS_ZERO
         return state_fn
 
 

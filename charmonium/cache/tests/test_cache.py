@@ -1,6 +1,8 @@
 from typing import cast, List
 from pathlib import Path
 import threading
+import sys
+import subprocess
 import time
 import tempfile
 from charmonium.cache.core import Cache, MemoryStore, FileStore, DirectoryStore, make_file_state_fn
@@ -129,6 +131,36 @@ def test_files() -> None:
         # I should only have the newer-state version cached
         assert len(cast(Cache, open_).obj_store) == 1
 
+def test_no_files() -> None:
+    # ensure it works for the edge case where there are no files
 
-if __name__ == '__main__':
-    test_files()
+    with tempfile.TemporaryDirectory() as work_dir_:
+        work_dir = Path(work_dir_)
+        file_path = work_dir / 'file1'
+
+        with file_path.open('w') as fil:
+            fil.write('more text')
+
+        calls: List[str] = []
+
+        @Cache.decor(
+            MemoryStore.create(), state_fn=make_file_state_fn()
+        )
+        def open_(filename: str) -> str:
+            calls.append(filename)
+            with open(filename) as fil:
+                return fil.read()
+
+        assert open_(str(file_path)) == 'more text' # miss
+        assert open_(str(file_path)) == 'more text' # hit
+
+
+def test_cli() -> None:
+    def run(*args: str) -> int:
+        return subprocess.run(
+            [sys.executable, '-m', 'charmonium.cache', *args]
+        ).returncode
+    assert run('--help') == 0
+    assert run('printf', 'hi') == 0
+    assert run('--verbose', 'printf', 'hi') == 0
+    assert run() != 0
