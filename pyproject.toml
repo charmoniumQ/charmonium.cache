@@ -1,0 +1,59 @@
+[tool.poetry]
+name = "charmonium.cache"
+version = "0.0.0"
+description = "Provides a decorator for caching a function and an equivalent command-line util."
+authors = ["Samuel Grayson <sam+dev@samgrayson.me>"]
+license = "MPL-2.0"
+readme = 'README.rst'
+repository = "https://github.com/charmoniumQ/charmonium.cache.git"
+packages = [
+    { include = "charmonium" },
+]
+include = ["res/"]
+
+[tool.poetry.scripts]
+cache = "charmonium.cache._cli:main"
+
+[tool.poetry.dependencies]
+python = "^3.6"
+
+[tool.poetry.dev-dependencies]
+autoflake = "^1.3.1"
+isort = "^4.3.21"
+black = "^19.10b0"
+pylint = "^2.5.2"
+pylint-exit = "^1.1.0"
+mypy = "^0.780"
+pytest = "^5.4.1"
+pytest-cov = "^2.10.0"
+coverage = "^5.1"
+codecov = "^2.1.4"
+sphinx = "^3.1.0"
+sphinx-autoapi = "^1.4.0"
+sphinx-autodoc-annotation = "^1.0-1"
+bump2version = "^1.0.0"
+tox = "^3.15.2"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
+[tool.tox]
+# According to tox docs
+# The tox configuration can also be in pyproject.toml (if you want to avoid an extra file).
+# Currently only the old format is supported via legacy_tox_ini, a native implementation is planned though.
+legacy_tox_ini = """
+[tox]
+envlist = py36
+isolated_build = True
+
+[tox:.package]
+# note tox will use the same python version as under what tox is installed to package
+# so unless this is python 3 you can require a given python version for the packaging
+# environment via the basepython key
+basepython = python3
+
+[testenv]
+commands =
+    poetry install
+    pytest --quiet --exitfirst tests
+"""
