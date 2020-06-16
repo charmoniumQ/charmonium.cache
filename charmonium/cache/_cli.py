@@ -1,7 +1,7 @@
 import functools
 import subprocess
 from pathlib import Path
-from typing import Any, List, Tuple, cast
+from typing import Any, List, Tuple, cast, Callable
 
 import click
 
@@ -13,8 +13,8 @@ def cli_cached(
     command: List[str],
     cache_path: PotentiallyPathLike,
     files: List[PotentiallyPathLike],
-    extra_state: Any,
-    verbose: bool,
+    extra_state: Any = None,
+    verbose: bool = False,
 ) -> str:
     """Executes `command` or recalls its cached output
 
@@ -37,9 +37,9 @@ you could pass $(date +%j) to trigger invalidation once per day.
     ) -> str:
         if verbose:
             print("cache miss")
-        return cast(str, subprocess.run(command, capture_output=True, text=True).stdout)
+        return subprocess.run(command, capture_output=True, text=True).stdout
 
-    return this_cli_cached(command, extra_state)
+    return cast(Callable[[List[str], Any], str], this_cli_cached)(command, extra_state)
 
 
 # pylint: disable=no-value-for-parameter
@@ -73,7 +73,7 @@ you could pass $(date +%j) to trigger invalidation once per day.
 @click.option(
     "-v", "--verbose", is_flag=True, help="prints when the command is a cache miss",
 )
-@functools.wraps(make_exec_cached)
+@functools.wraps(cli_cached)
 def main(
     command: List[str],
     cache_path: Path,

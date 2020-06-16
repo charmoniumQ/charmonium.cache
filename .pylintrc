@@ -62,9 +62,17 @@ confidence=
 # --disable=W".
 disable=
     missing-docstring,
+    invalid-name,
 
 	# This is needed to make mypy types work (such as OrderedDict[K, V])
     unsubscriptable-object,
+
+    # Black disagrees with pylint on how to indent
+    #     class Derived (
+    #         BaseClass, metaclass=MetaClass,
+    #     ):
+    #         pass
+    bad-continuation,
 
     # my personal style is to explicitly else-return and else-raise.
     # that way, if you change the return or raise, same functionality

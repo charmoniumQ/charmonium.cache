@@ -5,6 +5,7 @@ import threading
 import time
 from pathlib import Path
 from typing import List, cast
+from mypy_extensions import DefaultArg
 
 from charmonium.cache import (
     Cache,
@@ -22,17 +23,17 @@ def test_cache() -> None:
         calls: List[int] = []
 
         @Cache.decor(MemoryStore.create())
-        def square1(x: int, a: int = 0) -> int:  # pylint: disable=invalid-name
+        def square1(x: int, a: int = 0) -> int:
             calls.append(x)
             return x ** 2 + a
 
         @Cache.decor(FileStore.create(str(work_dir)))
-        def square2(x: int, a: int = 0) -> int:  # pylint: disable=invalid-name
+        def square2(x: int, a: int = 0) -> int:
             calls.append(x)
             return x ** 2 + a
 
         @Cache.decor(DirectoryStore.create(work_dir / "cache"))
-        def square3(x: int, a: int = 0) -> int:  # pylint: disable=invalid-name
+        def square3(x: int, a: int = 0) -> int:
             calls.append(x)
             return x ** 2 + a
 
@@ -157,13 +158,13 @@ def test_no_files() -> None:
         assert open_(str(file_path)) == "more text"  # hit
 
 
-def test_cli() -> None:
-    def run(*args: str) -> int:
-        return subprocess.run(
-            [sys.executable, "-m", "charmonium.cache", *args]
-        ).returncode
+# def test_cli() -> None:
+#     def run(*args: str) -> int:
+#         return subprocess.run(
+#             [sys.executable, "-m", "cache", *args]
+#         ).returncode
 
-    assert run("--help") == 0
-    assert run("printf", "hi") == 0
-    assert run("--verbose", "printf", "hi") == 0
-    assert run() != 0
+#     assert run("--help") == 0
+#     assert run("printf", "hi") == 0
+#     assert run("--verbose", "printf", "hi") == 0
+#     assert run() != 0

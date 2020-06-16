@@ -15,7 +15,7 @@ include = ["res/"]
 cache = "charmonium.cache._cli:main"
 
 [tool.poetry.dependencies]
-python = "^3.6"
+python = "3.8"
 
 [tool.poetry.dev-dependencies]
 autoflake = "^1.3.1"
@@ -33,10 +33,8 @@ sphinx-autoapi = "^1.4.0"
 sphinx-autodoc-annotation = "^1.0-1"
 bump2version = "^1.0.0"
 tox = "^3.15.2"
+pytype = "^2020.6.1"
 
-[build-system]
-requires = ["poetry>=0.12"]
-build-backend = "poetry.masonry.api"
 [tool.tox]
 # According to tox docs
 # The tox configuration can also be in pyproject.toml (if you want to avoid an extra file).
@@ -57,3 +55,6 @@ commands =
     poetry install
     pytest --quiet --exitfirst tests
 """
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"

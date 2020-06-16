@@ -1,4 +1,4 @@
-'''
+"""
 # charmonium.cache
 
 This package provides a decorator that caches a function. It stores
@@ -53,9 +53,18 @@ changes on the disk.
     # recompiles when main.c is newer than the most recent compile
     cache --file main.c -- gcc main.c -o main
 
-'''
+"""
 
 from .core import (
-    Cache, ObjectStore, MemoryStore, FileStore, DirectoryStore, make_file_state_fn
+    Cache,
+    DirectoryStore,
+    FileStore,
+    MemoryStore,
+    ObjectStore,
+    make_file_state_fn,
 )
-VERSION = '0.1.0'
+
+VERSION = "0.1.0"
+
+__all__ = ["Cache", "DirectoryStore", "FileStore", "MemoryStore", "ObjectStore", "make_file_state_fn"]
+

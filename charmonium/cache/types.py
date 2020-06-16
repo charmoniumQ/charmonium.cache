@@ -1,9 +1,10 @@
 from __future__ import annotations
-from pathlib import PurePath
-from typing import Iterable, Union, Any, IO, TYPE_CHECKING, ContextManager
-from collections import UserDict as _UserDict
-from typing_extensions import Protocol
 
+from collections import UserDict as _UserDict
+from pathlib import PurePath
+from typing import IO, TYPE_CHECKING, Any, ContextManager, Iterable, Union
+
+from typing_extensions import Protocol
 
 # https://stackoverflow.com/a/48554601/1078199
 if TYPE_CHECKING:
@@ -14,47 +15,57 @@ else:
     # I need to make `UserDict` subscriptable
     # subscripting FakeUserDictMeta is a no-op
     # so `UserDict[T] is UserDict`
-    class FakeUserDictMeta(type(_UserDict)): # pylint: disable=missing-docstring
+    class FakeUserDictMeta(type(_UserDict)):
         def __getitem__(cls, item):
             return cls
-    class UserDict(_UserDict, metaclass=FakeUserDictMeta): # pylint: disable=missing-docstring
+
+    class UserDict(_UserDict, metaclass=FakeUserDictMeta):
         pass
 
 
 class PathLike(Protocol):
-    '''Something that acts like pathlib.PurePath.
+    """Something that acts like pathlib.PurePath.
 
 This can be generalized to AWS S3 or Google Cloud Storage backends
 
-    '''
+    """
 
     # pylint: disable=no-self-use,unused-argument,missing-docstring
     def __truediv__(self, other: Union[str, PurePath]) -> PathLike:
         ...
-    def mkdir(self, mode: int = 0, parents: bool = False, exist_ok: bool = False) -> None:
+
+    def mkdir(
+        self, mode: int = 0, parents: bool = False, exist_ok: bool = False
+    ) -> None:
         ...
+
     def exists(self) -> bool:
         ...
+
     def unlink(self) -> None:
         ...
+
     def iterdir(self) -> Iterable[PathLike]:
         ...
-    def open(self, mode: str = 'r') -> IO[Any]:
+
+    def open(self, mode: str = "r") -> IO[Any]:
         ...
+
     @property
     def parent(self) -> PathLike:
         ...
 
 
-Serializable = Any # pylint: disable=invalid-name
+Serializable = Any  # pylint: disable=invalid-name
 
 
 class Serializer(Protocol):
-    '''Something that acts like pickle.'''
+    """Something that acts like pickle."""
 
     # pylint: disable=no-self-use,unused-argument,missing-docstring
     def load(self, fil: IO[bytes]) -> Serializable:
         ...
+
     def dump(self, obj: Serializable, fil: IO[bytes]) -> None:
         ...
 

@@ -1,36 +1,52 @@
 from __future__ import annotations
+
 import abc
-import shutil
-import datetime
 import contextlib
+import datetime
 import functools
+import logging
+import pickle
+import shutil
 import threading
 from typing import (
-    Callable, Any, TypeVar, cast, Tuple, Dict,
-    Optional, Hashable, Generator,
+    Any,
+    Callable,
+    Dict,
+    Generator,
+    Hashable,
+    Optional,
+    Tuple,
+    TypeVar,
+    cast,
+    Generic,
 )
-import logging
-from .types import UserDict, Serializable, Serializer, RLockLike, PathLike
+
+from .types import PathLike, RLockLike, Serializable, Serializer, UserDict
 from .util import (
-    pathify, PotentiallyPathLike, to_hashable,
-    injective_str, modtime_recursive, UNIX_TS_ZERO,
+    UNIX_TS_ZERO,
+    PotentiallyPathLike,
+    injective_str,
+    modtime_recursive,
+    pathify,
+    to_hashable,
 )
 
+CacheKey = TypeVar("CacheKey")
+CacheReturn = TypeVar("CacheReturn")
+# CacheFunc = TypeVar('CacheFunc', bound=Callable[..., CacheReturn])
+CacheFunc = TypeVar("CacheFunc", bound=Callable[..., Any])
 
-CacheKey = TypeVar('CacheKey')
-CacheReturn = TypeVar('CacheReturn')
-#CacheFunc = TypeVar('CacheFunc', bound=Callable[..., CacheReturn])
-CacheFunc = TypeVar('CacheFunc', bound=Callable[..., Any])
-class Cache:
+
+class Cache(Generic[CacheFunc]):
     @classmethod
     def decor(
-            cls,
-            obj_store: Callable[[str], ObjectStore[CacheKey, Tuple[Any, CacheReturn]]],
-            lock: Optional[RLockLike] = None,
-            state_fn: Optional[Callable[..., Any]] = None,
-            name: Optional[str] = None,
+        cls,
+        obj_store: Callable[[str], ObjectStore[CacheKey, Tuple[Any, CacheReturn]]],
+        lock: Optional[RLockLike] = None,
+        state_fn: Optional[Callable[..., Any]] = None,
+        name: Optional[str] = None,
     ) -> Callable[[CacheFunc], CacheFunc]:
-        '''Decorator that creates a cached function
+        """Decorator that creates a cached function
 
     >>> @Cache.decor(ObjectStore())
     ... def foo():
@@ -38,30 +54,35 @@ class Cache:
 
 See __init__ for more details.
 
-        '''
+        """
 
         _lock = lock if lock is not None else threading.RLock()
-        _state_fn = state_fn if state_fn is not None else \
-            cast(Callable[..., Any], lambda *args, **kwargs: None)
+        _state_fn = (
+            state_fn
+            if state_fn is not None
+            else cast(Callable[..., Any], lambda *args, **kwargs: None)
+        )
+
         def decor_(function: CacheFunc) -> CacheFunc:
             return cast(
                 CacheFunc,
                 functools.wraps(function)(
                     cls(function, obj_store, _lock, _state_fn, name)
-                )
+                ),
             )
+
         return decor_
 
-    #pylint: disable=too-many-arguments
+    # pylint: disable=too-many-arguments
     def __init__(
-            self,
-            function: CacheFunc,
-            obj_store: Callable[[str], ObjectStore[CacheKey, Tuple[Any, CacheReturn]]],
-            lock: RLockLike,
-            state_fn: Callable[..., Any],
-            name: Optional[str] = None,
+        self,
+        function: CacheFunc,
+        obj_store: Callable[[str], ObjectStore[CacheKey, Tuple[Any, CacheReturn]]],
+        lock: RLockLike,
+        state_fn: Callable[..., Any],
+        name: Optional[str] = None,
     ) -> None:
-        '''Cache a `function` in the given `obj_store`
+        """Cache a `function` in the given `obj_store`
 
 Instances of Cache are callable with the same signature as the
 `function` which is cached.
@@ -130,17 +151,18 @@ want to replace stale cached values.
 - a file's modtime could be considered state. When it is newer, we
 want to replace stale cached values.
 
-        '''
+        """
 
         self.function = function
-        self.name = '{}.{}'.format(
-            self.function.__module__,
-            self.function.__qualname__,
-        ) if name is None else name
+        self.name = (
+            "{}.{}".format(self.function.__module__, self.function.__qualname__,)
+            if name is None
+            else name
+        )
         self.obj_store = obj_store(self.name)
         self.lock = lock
         self.state_fn = state_fn
-        self.__qualname__ = f'Cache({self.name})'
+        self.__qualname__ = f"Cache({self.name})"
         self.__name__ = self.__qualname__
         self._disable = False
 
@@ -149,68 +171,71 @@ want to replace stale cached values.
             return self.function(*pos_args, **kwargs)
         else:
             with self.lock:
-                args_key = self.obj_store.args2key(
-                    pos_args, kwargs
-                )
+                args_key = self.obj_store.args2key(pos_args, kwargs)
                 state = self.state_fn(*pos_args, **kwargs)
                 if args_key in self.obj_store:
-                    logging.getLogger(f'{self.name}.hit').debug(
-                        'hit with %s, %s', pos_args, kwargs
+                    logging.getLogger(f"{self.name}.hit").debug(
+                        "hit with %s, %s", pos_args, kwargs
                     )
                     old_state, res = self.obj_store[args_key]
                     if old_state == state:
                         return res
                     else:
-                        logging.getLogger(f'{self.name}.outdated').debug(
-                            'outdated result with %s, %s', pos_args, kwargs
+                        logging.getLogger(f"{self.name}.outdated").debug(
+                            "outdated result with %s, %s", pos_args, kwargs
                         )
                         res = self.function(*pos_args, **kwargs)
                         self.obj_store[args_key] = state, res
                 else:
-                    logging.getLogger(f'{self.name}.miss').debug(
-                        'miss with %s, %s', pos_args, kwargs
+                    logging.getLogger(f"{self.name}.miss").debug(
+                        "miss with %s, %s", pos_args, kwargs
                     )
                     res = self.function(*pos_args, **kwargs)
                     self.obj_store[args_key] = state, res
                 return res
 
     def clear(self) -> None:
-        '''Removes all cached items'''
+        """Removes all cached items"""
         self.obj_store.clear()
 
     def __str__(self) -> str:
         store_type = type(self.obj_store).__name__
-        return f'Cache of {self.name} with {store_type}'
+        return f"Cache of {self.name} with {store_type}"
 
     def disable(self) -> None:
-        '''Disables caching; always recompute function.'''
+        """Disables caching; always recompute function."""
         self._disable = True
 
     @contextlib.contextmanager
     def disabled(self) -> Generator[None, None, None]:
-        '''Context for which caching is disabled.'''
+        """Context for which caching is disabled."""
         previously_disabled = self._disable
         self.disable()
         yield
         self._disable = previously_disabled
 
 
-ObjectStoreKey = TypeVar('ObjectStoreKey')
-ObjectStoreValue = TypeVar('ObjectStoreValue')
+ObjectStoreKey = TypeVar("ObjectStoreKey")
+ObjectStoreValue = TypeVar("ObjectStoreValue")
+
+
 class ObjectStore(UserDict[ObjectStoreKey, ObjectStoreValue], abc.ABC):
-    '''ObjectStore is the dict-like backing of a Cache object'''
+    """ObjectStore is the dict-like backing of a Cache object"""
+
     @classmethod
     def create(
-            cls, *args: Any, **kwargs: Any
+        cls, *args: Any, **kwargs: Any
     ) -> Callable[[str], ObjectStore[ObjectStoreKey, ObjectStoreValue]]:
-        '''This is a curried init.
+        """This is a curried init.
 
 This way, you can pass the args in now, and the name in later
 
-        '''
+        """
+
         @functools.wraps(cls)
         def create_(name: str) -> ObjectStore[ObjectStoreKey, ObjectStoreValue]:
-            return cls(*args, name=name, **kwargs) # type: ignore
+            return cls(*args, name=name, **kwargs)  # type: ignore
+
         return create_
 
     def __init__(self, name: str) -> None:
@@ -219,29 +244,27 @@ This way, you can pass the args in now, and the name in later
 
     @abc.abstractmethod
     def args2key(
-            self, args: Tuple[Any, ...], kwargs: Dict[str, Any],
+        self, _args: Tuple[Any, ...], _kwargs: Dict[str, Any],
     ) -> ObjectStoreKey:
-        '''Converts args to a key where this object will be kept, like a coat-check.'''
-        # pylint: disable=unused-argument,no-self-use
+        """Converts args to a key where this object will be kept, like a coat-check."""
+        # pylint: disable=no-self-use
         ...
 
 
 class MemoryStore(ObjectStore[Hashable, Any]):
-    '''ObjectStore backed in RAM for the duration of the program'''
+    """ObjectStore backed in RAM for the duration of the program"""
 
     def __init__(self, name: str):
         # pylint: disable=non-parent-init-called
         ObjectStore.__init__(self, name)
 
-    def args2key(
-            self, args: Tuple[Any, ...], kwargs: Dict[str, Any],
-    ) -> Hashable:
+    def args2key(self, args: Tuple[Any, ...], kwargs: Dict[str, Any],) -> Hashable:
         # pylint: disable=no-self-use
         return to_hashable((args, kwargs))
 
 
 class FileStore(ObjectStore[Hashable, Serializable]):
-    '''ObjectStore backed in one file
+    """ObjectStore backed in one file
 
 Data backed in ./${CACHE_PATH}/${FUNCTION_NAME}_cache.pickle
 
@@ -251,24 +274,23 @@ when the function returns small objects.
 The entire store (dict of function-args -> function-value) is loaded
 on the first call.
 
-    '''
+    """
 
     def __init__(
-            self,
-            cache_path: PotentiallyPathLike,
-            name: str,
-            suffix: bool = True,
-            serializer: Optional[Serializer] = None,
+        self,
+        cache_path: PotentiallyPathLike,
+        name: str,
+        suffix: bool = True,
+        serializer: Optional[Serializer] = None,
     ):
         # pylint: disable=non-parent-init-called,super-init-not-called
         ObjectStore.__init__(self, name)
         if serializer is None:
-            import pickle
             self.serializer = cast(Serializer, pickle)
         else:
             self.serializer = serializer
         self.cache_path = pathify(cache_path) / (
-            self.name + ('_cache.pickle' if suffix else '')
+            self.name + ("_cache.pickle" if suffix else "")
         )
         self.loaded = False
         self.data = cast(Dict[Hashable, Serializable], {})
@@ -277,26 +299,24 @@ on the first call.
         if not self.loaded:
             self.loaded = True
             if self.cache_path.exists():
-                with self.cache_path.open('rb') as fil:
+                with self.cache_path.open("rb") as fil:
                     self.data = self.serializer.load(fil)
             else:
                 self.cache_path.parent.mkdir(parents=True, exist_ok=True)
                 self.data = {}
 
-    def args2key(
-            self, args: Tuple[Any, ...], kwargs: Dict[str, Any],
-    ) -> Hashable:
+    def args2key(self, args: Tuple[Any, ...], kwargs: Dict[str, Any],) -> Hashable:
         # pylint: disable=no-self-use
         return to_hashable((args, kwargs))
 
     def _commit(self) -> None:
         self._load_if_not_loaded()
         if self.data:
-            with self.cache_path.open('wb') as fil:
+            with self.cache_path.open("wb") as fil:
                 self.serializer.dump(self.data, fil)
         else:
             if self.cache_path.exists():
-                print('deleting ', self.cache_path)
+                print("deleting ", self.cache_path)
                 self.cache_path.unlink()
 
     def __contains__(self, key: Hashable) -> bool:
@@ -320,7 +340,7 @@ on the first call.
 
 
 class DirectoryStore(ObjectStore[PathLike, Serializable]):
-    '''ObjectStore backed in one directory.
+    """ObjectStore backed in one directory.
 
 Data stored in: ./${CACHE_PATH}/${FUNCTION_NAME}/${injective_str(args)}.pickle
 
@@ -328,85 +348,87 @@ Because this uses one file for each function-value and lazily loads
 function-values, this is appropriate when the function returns a large
 object.
 
-    '''
+    """
 
     def __init__(
-            self, object_path: PotentiallyPathLike, name: str,
-            serializer: Optional[Serializer] = None
+        self,
+        object_path: PotentiallyPathLike,
+        name: str,
+        serializer: Optional[Serializer] = None,
     ) -> None:
         # pylint: disable=non-parent-init-called
         ObjectStore.__init__(self, name)
         if serializer is None:
-            import pickle
             self.serializer = cast(Serializer, pickle)
         else:
             self.serializer = serializer
         self.cache_path = pathify(object_path) / self.name
 
-    def args2key(
-            self, args: Tuple[Any, ...], kwargs: Dict[str, Any],
-    ) -> PathLike:
+    def args2key(self, args: Tuple[Any, ...], kwargs: Dict[str, Any],) -> PathLike:
         if kwargs:
             args += (kwargs,)
-        fname = f'{injective_str(args)}.pickle'
+        fname = f"{injective_str(args)}.pickle"
         return self.cache_path / fname
 
     def __setitem__(self, path: PathLike, obj: Serializable) -> None:
         path.parent.mkdir(parents=True, exist_ok=True)
-        with path.open('wb') as fil:
+        with path.open("wb") as fil:
             self.serializer.dump(obj, fil)
 
     def __delitem__(self, path: PathLike) -> None:
         path.unlink()
 
     def __getitem__(self, path: PathLike) -> Serializable:
-        with path.open('rb') as fil:
+        with path.open("rb") as fil:
             return self.serializer.load(fil)
 
     def __contains__(self, path: Any) -> bool:
-        if hasattr(path, 'exists'):
+        if hasattr(path, "exists"):
             return bool(path.exists())
         else:
             return False
 
     def clear(self) -> None:
-        if hasattr(self.cache_path, 'rmtree'):
+        if hasattr(self.cache_path, "rmtree"):
             cast(Any, self.cache_path).rmtree()
         else:
             shutil.rmtree(str(self.cache_path))
 
 
-def make_file_state_fn(
-        *files: PotentiallyPathLike
-) -> Callable[..., datetime.datetime]:
-    '''Declares that the state depends on the modtime of files.
+def make_file_state_fn(*files: PotentiallyPathLike) -> Callable[..., datetime.datetime]:
+    """Declares that the state depends on the modtime of files.
 
 Directories are scanned recursively for there most recently modified
 file.
 
-    '''
+    """
 
     paths = list(map(pathify, files))
     if paths:
+
         def state_fn(*_args: Any, **_kwargs: Any) -> datetime.datetime:
             return max(map(modtime_recursive, paths))
+
         return state_fn
     else:
+
         def state_fn(*_args: Any, **_kwargs: Any) -> datetime.datetime:
             return UNIX_TS_ZERO
+
         return state_fn
 
 
 def make_code_state_fn(function: Callable[..., Any]) -> Callable[..., bytes]:
     code = function.__code__.co_code
+
     def state_fn(*_args: Any, **_kwargs: Any) -> bytes:
         return code
+
     return state_fn
 
 
 def make_combined_state_fn(*state_fns: Callable[..., Any]) -> Any:
     def state_fn(*args: Any, **kwargs: Any) -> Tuple[Any, ...]:
-        return tuple(
-            state_fn(*args, **kwargs) for state_fn in state_fns
-        )
+        return tuple(state_fn(*args, **kwargs) for state_fn in state_fns)
+
     return state_fn
