@@ -13,12 +13,12 @@ from typing import (
     Callable,
     Dict,
     Generator,
+    Generic,
     Hashable,
     Optional,
     Tuple,
     TypeVar,
     cast,
-    Generic,
 )
 
 from .types import PathLike, RLockLike, Serializable, Serializer, UserDict
@@ -37,42 +37,41 @@ CacheReturn = TypeVar("CacheReturn")
 CacheFunc = TypeVar("CacheFunc", bound=Callable[..., Any])
 
 
-class Cache(Generic[CacheFunc]):
-    @classmethod
-    def decor(
-        cls,
-        obj_store: Callable[[str], ObjectStore[CacheKey, Tuple[Any, CacheReturn]]],
-        lock: Optional[RLockLike] = None,
-        state_fn: Optional[Callable[..., Any]] = None,
-        name: Optional[str] = None,
-    ) -> Callable[[CacheFunc], CacheFunc]:
-        """Decorator that creates a cached function
+def cache_decor(
+    obj_store: Callable[[str], ObjectStore[CacheKey, Tuple[Any, CacheReturn]]],
+    lock: Optional[RLockLike] = None,
+    state_fn: Optional[Callable[..., Any]] = None,
+    name: Optional[str] = None,
+) -> Callable[[CacheFunc], Cache[CacheFunc]]:
+    """Decorator that creates a cached function
 
     >>> @Cache.decor(ObjectStore())
     ... def foo():
     ...     pass
 
-See __init__ for more details.
+    See __init__ for more details.
 
-        """
+    """
 
-        _lock = lock if lock is not None else threading.RLock()
-        _state_fn = (
-            state_fn
-            if state_fn is not None
-            else cast(Callable[..., Any], lambda *args, **kwargs: None)
+    _lock = lock if lock is not None else threading.RLock()
+    _state_fn = (
+        state_fn
+        if state_fn is not None
+        else cast(Callable[..., Any], lambda *args, **kwargs: None)
+    )
+
+    def decor_(function: CacheFunc) -> Cache[CacheFunc]:
+        return cast(
+            Cache[CacheFunc],
+            functools.wraps(function)(
+                Cache(function, obj_store, _lock, _state_fn, name)
+            ),
         )
 
-        def decor_(function: CacheFunc) -> CacheFunc:
-            return cast(
-                CacheFunc,
-                functools.wraps(function)(
-                    cls(function, obj_store, _lock, _state_fn, name)
-                ),
-            )
+    return decor_
 
-        return decor_
 
+class Cache(Generic[CacheFunc]):
     # pylint: disable=too-many-arguments
     def __init__(
         self,

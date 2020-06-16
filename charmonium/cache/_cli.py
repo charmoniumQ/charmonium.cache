@@ -1,11 +1,11 @@
 import functools
 import subprocess
 from pathlib import Path
-from typing import Any, List, Tuple, cast, Callable
+from typing import Any, Callable, List, Tuple, cast
 
 import click
 
-from .core import Cache, FileStore, make_file_state_fn
+from .core import FileStore, cache_decor, make_file_state_fn
 from .util import PotentiallyPathLike
 
 
@@ -27,7 +27,7 @@ you could pass $(date +%j) to trigger invalidation once per day.
 
     """
 
-    @Cache.decor(
+    @cache_decor(
         FileStore.create("./", suffix=False),
         name=str(cache_path),
         state_fn=make_file_state_fn(*files),
@@ -37,7 +37,9 @@ you could pass $(date +%j) to trigger invalidation once per day.
     ) -> str:
         if verbose:
             print("cache miss")
-        return subprocess.run(command, capture_output=True, text=True).stdout
+        return subprocess.run(
+            command, capture_output=True, text=True, check=True
+        ).stdout
 
     return cast(Callable[[List[str], Any], str], this_cli_cached)(command, extra_state)
 

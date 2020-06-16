@@ -1,17 +1,17 @@
-import subprocess
-import sys
+import pickle
 import tempfile
 import threading
 import time
 from pathlib import Path
-from typing import List, cast
+from typing import List
+
 from mypy_extensions import DefaultArg
 
 from charmonium.cache import (
-    Cache,
     DirectoryStore,
     FileStore,
     MemoryStore,
+    cache_decor,
     make_file_state_fn,
 )
 from charmonium.cache.util import loop_for_duration, unix_ts_now
@@ -22,17 +22,17 @@ def test_cache() -> None:
         work_dir = Path(work_dir_)
         calls: List[int] = []
 
-        @Cache.decor(MemoryStore.create())
+        @cache_decor(MemoryStore.create())
         def square1(x: int, a: int = 0) -> int:
             calls.append(x)
             return x ** 2 + a
 
-        @Cache.decor(FileStore.create(str(work_dir)))
+        @cache_decor(FileStore.create(str(work_dir), serializer=pickle))
         def square2(x: int, a: int = 0) -> int:
             calls.append(x)
             return x ** 2 + a
 
-        @Cache.decor(DirectoryStore.create(work_dir / "cache"))
+        @cache_decor(DirectoryStore.create(work_dir / "cache"))
         def square3(x: int, a: int = 0) -> int:
             calls.append(x)
             return x ** 2 + a
@@ -49,12 +49,11 @@ def test_cache() -> None:
             assert square(2) == 4
 
             # clearing cache should make next miss
-            square_ = cast(Cache, square)
-            square_.clear()
+            square.clear()
 
             # clearing cache should remove the file
-            if hasattr(square_, "cache_path"):
-                assert not getattr(square_, "cache_path").exists()
+            if hasattr(square, "cache_path"):
+                assert not getattr(square, "cache_path").exists()
 
             assert square(7) == 49  # miss
             assert square(2) == 4  # miss
@@ -65,21 +64,24 @@ def test_cache() -> None:
 
             # test del explicitly
             # no good way to test it no normal functionality
-            del square_.obj_store[square_.obj_store.args2key((7,), {})]
+            del square.obj_store[square.obj_store.args2key((7,), {})]
             assert square(7) == 49
 
             # test disabling feature
-            with square_.disabled():
+            with square.disabled():
                 assert square(2) == 4  # miss
                 assert square(2) == 4  # miss, even after regotten
 
             assert calls == [7, 2, 7, 2, 7, 7, 2, 2]
 
+            # should not throw
+            str(square)
+
 
 def test_multithreaded_cache() -> None:
     calls: List[int] = []
 
-    @Cache.decor(MemoryStore.create())
+    @cache_decor(MemoryStore.create())
     def square(x: int) -> int:  # pylint: disable=invalid-name
         calls.append(x)
         return x ** 2
@@ -107,33 +109,38 @@ def test_files() -> None:
     with tempfile.TemporaryDirectory() as work_dir_:
         work_dir = Path(work_dir_)
         file_path = work_dir / "file1"
-        calls: List[str] = []
+        calls: List[Path] = []
 
-        @Cache.decor(MemoryStore.create(), state_fn=make_file_state_fn(work_dir))
-        def open_(filename: str) -> str:
-            calls.append(filename)
-            with open(filename) as fil:
+        @cache_decor(MemoryStore.create(), state_fn=make_file_state_fn(work_dir))
+        def read(path: Path) -> str:
+            calls.append(path)
+            with path.open("r") as fil:
                 return fil.read()
 
-        with file_path.open("w") as fil:
-            fil.write("text")
+        def write(path: Path, text: str) -> None:
+            with path.open("w+") as fil:
+                fil.write(text)
 
-        assert open_(str(file_path)) == "text"  # miss
-        assert open_(str(file_path)) == "text"  # hit
+        write(file_path, "text")
 
-        time.sleep(0.5)
+        assert read(file_path) == "text"  # miss
+        assert read(file_path) == "text"  # hit
 
-        with file_path.open("w") as fil:
-            fil.write("more text")
+        # On systems that trakc mod-time by seconds
+        # We need to do a read at least one second later
+        # So the file correctly appears out-of-date
+        time.sleep(1)
 
-        assert open_(str(file_path)) == "more text"  # miss
-        assert open_(str(file_path)) == "more text"  # hit
+        write(file_path, "more text")
+
+        assert read(file_path) == "more text"  # miss
+        assert read(file_path) == "more text"  # hit
 
         # I should only have to read the file twice
         assert len(calls) == 2
 
         # I should only have the newer-state version cached
-        assert len(cast(Cache, open_).obj_store) == 1
+        assert len(read.obj_store) == 1
 
 
 def test_no_files() -> None:
@@ -148,7 +155,7 @@ def test_no_files() -> None:
 
         calls: List[str] = []
 
-        @Cache.decor(MemoryStore.create(), state_fn=make_file_state_fn())
+        @cache_decor(MemoryStore.create(), state_fn=make_file_state_fn())
         def open_(filename: str) -> str:
             calls.append(filename)
             with open(filename) as fil:

@@ -56,15 +56,21 @@ changes on the disk.
 """
 
 from .core import (
-    Cache,
     DirectoryStore,
     FileStore,
     MemoryStore,
     ObjectStore,
+    cache_decor,
     make_file_state_fn,
 )
 
 VERSION = "0.1.0"
 
-__all__ = ["Cache", "DirectoryStore", "FileStore", "MemoryStore", "ObjectStore", "make_file_state_fn"]
-
+__all__ = [
+    "cache_decor",
+    "DirectoryStore",
+    "FileStore",
+    "MemoryStore",
+    "ObjectStore",
+    "make_file_state_fn",
+]
