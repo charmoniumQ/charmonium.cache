@@ -5,7 +5,7 @@ from typing import Any, Callable, List, Tuple, cast
 
 import click
 
-from .core import FileStore, cache_decor, make_file_state_fn
+from .core import FileStore, decor, make_file_state_fn
 from .util import PotentiallyPathLike
 
 
@@ -27,7 +27,7 @@ you could pass $(date +%j) to trigger invalidation once per day.
 
     """
 
-    @cache_decor(
+    @decor(
         FileStore.create("./", suffix=False),
         name=str(cache_path),
         state_fn=make_file_state_fn(*files),

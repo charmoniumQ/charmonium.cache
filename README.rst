@@ -18,8 +18,8 @@ Quickstart
 
 ::
 
-    >>> from charmonium.cache import cache_decor, MemoryStore
-    >>> @cache_decor(MemoryStore.create())
+    >>> import charmonium.cache as ch_cache
+    >>> @ch_cache.decor(ch_cache.MemoryStore.create())
     ... def square(x):
     ...     print('computing')
     ...     return x**2

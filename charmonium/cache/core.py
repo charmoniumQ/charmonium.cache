@@ -37,7 +37,7 @@ CacheReturn = TypeVar("CacheReturn")
 CacheFunc = TypeVar("CacheFunc", bound=Callable[..., Any])
 
 
-def cache_decor(
+def decor(
     obj_store: Callable[[str], ObjectStore[CacheKey, Tuple[Any, CacheReturn]]],
     lock: Optional[RLockLike] = None,
     state_fn: Optional[Callable[..., Any]] = None,
@@ -45,8 +45,8 @@ def cache_decor(
 ) -> Callable[[CacheFunc], Cache[CacheFunc]]:
     """Decorator that creates a cached function
 
-    >>> from charmonium.cache import cache_decor, MemoryStore
-    >>> @cache_decor(MemoryStore.create())
+    >>> from charmonium.cache import decor, MemoryStore
+    >>> @decor(MemoryStore.create())
     ... def square(x):
     ...     print('computing')
     ...     return x**2
@@ -118,7 +118,7 @@ instead.
     # TODO: Make doctest
 
     # Suppose you consume the state as an argument
-    @cache_decor(...)
+    @decor(...)
     def f(arg, state):
         ...
 
@@ -135,7 +135,7 @@ Now the cache contains *both* versions of result:
 when you don't really need the stale `result1`. Instead with
 `state_fn`:
 
-    @cache_decor(..., state_fn=state_fn)
+    @decor(..., state_fn=state_fn)
     def f(arg):
         ...
 

@@ -11,7 +11,7 @@ from charmonium.cache import (
     DirectoryStore,
     FileStore,
     MemoryStore,
-    cache_decor,
+    decor,
     make_file_state_fn,
 )
 from charmonium.cache.util import loop_for_duration, unix_ts_now
@@ -22,17 +22,17 @@ def test_cache() -> None:
         work_dir = Path(work_dir_)
         calls: List[int] = []
 
-        @cache_decor(MemoryStore.create())
+        @decor(MemoryStore.create())
         def square1(x: int, a: int = 0) -> int:
             calls.append(x)
             return x ** 2 + a
 
-        @cache_decor(FileStore.create(str(work_dir), serializer=pickle))
+        @decor(FileStore.create(str(work_dir), serializer=pickle))
         def square2(x: int, a: int = 0) -> int:
             calls.append(x)
             return x ** 2 + a
 
-        @cache_decor(DirectoryStore.create(work_dir / "cache"))
+        @decor(DirectoryStore.create(work_dir / "cache"))
         def square3(x: int, a: int = 0) -> int:
             calls.append(x)
             return x ** 2 + a
@@ -81,7 +81,7 @@ def test_cache() -> None:
 def test_multithreaded_cache() -> None:
     calls: List[int] = []
 
-    @cache_decor(MemoryStore.create())
+    @decor(MemoryStore.create())
     def square(x: int) -> int:  # pylint: disable=invalid-name
         calls.append(x)
         return x ** 2
@@ -111,7 +111,7 @@ def test_files() -> None:
         file_path = work_dir / "file1"
         calls: List[Path] = []
 
-        @cache_decor(MemoryStore.create(), state_fn=make_file_state_fn(work_dir))
+        @decor(MemoryStore.create(), state_fn=make_file_state_fn(work_dir))
         def read(path: Path) -> str:
             calls.append(path)
             with path.open("r") as fil:
@@ -155,7 +155,7 @@ def test_no_files() -> None:
 
         calls: List[str] = []
 
-        @cache_decor(MemoryStore.create(), state_fn=make_file_state_fn())
+        @decor(MemoryStore.create(), state_fn=make_file_state_fn())
         def open_(filename: str) -> str:
             calls.append(filename)
             with open(filename) as fil:

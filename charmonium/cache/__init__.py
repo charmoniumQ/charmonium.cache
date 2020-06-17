@@ -3,7 +3,7 @@ from .core import (
     FileStore,
     MemoryStore,
     ObjectStore,
-    cache_decor,
+    decor,
     make_file_state_fn,
 )
 
@@ -14,7 +14,7 @@ __license__ = "MPL-2.0"
 __copyright__ = "2020 Samuel Grayson"
 
 __all__ = [
-    "cache_decor",
+    "decor",
     "DirectoryStore",
     "FileStore",
     "MemoryStore",
