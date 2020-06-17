@@ -29,6 +29,8 @@ def unix_ts_now() -> float:
 def loop_for_duration(duration: float) -> Iterable[float]:
     """Use in a for loop.
 
+    >>> import time
+    >>> from charmonium.cache.util import loop_for_duration
     >>> for t in loop_for_duration(.1):
     ...     print(f'{t:.1} seconds left')
     ...     time.sleep(0.04)
@@ -77,6 +79,7 @@ def injective_str(obj: Any) -> str:
     True
     >>> str(a) == str(b)
     False
+    >>> from charmonium.cache.util import injective_str
     >>> injective_str(a) == injective_str(b)
     True
 

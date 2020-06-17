@@ -45,11 +45,17 @@ def cache_decor(
 ) -> Callable[[CacheFunc], Cache[CacheFunc]]:
     """Decorator that creates a cached function
 
-    >>> @cache_decor(ObjectStore())
-    ... def foo():
-    ...     pass
-
-    See Cache.__init__ for more details.
+    >>> from charmonium.cache import cache_decor, MemoryStore
+    >>> @cache_decor(MemoryStore.create())
+    ... def square(x):
+    ...     print('computing')
+    ...     return x**2
+    ...
+    >>> square(4)
+    computing
+    16
+    >>> square(4) # square is not called again; answer is just looked up
+    16
 
     """
 
@@ -109,8 +115,10 @@ A note on `state_fn`. Some functions might choose to consume the
 state as an argument. Here is why you might want to use a `state_fn`
 instead.
 
+    # TODO: Make doctest
+
     # Suppose you consume the state as an argument
-    @Cache.decor(...)
+    @cache_decor(...)
     def f(arg, state):
         ...
 
@@ -127,7 +135,7 @@ Now the cache contains *both* versions of result:
 when you don't really need the stale `result1`. Instead with
 `state_fn`:
 
-    @Cache.decor(..., state_fn=state_fn)
+    @cache_decor(..., state_fn=state_fn)
     def f(arg):
         ...
 
