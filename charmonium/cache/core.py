@@ -45,11 +45,11 @@ def cache_decor(
 ) -> Callable[[CacheFunc], Cache[CacheFunc]]:
     """Decorator that creates a cached function
 
-    >>> @Cache.decor(ObjectStore())
+    >>> @cache_decor(ObjectStore())
     ... def foo():
     ...     pass
 
-    See __init__ for more details.
+    See Cache.__init__ for more details.
 
     """
 
@@ -265,7 +265,7 @@ class MemoryStore(ObjectStore[Hashable, Any]):
 class FileStore(ObjectStore[Hashable, Serializable]):
     """ObjectStore backed in one file
 
-Data backed in ./${CACHE_PATH}/${FUNCTION_NAME}_cache.pickle
+Data backed in ${CACHE_PATH}/${FUNCTION_NAME}_cache.pickle
 
 Because this uses one file for all function-value, this is appropriate
 when the function returns small objects.
@@ -341,7 +341,7 @@ on the first call.
 class DirectoryStore(ObjectStore[PathLike, Serializable]):
     """ObjectStore backed in one directory.
 
-Data stored in: ./${CACHE_PATH}/${FUNCTION_NAME}/${injective_str(args)}.pickle
+Data stored in: ${CACHE_PATH}/${FUNCTION_NAME}/${injective_str(args)}.pickle
 
 Because this uses one file for each function-value and lazily loads
 function-values, this is appropriate when the function returns a large

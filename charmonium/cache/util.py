@@ -67,10 +67,9 @@ def to_hashable(obj: Any) -> Hashable:
 
 
 def injective_str(obj: Any) -> str:
-    """Safe names are compact, unique, urlsafe, and equal when the objects are equal
+    """Compact, unique, urlsafe, and injective
 
-str does not work because x == y does not imply str(x) == str(y); it's
-not injective.
+    str does not work because x == y does not imply str(x) == str(y).
 
     >>> a = dict(d=1, e=1)
     >>> b = dict(e=1, d=1)
