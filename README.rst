@@ -12,23 +12,23 @@ computed.
 Quickstart
 ----------
 
-.. code-block:: console
+::
 
     $ pip install charmonium.cache
 
-.. highlight:: python
+::
 
->>> from charmonium.cache import cache_decor, MemoryStore
->>> @cache_decor(MemoryStore.create())
-... def square(x):
-...     print('computing')
-...     return x**2
-...
->>> square(4)
-computing
-16
->>> square(4) # square is not called again; answer is just looked up
-16
+    >>> from charmonium.cache import cache_decor, MemoryStore
+    >>> @cache_decor(MemoryStore.create())
+    ... def square(x):
+    ...     print('computing')
+    ...     return x**2
+    ...
+    >>> square(4)
+    computing
+    16
+    >>> square(4) # square is not called again; answer is just looked up
+    16
 
 Customization
 -------------
@@ -62,7 +62,7 @@ could be a state, as in `make_file_state_fn`).
 CLI
 ---
 
-.. code-block:: console
+::
 
     # cache a commandline function based on its args
     read n

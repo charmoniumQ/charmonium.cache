@@ -15,6 +15,8 @@ fi
 if [ -z "${skip_docs}" ]; then
 	./scripts/docs.sh
 fi
+poetry build
+poetry run twine check dist/*
 poetry run bump2version "${part}"
 if [ -z "${dry_run}" ]; then
 	poetry publish --build
