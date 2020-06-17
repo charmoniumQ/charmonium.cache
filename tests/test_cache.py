@@ -165,6 +165,18 @@ def test_no_files() -> None:
         assert open_(str(file_path)) == "more text"  # hit
 
 
+def test_long_name() -> None:
+    with tempfile.TemporaryDirectory() as work_dir_:
+        work_dir = Path(work_dir_)
+
+        @decor(DirectoryStore.create(work_dir))
+        def test(string: str) -> int:
+            return len(string)
+
+        test("a" * 10000)
+        test("a" * 254)
+
+
 # def test_cli() -> None:
 #     def run(*args: str) -> int:
 #         return subprocess.run(

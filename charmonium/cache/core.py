@@ -375,6 +375,8 @@ object.
         if kwargs:
             args += (kwargs,)
         fname = f"{injective_str(args)}.pickle"
+        if len(fname) > 255:
+            fname = str(hash(fname))
         return self.cache_path / fname
 
     def __setitem__(self, path: PathLike, obj: Serializable) -> None:
