@@ -9,9 +9,9 @@ fi
 
 part="${1}"
 
+poetry run bump2version "${part}"
 poetry build
 poetry run twine check dist/*
-poetry run bump2version "${part}"
 
 if [ -z "${dry_run}" ]; then
 	poetry publish

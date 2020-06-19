@@ -60,6 +60,8 @@ Customization
    individual files in that directory, and they are loaded lazily. Use
    this for functions that return large objects.
 
+.. code:: python
+
     >>> import charmonium.cache as ch_cache
     >>> @ch_cache.decor(ch_cache.DirectoryStore.create("tmp/2"))
     ... def square(x):
@@ -80,7 +82,7 @@ Customization
 ``FileStore`` and ``DirectoryStore`` can both themselves be customized by:
 
 - Providing a ``cache_path`` (conforming to the ``PathLike`` interface),
-  e.g. one can transparently cache in AWS S3 with an `S3Path`_] object.
+  e.g. one can transparently cache in AWS S3 with an `S3Path`_ object.
 
 .. _`S3Path`: https://pypi.org/project/s3path/
 
