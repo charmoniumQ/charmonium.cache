@@ -9,7 +9,7 @@ from .core import (
 
 __author__ = "Samuel Grayson"
 __email__ = "sam+dev@samgrayson.me"
-__version__ = "0.4.2"
+__version__ = "0.5.0"
 __license__ = "MPL-2.0"
 __copyright__ = "2020 Samuel Grayson"
 
