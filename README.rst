@@ -29,6 +29,12 @@ Quickstart
     16
     >>> square(4) # square is not called again; answer is just looked up
     16
+    >>> with square.disabled():
+    ...     # disable caching; always recomptue
+    ...     square(4)
+    ...
+    computing
+    16
 
 Customization
 -------------

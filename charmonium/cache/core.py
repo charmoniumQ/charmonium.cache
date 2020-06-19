@@ -21,6 +21,7 @@ from typing import (
     TypeVar,
     cast,
 )
+import zlib
 
 from .types import PathLike, RLockLike, Serializable, Serializer, UserDict
 from .util import (
@@ -39,25 +40,86 @@ CacheFunc = TypeVar("CacheFunc", bound=Callable[..., Any])
 
 
 def decor(
-    obj_store: Callable[[str], ObjectStore[CacheKey, Tuple[Any, CacheReturn]]],
+    obj_store: Callable[
+        [str, logging.Logger], ObjectStore[CacheKey, Tuple[Any, CacheReturn]]
+    ],
     lock: Optional[RLockLike] = None,
     state_fn: Optional[Callable[..., Any]] = None,
     name: Optional[str] = None,
     verbose: bool = False,
+    use_module_name: bool = True,
 ) -> Callable[[CacheFunc], Cache[CacheFunc]]:
-    """Decorator that creates a cached function
+    """Cache a `function` in the given `obj_store`
 
-    >>> from charmonium.cache import decor, MemoryStore
-    >>> @decor(MemoryStore.create())
-    ... def square(x):
-    ...     print('computing')
-    ...     return x**2
-    ...
-    >>> square(4)
-    computing
-    16
-    >>> square(4) # square is not called again; answer is just looked up
-    16
+    Instances of Cache are callable with the same signature as the
+    `function` which is cached.
+
+    `obj_store` is like a bag-check. It converts the arguments to a
+    key and stores the returned value at that key. See `ObjectStore`
+    for the interface.
+
+    This is threadsafe, but only one thread can be computing a cached
+    function at a time for the same. `lock` can be passed in for
+    multiprocessed synchronization. It should be a context manager,
+    and it should be re-entrant.
+
+    `state_fn` is called with the same arguments as `function` returns
+    the state of the environment for the computation. The state is
+    like an extra argument (if it changes, the cache is invalidated)
+    except that objects corresponding to an old-state are deleted when
+    they are encountered; consuming the state as an extra argument
+    would store both.
+
+    The same name results in the same cache, so this class uses the
+    name of the function and its module as `name`. This can be
+    overriden by explicitly passing `name`.
+
+    A note on `state_fn`. Some functions might choose to consume the
+    state as an argument. Here is why you might want to use a
+    `state_fn` instead.
+
+        # TODO: Make doctest
+
+        # Suppose you consume the state as an argument
+        @decor(...)
+        def f(arg, state):
+            ...
+
+        f(arg, state) # suppose this returns `result`
+
+        # suppose `state` changes to `new_state`
+
+        f(arg, new_state) # suppose this returns `result2`
+
+        Now the cache contains *both* versions of result:
+
+        {(arg, state): result1, (arg, new_state): result2}
+
+        when you don't really need the stale `result1`. Instead with
+        `state_fn`:
+
+        @decor(..., state_fn=state_fn)
+        def f(arg):
+            ...
+
+        # suppose `state_fn` returns `state`
+        f(arg) # suppose this returns `result`
+
+        # suppose the state changes for some reason,
+        # and accordingly `state_fn` returns `new_state`
+
+        f(arg) # this calls `f` again (new state invalidates the cache)
+        # suppose it returns `result2`
+
+        # but the key is _replaced_, so the cache is `{(arg, new_state): result2}`
+
+    Example use cases:
+
+    - the f.__code__ could be considered state. When it is changed, we
+      want to replace stale cached values.
+
+    - a file's modtime could be considered state. When it is newer, we
+      want to replace stale cached values.
 
     """
 
@@ -72,7 +134,15 @@ def decor(
         return cast(
             Cache[CacheFunc],
             functools.wraps(function)(
-                Cache(function, obj_store, _lock, _state_fn, name, verbose)
+                Cache(
+                    function,
+                    obj_store,
+                    _lock,
+                    _state_fn,
+                    name,
+                    verbose,
+                    use_module_name,
+                )
             ),
         )
 
@@ -84,103 +154,35 @@ class Cache(Generic[CacheFunc]):
     def __init__(
         self,
         function: CacheFunc,
-        obj_store: Callable[[str], ObjectStore[CacheKey, Tuple[Any, CacheReturn]]],
+        obj_store: Callable[
+            [str, logging.Logger], ObjectStore[CacheKey, Tuple[Any, CacheReturn]]
+        ],
         lock: RLockLike,
         state_fn: Callable[..., Any],
         name: Optional[str] = None,
         verbose: bool = False,
+        use_module_name: bool = True,
     ) -> None:
-        """Cache a `function` in the given `obj_store`
-
-Instances of Cache are callable with the same signature as the
-`function` which is cached.
-
-`obj_store` is like a bag-check. It converts the arguments to a key
-and stores the returned value at that key. See `ObjectStore` for the
-interface.
-
-This is threadsafe, but only one thread can be computing a cached
-function at a time for the same. `lock` can be passed in for
-multiprocessed synchronization. It should be a context manager, and it
-should be re-entrant.
-
-`state_fn` is called with the same arguments as `function` returns
-the state of the environment for the computation. The state is like an
-extra argument (if it changes, the cache is invalidated) except that
-objects corresponding to an old-state are deleted when they are
-encountered; consuming the state as an extra argument would store both.
-
-The same name results in the same cache, so this class uses the name
-of the function and its module as `name`. This can be overriden by
-explicitly passing `name`.
-
-A note on `state_fn`. Some functions might choose to consume the
-state as an argument. Here is why you might want to use a `state_fn`
-instead.
-
-    # TODO: Make doctest
-
-    # Suppose you consume the state as an argument
-    @decor(...)
-    def f(arg, state):
-        ...
-
-    f(arg, state) # suppose this returns `result`
-
-    # suppose `state` changes to `new_state`
-
-    f(arg, new_state) # suppose this returns `result2`
-
-Now the cache contains *both* versions of result:
-
-{(arg, state): result1, (arg, new_state): result2}
-
-when you don't really need the stale `result1`. Instead with
-`state_fn`:
-
-    @decor(..., state_fn=state_fn)
-    def f(arg):
-        ...
-
-    # suppose `state_fn` returns `state`
-    f(arg) # suppose this returns `result`
-
-    # suppose the state changes for some reason,
-    # and accordingly `state_fn` returns `new_state`
-
-    f(arg) # this calls `f` again (new state invalidates the cache)
-    # suppose it returns `result2`
-
-    # but the key is _replaced_, so the cache is `{(arg, new_state): result2}`
-
-Example use cases:
-
-- the f.__code__ could be considered state. When it is changed, we
-want to replace stale cached values.
-
-- a file's modtime could be considered state. When it is newer, we
-want to replace stale cached values.
-
-        """
-
-        self.function = function
-        self.name = (
-            "{}.{}".format(self.function.__module__, self.function.__qualname__,)
-            if name is None
-            else name
-        )
-        self.obj_store = obj_store(self.name)
-        self.lock = lock
-        self.state_fn = state_fn
-        self.__qualname__ = f"Cache({self.name})"
-        self.__name__ = self.__qualname__
-        self._disable = False
         self.logger = logging.getLogger("charmonium.cache").getChild(__name__)
         self.logger.setLevel(logging.DEBUG)
         self.handler = logging.StreamHandler(sys.stderr)
         self.handler.setFormatter(logging.Formatter("%(asctime)s - %(message)s"))
         if verbose:
             self.enable_logging()
+        self.function = function
+        if name:
+            self.name = name
+        else:
+            if use_module_name:
+                self.name = f"{self.function.__module__}.{self.function.__qualname__}"
+            else:
+                self.name = self.function.__qualname__
+        self.obj_store = obj_store(self.name, self.logger)
+        self.lock = lock
+        self.state_fn = state_fn
+        self.__qualname__ = f"Cache({self.name})"
+        self.__name__ = self.__qualname__
+        self._disable = False
 
     def __call__(self, *pos_args: Any, **kwargs: Any) -> Any:
         if self._disable:
@@ -232,15 +234,11 @@ want to replace stale cached values.
         store_type = type(self.obj_store).__name__
         return f"Cache of {self.name} with {store_type}"
 
-    def disable(self) -> None:
-        """Disables caching; always recompute function."""
-        self._disable = True
-
     @contextlib.contextmanager
     def disabled(self) -> Generator[None, None, None]:
         """Context for which caching is disabled."""
         previously_disabled = self._disable
-        self.disable()
+        self._disable = True
         yield
         self._disable = previously_disabled
 
@@ -255,7 +253,7 @@ class ObjectStore(UserDict[ObjectStoreKey, ObjectStoreValue], abc.ABC):
     @classmethod
     def create(
         cls, *args: Any, **kwargs: Any
-    ) -> Callable[[str], ObjectStore[ObjectStoreKey, ObjectStoreValue]]:
+    ) -> Callable[[str, logging.Logger], ObjectStore[ObjectStoreKey, ObjectStoreValue]]:
         """This is a curried init.
 
 This way, you can pass the args in now, and the name in later
@@ -263,14 +261,17 @@ This way, you can pass the args in now, and the name in later
         """
 
         @functools.wraps(cls)
-        def create_(name: str) -> ObjectStore[ObjectStoreKey, ObjectStoreValue]:
-            return cls(*args, name=name, **kwargs)  # type: ignore
+        def create_(
+            name: str, logger: logging.Logger
+        ) -> ObjectStore[ObjectStoreKey, ObjectStoreValue]:
+            return cls(*args, name=name, logger=logger, **kwargs)  # type: ignore
 
         return create_
 
-    def __init__(self, name: str) -> None:
+    def __init__(self, name: str, logger: logging.Logger) -> None:
         super().__init__()
         self.name = name
+        self.logger = logger
 
     @abc.abstractmethod
     def args2key(
@@ -284,9 +285,9 @@ This way, you can pass the args in now, and the name in later
 class MemoryStore(ObjectStore[Hashable, Any]):
     """ObjectStore backed in RAM for the duration of the program"""
 
-    def __init__(self, name: str):
+    def __init__(self, name: str, logger: logging.Logger):
         # pylint: disable=non-parent-init-called
-        ObjectStore.__init__(self, name)
+        ObjectStore.__init__(self, name, logger)
 
     def args2key(self, args: Tuple[Any, ...], kwargs: Dict[str, Any],) -> Hashable:
         # pylint: disable=no-self-use
@@ -296,7 +297,7 @@ class MemoryStore(ObjectStore[Hashable, Any]):
 class FileStore(ObjectStore[Hashable, Serializable]):
     """ObjectStore backed in one file
 
-Data backed in ${CACHE_PATH}/${FUNCTION_NAME}_cache.pickle
+Data backed in ``${CACHE_PATH}/${FUNCTION_NAME}_cache.pickle``
 
 Because this uses one file for all function-value, this is appropriate
 when the function returns small objects.
@@ -310,11 +311,12 @@ on the first call.
         self,
         cache_path: PotentiallyPathLike,
         name: str,
+        logger: logging.Logger,
         suffix: bool = True,
         serializer: Optional[Serializer] = None,
     ):
         # pylint: disable=non-parent-init-called,super-init-not-called
-        ObjectStore.__init__(self, name)
+        ObjectStore.__init__(self, name, logger)
         if serializer is None:
             self.serializer = cast(Serializer, pickle)
         else:
@@ -371,7 +373,7 @@ on the first call.
 class DirectoryStore(ObjectStore[PathLike, Serializable]):
     """ObjectStore backed in one directory.
 
-Data stored in: ${CACHE_PATH}/${FUNCTION_NAME}/${injective_str(args)}.pickle
+Data stored in: ``${CACHE_PATH}/${FUNCTION_NAME}/${injective_str(args)}.pickle``
 
 Because this uses one file for each function-value and lazily loads
 function-values, this is appropriate when the function returns a large
@@ -383,10 +385,11 @@ object.
         self,
         object_path: PotentiallyPathLike,
         name: str,
+        logger: logging.Logger,
         serializer: Optional[Serializer] = None,
     ) -> None:
         # pylint: disable=non-parent-init-called
-        ObjectStore.__init__(self, name)
+        ObjectStore.__init__(self, name, logger)
         if serializer is None:
             self.serializer = cast(Serializer, pickle)
         else:
@@ -395,11 +398,17 @@ object.
         self.cache_path.mkdir(exist_ok=True, parents=True)
 
     def args2key(self, args: Tuple[Any, ...], kwargs: Dict[str, Any],) -> PathLike:
+        # TODO: make an option to use hashes always here
+        # Opaque file names but faster to compute
+        # because recursive hashing instead of string concat
         if kwargs:
             args += (kwargs,)
         fname = f"{injective_str(args)}.pickle".replace("/", "")
         if len(fname) > 255:
-            fname = str(hash(fname))
+            self.logger.getChild(self.__class__.__name__).debug(
+                "name too long; switching to hash: %s", fname[:50]
+            )
+            fname = f"{zlib.adler32(fname.encode())}.pickle"
         return self.cache_path / fname
 
     def __setitem__(self, path: PathLike, obj: Serializable) -> None:
