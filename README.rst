@@ -16,7 +16,7 @@ Quickstart
 
     $ pip install charmonium.cache
 
-::
+.. code:: python
 
     >>> import charmonium.cache as ch_cache
     >>> @ch_cache.decor(ch_cache.MemoryStore.create())
@@ -35,29 +35,88 @@ Customization
 
 `cache_decor` is flexible because it supports multiple backends.
 
-1. `MemoryStore`: backed in RAM for the duration of the program
+1. `MemoryStore`: backed in RAM for the duration of the program.
 
-2. `FileStore`: backed in an index file which is loaded on first call.
+2. `FileStore`: backed in a file which is loaded on first call.
+
+.. code:: python
+
+    >>> import charmonium.cache as ch_cache
+    >>> @ch_cache.decor(ch_cache.FileStore.create("tmp/1"))
+    ... def square(x):
+    ...     return x**2
+    ...
+    >>> # Now that we cache in a file, this is persistent between runs
+    >>> # So I must clear it here.
+    >>> square.clear()
+    >>> list(map(square, range(5)))
+    [0, 1, 4, 9, 16]
+    >>> import os
+    >>> os.listdir("tmp/1")
+    ['__main__.square_cache.pickle']
 
 3. `DirectoryStore`: backed in a directory. Results are stored as
    individual files in that directory, and they are loaded lazily. Use
    this for functions that return large objects.
 
-4. Custom stores: to create a custom store, just extend `ObjectStore`
+    >>> import charmonium.cache as ch_cache
+    >>> @ch_cache.decor(ch_cache.DirectoryStore.create("tmp/2"))
+    ... def square(x):
+    ...     return x**2
+    ...
+    >>> # Now that we cache in a file, this is persistent between runs
+    >>> # So I must clear it here.
+    >>> square.clear()
+    >>> list(map(square, range(5)))
+    [0, 1, 4, 9, 16]
+    >>> import os
+    >>> sorted(os.listdir("tmp/2/__main__.square"))
+    ['(0).pickle', '(1).pickle', '(2).pickle', '(3).pickle', '(4).pickle']
+
+4. Custom stores: to create a custom store, just extend ``ObjectStore``
    and implement a dict-like interface.
 
-`FileStore` and `DirectoryStore` can both themselves be customized by:
+``FileStore`` and ``DirectoryStore`` can both themselves be customized by:
 
-- Providing a `cache_path`  (conforming to the `PathLike` interface), e.g. an `S3Path` object.
+- Providing a ``cache_path`` (conforming to the ``PathLike`` interface),
+  e.g. one can transparently cache in AWS S3 with an `S3Path`_] object.
 
-- Providing a `serializer` (conforming to the `Serializer` interface), e.g. [pickle] (default), [cloudpickle], [dill], [messagepack].
+.. _`S3Path`: https://pypi.org/project/s3path/
 
-`cache_decor` also takes a "state function" which computes the value
+- Providing a ``serializer`` (conforming to the ``Serializer`` interface),
+  e.g. `pickle`_ (default), `cloudpickle`_, `dill`_, or `messagepack`_.
+
+.. `pickle`_: https://docs.python.org/3/library/pickle.html
+.. `cloudpickle`_: https://github.com/cloudpipe/cloudpickle
+.. `dill`_: https://github.com/uqfoundation/dill
+.. `messagepack`_: https://github.com/msgpack/msgpack-python
+
+``cache_decor`` also takes a "state function" which computes the value
 of some external state that this computation should depend on. Unlike
 the arguments (which the cache explicitly depends on), values computed
 with a different state are evicted out, so this is appropriate when
 you never expect to revisit a prior state (e.g. modtime of a file
-could be a state, as in `make_file_state_fn`).
+could be a state, as in ``make_file_state_fn``).
+
+With ``verbose=True``, this will output to a logger.
+
+.. code:: python
+
+    >>> import charmonium.cache as ch_cache
+    >>> @ch_cache.decor(ch_cache.MemoryStore.create(), verbose=True)
+    ... def square(x):
+    ...     print('computing')
+    ...     return x**2
+    ...
+    >>> square(4) # doctest:+SKIP
+    2020-06-19 11:31:40,197 - __main__.square: miss with args: (4,), {}
+    computing
+    16
+    >>> square(4) # doctest:+SKIP
+    2020-06-19 11:31:40,197 - __main__.square: hit with args: (4,), {}
+    16
+
+Finally, wiht 
 
 CLI
 ---
@@ -65,9 +124,10 @@ CLI
 ::
 
     # cache a commandline function based on its args
-    read n
-    cache -- compute_prime ${n}
+    $ cache --verbose -- compute_square 6
+    miss for square(["6"])
+    36
 
-    # cache based on args AND file-modtime
-    # recompiles when main.c is newer than the most recent compile
-    cache --file main.c -- gcc main.c -o main
+    $ cache -- compute_square 6
+    hit for square(["6"])
+    36

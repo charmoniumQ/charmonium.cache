@@ -7,6 +7,7 @@ import functools
 import logging
 import pickle
 import shutil
+import sys
 import threading
 from typing import (
     Any,
@@ -42,6 +43,7 @@ def decor(
     lock: Optional[RLockLike] = None,
     state_fn: Optional[Callable[..., Any]] = None,
     name: Optional[str] = None,
+    verbose: bool = False,
 ) -> Callable[[CacheFunc], Cache[CacheFunc]]:
     """Decorator that creates a cached function
 
@@ -70,7 +72,7 @@ def decor(
         return cast(
             Cache[CacheFunc],
             functools.wraps(function)(
-                Cache(function, obj_store, _lock, _state_fn, name)
+                Cache(function, obj_store, _lock, _state_fn, name, verbose)
             ),
         )
 
@@ -86,6 +88,7 @@ class Cache(Generic[CacheFunc]):
         lock: RLockLike,
         state_fn: Callable[..., Any],
         name: Optional[str] = None,
+        verbose: bool = False,
     ) -> None:
         """Cache a `function` in the given `obj_store`
 
@@ -172,6 +175,12 @@ want to replace stale cached values.
         self.__qualname__ = f"Cache({self.name})"
         self.__name__ = self.__qualname__
         self._disable = False
+        self.logger = logging.getLogger("charmonium.cache").getChild(__name__)
+        self.logger.setLevel(logging.DEBUG)
+        self.handler = logging.StreamHandler(sys.stderr)
+        self.handler.setFormatter(logging.Formatter("%(asctime)s - %(message)s"))
+        if verbose:
+            self.enable_logging()
 
     def __call__(self, *pos_args: Any, **kwargs: Any) -> Any:
         if self._disable:
@@ -181,28 +190,42 @@ want to replace stale cached values.
                 args_key = self.obj_store.args2key(pos_args, kwargs)
                 state = self.state_fn(*pos_args, **kwargs)
                 if args_key in self.obj_store:
-                    logging.getLogger(f"{self.name}.hit").debug(
-                        "hit with %s, %s", pos_args, kwargs
-                    )
                     old_state, res = self.obj_store[args_key]
                     if old_state == state:
+                        self.logger.getChild("hit").debug(
+                            "%s: hit with args: %s, %s", self.name, pos_args, kwargs
+                        )
                         return res
                     else:
-                        logging.getLogger(f"{self.name}.outdated").debug(
-                            "outdated result with %s, %s", pos_args, kwargs
+                        self.logger.getChild("miss").debug(
+                            "%s: miss with args: %s, %s due to state (%s -> %s)",
+                            self.name,
+                            pos_args,
+                            kwargs,
+                            old_state,
+                            state,
                         )
                         res = self.function(*pos_args, **kwargs)
                         self.obj_store[args_key] = state, res
                 else:
-                    logging.getLogger(f"{self.name}.miss").debug(
-                        "miss with %s, %s", pos_args, kwargs
+                    self.logger.getChild("miss").debug(
+                        "%s: miss with %s, %s", self.name, pos_args, kwargs
                     )
                     res = self.function(*pos_args, **kwargs)
                     self.obj_store[args_key] = state, res
                 return res
 
+    def enable_logging(self) -> None:
+        self.logger.addHandler(self.handler)
+
+    def disable_logging(self) -> None:
+        self.logger.removeHandler(self.handler)
+
     def clear(self) -> None:
         """Removes all cached items"""
+        self.logger.getChild("clear").debug(
+            "%s: clear", self.name,
+        )
         self.obj_store.clear()
 
     def __str__(self) -> str:
@@ -323,7 +346,6 @@ on the first call.
                 self.serializer.dump(self.data, fil)
         else:
             if self.cache_path.exists():
-                print("deleting ", self.cache_path)
                 self.cache_path.unlink()
 
     def __contains__(self, key: Hashable) -> bool:
@@ -370,17 +392,17 @@ object.
         else:
             self.serializer = serializer
         self.cache_path = pathify(object_path) / self.name
+        self.cache_path.mkdir(exist_ok=True, parents=True)
 
     def args2key(self, args: Tuple[Any, ...], kwargs: Dict[str, Any],) -> PathLike:
         if kwargs:
             args += (kwargs,)
-        fname = f"{injective_str(args)}.pickle"
+        fname = f"{injective_str(args)}.pickle".replace("/", "")
         if len(fname) > 255:
             fname = str(hash(fname))
         return self.cache_path / fname
 
     def __setitem__(self, path: PathLike, obj: Serializable) -> None:
-        path.parent.mkdir(parents=True, exist_ok=True)
         with path.open("wb") as fil:
             self.serializer.dump(obj, fil)
 
@@ -402,6 +424,7 @@ object.
             cast(Any, self.cache_path).rmtree()
         else:
             shutil.rmtree(str(self.cache_path))
+        self.cache_path.mkdir()
 
 
 def make_file_state_fn(*files: PotentiallyPathLike) -> Callable[..., datetime.datetime]:

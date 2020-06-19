@@ -31,14 +31,16 @@ you could pass $(date +%j) to trigger invalidation once per day.
         FileStore.create("./", suffix=False),
         name=str(cache_path),
         state_fn=make_file_state_fn(*files),
+            verbose=verbose,
     )
     def this_cli_cached(
         command: List[str], extra_state: Any,  # pylint: disable=unused-argument
     ) -> str:
-        if verbose:
-            print("cache miss")
         return subprocess.run(
-            command, capture_output=True, text=True, check=True
+            command,
+            capture_output=True,
+            text=True,
+            check=True,
         ).stdout
 
     return cast(Callable[[List[str], Any], str], this_cli_cached)(command, extra_state)

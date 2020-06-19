@@ -91,7 +91,7 @@ capture \
 
 capture \
 	poetry run \
-		pytest --quiet --exitfirst  --cov="${package_path}" --cov-report=term-missing  tests
+		pytest --quiet --exitfirst .
 # I only care about --cov= in the exported package
 
 [[ -z "${htmlcov}" ]] || \
