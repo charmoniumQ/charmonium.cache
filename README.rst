@@ -33,11 +33,12 @@ Quickstart
 Customization
 -------------
 
-`cache_decor` is flexible because it supports multiple backends.
+``cache_decor`` is flexible because it supports multiple backends.
 
-1. `MemoryStore`: backed in RAM for the duration of the program.
+1. ``MemoryStore``: backed in RAM for the duration of the program (see
+   example above).
 
-2. `FileStore`: backed in a file which is loaded on first call.
+2. ``FileStore``: backed in a file which is loaded on first call.
 
 .. code:: python
 
@@ -55,7 +56,7 @@ Customization
     >>> os.listdir("tmp/1")
     ['__main__.square_cache.pickle']
 
-3. `DirectoryStore`: backed in a directory. Results are stored as
+3. ``DirectoryStore``: backed in a directory. Results are stored as
    individual files in that directory, and they are loaded lazily. Use
    this for functions that return large objects.
 
@@ -86,10 +87,10 @@ Customization
 - Providing a ``serializer`` (conforming to the ``Serializer`` interface),
   e.g. `pickle`_ (default), `cloudpickle`_, `dill`_, or `messagepack`_.
 
-.. `pickle`_: https://docs.python.org/3/library/pickle.html
-.. `cloudpickle`_: https://github.com/cloudpipe/cloudpickle
-.. `dill`_: https://github.com/uqfoundation/dill
-.. `messagepack`_: https://github.com/msgpack/msgpack-python
+.. _`pickle`: https://docs.python.org/3/library/pickle.html
+.. _`cloudpickle`: https://github.com/cloudpipe/cloudpickle
+.. _`dill`: https://github.com/uqfoundation/dill
+.. _`messagepack`: https://github.com/msgpack/msgpack-python
 
 ``cache_decor`` also takes a "state function" which computes the value
 of some external state that this computation should depend on. Unlike
@@ -115,8 +116,6 @@ With ``verbose=True``, this will output to a logger.
     >>> square(4) # doctest:+SKIP
     2020-06-19 11:31:40,197 - __main__.square: hit with args: (4,), {}
     16
-
-Finally, wiht 
 
 CLI
 ---
