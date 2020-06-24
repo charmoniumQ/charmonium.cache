@@ -163,12 +163,6 @@ class Cache(Generic[CacheFunc]):
         verbose: bool = False,
         use_module_name: bool = True,
     ) -> None:
-        self.logger = logging.getLogger("charmonium.cache").getChild(__name__)
-        self.logger.setLevel(logging.DEBUG)
-        self.handler = logging.StreamHandler(sys.stderr)
-        self.handler.setFormatter(logging.Formatter("%(asctime)s - %(message)s"))
-        if verbose:
-            self.enable_logging()
         self.function = function
         if name:
             self.name = name
@@ -177,6 +171,12 @@ class Cache(Generic[CacheFunc]):
                 self.name = f"{self.function.__module__}.{self.function.__qualname__}"
             else:
                 self.name = self.function.__qualname__
+        self.logger = logging.getLogger("charmonium.cache").getChild(self.name)
+        self.logger.setLevel(logging.DEBUG)
+        self.handler = logging.StreamHandler(sys.stderr)
+        self.handler.setFormatter(logging.Formatter("%(asctime)s - %(message)s"))
+        if verbose:
+            self.enable_logging()
         self.obj_store = obj_store(self.name, self.logger)
         self.lock = lock
         self.state_fn = state_fn
