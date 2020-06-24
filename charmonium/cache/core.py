@@ -9,6 +9,7 @@ import pickle
 import shutil
 import sys
 import threading
+import zlib
 from typing import (
     Any,
     Callable,
@@ -21,7 +22,6 @@ from typing import (
     TypeVar,
     cast,
 )
-import zlib
 
 from .types import PathLike, RLockLike, Serializable, Serializer, UserDict
 from .util import (
@@ -195,12 +195,12 @@ class Cache(Generic[CacheFunc]):
                     old_state, res = self.obj_store[args_key]
                     if old_state == state:
                         self.logger.getChild("hit").debug(
-                            "%s: hit with args: %s, %s", self.name, pos_args, kwargs
+                            "%s: hit with args: %.30s, %.30s", self.name, pos_args, kwargs
                         )
                         return res
                     else:
                         self.logger.getChild("miss").debug(
-                            "%s: miss with args: %s, %s due to state (%s -> %s)",
+                            "%s: miss with args: %.30s, %.30s due to state (%.30s -> %.30s)",
                             self.name,
                             pos_args,
                             kwargs,
@@ -211,7 +211,7 @@ class Cache(Generic[CacheFunc]):
                         self.obj_store[args_key] = state, res
                 else:
                     self.logger.getChild("miss").debug(
-                        "%s: miss with %s, %s", self.name, pos_args, kwargs
+                        "%s: miss with %.30s, %.30s", self.name, pos_args, kwargs
                     )
                     res = self.function(*pos_args, **kwargs)
                     self.obj_store[args_key] = state, res
