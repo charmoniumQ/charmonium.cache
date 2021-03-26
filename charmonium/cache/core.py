@@ -195,7 +195,10 @@ class Cache(Generic[CacheFunc]):
                     old_state, res = self.obj_store[args_key]
                     if old_state == state:
                         self.logger.getChild("hit").debug(
-                            "%s: hit with args: %.30s, %.30s", self.name, pos_args, kwargs
+                            "%s: hit with args: %.30s, %.30s",
+                            self.name,
+                            pos_args,
+                            kwargs,
                         )
                         return res
                     else:
