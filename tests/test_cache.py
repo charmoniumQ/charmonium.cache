@@ -7,13 +7,7 @@ from typing import List
 
 from mypy_extensions import DefaultArg
 
-from charmonium.cache import (
-    DirectoryStore,
-    FileStore,
-    MemoryStore,
-    decor,
-    make_file_state_fn,
-)
+from charmonium.cache import DirectoryStore, FileStore, MemoryStore, decor
 from charmonium.cache.util import loop_for_duration, unix_ts_now
 
 
@@ -64,15 +58,15 @@ def test_cache() -> None:
 
             # test del explicitly
             # no good way to test it no normal functionality
-            del square.obj_store[square.obj_store.args2key((7,), {})]
-            assert square(7) == 49
+            # del square.obj_store[square.obj_store.args2key((7,), {})]
+            # assert square(7) == 49
 
             # test disabling feature
             with square.disabled():
                 assert square(2) == 4  # miss
                 assert square(2) == 4  # miss, even after regotten
 
-            assert calls == [7, 2, 7, 2, 7, 7, 2, 2]
+            assert calls == [7, 2, 7, 2, 7, 2, 2]
 
             # should not throw
             str(square)
@@ -106,32 +100,43 @@ def test_multithreaded_cache() -> None:
 
 
 def test_files() -> None:
+    class PathContents:
+        def __init__(self, path: Path) -> None:
+            self.path = path
+
+        def write_text(self, text: str) -> None:
+            self.path.write_text(text)
+
+        def read_text(self) -> str:
+            return self.path.read_text()
+
+        def __cache_key__(self) -> Path:
+            return self.path
+
+        def __cache_val__(self) -> str:
+            return self.read_text()
+
     with tempfile.TemporaryDirectory() as work_dir_:
         work_dir = Path(work_dir_)
-        file_path = work_dir / "file1"
-        calls: List[Path] = []
+        file_path = PathContents(work_dir / "file1")
+        calls: List[PathContents] = []
 
-        @decor(MemoryStore.create(), state_fn=make_file_state_fn(work_dir))
-        def read(path: Path) -> str:
+        @decor(MemoryStore.create())
+        def read(path: PathContents) -> str:
             calls.append(path)
-            with path.open("r") as fil:
-                return fil.read()
+            return path.read_text()
 
-        def write(path: Path, text: str) -> None:
-            with path.open("w+") as fil:
-                fil.write(text)
-
-        write(file_path, "text")
+        file_path.write_text("text")
 
         assert read(file_path) == "text"  # miss
         assert read(file_path) == "text"  # hit
 
-        # On systems that trakc mod-time by seconds
+        # On systems that track mod-time by seconds
         # We need to do a read at least one second later
         # So the file correctly appears out-of-date
         time.sleep(1)
 
-        write(file_path, "more text")
+        file_path.write_text("more text")
 
         assert read(file_path) == "more text"  # miss
         assert read(file_path) == "more text"  # hit
@@ -139,8 +144,8 @@ def test_files() -> None:
         # I should only have to read the file twice
         assert len(calls) == 2
 
-        # I should only have the newer-state version cached
-        assert len(read.obj_store) == 1
+        # I should only have the newer-state version cached and the env
+        assert len(read.obj_store) == 2
 
 
 def test_no_files() -> None:
@@ -155,7 +160,7 @@ def test_no_files() -> None:
 
         calls: List[str] = []
 
-        @decor(MemoryStore.create(), state_fn=make_file_state_fn())
+        @decor(MemoryStore.create())
         def open_(filename: str) -> str:
             calls.append(filename)
             with open(filename) as fil:
