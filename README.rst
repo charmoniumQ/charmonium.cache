@@ -27,8 +27,8 @@ Quickstart
 
 .. code:: python
 
-    >>> import charmonium.cache as ch_cache
-    >>> @ch_cache.decor()
+    >>> import charmonium.cache.memoize as memoize
+    >>> @memoize
     ... def square(x):
     ...     print("computing")
     ...     return x**2
@@ -37,12 +37,6 @@ Quickstart
     computing
     16
     >>> square(4) # square is not called again; answer is just looked up
-    16
-    >>> with square.disabled():
-    ...     # disable caching; always recomptue
-    ...     square(4)
-    ...
-    computing
     16
 
 Goals
