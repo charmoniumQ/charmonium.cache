@@ -157,6 +157,8 @@ Prior work
 |charmonium.cache  |    ✅    |    ✅     |    ✅     |  ✅   |    ✅     |     ✅     |  ✅  |   ✅   |   ✅   |
 +------------------+----------+-----------+-----------+-------+-----------+------------+------+--------+--------+
 
+TODO: Separate `functools.lru_cache`.
+
 Implementation
 --------------
 
@@ -211,29 +213,19 @@ Plans
 Design decisions:
 - Use directory trees for fast dropping? No, not all FS support efficiently; Probably faster on avg to use an index file.
 
-Options:
-- Store keys in-line, out-of-line
-- Store values in-line or out-of-line
-- Pickler
-- cache_key/cache_ver methods on object
-  - Write wrapper if need be
-  - Lossy/non-lossy (checksums)
-    - Faster persistent-hash or custom persistent-hash
-- [X] Lockfile method
-- [X] fine_grained_persistence
-- [X] fine_grained_eviction
-- System-version and function-version
-
-Pre-made setups:
+Usage examples:
+- advice on making functions pure
 - Lossy checksum for cache_key
 - FileContents
 - TTL
 - LRU, LUV, fn+TTL
-- Unhashable types
 - Two-level store
+- Lossy (checksum) hash
+- Fasteners ReadersWriterLock
 
 Additional features:
 - can store unhashable types
+- supports lossy and non-lossy keys
 - supports TTL
 - thread-safe
 - process-safe
@@ -245,11 +237,8 @@ Additional features:
 - shared
 
 Todo
-- Delete from two-level store
-- Size
 - Use index versions to elide load
 - Test with impure function
-- Measure overhead and savings
 
 The library supports backends in filesystem, cloud storage (AWS S3, Google
 Cloud Storage, etc.), or any storage medium supported by `Universal Pathlib`_.

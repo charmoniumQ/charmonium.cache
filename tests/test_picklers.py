@@ -1,16 +1,16 @@
-import binascii
 from pathlib import Path
 import json
-import inspect
 import subprocess
 import sys
 import textwrap
+from typing import TypedDict
 
 import cloudpickle as cp  # type: ignore
 import dill  # type: ignore
 
 
-def run_script(foo_val: int, write_to_disk: bool, as_main: bool) -> None:
+ScriptResult = TypedDict("ScriptResult", {"foo_loaded": dict[str, int], "foo_serialized": dict[str, bytes]})
+def run_script(foo_val: int, write_to_disk: bool, as_main: bool) -> ScriptResult:
     directory = Path("/tmp/test_picklers")
     directory.mkdir(exist_ok=True)
     script = directory / "script.py"
@@ -19,7 +19,7 @@ for serializer in serializers:
     (directory / serializer.__name__).write_bytes(foo_serialized[serializer.__name__])
 """ if write_to_disk else ""
 
-    script.write_text("""
+    script.write_text(f"""
 from pathlib import Path
 import json
 import base64
@@ -52,11 +52,11 @@ print(json.dumps({{
         for serializer, bytez in foo_serialized.items()
     }},
 }}))
-""".format(**locals()).lstrip())
+""".lstrip())
     cmd = ["script.py"] if as_main else ["-m", "script"]
     proc = subprocess.run([sys.executable, *cmd], cwd=directory, capture_output=True, text=True)
     if proc.stderr:
-        print("""
+        print(f"""
 script:
 {textwrap.indent(script.read_text(), "    ")}
 stderr:
@@ -76,11 +76,13 @@ def test_picklers():
         assert as_main == (last_result["foo_serialized"]["cloudpickle"] == result["foo_serialized"]["cloudpickle"]), (
             "cloudpickle should have the same hash between runs with identical source, iff as_main == True"
         )
-        assert last_result["foo_serialized"]["dill"] == result["foo_serialized"]["dill"], "dill should have the same hash between runs with identical source"
+        assert last_result["foo_serialized"]["dill"] == result["foo_serialized"]["dill"], (
+            "dill should have the same hash between runs with identical source"
+        )
 
         result = run_script(foo_val=4, write_to_disk=False, as_main=as_main)
         for serializer, value in result["foo_loaded"].items():
-            assert result["foo_loaded"][serializer] == 3, f"{serializer} should use serialized closed-over variables"
+            assert value == 3, f"{serializer} should use serialized closed-over variables"   # type
 
 
 if __name__ == "__main__":
