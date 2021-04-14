@@ -18,6 +18,7 @@ import attr
 from .util import Sizeable, Pickler, PathLike, PathLike_from, pickle
 from .readers_writer_lock import ReadersWriterLock, ReadersWriterLock_from
 
+
 class IndexKeyType(enum.IntEnum):
     MATCH = 0
     LOOKUP = 1

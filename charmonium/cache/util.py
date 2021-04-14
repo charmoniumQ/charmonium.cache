@@ -9,7 +9,6 @@ from typing import (
     TypeVar,
     Callable,
     Protocol,
-    Optional,
     Any,
     Union,
     cast,
@@ -75,7 +74,7 @@ class Sizeable(Protocol):
 class KeyGen:
     """Generates unique keys (not cryptographically secure)."""
 
-    def __init__(self, key_bits: int) -> None:
+    def __init__(self, key_bits: int = 64) -> None:
         self.key_bits = key_bits
         self.key_bytes = int(math.ceil(key_bits / 8))
         self.key_space = 2 ** self.key_bits
@@ -90,7 +89,10 @@ class KeyGen:
         if self.counter % 1000 == 0:
             prob = self.probability_of_collision(self.counter)
             if prob > 1e-6:
-                warnings.warn(f"Probability of key collision is {prob:0.7f}; Consider using more than {self.key_bits} bits.", UserWarning)
+                warnings.warn(
+                    f"Probability of key collision is {prob:0.7f}; Consider using more than {self.key_bits} bits.",
+                    UserWarning,
+                )
         return random.randint(0, 2 ** self.key_space - 1)
 
     def probability_of_collision(self, keys: int) -> float:
@@ -107,6 +109,7 @@ class KeyGen:
 Key = TypeVar("Key")
 Val = TypeVar("Val")
 
+
 class ObjStore(Sizeable, Generic[Key, Val]):
     def __setitem__(self, key: Key, val: Val) -> None:
         ...
@@ -117,9 +120,11 @@ class ObjStore(Sizeable, Generic[Key, Val]):
     def __delitem__(self, key: Key) -> None:
         ...
 
+
 def constant(val: T) -> Callable[..., T]:
     def fn(*args: Any, **kwargs: Any) -> T:
         return val
+
     return fn
 
 
@@ -128,51 +133,25 @@ class Sentinel:
 
 
 class Future(Generic[T]):
-    """Represents a future value that has not yet been computed."""
+    def __init__(self) -> None:
+        self.computed = False
 
-    # TODO: create_future(Callable[[], T]) -> T: ...
-
-    empty_result_sentinel = Sentinel()
-
-    def __init__(
-        self,
-        result: Union[T, Sentinel] = empty_result_sentinel,
-        result_thunk: Optional[Callable[[], T]] = None,
-    ) -> None:
-        """
-        :param result: supply if you intend to fulfill the Future right away.
-        """
-        self.result: Union[T, Sentinel] = result
-        self.result_thunk = result_thunk
-        if self.is_fulfilled and self.result_thunk:
-            raise ValueError("Cannot supply a result and a result_thunk")
-
-    @property
-    def is_fulfilled(self) -> bool:
-        return self.result != Future.empty_result_sentinel or self.result_thunk is not None
-
-    def fulfill(self, result: T) -> None:
-        if self.is_fulfilled:
-            raise ValueError("Future is already fulfilled.")
-        self.result = result
-
-    @property
-    def _(self) -> T:
-        """Returns the value, and ValueErrors if it is not yet fulfilled."""
-        if not self.is_fulfilled:
+    def unwrap(self) -> T:
+        if self.computed:
             raise ValueError("Future is not yet fulfilled.")
         else:
-            if self.result == Future.empty_result_sentinel:
-                self._result = self._result_thunk()
-            return self._result
+            return self.value
 
     def __getattr__(self, attr: str) -> Any:
-        return getattr(self._, attr)
+        return getattr(self.unwrap(), attr)
+
+    def fulfill(self, value: T) -> None:
+        if self.computed:
+            raise ValueError("Future is already fulfilled.")
+        else:
+            self.value = value
+            self.computed = True
 
     @classmethod
-    def create(
-            cls: type[Future[T]],
-            result: Union[T, Sentinel] = empty_result_sentinel,
-            result_thunk: Optional[Callable[[], T]] = None,
-    ) -> T:
-        return cast(T, Future(result, result_thunk))
+    def create(cls) -> T:
+        return cast(T, Future())

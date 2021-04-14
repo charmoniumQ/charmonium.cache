@@ -75,10 +75,10 @@ class MemoizedGroup:
         return (__version__, self._extra_global_state())
 
     # TODO: Convert from string
-    _eval_func: Callable[[Entry[Any]], float] = attr.ib(default=policies["LUV"])
+    _eval_func: Callable[[Entry], float] = attr.ib(default=policies["LUV"])
 
     def _evict(self) -> None:
-        heap = list[tuple[float, tuple[Any, ...], Entry[Any]]]()
+        heap = list[tuple[float, tuple[Any, ...], Entry]]()
         for key, entry in self._index.items():
             heapq.heappush(heap, (self._eval_func(entry), key, entry))
         while self._index.size() + self._obj_store.size() > self._size:
@@ -216,7 +216,7 @@ class Memoize(Generic[FuncParams, FuncReturn]):
     def __str__(self) -> str:
         return f"memoized {self._name}"
 
-    def _recompute(self, *args: FuncParams.args, **kwargs: FuncParams.kwargs,) -> Entry[FuncReturn]:
+    def _recompute(self, *args: FuncParams.args, **kwargs: FuncParams.kwargs,) -> Entry:
         start = datetime.datetime.now()
         value = self._func(*args, **kwargs)
         stop = datetime.datetime.now()
@@ -230,7 +230,7 @@ class Memoize(Generic[FuncParams, FuncReturn]):
             value_ser = key.to_bytes(self._group._key_gen.key_bytes, BYTE_ORDER)
             data_size += len(value_ser)
 
-        return Entry[FuncReturn](
+        return Entry(
             data_size=data_size, compute_time=stop - start, value=value, obj_store=apply_obj_store,
         )
 
@@ -262,8 +262,8 @@ class Memoize(Generic[FuncParams, FuncReturn]):
 
         value_ser = entry.value
         if entry.obj_store:
-            key = int.from_bytes(value_ser, BYTE_ORDER)
-            value_ser = self._group._obj_store[key]
+            value_key = int.from_bytes(value_ser, BYTE_ORDER)
+            value_ser = self._group._obj_store[value_key]
         value: FuncReturn = self._pickler.loads(value_ser)
         # TODO: figure out how to elide this `loads(dumps(...))`, if we did a recompute.
 

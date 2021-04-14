@@ -1,10 +1,10 @@
 from __future__ import annotations
+from types import TracebackType
 from typing import (
     Protocol,
     Union,
     runtime_checkable,
     Optional,
-    TracebackType,
 )
 
 
@@ -45,6 +45,7 @@ def ReadersWriterLock_from(lock: ReadersWriterLockSources) -> ReadersWriterLock:
     else:
         assert isinstance(lock, Lock)
         return NaiveReadersWriterLock(lock)
+
 
 class NaiveReadersWriterLock(ReadersWriterLock):
     """ReadersWriterLock constructed from a regular Lock.

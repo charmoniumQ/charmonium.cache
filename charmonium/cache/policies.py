@@ -1,4 +1,4 @@
-from typing import Callable, TypeVar, Generic, Any
+from typing import Callable, TypeVar, Any
 import datetime
 
 import attr
@@ -7,18 +7,16 @@ T = TypeVar("T")
 
 
 @attr.s  # type: ignore
-class Entry(Generic[T]):
+class Entry:
     data_size: int
     compute_time: float
     obj_store: bool
     last_use: datetime.datetime
-    value: T
+    value: Any
 
 
-def LUV(entry: Entry[Any]) -> float:
+def LUV(entry: Entry) -> float:
     return 0
 
 
-policies = dict[str, Callable[[Entry[Any]], Any]](
-    LUV=LUV,
-)
+policies = dict[str, Callable[[Entry], Any]](LUV=LUV,)
