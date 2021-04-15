@@ -1,8 +1,10 @@
 import itertools
 import tempfile
+import threading
 from typing import cast
 
 from charmonium.cache.util import KeyGen, PathLike, PathLike_from, Future
+from charmonium.cache.readers_writer_lock import NaiveReadersWriterLock
 
 
 def test_key_gen() -> None:
@@ -31,3 +33,6 @@ def test_future() -> None:
 
     assert str(future_int) == "3"
     assert cast(Future[int], future_int).computed
+
+def test_lock() -> None:
+    lock = NaiveReadersWriterLock(threading.Lock())
