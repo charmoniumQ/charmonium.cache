@@ -34,9 +34,6 @@ class Index(Sizeable, Protocol):
     def set_schema(self, schema: tuple[IndexKeyType, ...]) -> None:
         self.schema = schema
 
-    def __init__(self, schema: tuple[IndexKeyType]) -> None:
-        self.schema = schema
-
     def __delitem__(self, keys: tuple[Any, ...]) -> None:
         ...
 
@@ -120,13 +117,12 @@ class DictIndex(Generic[Key, Val]):
 
 DEFAULT_CACHE_PATH = Path(".cache/index")
 
-# TODO: make this immutable
-@attr.s  # type: ignore
+@attr.frozen  # type: ignore
 class FileIndex(Index):
-    path: PathLike = attr.ib(default=DEFAULT_CACHE_PATH)
+    path: PathLike = DEFAULT_CACHE_PATH
     _data: DictIndex[Any, Any] = DictIndex[Any, Any](single_key=True)
-    _lock: ReadersWriterLock = attr.ib(default=ReadersWriterLock_from(contextlib.nullcontext()))
-    _pickler: Pickler = attr.ib(default=pickle)
+    _lock: ReadersWriterLock = ReadersWriterLock_from(contextlib.nullcontext())
+    _pickler: Pickler = pickle
     # Two ways to implement _data:
     # - a hierarchical dict (dict of dict of dicts of ...)
     # - or a mixed-key dict.(keys are k1 or (k1, k2) or (k1, k2, k3))

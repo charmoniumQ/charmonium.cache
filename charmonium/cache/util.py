@@ -3,6 +3,7 @@ import random
 import pickle as pickle_
 import os
 from pathlib import Path
+import math
 import typing
 from typing import (
     TYPE_CHECKING,
@@ -17,7 +18,8 @@ from typing import (
 )
 import warnings
 
-import dill as dill_  # type: ignore
+import attr
+import dill as dill_
 
 T = TypeVar("T")
 
@@ -71,13 +73,16 @@ class PathLike(Protocol):
     def stat(self) -> os.stat_result:
         ...
 
+    @property
     def parent(self) -> PathLike:
         ...
 
     def exists(self) -> bool:
         ...
 
-    name: str
+    @property
+    def name(self) -> str:
+        ...
 
 PathLikeSources = Union[str, PathLike]
 
@@ -102,15 +107,17 @@ class Sizeable(Protocol):
         ...
 
 
+@attr.s  # type: ignore (pyright: attrs ambiguous overload)
 class KeyGen:
     """Generates unique keys (not cryptographically secure)."""
 
-    def __init__(self, key_bits: int = 64) -> None:
-        self.key_bits = key_bits
-        self.key_bytes = self.key_bits // 8 + (self.key_bits % 8 != 0)
-        self.key_space = 2 ** self.key_bits
-        self.counter = 0
-        self.tolerance = 1e-6
+    key_bytes: int = attr.ib(default=8)
+    tolerance: float = attr.ib(default=1e-6)
+    counter: int = 0
+    key_space: int = 0
+
+    def __attrs_post_init__(self) -> None:
+        self.key_space = 256 ** self.key_bytes
 
     def __iter__(self) -> KeyGen:
         return self
@@ -118,23 +125,18 @@ class KeyGen:
     def __next__(self) -> int:
         """Generates a new key."""
         self.counter += 1
-        if self.counter % 1000 == 0:
+        if self.counter % 100 == 0:
             prob = self.probability_of_collision(self.counter)
             if prob > self.tolerance:
                 warnings.warn(
-                    f"Probability of key collision is {prob:0.7f}; Consider using more than {self.key_bits} bits.",
+                    f"Probability of key collision is {prob:0.7f}; Consider using more than {self.key_bytes} key bytes.",
                     UserWarning,
                 )
         return random.randint(0, self.key_space - 1)
 
     def probability_of_collision(self, keys: int) -> float:
         """Use to assert the probability of collision is acceptable."""
-        try:
-            from scipy.special import perm  # type: ignore
-        except ImportError:
-            raise ImportError("I require scipy to compute probability_of_collision")
-        p: float = perm(self.key_space, keys, exact=False)  # type: ignore
-        return 1 - p / (self.key_space ** keys)
+        return 1 - math.exp(-keys * (keys - 1) / (2 * self.key_space))
 
 
 class Constant(Generic[FuncParams, FuncReturn]):

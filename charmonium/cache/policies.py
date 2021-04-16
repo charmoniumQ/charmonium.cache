@@ -6,7 +6,7 @@ import attr
 T = TypeVar("T")
 
 
-@attr.s  # type: ignore
+@attr.s  # type: ignore (pyright: attrs ambiguous overload)
 class Entry:
     data_size: int
     compute_time: float

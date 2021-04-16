@@ -8,10 +8,14 @@ from charmonium.cache.util import KeyGen, PathLike, PathLike_from, Future, GetAt
 
 
 def test_key_gen() -> None:
-    n_samples = 10
+    n_samples = 100
     key_gen = KeyGen()
     assert len(set(itertools.islice(key_gen, n_samples))) == n_samples
     assert key_gen.probability_of_collision(n_samples) < 1e-9
+
+    key_gen2 = KeyGen(tolerance=1e-2, key_bytes=1)  # type: ignore (pyright doesn't know attrs __init__)
+    with pytest.warns(UserWarning):
+        list(itertools.islice(key_gen2, n_samples))
 
 def test_pathlike() -> None:
     # primarily test the type signature
@@ -23,7 +27,7 @@ def test_pathlike() -> None:
         (path / "test").read_bytes() == payload
 
     with pytest.raises(TypeError):
-        PathLike_from(3)
+        PathLike_from(3)  # type: ignore (deliberate error for testing)
 
 def test_future() -> None:
     future_int = Future[int]()

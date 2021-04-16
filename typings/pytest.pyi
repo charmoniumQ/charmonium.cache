@@ -1,0 +1,6 @@
+from typing import ContextManager
+def raises(exc: type[BaseException]) -> ContextManager[None]:
+    ...
+
+def warns(exc: type[Warning]) -> ContextManager[None]:
+    ...

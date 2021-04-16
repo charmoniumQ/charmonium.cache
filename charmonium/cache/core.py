@@ -18,7 +18,7 @@ from typing import (
 )
 
 import attr
-from bitmath import MiB  # type: ignore
+from bitmath import MiB
 
 
 from .util import Constant, pickle, dill, Pickler, KeyGen, Future, GetAttr
@@ -49,32 +49,34 @@ def memoize(
     def actual_memoize(
         func: Callable[FuncParams, FuncReturn], /
     ) -> Memoized[FuncParams, FuncReturn]:
-        return Memoized[FuncParams, FuncReturn](func, **kwargs)
+        return Memoized[FuncParams, FuncReturn](func, **kwargs)  # type: ignore (pyright doesn't know attrs __init__)
 
-    # I believe pyright suffers from this old mypy bug: https://github.com/python/mypy/issues/1323
+    # I believe pyright suffers from this fixed mypy bug: https://github.com/python/mypy/issues/1323
     # Therefore, I have to circumvent the type system.
     # However, somehow `cast` isn't sufficient.
     # Therefore, I need `# type: ignore`. I don't like it any more than you.
     # return cast(Memoized[FuncParams, FuncReturn], actual_memoize)
-    return actual_memoize  # type: ignore
+    return actual_memoize  # type: ignore (see above)
 
 
-@attr.frozen  # type: ignore
+@attr.frozen  # type: ignore (pyright: attrs ambiguous overload)
 class MemoizedGroup:
-    _index: Index = attr.ib(factory=FileIndex)
 
-    _obj_store: ObjStore = attr.ib(factory=DirObjStore)
+    # somehow, pyright does not like
+    #     attr.ib(factory=FileIndex)
+    # It wants a Callable[[], Index] instead of a Type[index].
+    _index: Index = attr.ib(factory=lambda: FileIndex())
 
-    _key_gen: KeyGen = attr.ib(factory=KeyGen)  # type: ignore
+    _obj_store: ObjStore = attr.ib(factory=lambda: DirObjStore())
 
-    _size: int = attr.ib(default=cast(int,
-                                      MiB(1).to_Byte()  # type: ignore
-    ))
+    _key_gen: KeyGen = attr.ib(factory=lambda: KeyGen())
+
+    _size: int = int(MiB(1).to_Byte())
     # TODO: use bitmath.parse_string("4.7 GiB") or integer
 
-    _pickler: Pickler = attr.ib(default=pickle)
+    _pickler: Pickler = pickle
 
-    _verbose: bool = attr.ib(default=True)
+    _verbose: bool = True
 
     def __attrs_post_init__(self) -> None:
         self._index.schema = (
@@ -88,7 +90,7 @@ class MemoizedGroup:
         self._index.read()
         atexit.register(self._index.write)
 
-    _extra_global_state: Callable[[], Any] = attr.ib(default=Constant(None))
+    _extra_global_state: Callable[[], Any] = Constant(None)
 
     def _global_state(self) -> Any:
         """Functions are deterministic with (global state, function-specific state, args key, args version).
@@ -100,7 +102,7 @@ class MemoizedGroup:
         return (__version__, self._extra_global_state())
 
     # TODO: Convert from string
-    _eval_func: Callable[[Entry], float] = attr.ib(default=policies["LUV"])
+    _eval_func: Callable[[Entry], float] = policies["LUV"]
 
     def _evict(self) -> None:
         heap = list[tuple[float, tuple[Any, ...], Entry]]()
@@ -120,7 +122,7 @@ DEFAULT_MEMOIZED_GROUP = Future[MemoizedGroup](fulfill_twice=True)
 # TODO: fulfill default
 
 
-@attr.s  # type: ignore
+@attr.s  # type: ignore (pyright: attrs ambiguous overload)
 class Memoized(Generic[FuncParams, FuncReturn]):
     def __attrs_post_init__(self) -> None:
         functools.update_wrapper(self, self._func)
@@ -135,22 +137,22 @@ class Memoized(Generic[FuncParams, FuncReturn]):
 
     _func: Callable[FuncParams, FuncReturn]
 
-    _group: Future[MemoizedGroup] = attr.ib(default=DEFAULT_MEMOIZED_GROUP)
+    _group: Future[MemoizedGroup] = DEFAULT_MEMOIZED_GROUP
 
-    _name: str = attr.ib(default="")
+    _name: str = ""
 
     # TODO: make this accept default_group_verbose = Sentinel()
-    _verbose: bool = attr.ib(default=True)
+    _verbose: bool = True
 
-    _apply_obj_store: Callable[FuncParams, bool] = attr.ib(default=Constant(True))
+    _apply_obj_store: Callable[FuncParams, bool] = Constant(True)
 
     # TODO: make this accept default_group_pickler = Sentinel()
-    _pickler: Pickler = attr.ib(default=pickle)
+    _pickler: Pickler = pickle
 
-    _fine_grain_eviction: bool = attr.ib(default=False)
-    _fine_grain_persistence: bool = attr.ib(default=False)
+    _fine_grain_eviction: bool = False
+    _fine_grain_persistence: bool = False
 
-    _extra_func_state: Callable[[Callable[FuncParams, FuncReturn]], Any] = attr.ib(default=cast("Callable[[Callable[FuncParams, FuncReturn]], Any]", Constant(None)))
+    _extra_func_state: Callable[[Callable[FuncParams, FuncReturn]], Any] = cast("Callable[[Callable[FuncParams, FuncReturn]], Any]", Constant(None))
 
     def _func_state(self) -> Any:
         """Returns function-specific state.
@@ -177,7 +179,7 @@ class Memoized(Generic[FuncParams, FuncReturn]):
             self._extra_func_state(self._func),
         )
 
-    _extra_args2key: Callable[FuncParams, Any] = attr.ib(default=Constant(None))
+    _extra_args2key: Callable[FuncParams, Any] = Constant(None)
 
     def _args2key(self, *args: FuncParams.args, **kwargs: FuncParams.kwargs) -> Any:
         """Convert arguments to their key for caching.
@@ -210,7 +212,7 @@ class Memoized(Generic[FuncParams, FuncReturn]):
             self._extra_args2key(*args, **kwargs),
         )
 
-    _extra_args2ver: Callable[FuncParams, Any] = attr.ib(default=Constant(None))
+    _extra_args2ver: Callable[FuncParams, Any] = Constant(None)
 
     def _args2ver(self, *args: FuncParams.args, **kwargs: FuncParams.kwargs) -> Any:
         """Convert arguments to their version for caching.
@@ -252,10 +254,10 @@ class Memoized(Generic[FuncParams, FuncReturn]):
             value_ser = key.to_bytes(self._group._._key_gen.key_bytes, BYTE_ORDER)
             data_size += len(value_ser)
 
-        return Entry(
+        return Entry(  # type: ignore (pyright doesn't know attrs __init__)
             data_size=data_size, compute_time=stop - start, value=value, obj_store=apply_obj_store,
         )
-
+    
     def __call__(self, *args: FuncParams.args, **kwargs: FuncParams.kwargs) -> FuncReturn:
         # TODO: capture overhead. Warn and log based on it.
 

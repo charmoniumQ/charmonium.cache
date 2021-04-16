@@ -85,12 +85,10 @@ def test_picklers() -> None:
         last_result = result
 
         result = run_script(foo_val=3, write_to_disk=True, as_main=as_main)
-        assert as_main == (
-            last_result["foo_serialized"]["cloudpickle"] == result["foo_serialized"]["cloudpickle"]
-        ), "cloudpickle should have the same hash between runs with identical source, iff as_main == True"
-        assert (
-            last_result["foo_serialized"]["dill"] == result["foo_serialized"]["dill"]
-        ), "dill should have the same hash between runs with identical source"
+        for serializer in last_result["foo_serialized"].keys():
+            assert (
+                last_result["foo_serialized"][serializer] == result["foo_serialized"][serializer]
+            ) or serializer == "cloudpickle", f"serializer {serializer} should have the same hash between runs with identical source"
 
         result = run_script(foo_val=4, write_to_disk=False, as_main=as_main)
         for serializer, value in result["foo_loaded"].items():

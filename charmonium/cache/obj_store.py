@@ -28,7 +28,6 @@ DEFAULT_PATH = Path(".cache_obj")
 class DirObjStore(ObjStore):
 
     path: PathLike = attr.ib(default=DEFAULT_PATH, converter=PathLike_from)
-    should_be_fresh: bool = attr.ib(default=False)
     key_bytes: int = 8
 
     def __attrs_post_init__(self) -> None:
