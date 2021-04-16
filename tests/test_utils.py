@@ -60,6 +60,6 @@ def test_getattr() -> None:
     with pytest.raises(TypeError):
         GetAttr[Callable[[], int]]()(obj, "attr1")
 
-def test_constatn() -> None:
+def test_constant() -> None:
     c: Callable[[int, float], int] = Constant(3)
     assert c(4, 5.6) == 3
