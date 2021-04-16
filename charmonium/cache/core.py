@@ -22,7 +22,7 @@ from bitmath import MiB
 
 
 from .util import Constant, pickle, dill, Pickler, KeyGen, Future, GetAttr
-from .index import Index, IndexKeyType, FileIndex
+from .index import Index, IndexKeyType
 from .obj_store import ObjStore, DirObjStore
 from .policies import policies, Entry
 
@@ -63,15 +63,21 @@ def memoize(
 class MemoizedGroup:
 
     # somehow, pyright does not like
-    #     attr.ib(factory=FileIndex)
+    #     attr.ib(factory=Index)
     # It wants a Callable[[], Index] instead of a Type[index].
-    _index: Index = attr.ib(factory=lambda: FileIndex())
+    _index: Index[Any, Entry] = Index((
+        IndexKeyType.MATCH,  # system state
+        IndexKeyType.LOOKUP, # func name
+        IndexKeyType.MATCH,  # func state
+        IndexKeyType.LOOKUP, # args key
+        IndexKeyType.MATCH,  # args version
+    ))
 
     _obj_store: ObjStore = attr.ib(factory=lambda: DirObjStore())
 
     _key_gen: KeyGen = attr.ib(factory=lambda: KeyGen())
 
-    _size: int = int(MiB(1).to_Byte())
+    _size: int = int(MiB(1).to_Byte().value)
     # TODO: use bitmath.parse_string("4.7 GiB") or integer
 
     _pickler: Pickler = pickle
@@ -90,16 +96,16 @@ class MemoizedGroup:
         self._index.read()
         atexit.register(self._index.write)
 
-    _extra_global_state: Callable[[], Any] = Constant(None)
+    _extra_system_state: Callable[[], Any] = Constant(None)
 
-    def _global_state(self) -> Any:
+    def _system_state(self) -> Any:
         """Functions are deterministic with (global state, function-specific state, args key, args version).
 
-        - The global_state contains:
+        - The system_state contains:
           - Package version
 
         """
-        return (__version__, self._extra_global_state())
+        return (__version__, self._extra_system_state())
 
     # TODO: Convert from string
     _eval_func: Callable[[Entry], float] = policies["LUV"]
@@ -157,7 +163,7 @@ class Memoized(Generic[FuncParams, FuncReturn]):
     def _func_state(self) -> Any:
         """Returns function-specific state.
 
-        See _global_state for the usage of function-specific state.
+        See _system_state for the usage of function-specific state.
 
         - The function state contains:
           - the source code, the
@@ -262,7 +268,7 @@ class Memoized(Generic[FuncParams, FuncReturn]):
         # TODO: capture overhead. Warn and log based on it.
 
         key = (
-            self._group._._global_state(),
+            self._group._._system_state(),
             self._name,
             self._func_state(),
             self._args2key(*args, **kwargs),

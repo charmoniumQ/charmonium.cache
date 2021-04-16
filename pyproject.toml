@@ -40,7 +40,6 @@ rstctl = "^0.4"
 twine = "^3.1.1"
 mypy = "^0.812"
 ipython = "^7.22.0"
-scipy = "^1.6.2"
 
 [tool.tox]
 # According to tox docs

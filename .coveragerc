@@ -4,7 +4,6 @@ branch = true
 [report]
 exclude_lines =
     \.\.\.
-    pass
     if TYPE_CHECKING:
     ImportError
     pragma: no cover

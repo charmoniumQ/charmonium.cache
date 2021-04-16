@@ -1,22 +1,15 @@
 from __future__ import annotations
 import enum
-import contextlib
-from pathlib import Path
 from typing import (
-    Generic,
-    Generator,
-    TypeVar,
+    cast,
     Callable,
-    ContextManager,
-    Protocol,
+    Generic,
+    TypeVar,
     Any,
     Iterable,
 )
 
-import attr
-
-from .util import Sizeable, Pickler, PathLike, pickle
-from .readers_writer_lock import ReadersWriterLock, ReadersWriterLock_from
+from .util import Sizeable
 
 
 class IndexKeyType(enum.IntEnum):
@@ -24,157 +17,56 @@ class IndexKeyType(enum.IntEnum):
     LOOKUP = 1
 
 
-class Index(Sizeable, Protocol):
-
-    initialized: bool
-    # TODO: instance-var doc-string: Returns if data is in the Index from read()
-
-    schema: tuple[IndexKeyType, ...] = ()
-
-    def set_schema(self, schema: tuple[IndexKeyType, ...]) -> None:
-        self.schema = schema
-
-    def __delitem__(self, keys: tuple[Any, ...]) -> None:
-        ...
-
-    def get_or(self, keys: tuple[Any, ...], thunk: Callable[[], Any]) -> Any:
-        """Gets the value at `key` or calls `thunk` and stores it at `key`."""
-
-    def items(self) -> Iterable[tuple[tuple[Any, ...], Any]]:
-        ...
-
-    def read(self) -> None:
-        """Atomically read index from storage.
-
-        The mechanism of locking could depend on the storage medium
-        used by the Index implementation. For example, this may use
-        file locks or database transactions.
-
-        If the cache is never used by multiple processes, the lock can
-        be omitted entirely.
-
-        """
-
-    def write(self) -> None:
-        """Atomic write index from storage.
-
-        See the note on read.
-
-        """
-
-    def read_modify_write(self) -> ContextManager[None]:
-        """Atomic RMW, where the modification is done by the ContextManager.
-
-        See the note on read.
-
-        """
-
-
 Key = TypeVar("Key")
 Val = TypeVar("Val")
 
+class Index(Sizeable, Generic[Key, Val]):
+    def __init__(self, schema: tuple[IndexKeyType, ...]) -> None:
+        self.schema = schema
+        self._data = dict[Key, Any]()
 
-class DictIndex(Generic[Key, Val]):
-    def __init__(self, single_key: bool = False) -> None:
-        self.single_key = single_key
-        self.data = dict[Key, Val]()
-
-    def __delitem__(self, key: Key) -> None:
-        del self.data[key]
-
-    def __contains__(self, key: Key) -> bool:
-        return key in self
-
-    def get_or(self, key: Key, thunk: Callable[[], Val]) -> Val:
-        if key in self.data:
-            return self.data[key]
-        else:
-            if self.single_key:
-                self.data.clear()
-            val = thunk()
-            self.data[key] = val
-            return val
-
-    def update(self, other: DictIndex[Key, Val], depth: int) -> None:
-        for key_, val in other.items(0):
-            key = key_[0]
-            if key in self.data and depth > 0:
-                self.data[key].update(val, depth - 1)  # type: ignore
-            else:
-                if self.single_key:
-                    self.data.clear()
-                self.data[key] = val
-
-    def items(self, depth: int) -> Iterable[tuple[tuple[Any, ...], Val]]:
-        if depth <= 0:
-            for key, val in self.data.items():
-                yield ((key,), val)
-        else:
-            for key, val in self.data.items():
-                for subkey, subval in val.items(depth - 1):  # type: ignore
-                    yield (key + subkey, subval)
-
-
-DEFAULT_CACHE_PATH = Path(".cache/index")
-
-@attr.frozen  # type: ignore
-class FileIndex(Index):
-    path: PathLike = DEFAULT_CACHE_PATH
-    _data: DictIndex[Any, Any] = DictIndex[Any, Any](single_key=True)
-    _lock: ReadersWriterLock = ReadersWriterLock_from(contextlib.nullcontext())
-    _pickler: Pickler = pickle
-    # Two ways to implement _data:
-    # - a hierarchical dict (dict of dict of dicts of ...)
-    # - or a mixed-key dict.(keys are k1 or (k1, k2) or (k1, k2, k3))
-    # Either way, the typing system can't handle it.
-    # The hierarchical dict makes it easier to delete stuff.
-    # Suppose I need to delete (k1, k2, *, *, *).
-    # In the hierarchical dict, I drop `del _data[k1][k2]`.
-    # In the mixed-key dict, I need to iterate over and remove all keys beginning with (k1, k2).
-
-    def get_or(self, keys: tuple[Any, ...], thunk: Callable[[], Any]) -> Any:
+    def _get_last_level(self, keys: tuple[Key, ...]) -> tuple[dict[Key, Val], Key, IndexKeyType]:
         if len(keys) != len(self.schema):
-            raise ValueError("{keys=} do not match {self.schema=}")
+            raise ValueError(f"{keys=} should be the same len as {self.schema=}")
         obj = self._data
-        for next_key_schema, key in zip(self.schema + (None,), (None,) + keys):
-            single_key = next_key_schema == IndexKeyType.MATCH
-            this_thunk = (
-                (lambda: DictIndex[Any, Any](single_key=single_key))
-                if next_key_schema is not None
-                else thunk
-            )
-            obj = obj.get_or(key, this_thunk)
-        return obj
-
-    def __delitem__(self, keys: tuple[Any, ...]) -> None:
-        obj = self._data
-        for key in (None,) + keys:
+        for key_type, key in zip(self.schema[:-1], keys[:-1]):
             if key not in obj:
-                break
-            obj = obj.get_or(key, lambda: None)
-        del obj[keys[-1]]
+                if key_type == IndexKeyType.MATCH:
+                    obj.clear()
+                obj[key] = dict[Key, Any]()
+            obj = cast(dict[Key, Any], obj[key])
+        return cast(dict[Key, Val], obj), keys[-1], self.schema[-1]
 
-    def read(self) -> None:
-        with self._lock.reader:
-            if self.path.exists():
-                self._data = self._pickler.loads(self.path.read_bytes())
+    def get_or(self, keys: tuple[Key, ...], thunk: Callable[[], Val]) -> Val:
+        last_level, last_key, last_key_type = self._get_last_level(keys)
+        if last_key not in last_level:
+            if last_key_type == IndexKeyType.MATCH:
+                last_level.clear()
+            last_level[last_key] = thunk()
+        return last_level[last_key]
 
-    def write(self) -> None:
-        with self._lock.writer:
-            self.path.parent.mkdir(parents=True, exist_ok=True)
-            self.path.write_bytes(self._pickler.dumps(self._data))
+    def __delitem__(self, keys: tuple[Key, ...]) -> None:
+        last_level, last_key, _ = self._get_last_level(keys)
+        del last_level[last_key]
 
-    @contextlib.contextmanager
-    def read_modify_write(self) -> Generator[None, None, None]:
-        with self._lock.writer:
-            self._data = self._pickler.loads(self.path.read_bytes())
-            yield
-            self.path.write_bytes(self._pickler.dumps(self._data))
+    def __setitem__(self, keys: tuple[Key, ...], val: Val) -> None:
+        last_level, last_key, last_key_type = self._get_last_level(keys)
+        if last_key_type == IndexKeyType.MATCH:
+            last_level.clear()
+        last_level[last_key] = val
 
-    def items(self) -> Iterable[tuple[tuple[Any, ...], Any]]:
-        for key, val in self._data.items(len(self.schema) + 1):
-            yield (key[1:], val)
+    def __getitem__(self, keys: tuple[Key, ...]) -> Val:
+        last_level, last_key, _ = self._get_last_level(keys)
+        return last_level[last_key]
 
-    def __size__(self) -> int:
-        # TODO: this
-        raise NotImplementedError
+    def items(self) -> Iterable[tuple[tuple[Key, ...], Val]]:
+        def helper(data: dict[Key, Any], depth: int) -> Iterable[tuple[tuple[Key, ...], Val]]:
+            if depth == 1:
+                for key, val in data.items():
+                    yield ((key,), val)
+            else:
+                for key, subdict in data.items():
+                    for subkey, val in helper(cast(dict[Key, Any], subdict), depth - 1):
+                        yield ((key,) + subkey, val)
+
+        yield from helper(self._data, len(self.schema))
