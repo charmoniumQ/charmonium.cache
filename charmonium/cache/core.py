@@ -10,24 +10,33 @@ from typing import (
     Generic,
     TypeVar,
     Callable,
-    Optional,
     Any,
     cast,
     Final,
     Iterator,
+    TYPE_CHECKING,
 )
-from typing_extensions import ParamSpec
 
 import attr
+from bitmath import MiB  # type: ignore
 
-from .util import constant, pickle, dill, ObjStore, Pickler, KeyGen, Future
-from .index import Index
+
+from .util import Constant, pickle, dill, Pickler, KeyGen, Future, GetAttr
+from .index import Index, IndexKeyType, FileIndex
+from .obj_store import ObjStore, DirObjStore
 from .policies import policies, Entry
 
 
 __version__ = "1.0.0"
 
-FuncParams = ParamSpec("FuncParams")
+# Thanks Eric Traut
+# https://github.com/microsoft/pyright/discussions/1763#discussioncomment-617220
+if TYPE_CHECKING:
+    from typing_extensions import ParamSpec
+    FuncParams = ParamSpec("FuncParams")
+else:
+    FuncParams = TypeVar("FuncParams")
+
 FuncReturn = TypeVar("FuncReturn")
 
 
@@ -36,34 +45,50 @@ BYTE_ORDER: Final[str] = "big"
 
 def memoize(
     **kwargs: Any,
-) -> Callable[[Callable[FuncParams, FuncReturn]], Callable[FuncParams, FuncReturn]]:
+) -> Callable[[Callable[FuncParams, FuncReturn]], Memoized[FuncParams, FuncReturn]]:
     def actual_memoize(
         func: Callable[FuncParams, FuncReturn], /
-    ) -> Callable[FuncParams, FuncReturn]:
-        return Memoize[FuncParams, FuncReturn](func, **kwargs)
+    ) -> Memoized[FuncParams, FuncReturn]:
+        return Memoized[FuncParams, FuncReturn](func, **kwargs)
 
-    return actual_memoize
+    # I believe pyright suffers from this old mypy bug: https://github.com/python/mypy/issues/1323
+    # Therefore, I have to circumvent the type system.
+    # However, somehow `cast` isn't sufficient.
+    # Therefore, I need `# type: ignore`. I don't like it any more than you.
+    # return cast(Memoized[FuncParams, FuncReturn], actual_memoize)
+    return actual_memoize  # type: ignore
 
 
-@attr.s  # type: ignore
+@attr.frozen  # type: ignore
 class MemoizedGroup:
-    _index: Index
+    _index: Index = attr.ib(factory=FileIndex)
 
-    _obj_store: ObjStore[int, bytes]
+    _obj_store: ObjStore = attr.ib(factory=DirObjStore)
 
-    _key_gen: KeyGen = attr.ib(default_factory=KeyGen)  # type: ignore
+    _key_gen: KeyGen = attr.ib(factory=KeyGen)  # type: ignore
 
-    _size: int = attr.ib(default=1 * 1024 * 1024)
+    _size: int = attr.ib(default=cast(int,
+                                      MiB(1).to_Byte()  # type: ignore
+    ))
+    # TODO: use bitmath.parse_string("4.7 GiB") or integer
 
     _pickler: Pickler = attr.ib(default=pickle)
 
     _verbose: bool = attr.ib(default=True)
 
-    def __init__(self) -> None:
+    def __attrs_post_init__(self) -> None:
+        self._index.schema = (
+            IndexKeyType.MATCH, # env state
+            IndexKeyType.LOOKUP, # function name
+            IndexKeyType.MATCH, # function state
+            IndexKeyType.LOOKUP, # args val
+            IndexKeyType.MATCH, # args ver
+        )
+        print(self._index)
         self._index.read()
         atexit.register(self._index.write)
 
-    _extra_global_state: Callable[[], Any] = attr.ib(default=constant(None))
+    _extra_global_state: Callable[[], Any] = attr.ib(default=Constant(None))
 
     def _global_state(self) -> Any:
         """Functions are deterministic with (global state, function-specific state, args key, args version).
@@ -81,7 +106,7 @@ class MemoizedGroup:
         heap = list[tuple[float, tuple[Any, ...], Entry]]()
         for key, entry in self._index.items():
             heapq.heappush(heap, (self._eval_func(entry), key, entry))
-        while self._index.size() + self._obj_store.size() > self._size:
+        while self._index.__size__() + self._obj_store.__size__() > self._size:
             _, key, entry = heap.pop()
             if entry.obj_store:
                 del self._obj_store[entry.value]
@@ -90,14 +115,17 @@ class MemoizedGroup:
     _use_count: Iterator[int] = itertools.count()
 
 
-DEFAULT_MEMOIZED_GROUP = Future[MemoizedGroup]()
+DEFAULT_MEMOIZED_GROUP = Future[MemoizedGroup](fulfill_twice=True)
+# DEFAULT_MEMOIZED_GROUP.fulfill(MemoizedGroup())
+# TODO: fulfill default
 
 
 @attr.s  # type: ignore
-class Memoize(Generic[FuncParams, FuncReturn]):
+class Memoized(Generic[FuncParams, FuncReturn]):
     def __attrs_post_init__(self) -> None:
         functools.update_wrapper(self, self._func)
-        self._name = f"{self._func.__module__}.{self._func.__qualname__}"
+        if self._name == "":
+            self._name = f"{self._func.__module__}.{self._func.__qualname__}"
         self._logger = logging.getLogger("charmonium.cache").getChild(self._name)
         self._logger.setLevel(logging.DEBUG)
         self._handler = logging.StreamHandler(sys.stderr)
@@ -107,14 +135,14 @@ class Memoize(Generic[FuncParams, FuncReturn]):
 
     _func: Callable[FuncParams, FuncReturn]
 
-    _group: MemoizedGroup = attr.ib()
+    _group: Future[MemoizedGroup] = attr.ib(default=DEFAULT_MEMOIZED_GROUP)
 
-    _name: Optional[str] = attr.ib(default=None)
+    _name: str = attr.ib(default="")
 
     # TODO: make this accept default_group_verbose = Sentinel()
     _verbose: bool = attr.ib(default=True)
 
-    _apply_obj_store: Callable[FuncParams, bool] = attr.ib(default=constant(True))
+    _apply_obj_store: Callable[FuncParams, bool] = attr.ib(default=Constant(True))
 
     # TODO: make this accept default_group_pickler = Sentinel()
     _pickler: Pickler = attr.ib(default=pickle)
@@ -122,9 +150,7 @@ class Memoize(Generic[FuncParams, FuncReturn]):
     _fine_grain_eviction: bool = attr.ib(default=False)
     _fine_grain_persistence: bool = attr.ib(default=False)
 
-    _extra_func_state: Callable[[Callable[FuncParams, FuncReturn]], Any] = attr.ib(
-        default=constant(None)
-    )
+    _extra_func_state: Callable[[Callable[FuncParams, FuncReturn]], Any] = attr.ib(default=cast("Callable[[Callable[FuncParams, FuncReturn]], Any]", Constant(None)))
 
     def _func_state(self) -> Any:
         """Returns function-specific state.
@@ -146,14 +172,12 @@ class Memoize(Generic[FuncParams, FuncReturn]):
         return (
             dill.dumps(self._func),
             self._pickler,
-            self._group._obj_store,
-            cast(Callable[[], Any], getattr(self._func, "__version__", lambda: None))(),
+            self._group._._obj_store,
+            GetAttr[Callable[[], Any]]()(self._func, "__version__", lambda: None)(),
             self._extra_func_state(self._func),
         )
 
-    _extra_args2key: Callable[FuncParams, FuncReturn] = cast(
-        Callable[FuncParams, FuncReturn], attr.ib(default=constant(None))
-    )
+    _extra_args2key: Callable[FuncParams, Any] = attr.ib(default=Constant(None))
 
     def _args2key(self, *args: FuncParams.args, **kwargs: FuncParams.kwargs) -> Any:
         """Convert arguments to their key for caching.
@@ -180,15 +204,13 @@ class Memoize(Generic[FuncParams, FuncReturn]):
         """
         return (
             {
-                key: cast(Callable[[], Any], getattr(val, "__cache_key__", lambda: val))()
+                key: GetAttr[Callable[[], Any]]()(val, "__cache_key__", lambda: val)()
                 for key, val in {**dict(enumerate(args)), **kwargs}.items()
             },
             self._extra_args2key(*args, **kwargs),
         )
 
-    _extra_args2ver: Callable[FuncParams, FuncReturn] = cast(
-        Callable[FuncParams, FuncReturn], attr.ib(default=constant(None))
-    )
+    _extra_args2ver: Callable[FuncParams, Any] = attr.ib(default=Constant(None))
 
     def _args2ver(self, *args: FuncParams.args, **kwargs: FuncParams.kwargs) -> Any:
         """Convert arguments to their version for caching.
@@ -201,7 +223,7 @@ class Memoize(Generic[FuncParams, FuncReturn]):
         """
         return (
             {
-                key: cast(Callable[[], None], getattr(val, "__cache_key__", lambda: val))()
+                key: GetAttr[Callable[[], Any]]()(val, "__cache_ver__", lambda: None)()
                 for key, val in {**dict(enumerate(args)), **kwargs}.items()
             },
             self._extra_args2ver(*args, **kwargs),
@@ -225,9 +247,9 @@ class Memoize(Generic[FuncParams, FuncReturn]):
         data_size = len(value_ser)
         apply_obj_store = self._apply_obj_store(*args, **kwargs)
         if apply_obj_store:
-            key = next(self._group._key_gen)
-            self._group._obj_store[key] = value_ser
-            value_ser = key.to_bytes(self._group._key_gen.key_bytes, BYTE_ORDER)
+            key = next(self._group._._key_gen)
+            self._group._._obj_store[key] = value_ser
+            value_ser = key.to_bytes(self._group._._key_gen.key_bytes, BYTE_ORDER)
             data_size += len(value_ser)
 
         return Entry(
@@ -238,7 +260,7 @@ class Memoize(Generic[FuncParams, FuncReturn]):
         # TODO: capture overhead. Warn and log based on it.
 
         key = (
-            self._group._global_state(),
+            self._group._._global_state(),
             self._name,
             self._func_state(),
             self._args2key(*args, **kwargs),
@@ -246,24 +268,24 @@ class Memoize(Generic[FuncParams, FuncReturn]):
         )
 
         if self._fine_grain_persistence:
-            self._group._index.read()
+            self._group._._index.read()
 
-        entry = self._group._index.get_or(key, self._recompute)
+        entry = self._group._._index.get_or(key, self._recompute)
         entry.size += len(self._pickler.dumps(key))
         entry.last_use = datetime.datetime.now()
-        entry.last_use_count = next(self._group._use_count)
+        entry.last_use_count = next(self._group._._use_count)
 
         if self._fine_grain_persistence:
-            with self._group._index.read_modify_write():
-                self._group._evict()
+            with self._group._._index.read_modify_write():
+                self._group._._evict()
 
         if self._fine_grain_eviction:
-            self._group._evict()
+            self._group._._evict()
 
         value_ser = entry.value
         if entry.obj_store:
             value_key = int.from_bytes(value_ser, BYTE_ORDER)
-            value_ser = self._group._obj_store[value_key]
+            value_ser = self._group._._obj_store[value_key]
         value: FuncReturn = self._pickler.loads(value_ser)
         # TODO: figure out how to elide this `loads(dumps(...))`, if we did a recompute.
 

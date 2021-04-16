@@ -27,8 +27,8 @@ Quickstart
 
 .. code:: python
 
-    >>> import charmonium.cache.memoize as memoize
-    >>> @memoize
+    >>> from charmonium.cache import memoize
+    >>> @memoize()
     ... def square(x):
     ...     print("computing")
     ...     return x**2

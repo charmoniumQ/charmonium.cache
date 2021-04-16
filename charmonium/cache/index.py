@@ -15,7 +15,7 @@ from typing import (
 
 import attr
 
-from .util import Sizeable, Pickler, PathLike, PathLike_from, pickle
+from .util import Sizeable, Pickler, PathLike, pickle
 from .readers_writer_lock import ReadersWriterLock, ReadersWriterLock_from
 
 
@@ -29,7 +29,10 @@ class Index(Sizeable, Protocol):
     initialized: bool
     # TODO: instance-var doc-string: Returns if data is in the Index from read()
 
-    schema: tuple[IndexKeyType]
+    schema: tuple[IndexKeyType, ...] = ()
+
+    def set_schema(self, schema: tuple[IndexKeyType, ...]) -> None:
+        self.schema = schema
 
     def __init__(self, schema: tuple[IndexKeyType]) -> None:
         self.schema = schema
@@ -115,13 +118,13 @@ class DictIndex(Generic[Key, Val]):
                     yield (key + subkey, subval)
 
 
+DEFAULT_CACHE_PATH = Path(".cache/index")
+
+# TODO: make this immutable
 @attr.s  # type: ignore
 class FileIndex(Index):
-    def __init__(self, schema: tuple[IndexKeyType]) -> None:
-        self.schema = schema
-        self._data = DictIndex[Any, Any](single_key=True)
-
-    _path: PathLike = attr.ib(default=PathLike_from(Path(".cache")))
+    path: PathLike = attr.ib(default=DEFAULT_CACHE_PATH)
+    _data: DictIndex[Any, Any] = DictIndex[Any, Any](single_key=True)
     _lock: ReadersWriterLock = attr.ib(default=ReadersWriterLock_from(contextlib.nullcontext()))
     _pickler: Pickler = attr.ib(default=pickle)
     # Two ways to implement _data:
@@ -157,19 +160,25 @@ class FileIndex(Index):
 
     def read(self) -> None:
         with self._lock.reader:
-            self._data = self._pickler.loads(self._path.read_bytes())
+            if self.path.exists():
+                self._data = self._pickler.loads(self.path.read_bytes())
 
     def write(self) -> None:
         with self._lock.writer:
-            self._path.write_bytes(self._pickler.dumps(self._data))
+            self.path.parent.mkdir(parents=True, exist_ok=True)
+            self.path.write_bytes(self._pickler.dumps(self._data))
 
     @contextlib.contextmanager
     def read_modify_write(self) -> Generator[None, None, None]:
         with self._lock.writer:
-            self._data = self._pickler.loads(self._path.read_bytes())
+            self._data = self._pickler.loads(self.path.read_bytes())
             yield
-            self._path.write_bytes(self._pickler.dumps(self._data))
+            self.path.write_bytes(self._pickler.dumps(self._data))
 
     def items(self) -> Iterable[tuple[tuple[Any, ...], Any]]:
         for key, val in self._data.items(len(self.schema) + 1):
             yield (key[1:], val)
+
+    def __size__(self) -> int:
+        # TODO: this
+        raise NotImplementedError
