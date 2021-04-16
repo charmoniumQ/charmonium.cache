@@ -2,22 +2,25 @@ from __future__ import annotations
 from types import TracebackType
 from typing import (
     Protocol,
-    Union,
     runtime_checkable,
     Optional,
 )
 
+import attr
+import fasteners
+
+from .util import PathLikeFrom, PathLike_from
 
 @runtime_checkable
 class Lock(Protocol):
-    def __enter__(self) -> None:
+    def __enter__(self) -> Optional[bool]:
         ...
 
     def __exit__(
         self,
         exc_type: Optional[type[BaseException]],
-        exc_value: Optional[BaseException],
-        traceback: Optional[TracebackType],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional[TracebackType],
     ) -> Optional[bool]:
         ...
 
@@ -36,17 +39,6 @@ class ReadersWriterLock(Protocol):
     writer: Lock
 
 
-ReadersWriterLockSources = Union[Lock, ReadersWriterLock]
-
-
-def ReadersWriterLock_from(lock: ReadersWriterLockSources) -> ReadersWriterLock:
-    if isinstance(lock, ReadersWriterLock):
-        return lock
-    else:
-        assert isinstance(lock, Lock)
-        return NaiveReadersWriterLock(lock)
-
-
 class NaiveReadersWriterLock(ReadersWriterLock):
     """ReadersWriterLock constructed from a regular Lock.
 
@@ -60,3 +52,20 @@ class NaiveReadersWriterLock(ReadersWriterLock):
     def __init__(self, lock: Lock) -> None:
         self.reader = lock
         self.writer = lock
+
+@attr.frozen  # type: ignore (pyright: ambiguous attrs overload)
+class FastenerReadersWriterLock:
+    path: PathLikeFrom = attr.ib(converter=PathLike_from)  # type: ignore (pyright doesn't limit the domain of converter)
+
+    _rw_lock: fasteners.InterProcessReaderWriterLock = attr.ib(init=False)
+
+    def __attrs_post_init__(self):
+        object.__setattr__(self, "_rw_lock", fasteners.InterProcessReaderWriterLock(str(self.path)))
+
+    @property
+    def writer(self) -> Lock:
+        return self._rw_lock.write_lock()
+
+    @property
+    def reader(self) -> Lock:
+        return self._rw_lock.read_lock()

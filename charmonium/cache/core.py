@@ -1,12 +1,15 @@
 from __future__ import annotations
+import atexit
+import datetime
+# import functools
 import heapq
 import itertools
 import logging
-import functools
+import pickle
 import sys
-import atexit
-import datetime
+import threading
 from typing import (
+    Union,
     Generic,
     TypeVar,
     Callable,
@@ -14,17 +17,21 @@ from typing import (
     cast,
     Final,
     Iterator,
+    Mapping,
     TYPE_CHECKING,
 )
+import warnings
 
 import attr
-from bitmath import MiB
+import bitmath
+# import cloudpickle
 
-
-from .util import Constant, pickle, dill, Pickler, KeyGen, Future, GetAttr
+from .util import Constant, Pickler, KeyGen, Future, GetAttr, Sentinel
 from .index import Index, IndexKeyType
+from .readers_writer_lock import FastenerReadersWriterLock, ReadersWriterLock, Lock
 from .obj_store import ObjStore, DirObjStore
 from .policies import policies, Entry
+from .func_version import func_version
 
 
 __version__ = "1.0.0"
@@ -59,42 +66,66 @@ def memoize(
     return actual_memoize  # type: ignore (see above)
 
 
+LOCK_PATH = ".cache_lock"
+OBJ_STORE_PATH = ".cache"
+
 @attr.frozen  # type: ignore (pyright: attrs ambiguous overload)
 class MemoizedGroup:
 
     # somehow, pyright does not like
     #     attr.ib(factory=Index)
     # It wants a Callable[[], Index] instead of a Type[index].
-    _index: Index[Any, Entry] = Index((
+    _index: Index[Any, Entry] = attr.ib(init=False, default=Index[Any, Entry]((
         IndexKeyType.MATCH,  # system state
         IndexKeyType.LOOKUP, # func name
         IndexKeyType.MATCH,  # func state
         IndexKeyType.LOOKUP, # args key
         IndexKeyType.MATCH,  # args version
-    ))
+    )))
 
-    _obj_store: ObjStore = attr.ib(factory=lambda: DirObjStore())
+    _obj_store: ObjStore = attr.ib(
+        factory=lambda: DirObjStore(OBJ_STORE_PATH)  # type: ignore (pyright doesn't know attrs __init__)
+    )
 
     _key_gen: KeyGen = attr.ib(factory=lambda: KeyGen())
 
-    _size: int = int(MiB(1).to_Byte().value)
+    _size: int = attr.ib(
+        default=int(bitmath.MiB(1).to_Byte().value),
+        converter=lambda x: x if isinstance(x, int) else bitmath.parse_string(x),
+    )
     # TODO: use bitmath.parse_string("4.7 GiB") or integer
 
     _pickler: Pickler = pickle
+    # TODO: how does end-user know Pickler type?
 
-    _verbose: bool = True
+    _lock: ReadersWriterLock = attr.ib(factory=lambda:
+                                       FastenerReadersWriterLock(LOCK_PATH)  # type: ignore (pyright doesn't know attrs __init__)
+    )
+
+    _fine_grain_persistence: bool = False
+
+    _fine_grain_eviction: bool = False
+
+    _index_key: int = attr.ib(default=0, init=False)
+
+    def _index_read(self) -> None:
+        with self._lock.reader:
+            if self._index_key in self._obj_store:
+                other = cast(Index[Any, Entry], self._pickler.loads(self._obj_store[self._index_key]))
+                self._index.update(other)
+
+    def _index_write(self) -> None:
+        with self._lock.writer:
+            if self._index_key in self._obj_store:
+                other = cast(Index[Any, Entry], self._pickler.loads(self._obj_store[self._index_key]))
+                self._index.update(other)
+            self._evict()
+            self._obj_store[self._index_key] = self._pickler.dumps(self._index)
 
     def __attrs_post_init__(self) -> None:
-        self._index.schema = (
-            IndexKeyType.MATCH, # env state
-            IndexKeyType.LOOKUP, # function name
-            IndexKeyType.MATCH, # function state
-            IndexKeyType.LOOKUP, # args val
-            IndexKeyType.MATCH, # args ver
-        )
-        print(self._index)
-        self._index.read()
-        atexit.register(self._index.write)
+        # TODO: Can I delay this until we know the Memoized Group for sure?
+        self._index_read()
+        atexit.register(self._index_write)
 
     _extra_system_state: Callable[[], Any] = Constant(None)
 
@@ -107,31 +138,38 @@ class MemoizedGroup:
         """
         return (__version__, self._extra_system_state())
 
-    # TODO: Convert from string
+    # TODO: Take by string
     _eval_func: Callable[[Entry], float] = policies["LUV"]
 
     def _evict(self) -> None:
         heap = list[tuple[float, tuple[Any, ...], Entry]]()
+        total_size = 0
+
         for key, entry in self._index.items():
             heapq.heappush(heap, (self._eval_func(entry), key, entry))
-        while self._index.__size__() + self._obj_store.__size__() > self._size:
+            total_size += entry.data_size
+
+        while total_size > self._size:
             _, key, entry = heap.pop()
             if entry.obj_store:
                 del self._obj_store[entry.value]
+            total_size -= entry.data_size
             del self._index[key]
 
     _use_count: Iterator[int] = itertools.count()
 
 
 DEFAULT_MEMOIZED_GROUP = Future[MemoizedGroup](fulfill_twice=True)
-# DEFAULT_MEMOIZED_GROUP.fulfill(MemoizedGroup())
-# TODO: fulfill default
+# TODO: Can I delay instantiating DirObjStore until I know that I am using it?
+DEFAULT_MEMOIZED_GROUP.fulfill(MemoizedGroup())
+
+GROUP_DEFAULT = Sentinel()
 
 
-@attr.s  # type: ignore (pyright: attrs ambiguous overload)
+@attr.define  # type: ignore (pyright: attrs ambiguous overload)
 class Memoized(Generic[FuncParams, FuncReturn]):
     def __attrs_post_init__(self) -> None:
-        functools.update_wrapper(self, self._func)
+        # functools.update_wrapper(self, self._func)
         if self._name == "":
             self._name = f"{self._func.__module__}.{self._func.__qualname__}"
         self._logger = logging.getLogger("charmonium.cache").getChild(self._name)
@@ -139,7 +177,14 @@ class Memoized(Generic[FuncParams, FuncReturn]):
         self._handler = logging.StreamHandler(sys.stderr)
         self._handler.setFormatter(logging.Formatter("%(asctime)s - %(message)s"))
         if self._verbose:
+            atexit.register(self._usage_report)
             self.enable_logging()
+
+    def _usage_report(self) -> None:
+        cost = self.time_cost.total_seconds()
+        saved = self.time_saved.total_seconds()
+        net_saved = saved - cost
+        print(f"Caching {self._func}: cost {cost:.1f}s, saved {saved:.1f}s, net saved {net_saved:.1f}s", file=sys.stderr)
 
     _func: Callable[FuncParams, FuncReturn]
 
@@ -152,11 +197,25 @@ class Memoized(Generic[FuncParams, FuncReturn]):
 
     _apply_obj_store: Callable[FuncParams, bool] = Constant(True)
 
-    # TODO: make this accept default_group_pickler = Sentinel()
-    _pickler: Pickler = pickle
+    _return_val_pickler: Union[Sentinel, Pickler] = attr.ib(default=GROUP_DEFAULT)
 
-    _fine_grain_eviction: bool = False
-    _fine_grain_persistence: bool = False
+    _lock: Lock = threading.RLock()
+
+    _logger: logging.Logger = attr.ib(init=False)
+    _handler: logging.Handler = attr.ib(init=False)
+
+    time_cost: datetime.timedelta = attr.ib(init=False, default=datetime.timedelta())
+    time_saved: datetime.timedelta = attr.ib(init=False, default=datetime.timedelta())
+
+    @property
+    def return_val_pickler(self) -> Pickler:
+        if isinstance(self._return_val_pickler, Sentinel):
+            return self._group._._pickler
+        else:
+            return self._return_val_pickler
+
+    _use_metadata_size: bool = False
+    """Whether to include the size of the metadata in the size threshold calculation for eviction"""
 
     _extra_func_state: Callable[[Callable[FuncParams, FuncReturn]], Any] = cast("Callable[[Callable[FuncParams, FuncReturn]], Any]", Constant(None))
 
@@ -178,12 +237,22 @@ class Memoized(Generic[FuncParams, FuncReturn]):
 
         """
         return (
-            dill.dumps(self._func),
-            self._pickler,
+            pickle.dumps(func_version(self._func)),
+            # cloudpickle.dumps(self._func),
+            GetAttr[str]()(self.return_val_pickler, "__name__", "", check_callable=False),
             self._group._._obj_store,
             GetAttr[Callable[[], Any]]()(self._func, "__version__", lambda: None)(),
             self._extra_func_state(self._func),
         )
+
+    def _combine_args(self, *args: FuncParams.args, **kwargs: FuncParams.kwargs) -> Mapping[str, Any]:
+        return {
+            **{
+                str(key): val
+                for key, val in enumerate(args)
+            },
+            **kwargs,
+        }
 
     _extra_args2key: Callable[FuncParams, Any] = Constant(None)
 
@@ -195,8 +264,7 @@ class Memoized(Generic[FuncParams, FuncReturn]):
           key" is the same, then "args version" assesses if the
           verison is new. For arguments which are not versioned
           resources, using that argument as the key and a constant as
-          the version (e.g. `"1.0.0"`) will work. This is the
-          default."
+          the version will work. This is the default."
 
         - The args2key consists of the default and the
           `extra_args2key(*args, **kwargs)`. The default is
@@ -211,10 +279,11 @@ class Memoized(Generic[FuncParams, FuncReturn]):
 
         """
         return (
-            {
-                key: GetAttr[Callable[[], Any]]()(val, "__cache_key__", lambda: val)()
-                for key, val in {**dict(enumerate(args)), **kwargs}.items()
-            },
+            frozenset({
+                key: GetAttr[Callable[[], Any]]()(val, "__cache_key__", Constant(val))()
+                # TODO: Use __persistent_hash__ instead of Constant(val)
+                for key, val in self._combine_args(*args, **kwargs).items()
+            }.items()),
             self._extra_args2key(*args, **kwargs),
         )
 
@@ -230,10 +299,10 @@ class Memoized(Generic[FuncParams, FuncReturn]):
 
         """
         return (
-            {
-                key: GetAttr[Callable[[], Any]]()(val, "__cache_ver__", lambda: None)()
-                for key, val in {**dict(enumerate(args)), **kwargs}.items()
-            },
+            frozenset({
+                key: GetAttr[Callable[[], Any]]()(val, "__cache_ver__", Constant(None))()
+                for key, val in self._combine_args(*args, **kwargs).items()
+            }.items()),
             self._extra_args2ver(*args, **kwargs),
         )
 
@@ -246,58 +315,73 @@ class Memoized(Generic[FuncParams, FuncReturn]):
     def __str__(self) -> str:
         return f"memoized {self._name}"
 
-    def _recompute(self, *args: FuncParams.args, **kwargs: FuncParams.kwargs,) -> Entry:
+    def _recompute(self, *args: FuncParams.args, **kwargs: FuncParams.kwargs) -> tuple[Entry, FuncReturn]:
         start = datetime.datetime.now()
         value = self._func(*args, **kwargs)
+        apply_obj_store = self._apply_obj_store(*args, **kwargs)
+
+        mid = datetime.datetime.now()
+
+        if apply_obj_store:
+            value_ser = self.return_val_pickler.dumps(value)
+            data_size = len(value_ser)
+            stored_value = next(self._group._._key_gen)
+            self._group._._obj_store[stored_value] = value_ser
+        else:
+            stored_value = value
+            data_size = 0
+
         stop = datetime.datetime.now()
 
-        value_ser = self._pickler.dumps(value)
-        data_size = len(value_ser)
-        apply_obj_store = self._apply_obj_store(*args, **kwargs)
-        if apply_obj_store:
-            key = next(self._group._._key_gen)
-            self._group._._obj_store[key] = value_ser
-            value_ser = key.to_bytes(self._group._._key_gen.key_bytes, BYTE_ORDER)
-            data_size += len(value_ser)
-
+        # Returning value in addition to Entry elides the redundant `loads(dumps(...))` when obj_store is True.
         return Entry(  # type: ignore (pyright doesn't know attrs __init__)
-            data_size=data_size, compute_time=stop - start, value=value, obj_store=apply_obj_store,
-        )
+            data_size=data_size, recompute_time=stop - start, time_saved=mid - start, value=stored_value, obj_store=apply_obj_store,
+        ), value
     
     def __call__(self, *args: FuncParams.args, **kwargs: FuncParams.kwargs) -> FuncReturn:
-        # TODO: capture overhead. Warn and log based on it.
+        with self._lock:
+            start = datetime.datetime.now()
 
-        key = (
-            self._group._._system_state(),
-            self._name,
-            self._func_state(),
-            self._args2key(*args, **kwargs),
-            self._args2ver(*args, **kwargs),
-        )
+            key = (
+                self._group._._system_state(),
+                self._name,
+                self._func_state(),
+                self._args2key(*args, **kwargs),
+                self._args2ver(*args, **kwargs),
+            )
 
-        if self._fine_grain_persistence:
-            self._group._._index.read()
+            if self._group._._fine_grain_persistence:
+                self._group._._index_read()
 
-        entry = self._group._._index.get_or(key, self._recompute)
-        entry.size += len(self._pickler.dumps(key))
-        entry.last_use = datetime.datetime.now()
-        entry.last_use_count = next(self._group._._use_count)
+            if key in self._group._._index:
+                entry = self._group._._index[key]
+                if entry.obj_store:
+                    value = cast(FuncReturn, self.return_val_pickler.loads(self._group._._obj_store[cast(int, entry.value)]))
+                else:
+                    value = cast(FuncReturn, entry.value)
+                self.time_saved += entry.time_saved
+            else:
+                entry, value = self._recompute(*args, **kwargs)
+                if self._use_metadata_size:
+                    entry.data_size += len(self._group._._pickler.dumps(entry))
+                    entry.data_size += len(self._group._._pickler.dumps(key))
+                self._group._._index[key] = entry
+                # TODO: Propagate possible from index to obj_store.
 
-        if self._fine_grain_persistence:
-            with self._group._._index.read_modify_write():
+            entry.last_use = datetime.datetime.now()
+            # entry.last_use_count = next(self._group._._use_count)
+
+            if self._group._._fine_grain_eviction:
                 self._group._._evict()
 
-        if self._fine_grain_eviction:
-            self._group._._evict()
+            if self._group._._fine_grain_persistence:
+                    self._group._._index_write()
 
-        value_ser = entry.value
-        if entry.obj_store:
-            value_key = int.from_bytes(value_ser, BYTE_ORDER)
-            value_ser = self._group._._obj_store[value_key]
-        value: FuncReturn = self._pickler.loads(value_ser)
-        # TODO: figure out how to elide this `loads(dumps(...))`, if we did a recompute.
+            stop = datetime.datetime.now()
+            self.time_cost += stop - start
+            # TODO: persist time_cost, time_saved, date_began.
 
-        return value
+            if self.time_saved < self.time_cost and self.time_cost.total_seconds() > 5:
+                warnings.warn(f"Caching {self._func} cost {self.time_cost.total_seconds():.1f}s but only saved {self.time_saved.total_seconds():.1f}s", UserWarning)
 
-
-# TODO: thread safety
+            return value

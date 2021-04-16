@@ -31,30 +31,44 @@ def test_index() -> None:
     with pytest.raises(ValueError):
         index[(1, 2)] = "hello5"
 
-    index = Index[int, str]((
+    index2 = Index[int, str]((
         IndexKeyType.LOOKUP,
         IndexKeyType.MATCH,
         IndexKeyType.LOOKUP,
     ))
-    index[(1, 2, 3)] = "hello"
-    assert set(index.items()) == {((1, 2, 3), "hello")}
+    index2[(0, 2, 3)] = "hello"
+    assert set(index2.items()) == {((0, 2, 3), "hello")}
 
-    index[(1, 2, 4)] = "hello2"
-    assert set(index.items()) == {((1, 2, 3), "hello"), ((1, 2, 4), "hello2")}
+    index2[(0, 3, 4)] = "hello2"
+    assert set(index2.items()) == {((0, 3, 4), "hello2")}
 
-    # index.write()
+    del index2[(0, 4, 5)]
+    assert set(index2.items()) == {((0, 3, 4), "hello2")}, "deleting an item that should't exist doesn't affect anything"
 
-    # index = Index()
-    # index.set_schema((
-    #     IndexKeyType.MATCH,
-    #     IndexKeyType.LOOKUP,
-    #     IndexKeyType.MATCH,
-    # ))
-    # index[(1, 2, 3)] = "hello5"
-    # index.read()
+    assert (0, 3, 4) in index
+    assert (0, 3, 5) not in index
 
-    # assert set(index.items()) == {((1, 2, 3), "hello5"), ((1, 3, 3), "hello2")}
+    with pytest.raises(ValueError):
+        index.update(index2)
 
+def test_update() -> None:
+    index1 = Index[int, str]((
+        IndexKeyType.MATCH,
+        IndexKeyType.LOOKUP,
+        IndexKeyType.MATCH,
+    ))
+    index1[(1, 2, 3)] = "hello"
+    index1[(1, 3, 3)] = "hello2"
 
-    # with index.read_modify_write():
-    #     pass
+    index2 = Index[int, str]((
+        IndexKeyType.MATCH,
+        IndexKeyType.LOOKUP,
+        IndexKeyType.MATCH,
+    ))
+    index2[(1, 2, 3)] = "hello3"
+    index2[(1, 4, 3)] = "hello4"
+
+    index2.update(index1)
+    assert index2[(1, 2, 3)] == "hello3", "update() shouldn't overwrite when they conflict"
+    assert index2[(1, 4, 3)] == "hello4", "keys not in index1 are unaffected but .update(index1)"
+    assert index2[(1, 3, 3)] == "hello2", "keys in index1 and not in index2 are brought over to index2"

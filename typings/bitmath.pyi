@@ -8,3 +8,6 @@ class Bitmath:
 class MiB(Bitmath):
     def __init__(self, value: int) -> None:
         ...
+
+def parse_string(s: str) -> Bitmath:
+    ...

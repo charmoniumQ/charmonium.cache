@@ -224,6 +224,7 @@ Usage examples:
 - Fasteners ReadersWriterLock
 
 Additional features:
+- Two-level
 - can store unhashable types
 - supports lossy and non-lossy keys
 - supports TTL

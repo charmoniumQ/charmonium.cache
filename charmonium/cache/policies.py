@@ -6,13 +6,15 @@ import attr
 T = TypeVar("T")
 
 
-@attr.s  # type: ignore (pyright: attrs ambiguous overload)
+@attr.define  # type: ignore (pyright: attrs ambiguous overload)
 class Entry:
-    data_size: int
-    compute_time: float
-    obj_store: bool
-    last_use: datetime.datetime
     value: Any
+    data_size: int
+    recompute_time: datetime.timedelta
+    time_saved: datetime.timedelta
+    obj_store: bool
+    last_use: datetime.datetime = datetime.datetime.fromtimestamp(0)
+    # last_use_count: int
 
 
 def LUV(entry: Entry) -> float:

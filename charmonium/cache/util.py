@@ -1,6 +1,5 @@
 from __future__ import annotations
 import random
-import pickle as pickle_
 import os
 from pathlib import Path
 import math
@@ -19,7 +18,6 @@ from typing import (
 import warnings
 
 import attr
-import dill as dill_
 
 T = TypeVar("T")
 
@@ -33,16 +31,15 @@ else:
 
 FuncReturn = TypeVar("FuncReturn")
 
-class Pickler:
+class Pickler(Protocol):
     def loads(self, buffer: bytes) -> Any:
         ...
 
-    def dumps(self, val: Any) -> bytes:
+    def dumps(self, obj: Any) -> bytes:
         ...
 
 
-dill = cast(Pickler, dill_)
-pickle = cast(Pickler, pickle_)
+# TODO: adapter for joblib?
 
 
 # PathLikeSubclass = TypeVar("PathLikeSubclass", bound=PathLike)
@@ -64,7 +61,7 @@ class PathLike(Protocol):
     def mkdir(self, *, parents: bool = ..., exist_ok: bool = ...) -> None:
         ...
 
-    def unlink(self) -> None:
+    def unlink(self, missing_ok: bool = ...) -> None:
         ...
 
     def iterdir(self) -> Iterable[PathLike]:
@@ -80,31 +77,22 @@ class PathLike(Protocol):
     def exists(self) -> bool:
         ...
 
+    def resolve(self) -> PathLike:
+        ...
+
     @property
     def name(self) -> str:
         ...
 
-PathLikeSources = Union[str, PathLike]
+PathLikeFrom = Union[str, PathLike]
 
-def PathLike_from(path: PathLikeSources) -> PathLike:
+def PathLike_from(path: PathLikeFrom) -> PathLike:
     if isinstance(path, str):
         return Path(path)
     elif isinstance(path, PathLike):
         return path
     else:
         raise TypeError(f"Unable to interpret {path} as a PathLike.")
-
-
-class Sizeable(Protocol):
-    """A protocol for determining storage space usage.
-
-    This way, the storage of the whole can be computed from the size
-    of its parts.
-
-    """
-
-    def __size__(self) -> int:
-        ...
 
 
 @attr.s  # type: ignore (pyright: attrs ambiguous overload)
@@ -160,7 +148,6 @@ class Future(Generic[T]):
         if not self.computed:
             raise ValueError("Future is not yet fulfilled.")
         else:
-            print(f"{self.value=}")
             return cast(T, self.value)
 
     @property

@@ -1,6 +1,6 @@
 import itertools
 import tempfile
-from typing import Callable
+from typing import Callable, cast
 
 import pytest
 
@@ -65,5 +65,5 @@ def test_getattr() -> None:
         GetAttr[Callable[[], int]]()(obj, "attr1")
 
 def test_constant() -> None:
-    c: Callable[[int, float], int] = Constant(3)
+    c: Callable[[int, float], int] = cast(Callable[[int, float], int], Constant(3))
     assert c(4, 5.6) == 3
