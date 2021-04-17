@@ -1,21 +1,22 @@
 from __future__ import annotations
-import random
-import os
-from pathlib import Path
+
 import math
+import os
+import random
 import typing
+import warnings
+from pathlib import Path
 from typing import (
     TYPE_CHECKING,
-    Generic,
-    TypeVar,
-    Protocol,
     Any,
-    Union,
-    Optional,
-    cast,
+    Generic,
     Iterable,
+    Optional,
+    Protocol,
+    TypeVar,
+    Union,
+    cast,
 )
-import warnings
 
 import attr
 
@@ -24,12 +25,15 @@ T = TypeVar("T")
 # Thanks Eric Traut
 # https://github.com/microsoft/pyright/discussions/1763#discussioncomment-617220
 if TYPE_CHECKING:
-    from typing_extensions import ParamSpec
+    # ParamSpec is just for type checking, hence pylint disable
+    from typing_extensions import ParamSpec  # pylint: disable=no-name-in-module
+
     FuncParams = ParamSpec("FuncParams")
 else:
     FuncParams = TypeVar("FuncParams")
 
 FuncReturn = TypeVar("FuncReturn")
+
 
 class Pickler(Protocol):
     def loads(self, buffer: bytes) -> Any:
@@ -42,14 +46,14 @@ class Pickler(Protocol):
 # TODO: adapter for joblib?
 
 
-# PathLikeSubclass = TypeVar("PathLikeSubclass", bound=PathLike)
+PathLikeSubclass = Any
 @typing.runtime_checkable
 class PathLike(Protocol):
     """Based on [pathlib.Path]
 
     [pathlib.Path]: https://docs.python.org/3/library/pathlib.html#pathlib.Path"""
 
-    def __truediv__(self, key: str) -> PathLike:
+    def __truediv__(self, key: str) -> PathLikeSubclass:
         """Joins a segment onto this Path."""
 
     def read_bytes(self) -> bytes:
@@ -64,38 +68,40 @@ class PathLike(Protocol):
     def unlink(self, missing_ok: bool = ...) -> None:
         ...
 
-    def iterdir(self) -> Iterable[PathLike]:
+    def iterdir(self) -> Iterable[PathLikeSubclass]:
         ...
 
     def stat(self) -> os.stat_result:
         ...
 
     @property
-    def parent(self) -> PathLike:
+    def parent(self) -> PathLikeSubclass:
         ...
 
     def exists(self) -> bool:
         ...
 
-    def resolve(self) -> PathLike:
+    def resolve(self) -> PathLikeSubclass:
         ...
 
-    @property
-    def name(self) -> str:
-        ...
+    name: str
+
 
 PathLikeFrom = Union[str, PathLike]
 
-def PathLike_from(path: PathLikeFrom) -> PathLike:
+
+def pathlike_from(path: PathLikeFrom) -> PathLike:
     if isinstance(path, str):
         return Path(path)
-    elif isinstance(path, PathLike):
+    elif isinstance(path, PathLike): # type: ignore
+        # somehow pyright doesn't think that a Path can be PathLike
         return path
     else:
         raise TypeError(f"Unable to interpret {path} as a PathLike.")
 
 
-@attr.s  # type: ignore (pyright: attrs ambiguous overload)
+# pyright thinks attrs has ambiguous overload
+@attr.s  # type: ignore
 class KeyGen:
     """Generates unique keys (not cryptographically secure)."""
 
@@ -130,7 +136,10 @@ class KeyGen:
 class Constant(Generic[FuncParams, FuncReturn]):
     def __init__(self, val: FuncReturn):
         self.val = val
-    def __call__(self, *args: FuncParams.args, **kwargs: FuncParams.kwargs) -> FuncReturn:
+
+    def __call__(
+        self, *args: FuncParams.args, **kwargs: FuncParams.kwargs
+    ) -> FuncReturn:
         return self.val
 
 
@@ -171,15 +180,27 @@ class GetAttr(Generic[T]):
 
     error = Sentinel()
 
-    def __init__(self) -> None: ...
-    def __call__(self, obj: object, attr: str, default: Union[T, Sentinel] = error, check_callable: bool = True) -> T:
-        if hasattr(obj, attr):
-            attr_val = getattr(obj, attr)
+    def __init__(self) -> None:
+        ...
+
+    def __call__(
+        self,
+        obj: object,
+        attr_name: str,
+        default: Union[T, Sentinel] = error,
+        check_callable: bool = True,
+    ) -> T:
+        if hasattr(obj, attr_name):
+            attr_val = getattr(obj, attr_name)
             if check_callable and not hasattr(attr_val, "__call__"):
-                raise TypeError(f"Expected ({obj!r}).{attr} to be callable, but it is {type(attr_val)}.")
+                raise TypeError(
+                    f"Expected ({obj!r}).{attr_name} to be callable, but it is {type(attr_val)}."
+                )
             else:
                 return cast(T, attr_val)
         elif not isinstance(default, Sentinel):
             return default
         else:
-            raise AttributeError(f"{obj!r}.{attr} does not exist, and no default was provided")
+            raise AttributeError(
+                f"{obj!r}.{attr_name} does not exist, and no default was provided"
+            )

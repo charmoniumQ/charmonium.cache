@@ -17,11 +17,8 @@ cache = "charmonium.cache._cli:main"
 [tool.poetry.dependencies]
 python = ">=3.9,<3.10"
 attr = "^0.3.1"
-typing-extensions = "^3.7.4"
-typing = "^3.7.4"
 bitmath = "^1.3.3"
 fasteners = "^0.16"
-cloudpickle = "^1.6.0"
 
 [tool.poetry.dev-dependencies]
 autoflake = "^1.3.1"

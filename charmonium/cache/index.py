@@ -1,14 +1,7 @@
 from __future__ import annotations
+
 import enum
-from typing import (
-    Optional,
-    cast,
-    Callable,
-    Generic,
-    TypeVar,
-    Any,
-    Iterable,
-)
+from typing import Any, Callable, Generic, Iterable, Optional, TypeVar, cast
 
 
 class IndexKeyType(enum.IntEnum):
@@ -19,13 +12,16 @@ class IndexKeyType(enum.IntEnum):
 Key = TypeVar("Key")
 Val = TypeVar("Val")
 
+
 class Index(Generic[Key, Val]):
     def __init__(self, schema: tuple[IndexKeyType, ...]) -> None:
         self.schema = schema
         self._data = dict[Key, Any]()
 
     def items(self) -> Iterable[tuple[tuple[Key, ...], Val]]:
-        def helper(data: dict[Key, Any], depth: int) -> Iterable[tuple[tuple[Key, ...], Val]]:
+        def helper(
+            data: dict[Key, Any], depth: int
+        ) -> Iterable[tuple[tuple[Key, ...], Val]]:
             if depth == 1:
                 # depth = 0 would be the actual values
                 # data.items() wouldn't work.
@@ -38,17 +34,21 @@ class Index(Generic[Key, Val]):
 
         yield from helper(self._data, len(self.schema))
 
-    def _get_last_level(self, keys: tuple[Key, ...]) -> Optional[tuple[dict[Key, Val], Key, IndexKeyType]]:
+    def _get_last_level(
+        self, keys: tuple[Key, ...]
+    ) -> Optional[tuple[dict[Key, Val], Key, IndexKeyType]]:
         if len(keys) != len(self.schema):
             raise ValueError(f"{keys=} should be the same len as {self.schema=}")
         obj = self._data
         for key in keys[:-1]:
             if key not in obj:
-                return
+                return None
             obj = cast(dict[Key, Any], obj[key])
         return cast(dict[Key, Val], obj), keys[-1], self.schema[-1]
 
-    def _get_or_create_last_level(self, keys: tuple[Key, ...]) -> tuple[dict[Key, Val], Key, IndexKeyType]:
+    def _get_or_create_last_level(
+        self, keys: tuple[Key, ...]
+    ) -> tuple[dict[Key, Val], Key, IndexKeyType]:
         if len(keys) != len(self.schema):
             raise ValueError(f"{keys=} should be the same len as {self.schema=}")
         obj = self._data
@@ -102,4 +102,5 @@ class Index(Generic[Key, Val]):
         if other.schema != self.schema:
             raise ValueError(f"Schema mismatch {self.schema=}, {other.schema=}")
         for key, val in other.items():
-            self.get_or(key, lambda: val)
+            # this lambda confuses pyright, hence type ignore
+            self.get_or(key, lambda val=val: val)  # type: ignore

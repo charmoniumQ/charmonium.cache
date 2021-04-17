@@ -1,4 +1,3 @@
-from pathlib import Path
 import itertools
 import json
 import subprocess
@@ -10,14 +9,31 @@ from typing import TypedDict, cast
 
 import pytest
 
+from charmonium.cache.util import PathLikeFrom, pathlike_from
+
 ScriptResult = TypedDict(
-    "ScriptResult", {"returns": list[int], "recomputed": list[int], "serialized": dict[str, bytes], "expected": list[int]}
+    "ScriptResult",
+    {
+        "returns": list[int],
+        "recomputed": list[int],
+        "serialized": dict[str, bytes],
+        "expected": list[int],
+    },
 )
 
 
-def run_script(directory: Path, name: str, source_var: int = 1, closure_var: int = 2, closure_func_source_var: int = 3, other_var: int = 4, as_main: bool = False, inputs: list[int] = [2, 3, 2]) -> ScriptResult:
-    directory.mkdir(exist_ok=True)
-    script = directory / "script_{name}.py"
+def run_script(
+    directory: PathLikeFrom,
+    name: str = "",
+    source_var: int = 1,
+    closure_var: int = 2,
+    closure_func_source_var: int = 3,
+    other_var: int = 4,
+    as_main: bool = False,
+    inputs: list[int] = [2, 3, 2],
+) -> ScriptResult:
+    script = pathlike_from(directory) / "script_{name}.py"
+    script.parent.mkdir(exist_ok=True)
 
     script.write_text(
         f"""
@@ -39,13 +55,13 @@ returns = []
 for input in {json.dumps(inputs)}:
     returns.append(func(input))
 
-import cloudpickle
-import dill
+# import cloudpickle
+# import dill
 import pickle
 
 serializers = dict(
-    dill=dill.dumps,
-    cloudpickle=cloudpickle.dumps,
+    # dill=dill.dumps,
+    # cloudpickle=cloudpickle.dumps,
     func_version=lambda fn: pickle.dumps(func_version(fn)),
 )
 
@@ -60,7 +76,9 @@ print(json.dumps(dict(
 """.lstrip()
     )
     cmd = [script.name] if as_main else ["-m", script.stem]
-    proc = subprocess.run([sys.executable, *cmd], cwd=directory, capture_output=True, text=True)
+    proc = subprocess.run(
+        [sys.executable, *cmd], cwd=script.parent, capture_output=True, text=True
+    )
     if proc.returncode != 0:
         print(
             f"""
@@ -74,10 +92,16 @@ stderr:
         )
         raise ValueError("Script failed")
     out_str = proc.stdout.strip().split("\n")
-    return cast(ScriptResult, {
-        "expected": [(input**source_var + closure_func_source_var) * closure_var for input in inputs],
-        **json.loads(out_str[-1]),
-    })
+    return cast(
+        ScriptResult,
+        {
+            "expected": [
+                (input ** source_var + closure_func_source_var) * closure_var
+                for input in inputs
+            ],
+            **json.loads(out_str[-1]),
+        },
+    )
 
 
 vars_ = {
@@ -87,28 +111,25 @@ vars_ = {
     "closure_func_source_var": 4,
 }
 
+
 @pytest.mark.parametrize(
     "serializer,change,as_main",
-    itertools.product(
-        ["func_version"],
-        vars_.keys(),
-        [False, True],
-    ),
+    itertools.product(["func_version"], vars_.keys(), [False, True],),
 )
 def test_code_change(serializer: str, change: str, as_main: bool) -> None:
-    with tempfile.TemporaryDirectory() as directory_:
-        directory = Path(directory_)
-        name=serializer + change + str(as_main)
-        result = run_script(directory=directory, name=name, as_main=as_main, **vars_)
+    with tempfile.TemporaryDirectory() as directory:
+
+        result = run_script(directory=directory, as_main=as_main, **vars_)
         assert result["expected"] == result["returns"]
-        time.sleep(1)
-        kwargs = {var: val for var, val in vars_.items()}
-        kwargs[change] += 2
-        result2 = run_script(directory=directory, name=name, as_main=as_main, **kwargs)
+
+        time.sleep(0.1)
+
+        result2 = run_script(directory=directory, as_main=as_main, **{**vars_, change: 10})
         assert result2["expected"] == result2["returns"]
+
         if change in {"other_var"}:
             assert result["serialized"][serializer] == result2["serialized"][serializer]
         elif change in {"closure_var", "closure_func_source_var", "source_var"}:
             assert result["serialized"][serializer] != result2["serialized"][serializer]
         else:
-            raise ValueError
+            raise ValueError(f"Unknown change type {change}. Should be one of {list(vars_)}")

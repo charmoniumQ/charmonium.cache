@@ -1,15 +1,13 @@
 from __future__ import annotations
+
 from types import TracebackType
-from typing import (
-    Protocol,
-    runtime_checkable,
-    Optional,
-)
+from typing import Optional, Protocol, runtime_checkable
 
 import attr
 import fasteners
 
-from .util import PathLikeFrom, PathLike_from
+from .util import PathLikeFrom, pathlike_from
+
 
 @runtime_checkable
 class Lock(Protocol):
@@ -50,17 +48,23 @@ class NaiveReadersWriterLock(ReadersWriterLock):
     """
 
     def __init__(self, lock: Lock) -> None:
+        super().__init__()
         self.reader = lock
         self.writer = lock
 
-@attr.frozen  # type: ignore (pyright: ambiguous attrs overload)
+
+# pyright thinks attrs has ambiguous overload
+@attr.frozen  # type: ignore
 class FastenerReadersWriterLock:
-    path: PathLikeFrom = attr.ib(converter=PathLike_from)  # type: ignore (pyright doesn't limit the domain of converter)
+    # pyright doesn't limit the domain of converter, hence type ignore
+    path: PathLikeFrom = attr.ib(converter=pathlike_from)  # type: ignore
 
     _rw_lock: fasteners.InterProcessReaderWriterLock = attr.ib(init=False)
 
-    def __attrs_post_init__(self):
-        object.__setattr__(self, "_rw_lock", fasteners.InterProcessReaderWriterLock(str(self.path)))
+    def __attrs_post_init__(self) -> None:
+        object.__setattr__(
+            self, "_rw_lock", fasteners.InterProcessReaderWriterLock(str(self.path))
+        )
 
     @property
     def writer(self) -> Lock:

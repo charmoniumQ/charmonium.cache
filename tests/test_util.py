@@ -4,7 +4,14 @@ from typing import Callable, cast
 
 import pytest
 
-from charmonium.cache.util import KeyGen, PathLike, PathLike_from, Future, GetAttr, Constant
+from charmonium.cache.util import (
+    Constant,
+    Future,
+    GetAttr,
+    KeyGen,
+    PathLike,
+    pathlike_from,
+)
 
 
 def test_key_gen() -> None:
@@ -17,17 +24,19 @@ def test_key_gen() -> None:
     with pytest.warns(UserWarning):
         list(itertools.islice(key_gen2, n_samples))
 
+
 def test_pathlike() -> None:
     # primarily test the type signature
     payload = b"abc"
     with tempfile.TemporaryDirectory() as path_:
-        path: PathLike = PathLike_from(PathLike_from(path_))
+        path: PathLike = pathlike_from(pathlike_from(path_))
         path2: PathLike = path / "test"
         path2.write_bytes(payload)
         (path / "test").read_bytes() == payload
 
     with pytest.raises(TypeError):
-        PathLike_from(3)  # type: ignore (deliberate error for testing)
+        pathlike_from(3)  # type: ignore (deliberate error for testing)
+
 
 def test_future() -> None:
     future_int = Future[int]()
@@ -43,8 +52,8 @@ def test_future() -> None:
     with pytest.raises(ValueError):
         future_int.fulfill(4)
 
-def test_getattr() -> None:
 
+def test_getattr() -> None:
     class Class:
 
         attr1 = 11423
@@ -55,7 +64,7 @@ def test_getattr() -> None:
     obj = Class()
     assert GetAttr[int]()(obj, "attr1", 1, check_callable=False) == obj.attr1
     assert GetAttr[int]()(obj, "attr2", 2, check_callable=False) == 2
-    
+
     with pytest.raises(AttributeError):
         GetAttr[int]()(obj, "attr2", check_callable=False)
 
@@ -63,6 +72,7 @@ def test_getattr() -> None:
 
     with pytest.raises(TypeError):
         GetAttr[Callable[[], int]]()(obj, "attr1")
+
 
 def test_constant() -> None:
     c: Callable[[int, float], int] = cast(Callable[[int, float], int], Constant(3))

@@ -10,7 +10,14 @@ codecov=${codecov:-}
 
 package_name="charmonium.cache"
 package_path="./$(echo ${package_name} | sed 's/\./\//g')"
-srcs="${package_path} tests/ stubs/ $(find scripts/ -name '*.py')"
+srcs="${package_path} tests/ typings/ $(find scripts/ -name '*.py')"
+
+# TODO: Rewrite in Python
+# TODO: Start from last failure
+# TODO: Make colors work
+# TODO: Make TTY work in serial mode
+# TODO: Dispatch testing, docs, and publish from the same script
+# todo: Checker parallelism (this has a low reward/difficulty ratio)
 
 function excluding() {
 	# Usage: excluding needle haystack...
@@ -66,24 +73,26 @@ flag_check=$([ -n "${check}" ] && echo "--check")
 		poetry run \
 			isort --recursive ${flag_check_only} ${srcs}
 
-[[ -n "${skip_lint}" ]] || \
-	capture \
-		poetry run \
-			black --quiet --target-version py38 ${flag_check} ${flag_verbose_or_quiet} ${srcs}
+# [[ -n "${skip_lint}" ]] || \
+# 	capture \
+# 		poetry run \
+# 			black --quiet --target-version py38 ${flag_check} ${flag_verbose_or_quiet} ${srcs}
 
 [[ -n "${skip_lint}" ]] || \
 	capture \
 		poetry run \
 			sh -c "pylint ${flag_verbose} ${package_path} ${other_srcs} || poetry run pylint-exit -efail \${?} > /dev/null"
 
-capture \
-	poetry run \
-		env PYTHONPATH=".:${PYTHONPATH}" MYPYPATH="./stubs:${MYPYPATH}" \
-			mypy --namespace-packages -p ${package_name}
-capture \
-	poetry run \
-		env PYTHONPATH=".:${PYTHONPATH}" MYPYPATH="./stubs:${MYPYPATH}" \
-			mypy --namespace-packages $(excluding "stubs" $(excluding "${package_path}" ${srcs}))
+capture poetry run pyright
+
+# capture \
+# 	poetry run \
+# 		env PYTHONPATH=".:${PYTHONPATH}" MYPYPATH="./typings:${MYPYPATH}" \
+# 			mypy --namespace-packages -p ${package_name}
+# capture \
+# 	poetry run \
+# 		env PYTHONPATH=".:${PYTHONPATH}" MYPYPATH="./stubs:${MYPYPATH}" \
+# 			mypy --namespace-packages $(excluding "stubs" $(excluding "${package_path}" ${srcs}))
 # ${flag_verbose} is too verbose here
 
 # Note that I can't use dmypy because I have a package (-p) and files
@@ -92,10 +101,6 @@ capture \
 capture \
 	poetry run \
 		pytest --quiet --exitfirst .
-# I only care about --cov= in the exported package
-
-[[ -z "${htmlcov}" ]] || \
-	xdg-open htmlcov/index.html
 
 poetry run \
 	coverage html -d htmlcov
@@ -104,4 +109,7 @@ poetry run \
 	capture \
 		poetry run \
 			codecov
+
+[[ -z "${htmlcov}" ]] || \
+	xdg-open htmlcov/index.html
 

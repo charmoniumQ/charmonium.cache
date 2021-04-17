@@ -1,13 +1,15 @@
 from __future__ import annotations
+
 import shutil
 from pathlib import Path
-from typing import Callable
+from typing import Callable, Protocol
 
 import attr
 
-from .util import PathLike, GetAttr, PathLike_from
+from .util import GetAttr, PathLike, pathlike_from
 
-class ObjStore:
+
+class ObjStore(Protocol):
     def __setitem__(self, key: int, val: bytes) -> None:
         ...
 
@@ -20,34 +22,42 @@ class ObjStore:
     def __contains__(self, key: int) -> bool:
         ...
 
-    def clear(self) -> None:
+    def clear(self) -> None:  # pylint: disable=no-self-use
+        # Doesn't use self because I'm defining a Protocol
         ...
 
 
-@attr.frozen  # type: ignore (pyright: attrs ambiguous overload)
+# pyright thinks attrs has ambiguous overload
+@attr.frozen  # type: ignore
 class DirObjStore(ObjStore):
 
-    path: PathLike = attr.ib(converter=PathLike_from)
+    path: PathLike = attr.ib(converter=pathlike_from)
     key_bytes: int = 8
 
     def __attrs_post_init__(self) -> None:
-        if self.path.exists() and any(not self._is_key(path) for path in self.path.iterdir()):
+        if self.path.exists() and any(
+            not self._is_key(path) for path in self.path.iterdir()
+        ):
             bad_paths = [path for path in self.path.iterdir() if not self._is_key(path)]
-            raise ValueError(f"{self.path.resolve()=} contains junk I didn't make: {bad_paths}")
+            raise ValueError(
+                f"{self.path.resolve()=} contains junk I didn't make: {bad_paths}"
+            )
 
     def _int2str(self, key: int) -> str:
-        assert key < (1 << (8*self.key_bytes))
+        assert key < (1 << (8 * self.key_bytes))
         return f"{key:0{2*self.key_bytes}x}"
 
-    def _is_key(self, s: PathLike) -> bool:
-        return len(s.name) == 2*self.key_bytes and all(letter in "0123456789abcdef" for letter in s.name)
+    def _is_key(self, path: PathLike) -> bool:
+        return len(path.name) == 2 * self.key_bytes and all(
+            letter in "0123456789abcdef" for letter in path.name
+        )
 
     def __setitem__(self, key: int, val: bytes) -> None:
         self.path.mkdir(exist_ok=True)
         (self.path / self._int2str(key)).write_bytes(val)
 
     def __getitem__(self, key: int) -> bytes:
-        path = (self.path / self._int2str(key))
+        path = self.path / self._int2str(key)
         if not path.exists():
             raise KeyError(key)
         else:
@@ -61,7 +71,8 @@ class DirObjStore(ObjStore):
 
     def clear(self) -> None:
         self.path.mkdir(exist_ok=True)
-        if isinstance(self.path, Path):
+        # somehow pyright doesn't think that a Path can be PathLike
+        if isinstance(self.path, Path): # type: ignore
             shutil.rmtree(self.path)
         else:
             # "There is no syntax to indicate optional or keyword arguments; such function types are rarely used as callback types"

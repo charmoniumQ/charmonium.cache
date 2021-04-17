@@ -61,24 +61,35 @@ confidence=
 # no Warning level messages displayed, use "--disable=all --enable=classes
 # --disable=W".
 disable=
-    missing-docstring,
-    invalid-name,
-
 	# This is needed to make mypy types work (such as OrderedDict[K, V])
     unsubscriptable-object,
 
-    # Black disagrees with pylint on how to indent
-    #     class Derived (
-    #         BaseClass, metaclass=MetaClass,
-    #     ):
-    #         pass
+	# We have black, so I won't worry about this
+	line-too-long,
     bad-continuation,
+
+    # We have isort, so don't worry about this
+    wrong-import-position,
+
+    # We have mypy, so don't worry about this
+    no-member,
+	not-callable,
+	undefined-variable,
+	unsupported-membership-test,
+	unsupported-assignment-operation,
+	unsupported-delete-operation,
+
+    # We use classes like structs, so many will have no public methods.
+    # I actually want to encourage fewer methods.
+	too-few-public-methods,
 
     # my personal style is to explicitly else-return and else-raise.
     # that way, if you change the return or raise, same functionality
     no-else-raise,
     no-else-return,
-    no-else-continue
+    no-else-continue,
+
+    missing-docstring
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option

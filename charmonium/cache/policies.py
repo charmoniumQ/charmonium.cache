@@ -1,12 +1,13 @@
-from typing import Callable, TypeVar, Any
 import datetime
+from typing import Any, Callable, TypeVar
 
 import attr
 
 T = TypeVar("T")
 
 
-@attr.define  # type: ignore (pyright: attrs ambiguous overload)
+# pyright thinks attrs has ambiguous overload
+@attr.define  # type: ignore
 class Entry:
     value: Any
     data_size: int
@@ -17,8 +18,8 @@ class Entry:
     # last_use_count: int
 
 
-def LUV(entry: Entry) -> float:
+def luv(entry: Entry) -> float:
     return 0
 
 
-policies = dict[str, Callable[[Entry], Any]](LUV=LUV,)
+policies = dict[str, Callable[[Entry], Any]](luv=luv,)

@@ -1,7 +1,4 @@
-from .core import (
-    __version__,
-    memoize,
-)
+from .core import __version__, memoize
 
 __author__ = "Samuel Grayson"
 __email__ = "sam+dev@samgrayson.me"

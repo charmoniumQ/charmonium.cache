@@ -4,6 +4,7 @@ import pytest
 
 from charmonium.cache.obj_store import DirObjStore
 
+
 def test_obj_store() -> None:
     with tempfile.TemporaryDirectory() as path:
         os = DirObjStore(path)  # type: ignore (pyright doesn't know attrs __init__)
