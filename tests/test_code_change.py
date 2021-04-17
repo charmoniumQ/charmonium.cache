@@ -15,9 +15,9 @@ ScriptResult = TypedDict(
 )
 
 
-def run_script(directory: Path, source_var: int = 1, closure_var: int = 2, closure_func_source_var: int = 3, other_var: int = 4, as_main: bool = False, inputs: list[int] = [2, 3, 2]) -> ScriptResult:
+def run_script(directory: Path, name: str, source_var: int = 1, closure_var: int = 2, closure_func_source_var: int = 3, other_var: int = 4, as_main: bool = False, inputs: list[int] = [2, 3, 2]) -> ScriptResult:
     directory.mkdir(exist_ok=True)
-    script = directory / "script2.py"
+    script = directory / "script_{name}.py"
 
     script.write_text(
         f"""
@@ -59,7 +59,7 @@ print(json.dumps(dict(
 )))
 """.lstrip()
     )
-    cmd = ["script2.py"] if as_main else ["-m", "script2"]
+    cmd = [script.name] if as_main else ["-m", script.stem]
     proc = subprocess.run([sys.executable, *cmd], cwd=directory, capture_output=True, text=True)
     if proc.returncode != 0:
         print(
@@ -92,18 +92,19 @@ vars_ = {
     itertools.product(
         ["func_version"],
         vars_.keys(),
-        [False],
+        [False, True],
     ),
 )
 def test_code_change(serializer: str, change: str, as_main: bool) -> None:
     with tempfile.TemporaryDirectory() as directory_:
         directory = Path(directory_)
-        result = run_script(directory=directory, as_main=as_main, **vars_)
+        name=serializer + change + str(as_main)
+        result = run_script(directory=directory, name=name, as_main=as_main, **vars_)
         assert result["expected"] == result["returns"]
         time.sleep(1)
         kwargs = {var: val for var, val in vars_.items()}
         kwargs[change] += 2
-        result2 = run_script(directory=directory, as_main=as_main, **kwargs)
+        result2 = run_script(directory=directory, name=name, as_main=as_main, **kwargs)
         assert result2["expected"] == result2["returns"]
         if change in {"other_var"}:
             assert result["serialized"][serializer] == result2["serialized"][serializer]
