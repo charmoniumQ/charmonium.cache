@@ -207,3 +207,6 @@ class GetAttr(Generic[_T]):
             raise AttributeError(
                 f"{obj!r}.{attr_name} does not exist, and no default was provided"
             )
+
+def identity(obj: _T) -> _T:
+    return obj

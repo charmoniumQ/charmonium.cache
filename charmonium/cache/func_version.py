@@ -11,6 +11,15 @@ def closure_vars_version(closure_vars: inspect.ClosureVars,) -> Any:
 
 
 def func_version(func: Callable[..., Any]) -> Any:
+    """func_version is injective (different when the input is different).
+
+    The func_version depends on the functions source-code and its
+    `closure`_. If the closure contains a function, that function is
+    recorded by func_version as well.
+
+    .. _`closure`: https://en.wikipedia.org/wiki/Closure_(computer_programming)
+
+    """
     return (
         func.__code__.co_code,
         func.__code__.co_consts,

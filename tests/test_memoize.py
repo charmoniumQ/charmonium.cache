@@ -8,11 +8,15 @@ from typing import Any
 import fasteners
 import pytest
 
-from charmonium.cache import memoize
-# TODO: export in __init__
-from charmonium.cache.core import DEFAULT_MEMOIZED_GROUP, MemoizedGroup
-from charmonium.cache.obj_store import DirObjStore
-from charmonium.cache.rw_lock import FileRWLock, NaiveRWLock
+# import from __init__ because this is an integration test.
+from charmonium.cache import (
+    DEFAULT_MEMOIZED_GROUP,
+    DirObjStore,
+    FileRWLock,
+    MemoizedGroup,
+    NaiveRWLock,
+    memoize,
+)
 
 calls: list[int] = []
 
@@ -38,8 +42,8 @@ def test_memoize() -> None:
 calls2: list[int] = []
 
 i = 0
-# Not possible (or worthwhile) to type-hint a lambda
-@memoize(verbose=False, use_obj_store=False, use_metadata_size=True)  # type: ignore
+
+@memoize(verbose=False, use_obj_store=False, use_metadata_size=True)
 def square_impure_closure(x: int) -> int:
     # I don't want `calls` to be in the closure.
     globals()["calls2"].append(x)
@@ -114,8 +118,8 @@ def big_fn(x: int) -> bytes:
 def test_eviction() -> None:
     with tempfile.TemporaryDirectory() as path:
         DEFAULT_MEMOIZED_GROUP.fulfill(
-            MemoizedGroup(  # type: ignore (pyright doesn't know about attrs __init__)
-                obj_store=DirObjStore(path),  # type: ignore (pyright doesn't know about attrs __init__)
+            MemoizedGroup(
+                obj_store=DirObjStore(path),
                 fine_grain_eviction=True,
                 size="500B",
             )
@@ -132,9 +136,20 @@ def square_loud(x: int) -> int:
     return x**2
 
 def test_verbose(caplog: pytest.Caplog) -> None:
+    with tempfile.TemporaryDirectory() as path:
+        DEFAULT_MEMOIZED_GROUP.fulfill(
+            MemoizedGroup(
+                obj_store=DirObjStore(path),
+            )
+        )
     square_loud(2)
     square_loud(2)
     assert "hit" in caplog.text
     assert "miss" in caplog.text
 
     square_loud.disable_logging()
+
+    with pytest.warns(UserWarning):
+        @memoize(use_metadata_size=False, use_obj_store=False)
+        def foo() -> None: # type: ignore
+            pass

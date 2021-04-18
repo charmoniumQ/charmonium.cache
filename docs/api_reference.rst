@@ -25,6 +25,10 @@ API Reference
         :members:
         :special-members: __init__
 
+    .. autoclass:: FileContents
+        :members:
+        :special-members: __init__, __cache_key__, __cache_val__
+
     .. autoclass:: RWLock
         :members:
 

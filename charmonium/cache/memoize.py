@@ -32,10 +32,16 @@ from .obj_store import DirObjStore, ObjStore
 from .persistent_hash import persistent_hash
 from .replacement_policies import REPLACEMENT_POLICIES, Entry, ReplacementPolicy
 from .rw_lock import FileRWLock, Lock, RWLock
-from .util import Constant, FuncParams, FuncReturn, Future, GetAttr, KeyGen, Pickler
-
-# import cloudpickle
-
+from .util import (
+    Constant,
+    FuncParams,
+    FuncReturn,
+    Future,
+    GetAttr,
+    KeyGen,
+    Pickler,
+    identity,
+)
 
 __version__ = "1.0.0"
 
@@ -260,6 +266,16 @@ class Memoized(Generic[FuncParams, FuncReturn]):
         self._handler = logging.StreamHandler(sys.stderr)
         self._handler.setFormatter(logging.Formatter("%(asctime)s - %(message)s"))
 
+        if not self._use_obj_store and not self._use_metadata_size:
+            warnings.warn(
+                "You are not using the object store, so function return-values get "
+                "serialized into the metadata, but you are also not using "
+                "the metadata size for eviction. This will likely lead to "
+                "an unbounded cache. If you care about the boundedness, set "
+                "either `use_obj_store` or `use_metadata_size`. ",
+                UserWarning,
+            )
+
         if self._verbose:
             atexit.register(self.log_usage_report)
             self.enable_logging()
@@ -354,7 +370,7 @@ class Memoized(Generic[FuncParams, FuncReturn]):
             frozenset(
                 {
                     key: GetAttr[Callable[[Any], Any]]()(
-                        type(val), "__cache_key__", persistent_hash
+                        type(val), "__cache_key__", identity
                     )(val)
                     for key, val in self._combine_args(*args, **kwargs).items()
                 }.items()
@@ -435,6 +451,7 @@ class Memoized(Generic[FuncParams, FuncReturn]):
         with self._lock:
             start = datetime.datetime.now()
 
+            # TODO: use persistent hash?
             key = (
                 self._group._._system_state(),
                 self._name,
