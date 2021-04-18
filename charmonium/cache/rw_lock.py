@@ -24,47 +24,58 @@ class Lock(Protocol):
 
 
 @runtime_checkable
-class ReadersWriterLock(Protocol):
-    """A [Readers-Writer Lock] guarantees N readers xor 1 writer.
+class RWLock(Protocol):
+    """A `Readers-Writer Lock`_ guarantees N readers xor 1 writer.
 
-    This permits read-concurrency.
+    This permits read-concurrency in the underlying resource when
+    there is no writer.
 
-    [Readers-Writer Lock]: https://en.wikipedia.org/wiki/Readers%E2%80%93writer_lock
+    .. _`Readers-Writer Lock`: https://en.wikipedia.org/wiki/Readers%E2%80%93writer_lock
 
     """
 
-    reader: Lock
-    writer: Lock
+    @property
+    def reader(self) -> Lock:
+        ...
+    @property
+    def writer(self) -> Lock:
+        ...
 
 
-class NaiveReadersWriterLock(ReadersWriterLock):
-    """ReadersWriterLock constructed from a regular Lock.
+class NaiveRWLock(RWLock):
+    """RWLock constructed from a regular Lock.
 
     A true readers-writers lock permits read concurrency (N readers
     xor 1 writer), but in some cases, that may be more maintanence
-    effort than it is worth. A `NaiveReadersWriterLock` permits 1 reader
-    xor 1 writer.
+    effort than it is worth. A `NaiveRWLock` permits 1 reader xor 1
+    writer.
 
     """
 
     def __init__(self, lock: Lock) -> None:
         super().__init__()
-        self.reader = lock
-        self.writer = lock
+        self.lock = lock
+
+    @property
+    def reader(self) -> Lock:
+        return self.lock
+
+    @property
+    def writer(self) -> Lock:
+        return self.lock
 
 
 # pyright thinks attrs has ambiguous overload
-@attr.frozen  # type: ignore
-class FastenerReadersWriterLock:
-    # pyright doesn't limit the domain of converter, hence type ignore
-    path: PathLikeFrom = attr.ib(converter=pathlike_from)  # type: ignore
+@attr.define  # type: ignore
+class FileRWLock(RWLock):
+    path: PathLikeFrom
 
     _rw_lock: fasteners.InterProcessReaderWriterLock = attr.ib(init=False)
 
-    def __attrs_post_init__(self) -> None:
-        object.__setattr__(
-            self, "_rw_lock", fasteners.InterProcessReaderWriterLock(str(self.path))
-        )
+    def __init__(self, path: PathLikeFrom) -> None:
+        """Creates a lockfile at path."""
+        self.path = pathlike_from(path)
+        self._rw_lock = fasteners.InterProcessReaderWriterLock(str(self.path))
 
     @property
     def writer(self) -> Lock:

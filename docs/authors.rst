@@ -1,13 +1,10 @@
 =======
-Credits
+Authors
 =======
 
-Development Lead
-----------------
+Maintainers
+-----------
 
-* Samuel Grayson <sam+dev@samgrayson.me>
+* `Samuel Grayson`_ <sam+dev@samgrayson.me>
 
-Contributors
-------------
-
-None yet. Why not be the first?
+.. _`Samuel Grayson`: https://samgrayson.me

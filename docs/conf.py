@@ -6,10 +6,11 @@
 
 # -- Path setup --------------------------------------------------------------
 
-# import sys
-from pathlib import Path
+import sys
+import os
+sys.path.insert(0, os.path.abspath(".."))
 
-from typing import Optional, Tuple, Dict
+from typing import Optional
 
 import charmonium.cache
 
@@ -17,11 +18,11 @@ import charmonium.cache
 # -- Project information -----------------------------------------------------
 
 project = "charmonium.cache"
-copyright = "2020, Samuel Grayson"  # pylint: disable=redefined-builtin
+copyright = "2021, Samuel Grayson"  # pylint: disable=redefined-builtin
 author = "Samuel Grayson"
 
 # The full version, including alpha/beta/rc tags
-release = getattr(charmonium.cache, "__version__", "0.0.0")
+release = getattr(charmonium.cache, "__version__")
 
 
 # -- General configuration ---------------------------------------------------
@@ -30,28 +31,18 @@ release = getattr(charmonium.cache, "__version__", "0.0.0")
 # extensions coming with Sphinx (named "sphinx.ext.*") or your custom
 # ones.
 extensions = [
-    "autoapi.extension",
-    # "sphinx.ext.autodoc",
-    # "sphinx_autodoc_annotation",
-    "sphinx.ext.viewcode",
-    "sphinx.ext.napoleon",
+    "sphinx.ext.autodoc",
+    "sphinx.ext.autosummary",
+    "sphinx_autodoc_typehints",
+    # "sphinx.ext.viewcode",
+    # "sphinx.ext.napoleon",
     "sphinx.ext.intersphinx",
-    "sphinx.ext.doctest",
-]
-
-autoapi_dirs = [Path("..") / "charmonium.cache".split(".")[0]]
-autoapi_options = [
-    "members",
-    "undoc-members",
-    "show-inheritance",
-    "show-module-summary",
-    "special-members",
-    "imported-members",
+    "sphinxcontrib.spelling",
 ]
 
 autodoc_typehints = "description"
 
-intersphinx_mapping: Dict[str, Tuple[str, Optional[str]]] = {
+intersphinx_mapping: dict[str, tuple[str, Optional[str]]] = {
     "python": ("https://docs.python.org/3", None),
 }
 
@@ -87,4 +78,11 @@ html_theme = "alabaster"
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ["_static"]
+# html_static_path = ["_static"]
+
+# autodoc_member_order = "bysource
+autodoc_default_options = {
+    "member-order": "bysource",
+    "undoc-members": True,
+    "show-inheritance": True,
+}

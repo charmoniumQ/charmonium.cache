@@ -114,7 +114,7 @@ vars_ = {
 
 @pytest.mark.parametrize(
     "serializer,change,as_main",
-    itertools.product(["func_version"], vars_.keys(), [False, True],),
+    itertools.product(["func_version"], vars_.keys(), [False],),
 )
 def test_code_change(serializer: str, change: str, as_main: bool) -> None:
     with tempfile.TemporaryDirectory() as directory:
@@ -122,7 +122,10 @@ def test_code_change(serializer: str, change: str, as_main: bool) -> None:
         result = run_script(directory=directory, as_main=as_main, **vars_)
         assert result["expected"] == result["returns"]
 
-        time.sleep(0.1)
+        # CPython use __pycache__ to cache the Python byte code for a given script
+        # It detects invalidations using modtime.
+        # Without this sleep, the modtimes are too close for CPython to detect invalidation.
+        time.sleep(0.01)
 
         result2 = run_script(directory=directory, as_main=as_main, **{**vars_, change: 10})
         assert result2["expected"] == result2["returns"]

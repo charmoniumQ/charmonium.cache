@@ -20,7 +20,7 @@ from typing import (
 
 import attr
 
-T = TypeVar("T")
+_T = TypeVar("_T")
 
 # Thanks Eric Traut
 # https://github.com/microsoft/pyright/discussions/1763#discussioncomment-617220
@@ -43,17 +43,17 @@ class Pickler(Protocol):
         ...
 
 
-# TODO: adapter for joblib?
+# TODO: adapter for joblib's Pickler?
 
 
-PathLikeSubclass = Any
+_PathLikeSubclass = Any
 @typing.runtime_checkable
 class PathLike(Protocol):
-    """Based on [pathlib.Path]
+    """Duck type of `pathlib.Path`_
 
-    [pathlib.Path]: https://docs.python.org/3/library/pathlib.html#pathlib.Path"""
+    .. _`pathlib.Path`: https://docs.python.org/3/library/pathlib.html#pathlib.Path"""
 
-    def __truediv__(self, key: str) -> PathLikeSubclass:
+    def __truediv__(self, key: str) -> _PathLikeSubclass:
         """Joins a segment onto this Path."""
 
     def read_bytes(self) -> bytes:
@@ -68,20 +68,20 @@ class PathLike(Protocol):
     def unlink(self, missing_ok: bool = ...) -> None:
         ...
 
-    def iterdir(self) -> Iterable[PathLikeSubclass]:
+    def iterdir(self) -> Iterable[_PathLikeSubclass]:
         ...
 
     def stat(self) -> os.stat_result:
         ...
 
     @property
-    def parent(self) -> PathLikeSubclass:
+    def parent(self) -> _PathLikeSubclass:
         ...
 
     def exists(self) -> bool:
         ...
 
-    def resolve(self) -> PathLikeSubclass:
+    def resolve(self) -> _PathLikeSubclass:
         ...
 
     name: str
@@ -137,6 +137,9 @@ class Constant(Generic[FuncParams, FuncReturn]):
     def __init__(self, val: FuncReturn):
         self.val = val
 
+    def __repr__(self) -> str:
+        return f"lambda *args,  **kwargs: {self.val}"
+
     def __call__(
         self, *args: FuncParams.args, **kwargs: FuncParams.kwargs
     ) -> FuncReturn:
@@ -147,23 +150,23 @@ class Sentinel:
     pass
 
 
-class Future(Generic[T]):
+class Future(Generic[_T]):
     def __init__(self, fulfill_twice: bool = False) -> None:
         self.computed = False
-        self.value: Optional[T] = None
+        self.value: Optional[_T] = None
         self.fulfill_twice = fulfill_twice
 
-    def unwrap(self) -> T:
+    def unwrap(self) -> _T:
         if not self.computed:
             raise ValueError("Future is not yet fulfilled.")
         else:
-            return cast(T, self.value)
+            return cast(_T, self.value)
 
     @property
-    def _(self) -> T:
+    def _(self) -> _T:
         return self.unwrap()
 
-    def fulfill(self, value: T) -> None:
+    def fulfill(self, value: _T) -> None:
         if self.computed and not self.fulfill_twice:
             raise ValueError("Cannot fulfill this future twice.")
         else:
@@ -171,7 +174,7 @@ class Future(Generic[T]):
             self.computed = True
 
 
-class GetAttr(Generic[T]):
+class GetAttr(Generic[_T]):
     """When you want to getattr or use a default, with static types.
 
     Example: obj_hash = GetAttr[Callable[[], int]]()(obj, "__hash__", lambda: hash(obj))()
@@ -187,9 +190,9 @@ class GetAttr(Generic[T]):
         self,
         obj: object,
         attr_name: str,
-        default: Union[T, Sentinel] = error,
+        default: Union[_T, Sentinel] = error,
         check_callable: bool = True,
-    ) -> T:
+    ) -> _T:
         if hasattr(obj, attr_name):
             attr_val = getattr(obj, attr_name)
             if check_callable and not hasattr(attr_val, "__call__"):
@@ -197,7 +200,7 @@ class GetAttr(Generic[T]):
                     f"Expected ({obj!r}).{attr_name} to be callable, but it is {type(attr_val)}."
                 )
             else:
-                return cast(T, attr_val)
+                return cast(_T, attr_val)
         elif not isinstance(default, Sentinel):
             return default
         else:

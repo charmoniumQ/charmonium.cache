@@ -1,11 +1,13 @@
 .. include:: ../README.rst
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
-   installation
-   autoapi/index
-   contributing
+   api_reference
+   cache
+   modules
+   theory
+   contributors_guide
    authors
 
 * :ref:`genindex`

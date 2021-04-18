@@ -89,6 +89,9 @@ disable=
     no-else-return,
     no-else-continue,
 
+    # `from .module import blah as blah` is needed to make pyright know that blah is exported
+    useless-import-alias,
+
     missing-docstring
 
 # Enable the message, report, category or checker with the given id(s). You can

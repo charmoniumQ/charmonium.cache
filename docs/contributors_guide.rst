@@ -1,8 +1,8 @@
 .. highlight:: shell
 
-============
-Contributing
-============
+===================
+Contributor's Guide
+===================
 
 Contributions are welcome, and they are greatly appreciated! Every little bit
 helps, and credit will always be given.
@@ -31,7 +31,9 @@ Fix Bugs and Implementing Features
 
     .. code-block:: console
 
+        $ pip install poetry
         $ git clone git@github.com:charmoniumQ/charmonium.cache.git
+		$ cd charmonium.cache
         $ git switch -c fix-${issue_number}
         $ poetry shell
         (charmonium.cache-venv) $ poetry install

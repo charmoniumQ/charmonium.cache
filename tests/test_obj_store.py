@@ -7,7 +7,7 @@ from charmonium.cache.obj_store import DirObjStore
 
 def test_obj_store() -> None:
     with tempfile.TemporaryDirectory() as path:
-        os = DirObjStore(path)  # type: ignore (pyright doesn't know attrs __init__)
+        os = DirObjStore(path=path)
 
         os[123] = b"123"
         assert os[123] == b"123"
@@ -28,4 +28,4 @@ def test_obj_store() -> None:
             os[123], "clear() does not work"
 
         with pytest.raises(ValueError):
-            os2 = DirObjStore(".")  # type: ignore (pyright doesn't know attrs __init__)
+            DirObjStore(path=".")

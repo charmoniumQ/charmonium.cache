@@ -69,9 +69,7 @@ def test_update() -> None:
     index1[(1, 2, 3)] = "hello"
     index1[(1, 3, 3)] = "hello2"
 
-    index2 = Index[int, str](
-        (IndexKeyType.MATCH, IndexKeyType.LOOKUP, IndexKeyType.MATCH,)
-    )
+    index2 = Index[int, str](index1.schema)
     index2[(1, 2, 3)] = "hello3"
     index2[(1, 4, 3)] = "hello4"
 

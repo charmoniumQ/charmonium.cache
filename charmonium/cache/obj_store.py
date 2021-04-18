@@ -6,10 +6,15 @@ from typing import Callable, Protocol
 
 import attr
 
-from .util import GetAttr, PathLike, pathlike_from
+from .util import GetAttr, PathLike, PathLikeFrom, pathlike_from
 
 
 class ObjStore(Protocol):
+    """An `object-store`_ is a persistent mapping from int to bytes.
+
+    .. _`object-store`: https://en.wikipedia.org/wiki/Object_storage
+
+    """
     def __setitem__(self, key: int, val: bytes) -> None:
         ...
 
@@ -20,6 +25,10 @@ class ObjStore(Protocol):
         ...
 
     def __contains__(self, key: int) -> bool:
+        """The implementation is often slow, so it will be called rarely."""
+        ...
+
+    def __hash__(self) -> int:
         ...
 
     def clear(self) -> None:  # pylint: disable=no-self-use
@@ -28,15 +37,29 @@ class ObjStore(Protocol):
 
 
 # pyright thinks attrs has ambiguous overload
-@attr.frozen  # type: ignore
+@attr.frozen(init=False)  # type: ignore
 class DirObjStore(ObjStore):
+    """Use a directory in the filesystem as an object-store.
 
-    path: PathLike = attr.ib(converter=pathlike_from)
-    key_bytes: int = 8
+    Each object is a file in the directory.
 
-    def __attrs_post_init__(self) -> None:
+    Note that this directory must not contain any other files.
+
+    """
+
+    path: PathLike
+    _key_bytes: int
+
+    def __init__(self, path: PathLikeFrom, key_bytes: int = 8) -> None:
+        """
+        :param path: a 'PathLike' object which will be the directory of the object store.
+        :param key_bytes: the number of bytes to use as keys
+        """
+        object.__setattr__(self, "path", pathlike_from(path))
+        object.__setattr__(self, "_key_bytes", key_bytes)
+
         if self.path.exists() and any(
-            not self._is_key(path) for path in self.path.iterdir()
+            not self._is_key(path) and not path.name.startswith(".") for path in self.path.iterdir()
         ):
             bad_paths = [path for path in self.path.iterdir() if not self._is_key(path)]
             raise ValueError(
@@ -44,11 +67,11 @@ class DirObjStore(ObjStore):
             )
 
     def _int2str(self, key: int) -> str:
-        assert key < (1 << (8 * self.key_bytes))
-        return f"{key:0{2*self.key_bytes}x}"
+        assert key < (1 << (8 * self._key_bytes))
+        return f"{key:0{2*self._key_bytes}x}"
 
     def _is_key(self, path: PathLike) -> bool:
-        return len(path.name) == 2 * self.key_bytes and all(
+        return len(path.name) == 2 * self._key_bytes and all(
             letter in "0123456789abcdef" for letter in path.name
         )
 

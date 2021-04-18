@@ -1,4 +1,3 @@
-import dis
 import inspect
 import types
 from typing import Any, Callable
@@ -13,7 +12,7 @@ def closure_vars_version(closure_vars: inspect.ClosureVars,) -> Any:
 
 def func_version(func: Callable[..., Any]) -> Any:
     return (
-        # inspect.getsource is sensitive to comments, but dis.dis is not.
-        list(dis.get_instructions(func)),
+        func.__code__.co_code,
+        func.__code__.co_consts,
         closure_vars_version(inspect.getclosurevars(func)),
     )

@@ -4,17 +4,18 @@ from pathlib import Path
 from typing import Any
 
 import fasteners
+import pytest
 
 from charmonium.cache import memoize
 # TODO: export in __init__
 from charmonium.cache.core import DEFAULT_MEMOIZED_GROUP, MemoizedGroup
 from charmonium.cache.obj_store import DirObjStore
-from charmonium.cache.readers_writer_lock import NaiveReadersWriterLock
+from charmonium.cache.rw_lock import RWLock, FileRWLock, NaiveRWLock
 
 calls: list[int] = []
 
 
-@memoize()
+@memoize(verbose=False)
 def square(x: int) -> int:
     # I don't want `calls` to be in the closure.
     globals()["calls"].append(x)
@@ -23,20 +24,20 @@ def square(x: int) -> int:
 def test_memoize() -> None:
     with tempfile.TemporaryDirectory() as path:
         DEFAULT_MEMOIZED_GROUP.fulfill(
-            MemoizedGroup(  # type: ignore (pyright doesn't know about attrs __init__)
-                obj_store=DirObjStore(path),  # type: ignore (pyright doesn't know about attrs __init__)
+            MemoizedGroup(
+                obj_store=DirObjStore(path),
             )
         )
         assert [square(2), square(3), square(2)] == [4, 9, 4]
         assert calls == [2, 3]
-        square.print_usage_report()
+        square.log_usage_report()
         str(square)
 
 calls2: list[int] = []
 
 i = 0
 # Not possible (or worthwhile) to type-hint a lambda
-@memoize(apply_obj_store=lambda *args, **kwargs: False, use_metadata_size=True)  # type: ignore
+@memoize(verbose=False, use_obj_store=False, use_metadata_size=True)  # type: ignore
 def square_impure_closure(x: int) -> int:
     # I don't want `calls` to be in the closure.
     globals()["calls2"].append(x)
@@ -46,8 +47,8 @@ def square_impure_closure(x: int) -> int:
 def test_memoize_impure_closure() -> None:
     with tempfile.TemporaryDirectory() as path:
         DEFAULT_MEMOIZED_GROUP.fulfill(
-            MemoizedGroup(  # type: ignore (pyright doesn't know about attrs __init__)
-                obj_store=DirObjStore(path),  # type: ignore (pyright doesn't know about attrs __init__)
+            MemoizedGroup(
+                obj_store=DirObjStore(path),
             )
         )
         assert square_impure_closure(2) == 4
@@ -68,25 +69,30 @@ class _LoudPickle:
 
     def loads(self, buffer: bytes) -> Any:
         self.used_loads = True
+        print("loads", pickle.loads(buffer))
         return pickle.loads(buffer)
 
 loud_pickle = _LoudPickle()
 
 
-@memoize(return_val_pickler=loud_pickle)
+@memoize(verbose=False, pickler=loud_pickle)
 def square_loud_pickle(x: int) -> int:
     return x ** 2
 
 
-def test_memoize_fine_grain_persistence() -> None:
-    with tempfile.TemporaryDirectory() as path:
+@pytest.mark.parametrize("lock_type", ["naive", "file"])
+def test_memoize_fine_grain_persistence(lock_type: str) -> None:
+    with tempfile.TemporaryDirectory() as path_:
+        path = Path(path_)
         DEFAULT_MEMOIZED_GROUP.fulfill(
-            MemoizedGroup(  # type: ignore (pyright doesn't know about attrs __init__)
-                obj_store=DirObjStore(path),  # type: ignore (pyright doesn't know about attrs __init__)
+            MemoizedGroup(
+                obj_store=DirObjStore(path),
                 fine_grain_persistence=True,
+                lock=(
+                    NaiveRWLock(fasteners.InterProcessLock(path / "lock")) if lock_type == "naive" else FileRWLock(path / "lock")
+                )
             )
         )
-        square_loud_pickle.disable_logging()
 
         loud_pickle.used_dumps = False
         square_loud_pickle(2)
@@ -110,7 +116,6 @@ def test_eviction() -> None:
                 obj_store=DirObjStore(path),  # type: ignore (pyright doesn't know about attrs __init__)
                 fine_grain_eviction=True,
                 size="500B",
-                lock=NaiveReadersWriterLock(fasteners.InterProcessLock(str(Path(path) / "lock"))),
             )
         )
         big_fn(2)
@@ -119,3 +124,15 @@ def test_eviction() -> None:
         assert not big_fn.would_hit(1000)
         assert big_fn.would_hit(2)
         assert big_fn.would_hit(3)
+
+@memoize()
+def square_loud(x: int) -> int:
+    return x**2
+
+def test_verbose(caplog) -> None:
+    square_loud(2)
+    square_loud(2)
+    assert "hit" in caplog.text
+    assert "miss" in caplog.text
+
+    square_loud.disable_logging()
