@@ -2,14 +2,17 @@ from .core import MemoizedGroup as MemoizedGroup, __version__, memoize as memoiz
 from .obj_store import DirObjStore as DirObjStore, ObjStore as ObjStore
 from .replacement_policies import ReplacementPolicy as ReplacementPolicy
 from .rw_lock import (
-    Lock as Lock,
-    RWLock as RWLock,
-    NaiveRWLock as NaiveRWLock,
     FileRWLock as FileRWLock,
+    Lock as Lock,
+    NaiveRWLock as NaiveRWLock,
+    RWLock as RWLock,
 )
-from .util import Pickler as Pickler, KeyGen as KeyGen, Future as Future, PathLike as PathLike
-
-"""See https://github.com/charmoniumQ/charmonium.cache"""
+from .util import (
+    Future as Future,
+    KeyGen as KeyGen,
+    PathLike as PathLike,
+    Pickler as Pickler,
+)
 
 __author__ = "Samuel Grayson"
 __email__ = "sam+dev@samgrayson.me"

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import pickle
 import tempfile
 from pathlib import Path
@@ -10,7 +12,7 @@ from charmonium.cache import memoize
 # TODO: export in __init__
 from charmonium.cache.core import DEFAULT_MEMOIZED_GROUP, MemoizedGroup
 from charmonium.cache.obj_store import DirObjStore
-from charmonium.cache.rw_lock import RWLock, FileRWLock, NaiveRWLock
+from charmonium.cache.rw_lock import FileRWLock, NaiveRWLock
 
 calls: list[int] = []
 
@@ -129,7 +131,7 @@ def test_eviction() -> None:
 def square_loud(x: int) -> int:
     return x**2
 
-def test_verbose(caplog) -> None:
+def test_verbose(caplog: pytest.Caplog) -> None:
     square_loud(2)
     square_loud(2)
     assert "hit" in caplog.text

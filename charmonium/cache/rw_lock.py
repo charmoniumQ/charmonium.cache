@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+from pathlib import Path
 from types import TracebackType
-from typing import Optional, Protocol, runtime_checkable
+from typing import Optional, Protocol, cast, runtime_checkable
 
 import attr
 import fasteners
@@ -74,8 +75,9 @@ class FileRWLock(RWLock):
 
     def __init__(self, path: PathLikeFrom) -> None:
         """Creates a lockfile at path."""
+        super().__init__()
         self.path = pathlike_from(path)
-        self._rw_lock = fasteners.InterProcessReaderWriterLock(str(self.path))
+        self._rw_lock = fasteners.InterProcessReaderWriterLock(cast(Path, self.path))
 
     @property
     def writer(self) -> Lock:

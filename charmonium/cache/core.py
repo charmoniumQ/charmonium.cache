@@ -2,35 +2,37 @@ from __future__ import annotations
 
 import atexit
 import datetime
+import importlib
 # import functools
 # import heapq
 import itertools
-import importlib
 import logging
 import pickle
 import sys
 import threading
 import warnings
-from typing import Any, Callable, Final, Generic, Iterator, Mapping, Union, cast, Optional
+from typing import (
+    Any,
+    Callable,
+    Final,
+    Generic,
+    Iterator,
+    Mapping,
+    Optional,
+    Union,
+    cast,
+)
 
 import attr
 import bitmath
 
 from .func_version import func_version
-from .persistent_hash import persistent_hash
 from .index import Index, IndexKeyType
 from .obj_store import DirObjStore, ObjStore
-from .replacement_policies import Entry, ReplacementPolicy, REPLACEMENT_POLICIES
-from .rw_lock import RWLock, FileRWLock, Lock
-from .util import (
-    Constant,
-    FuncParams,
-    FuncReturn,
-    Future,
-    GetAttr,
-    KeyGen,
-    Pickler,
-)
+from .persistent_hash import persistent_hash
+from .replacement_policies import REPLACEMENT_POLICIES, Entry, ReplacementPolicy
+from .rw_lock import FileRWLock, Lock, RWLock
+from .util import Constant, FuncParams, FuncReturn, Future, GetAttr, KeyGen, Pickler
 
 # import cloudpickle
 
@@ -85,6 +87,7 @@ class MemoizedGroup:
 
     def __init__(
             self,
+            *,
             obj_store: Optional[ObjStore] = None,
             replacement_policy: Union[str, ReplacementPolicy] = "dummy",
             size: Union[int, str, bitmath.Bitmath] = bitmath.MiB(1),

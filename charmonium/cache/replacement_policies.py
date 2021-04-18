@@ -1,8 +1,9 @@
-import bitmath
+import abc
 import datetime
 from typing import Any
 
 import attr
+import bitmath
 
 
 # pyright thinks attrs has ambiguous overload
@@ -18,10 +19,13 @@ class Entry:
 
 
 class ReplacementPolicy:
+    @abc.abstractmethod
     def add(self, key: Any, entry: Entry) -> None:
         ...
+    @abc.abstractmethod
     def access(self, key: Any, entry: Entry) -> None:
         ...
+    @abc.abstractmethod
     def evict(self) -> tuple[Any, Entry]:
         ...
 
@@ -38,9 +42,9 @@ class Dummy(ReplacementPolicy):
         self._data: list[tuple[Any, Entry]] = []
     def add(self, key: Any, entry: Entry) -> None:
         self._data.append((key, entry))
-    def access(self, key: Any, entry: Entry) -> None:
+    def access(self, key: Any, entry: Entry) -> None: # pylint: disable=no-self-use,unused-argument
         pass
-    def evict(self) -> tuple[Any, Entry]:
+    def evict(self) -> tuple[Any, Entry]: # pylint: disable=unused-argument
         return self._data.pop(-1)
 
 REPLACEMENT_POLICIES = dict[str, type[ReplacementPolicy]](

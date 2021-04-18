@@ -1,5 +1,7 @@
 from typing import Any
+
 from charmonium.cache.persistent_hash import persistent_hash
+
 
 class Baz:
     def __persistent_hash__(self) -> Any:

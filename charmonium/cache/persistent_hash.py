@@ -1,8 +1,8 @@
 import functools
-import struct
 import operator
-from typing import Any, cast, Iterable, Callable
+import struct
 import zlib
+from typing import Any, Callable, Iterable, cast
 
 from .util import GetAttr
 
@@ -30,5 +30,3 @@ def persistent_hash(obj: Any) -> int:
             for attr_name in dir(obj)
             if not attr_name.startswith('__') and not callable(getattr(obj, attr_name))
         })
-
-                

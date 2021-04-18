@@ -55,6 +55,7 @@ class DirObjStore(ObjStore):
         :param path: a 'PathLike' object which will be the directory of the object store.
         :param key_bytes: the number of bytes to use as keys
         """
+        super().__init__()
         object.__setattr__(self, "path", pathlike_from(path))
         object.__setattr__(self, "_key_bytes", key_bytes)
 

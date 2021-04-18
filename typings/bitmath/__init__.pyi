@@ -50,4 +50,3 @@ class Byte(Bitmath):
 
 def parse_string(s: str) -> Bitmath:
     ...
-
