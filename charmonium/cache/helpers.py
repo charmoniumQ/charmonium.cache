@@ -1,23 +1,34 @@
+from __future__ import annotations
 import datetime
-
-import attr
-
-from .util import PathLikeFrom, pathlike_from
-
+from typing import Callable, Any, Union
+from pathlib import Path
+import os
 
 class FileContents:
-    path: PathLike
+    """Use FileContents instead of filenames to make your func pure.
 
-    def __init__(self, path: PathLikeFrom) -> None:
-        self.path = pathlike_from(path)
+    FileContents is `os.PathLike`_, so you can `open(FileContents("file"))`. You won't even know its not a string :)
+
+    .. _`os.PathLike`: https://docs.python.org/3/library/os.html#os.PathLike
+
+    """
+
+    path: os.PathLike[str]
+
+    def __init__(self, path: Union[str, os.PathLike[str]]) -> None:
+        self.path = Path(path) if isinstance(path, str) else path
+
+    def __fspath__(self) -> Union[bytes, str]:
+        return self.path.__fspath__()
 
     def __cache_key__(self) -> str:
         """Returns the path."""
         return str(self.path)
 
-    def __cache_val__(self) -> bytes:
+    def __cache_ver__(self) -> bytes:
         """Returns the contents of the file."""
-        return self.path.read_bytes()
+        with open(self.__fspath__(), "rb") as file:
+            return file.read()
 
 class TTLInterval:
     """TTLInterval(td)() returns a value that changes once every td.
@@ -52,6 +63,6 @@ class TTLInterval:
     def __init__(self, interval: datetime.timedelta) -> None:
         self.interval = interval
 
-    def __call__(self) -> datetime.datetime:
+    def __call__(self, func: Callable[..., Any]) -> int:
         delta = datetime.datetime.now() - datetime.datetime.fromtimestamp(0)
         return delta // self.interval

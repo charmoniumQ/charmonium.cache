@@ -29,7 +29,7 @@ import bitmath
 from .func_version import func_version
 from .index import Index, IndexKeyType
 from .obj_store import DirObjStore, ObjStore
-from .persistent_hash import persistent_hash
+from .persistent_hash import persistent_hash, hashable
 from .replacement_policies import REPLACEMENT_POLICIES, Entry, ReplacementPolicy
 from .rw_lock import FileRWLock, Lock, RWLock
 from .util import (
@@ -187,7 +187,6 @@ class MemoizedGroup:
             if entry.obj_store:
                 del self._obj_store[entry.value]
             total_size -= entry.data_size
-            print("Evicting %s, %s" % (key[3][0], key[3][1]))
             del self._index[key]
 
 
@@ -207,10 +206,18 @@ class Memoized(Generic[FuncParams, FuncReturn]):
 
     _use_obj_store: bool
 
+    _use_metadata_size: bool
+
+    _use_hash: bool
+
     # TODO: make this accept default_group_verbose = Sentinel()
     _verbose: bool
 
     _pickler: Optional[Pickler]
+
+    _extra_func_state: Callable[[Callable[FuncParams, FuncReturn]], Any]
+    _extra_args2key: Callable[FuncParams, Any]
+    _extra_args2ver: Callable[FuncParams, Any]
 
     _lock: Lock
 
@@ -221,14 +228,6 @@ class Memoized(Generic[FuncParams, FuncReturn]):
     time_cost: datetime.timedelta
     time_saved: datetime.timedelta
 
-    _use_metadata_size: bool
-
-    _extra_func_state: Callable[[Callable[FuncParams, FuncReturn]], Any] = cast(
-        "Callable[[Callable[FuncParams, FuncReturn]], Any]", Constant(None)
-    )
-    _extra_args2key: Callable[FuncParams, Any] = Constant(None)
-    _extra_args2ver: Callable[FuncParams, Any] = Constant(None)
-
     def __init__(
             self,
             func: Callable[FuncParams, FuncReturn],
@@ -237,6 +236,7 @@ class Memoized(Generic[FuncParams, FuncReturn]):
             name: Optional[str] = None,
             use_obj_store: bool = True,
             use_metadata_size: bool = False,
+            use_hash: bool = True,
             verbose: bool = True,
             pickler: Union[Pickler, str, None] = None,
             extra_func_state: Callable[[Callable[FuncParams, FuncReturn]], Any] = Constant(None), # type: ignore
@@ -246,6 +246,7 @@ class Memoized(Generic[FuncParams, FuncReturn]):
         """
 
         :param use_metadata_size: whether to include the size of the metadata in the size threshold calculation for eviction.
+        :param use_hash: whether to use a hash of the arguments or the actual arguments. A hash will be faster and smaller, but the actual values are more useful for debugging.
 
         """
 
@@ -254,6 +255,7 @@ class Memoized(Generic[FuncParams, FuncReturn]):
         self._group = group
         self._use_obj_store = use_obj_store
         self._use_metadata_size = use_metadata_size
+        self._use_hash = use_hash
         self._verbose = verbose
         self._pickler = PICKLERS[pickler]() if isinstance(pickler, str) else pickler
         self._lock = threading.RLock()
@@ -325,10 +327,8 @@ class Memoized(Generic[FuncParams, FuncReturn]):
 
         """
         return (
-            persistent_hash(func_version(self._func)),
-            GetAttr[str]()(
-                self.pickler, "__name__", "", check_callable=False
-            ),
+            hashable(func_version(self._func)),
+            hashable(self.pickler),
             # Group is a "friend class", so pylint disable
             self._group._._obj_store,  # pylint: disable=protected-access
             GetAttr[Callable[[], Any]]()(self._func, "__version__", lambda: None)(),
@@ -390,8 +390,8 @@ class Memoized(Generic[FuncParams, FuncReturn]):
         return (
             frozenset(
                 {
-                    type(key): GetAttr[Callable[[Any], Any]]()(
-                        val, "__cache_ver__", Constant(None)
+                    key: GetAttr[Callable[[Any], Any]]()(
+                        type(val), "__cache_ver__", Constant(None)
                     )(val)
                     for key, val in self._combine_args(*args, **kwargs).items()
                 }.items()
@@ -451,14 +451,7 @@ class Memoized(Generic[FuncParams, FuncReturn]):
         with self._lock:
             start = datetime.datetime.now()
 
-            # TODO: use persistent hash?
-            key = (
-                self._group._._system_state(),
-                self._name,
-                self._func_state(),
-                self._args2key(*args, **kwargs),
-                self._args2ver(*args, **kwargs),
-            )
+            key = self.key(*args, **kwargs)
 
             if self._group._._fine_grain_persistence:
                 self._group._._index_read()
@@ -507,19 +500,28 @@ class Memoized(Generic[FuncParams, FuncReturn]):
 
             return value
 
-    def would_hit(self, *args: FuncParams.args, **kwargs: FuncParams.kwargs) -> bool:
-        key = (
+    def _hash(self, obj: Any) -> Any:
+        if self._use_hash:
+            return persistent_hash(obj)
+        else:
+            return obj
+
+    def key(self, *args: FuncParams.args, **kwargs: FuncParams.kwargs) -> tuple[Any, Any, Any, Any, Any]:
+        # Note that the system state and name or so small already, it isn't worth hashing them.
+        # They are also used by other Memoized functions in the same MemoizedGroup.
+        # We will only hash the potentially large key items that are used exclusively by this Memoized function.
+        return (
             # Group is a friend class, hence type ignore
             self._group._._system_state(),  # pylint: disable=protected-access
             self._name,
-            self._func_state(),
-            self._args2key(*args, **kwargs),
-            self._args2ver(*args, **kwargs),
+            self._hash(self._func_state()),
+            self._hash(self._args2key(*args, **kwargs)),
+            self._hash(self._args2ver(*args, **kwargs)),
         )
 
+    def would_hit(self, *args: FuncParams.args, **kwargs: FuncParams.kwargs) -> bool:
         if self._group._._fine_grain_persistence:  # pylint: disable=protected-access
             self._group._._index_read() # pylint: disable=protected-access
 
-        print(key)
-
+        key = self.key(*args, **kwargs)
         return key in self._group._._index # pylint: disable=protected-access

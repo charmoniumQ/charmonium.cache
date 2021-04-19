@@ -1,6 +1,7 @@
 import inspect
 import types
 from typing import Any, Callable
+import zlib
 
 
 def closure_vars_version(closure_vars: inspect.ClosureVars,) -> Any:
@@ -21,7 +22,7 @@ def func_version(func: Callable[..., Any]) -> Any:
 
     """
     return (
-        func.__code__.co_code,
+        zlib.crc32(func.__code__.co_code),
         func.__code__.co_consts,
         closure_vars_version(inspect.getclosurevars(func)),
     )

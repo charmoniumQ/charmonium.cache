@@ -19,6 +19,7 @@ from .util import (
     PathLike as PathLike,
     Pickler as Pickler,
 )
+from .persistent_hash import persistent_hash
 
 __author__ = "Samuel Grayson"
 __email__ = "sam+dev@samgrayson.me"

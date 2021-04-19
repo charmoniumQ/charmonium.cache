@@ -65,17 +65,17 @@ def test_memoize_impure_closure() -> None:
         assert square_impure_closure(2) == 5
         assert calls2 == [2, 2]
 
+used_dumps: bool = False
+used_loads: bool = False
+
 class _LoudPickle:
-    used_dumps: bool = False
-    used_loads: bool = False
 
     def dumps(self, obj: Any) -> bytes:
-        self.used_dumps = True
+        globals()["used_dumps"] = True
         return pickle.dumps(obj)
 
     def loads(self, buffer: bytes) -> Any:
-        self.used_loads = True
-        print("loads", pickle.loads(buffer))
+        globals()["used_loads"] = True
         return pickle.loads(buffer)
 
 loud_pickle = _LoudPickle()
@@ -100,13 +100,14 @@ def test_memoize_fine_grain_persistence(lock_type: str) -> None:
             )
         )
 
-        loud_pickle.used_dumps = False
+        global used_dumps, used_loads
+        used_dumps = False
         square_loud_pickle(2)
-        assert loud_pickle.used_dumps
+        assert used_dumps
 
-        loud_pickle.used_loads = False
+        used_loads = False
         square_loud_pickle(2)
-        assert loud_pickle.used_loads
+        assert used_loads
 
         assert square_loud_pickle.would_hit(2)
 
@@ -131,7 +132,7 @@ def test_eviction() -> None:
         assert big_fn.would_hit(2)
         assert big_fn.would_hit(3)
 
-@memoize()
+@memoize(use_hash=False)
 def square_loud(x: int) -> int:
     return x**2
 

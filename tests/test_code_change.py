@@ -47,7 +47,7 @@ def closure_func():
 
 closure_var = {closure_var}
 
-@memoize()
+@memoize(use_hash=False)
 def func(input):
     return (input**{source_var} + closure_func()) * closure_var
 
