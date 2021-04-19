@@ -1,10 +1,19 @@
 import datetime
 import tempfile
-from pathlib import Path
 import time
-from charmonium.cache import memoize, DEFAULT_MEMOIZED_GROUP, MemoizedGroup, FileContents, TTLInterval, DirObjStore
+from pathlib import Path
 
-@memoize(use_hash=True)
+from charmonium.cache import (
+    DEFAULT_MEMOIZED_GROUP,
+    DirObjStore,
+    FileContents,
+    MemoizedGroup,
+    TTLInterval,
+    memoize,
+)
+
+
+@memoize()
 def square_file(filename: str) -> int:
     with open(filename) as file:
         return int(file.read().strip())**2
@@ -20,6 +29,9 @@ def test_filecontents() -> None:
 
         file1 = path / "file1"
         file2 = path / "file2"
+
+        # test __cache_key__ of non-existent file contents
+        FileContents(file1).__cache_key__()
 
         file1.write_text("3")
         # FileContents is masquerading as a str

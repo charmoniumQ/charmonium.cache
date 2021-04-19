@@ -6,6 +6,7 @@ from .memoize import (
     memoize as memoize,
 )
 from .obj_store import DirObjStore as DirObjStore, ObjStore as ObjStore
+from .persistent_hash import hashable as hashable, persistent_hash as persistent_hash
 from .replacement_policies import ReplacementPolicy as ReplacementPolicy
 from .rw_lock import (
     FileRWLock as FileRWLock,
@@ -19,7 +20,6 @@ from .util import (
     PathLike as PathLike,
     Pickler as Pickler,
 )
-from .persistent_hash import persistent_hash
 
 __author__ = "Samuel Grayson"
 __email__ = "sam+dev@samgrayson.me"

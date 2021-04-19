@@ -128,7 +128,7 @@ Code quality
   and required for merging with the ``main`` branch; This way they won't be
   easily forgotten.
 
-- I've implemented the complete feature-set in only 700 LoC. LoC count is an
+- I've implemented the complete feature-set in only 900 LoC. LoC count is an
   imperfect but reasonable metric of how hard something is to maintain and how
   likely it is to contain bugs according to [Zhang]_.
 

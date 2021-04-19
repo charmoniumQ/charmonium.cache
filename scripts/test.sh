@@ -113,3 +113,8 @@ poetry run \
 [[ -z "${htmlcov}" ]] || \
 	xdg-open htmlcov/index.html
 
+
+if which scc; then
+   scc --by-file "${package_path}"
+   scc --by-file "tests"
+fi

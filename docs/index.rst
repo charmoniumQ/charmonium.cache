@@ -3,10 +3,9 @@
 .. toctree::
    :maxdepth: 1
 
-   api_reference
-   cache
-   modules
+   tutorial
    theory
+   api_reference
    contributors_guide
    authors
 

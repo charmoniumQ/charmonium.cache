@@ -1,35 +1,57 @@
-from pathlib import Path
 import pickle
+from pathlib import Path
 from typing import Any
 
-from charmonium.cache.persistent_hash import persistent_hash, hashable
+import pytest
 
+from charmonium.cache.persistent_hash import hashable, persistent_hash
 
-a = [1]
-a.append(a)
+recursive_list: list[Any] = [1]
+recursive_list.append(recursive_list)
 
 class Baz:
     def __persistent_hash__(self) -> Any:
         return 3.1
 
-foo = dict(
-    a=a,
-    b=Baz(),
-    c=3+1j,
-    d=2.0,
-    e="hello world",
-    f=pickle,
-    g=None,
-    h=frozenset({3, 4, 5}),
-    i=[1, 2, 3],
-    j={1, 6, 7},
-    k=Path(),
-)
-expected = 1055205790
+class Bar:
+    pass
 
-def test_persistent_hash() -> None:
-    if persistent_hash(foo) != expected:
-        print("If you changed how persistent hash works, just copy the next line into `expected`:")
-        print(persistent_hash(foo))
-    assert persistent_hash(foo) == expected
-    hash(hashable(foo))
+foo: list[Any] = [
+    recursive_list,
+    Baz(),
+    3+1j,
+    2.0,
+    "hello world",
+    pickle,
+    None,
+    frozenset({3, 4, 5}),
+    dict(a=1, b=2, c=dict(a=3)),
+    {1, 6, 7},
+    Path(),
+    -1,
+    Bar(),
+]
+expected = 943999726
+
+def test_persistence() -> None:
+    p = persistent_hash(hashable(foo))
+    assert p == expected, f"If you changed how persistent hash works, just change the `expected` to {p}."
+    persistent_hash(Baz())
+
+
+def test_lambda_consts() -> None:
+    assert hashable(lambda: 1) == hashable(lambda: 1), "Same function should have the same hash"
+    assert hashable(lambda: 1) != hashable(lambda: 2), "Function with different constants should have different hash"
+
+def test_closure() -> None:
+    i = 0
+    def func():
+        return i
+    func1 = hashable(func)
+    i = 1
+    func2 = hashable(func)
+    assert func1 != func2, "Changing in closure should change hash"
+
+def test_nonhashable() -> None:
+    with pytest.raises(TypeError):
+        persistent_hash({})

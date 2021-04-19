@@ -84,6 +84,9 @@ class PathLike(Protocol):
     def resolve(self) -> _PathLikeSubclass:
         ...
 
+    def __fspath__(self) -> str:
+        ...
+
     name: str
 
 

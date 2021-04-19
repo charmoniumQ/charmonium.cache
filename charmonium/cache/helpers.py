@@ -1,8 +1,10 @@
 from __future__ import annotations
+
 import datetime
-from typing import Callable, Any, Union
-from pathlib import Path
-import os
+from typing import Any, Union
+
+from .util import PathLike, PathLikeFrom, pathlike_from
+
 
 class FileContents:
     """Use FileContents instead of filenames to make your func pure.
@@ -13,10 +15,10 @@ class FileContents:
 
     """
 
-    path: os.PathLike[str]
+    path: PathLike
 
-    def __init__(self, path: Union[str, os.PathLike[str]]) -> None:
-        self.path = Path(path) if isinstance(path, str) else path
+    def __init__(self, path: PathLikeFrom) -> None:
+        self.path = pathlike_from(path)
 
     def __fspath__(self) -> Union[bytes, str]:
         return self.path.__fspath__()
@@ -27,42 +29,47 @@ class FileContents:
 
     def __cache_ver__(self) -> bytes:
         """Returns the contents of the file."""
-        with open(self.__fspath__(), "rb") as file:
-            return file.read()
+        if self.path.exists():
+            return self.path.read_bytes()
+        else:
+            return b""
 
 class TTLInterval:
     """TTLInterval(td)() returns a value that changes once every td.
 
-    Usage:
+    MemoizedGroup usage:
 
-        >>> from charmonium.cache import *
-        >>> @memoized(group=Future(group))
+        >>> from charmonium.cache import memoize, Future, DEFAULT_MEMOIZED_GROUP, MemoizedGroup
+        >>> # applies a 5-minute TTL to the whole memoized group
+        >>> @memoize()
         ... def func():
         ...     pass
-        >>> interval = TTLInterval(datetime.timedelta(seconds=5))
-        >>> DEFAULT_MEMOIZED_GROUP.fulfill(MemoizedGroup(extra_system_state=interval))  # applies a 5-minute TTL to the whole memoized group
+        >>> interval = TTLInterval(datetime.timedelta(seconds=0.1))
+        >>> DEFAULT_MEMOIZED_GROUP.fulfill(MemoizedGroup(extra_system_state=interval))
 
-    Or:
+    Memoized usage:
 
-        >>> from charmonium.cache import *
-        >>> interval = TTLInterval(datetime.timedelta(seconds=5))
-        >>> @memoized(extra_func_state=interval) # applies a 5-minute TTL to justthis function
+        >>> interval = TTLInterval(datetime.timedelta(seconds=0.1))
+        >>> # applies a 5-minute TTL to justthis function
+        >>> @memoize(extra_func_state=interval)
         ... def func():
         ...     pass
 
     Underlying usage:
 
         >>> import datetime, time
-        >>> interval = TTLInterval(datetime.timedelta(seconds=5))
+        >>> interval = TTLInterval(datetime.timedelta(seconds=0.1))
         >>> start = interval()
-        >>> assert start == interval()
-        >>> time.sleep(5)
-        >>> assert start != interval()
+        >>> start == interval()
+        True
+        >>> time.sleep(0.1)
+        >>> start == interval()
+        False
 
     """
     def __init__(self, interval: datetime.timedelta) -> None:
         self.interval = interval
 
-    def __call__(self, func: Callable[..., Any]) -> int:
+    def __call__(self, func: Any=None) -> int:
         delta = datetime.datetime.now() - datetime.datetime.fromtimestamp(0)
         return delta // self.interval

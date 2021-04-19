@@ -132,7 +132,7 @@ def test_eviction() -> None:
         assert big_fn.would_hit(2)
         assert big_fn.would_hit(3)
 
-@memoize(use_hash=False)
+@memoize(lossy_compression=False)
 def square_loud(x: int) -> int:
     return x**2
 

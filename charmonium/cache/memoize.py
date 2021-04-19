@@ -26,10 +26,9 @@ from typing import (
 import attr
 import bitmath
 
-from .func_version import func_version
 from .index import Index, IndexKeyType
 from .obj_store import DirObjStore, ObjStore
-from .persistent_hash import persistent_hash, hashable
+from .persistent_hash import hashable, persistent_hash
 from .replacement_policies import REPLACEMENT_POLICIES, Entry, ReplacementPolicy
 from .rw_lock import FileRWLock, Lock, RWLock
 from .util import (
@@ -208,7 +207,7 @@ class Memoized(Generic[FuncParams, FuncReturn]):
 
     _use_metadata_size: bool
 
-    _use_hash: bool
+    _lossy_compression: bool
 
     # TODO: make this accept default_group_verbose = Sentinel()
     _verbose: bool
@@ -236,7 +235,7 @@ class Memoized(Generic[FuncParams, FuncReturn]):
             name: Optional[str] = None,
             use_obj_store: bool = True,
             use_metadata_size: bool = False,
-            use_hash: bool = True,
+            lossy_compression: bool = True,
             verbose: bool = True,
             pickler: Union[Pickler, str, None] = None,
             extra_func_state: Callable[[Callable[FuncParams, FuncReturn]], Any] = Constant(None), # type: ignore
@@ -246,7 +245,7 @@ class Memoized(Generic[FuncParams, FuncReturn]):
         """
 
         :param use_metadata_size: whether to include the size of the metadata in the size threshold calculation for eviction.
-        :param use_hash: whether to use a hash of the arguments or the actual arguments. A hash will be faster and smaller, but the actual values are more useful for debugging.
+        :param lossy_compression: whether to use a hash of the arguments or the actual arguments. A hash will be faster and smaller, but the actual values are more useful for debugging.
 
         """
 
@@ -255,7 +254,7 @@ class Memoized(Generic[FuncParams, FuncReturn]):
         self._group = group
         self._use_obj_store = use_obj_store
         self._use_metadata_size = use_metadata_size
-        self._use_hash = use_hash
+        self._lossy_compression = lossy_compression
         self._verbose = verbose
         self._pickler = PICKLERS[pickler]() if isinstance(pickler, str) else pickler
         self._lock = threading.RLock()
@@ -327,8 +326,8 @@ class Memoized(Generic[FuncParams, FuncReturn]):
 
         """
         return (
-            hashable(func_version(self._func)),
-            hashable(self.pickler),
+            self._func,
+            self.pickler,
             # Group is a "friend class", so pylint disable
             self._group._._obj_store,  # pylint: disable=protected-access
             GetAttr[Callable[[], Any]]()(self._func, "__version__", lambda: None)(),
@@ -500,8 +499,8 @@ class Memoized(Generic[FuncParams, FuncReturn]):
 
             return value
 
-    def _hash(self, obj: Any) -> Any:
-        if self._use_hash:
+    def _compress(self, obj: Any) -> Any:
+        if self._lossy_compression:
             return persistent_hash(obj)
         else:
             return obj
@@ -512,11 +511,11 @@ class Memoized(Generic[FuncParams, FuncReturn]):
         # We will only hash the potentially large key items that are used exclusively by this Memoized function.
         return (
             # Group is a friend class, hence type ignore
-            self._group._._system_state(),  # pylint: disable=protected-access
-            self._name,
-            self._hash(self._func_state()),
-            self._hash(self._args2key(*args, **kwargs)),
-            self._hash(self._args2ver(*args, **kwargs)),
+            hashable(self._group._._system_state()),  # pylint: disable=protected-access
+            hashable(self._name),
+            self._compress(hashable(self._func_state())),
+            self._compress(hashable(self._args2key(*args, **kwargs))),
+            self._compress(hashable(self._args2ver(*args, **kwargs))),
         )
 
     def would_hit(self, *args: FuncParams.args, **kwargs: FuncParams.kwargs) -> bool:

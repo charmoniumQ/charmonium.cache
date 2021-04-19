@@ -5,18 +5,6 @@ Design decisions:
 
 - Use directory trees for fast dropping? No, not all FS support efficiently; Probably faster on avg to use an index file.
 
-Usage examples:
-
-- advice on making functions pure
-- Lossy checksum for cache_key
-- FileContents
-- TTL
-- LRU, LUV, fn+TTL
-- Two-level store
-- Lossy (checksum) hash
-- Fasteners ReadersWriterLock
-- AWS/Google-cloud storage
-
 TODO:
 
 - Use index versions to elide load
