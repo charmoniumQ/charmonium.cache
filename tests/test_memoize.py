@@ -5,9 +5,9 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
-import fasteners
 import pytest
 
+import fasteners
 # import from __init__ because this is an integration test.
 from charmonium.cache import (
     DEFAULT_MEMOIZED_GROUP,
@@ -28,6 +28,7 @@ def square(x: int) -> int:
     return x ** 2
 
 def test_memoize() -> None:
+    # TODO: make this easier
     with tempfile.TemporaryDirectory() as path:
         DEFAULT_MEMOIZED_GROUP.fulfill(
             MemoizedGroup(

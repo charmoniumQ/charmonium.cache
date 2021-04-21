@@ -14,25 +14,27 @@ Val = TypeVar("Val")
 
 
 class Index(Generic[Key, Val]):
-    def __init__(self, schema: tuple[IndexKeyType, ...]) -> None:
+    def __init__(self, schema: tuple[IndexKeyType, ...], _deleter: Optional[Callable[[tuple[tuple[Key, ...], Val]], None]] = None) -> None:
         self.schema = schema
         self._data = dict[Key, Any]()
+        self._deleter = _deleter
+
+    @staticmethod
+    def _items(data: dict[Key, Any], keys: tuple[Key, ...], max_depth: int) -> Iterable[tuple[tuple[Key, ...], Val]]:
+        if len(keys) == max_depth:
+            yield (keys, cast(Val, data))
+        else:
+            for key, subdict in data.items():
+                yield from Index._items(cast(dict[Key, Any], subdict), keys + (key,), max_depth)
 
     def items(self) -> Iterable[tuple[tuple[Key, ...], Val]]:
-        def helper(
-            data: dict[Key, Any], depth: int
-        ) -> Iterable[tuple[tuple[Key, ...], Val]]:
-            if depth == 1:
-                # depth = 0 would be the actual values
-                # data.items() wouldn't work.
-                for key, val in data.items():
-                    yield ((key,), val)
-            else:
-                for key, subdict in data.items():
-                    for subkey, val in helper(cast(dict[Key, Any], subdict), depth - 1):
-                        yield ((key,) + subkey, val)
+        yield from self._items(self._data, (), len(self.schema))
 
-        yield from helper(self._data, len(self.schema))
+    def _delete(self, data: dict[Key, Any], keys: tuple[Key, ...]) -> None:
+        if self._deleter:
+            for item in self._items(data, keys, len(self.schema)):
+                self._deleter(item)
+        data.clear()
 
     def _get_last_level(
         self, keys: tuple[Key, ...]
@@ -47,31 +49,33 @@ class Index(Generic[Key, Val]):
         return cast(dict[Key, Val], obj), keys[-1], self.schema[-1]
 
     def _get_or_create_last_level(
-        self, keys: tuple[Key, ...]
+            self, keys: tuple[Key, ...],
     ) -> tuple[dict[Key, Val], Key, IndexKeyType]:
         if len(keys) != len(self.schema):
             raise ValueError(f"{keys=} should be the same len as {self.schema=}")
         obj = self._data
+        completed_keys: tuple[Key, ...] = ()
         for key_type, key in zip(self.schema[:-1], keys[:-1]):
             if key not in obj:
                 if key_type == IndexKeyType.MATCH:
-                    obj.clear()
+                    self._delete(obj, completed_keys)
                 obj[key] = dict[Key, Any]()
             obj = cast(dict[Key, Any], obj[key])
+            completed_keys += (key,)
         return cast(dict[Key, Val], obj), keys[-1], self.schema[-1]
 
     def get_or(self, keys: tuple[Key, ...], thunk: Callable[[], Val]) -> Val:
         last_level, last_key, last_key_type = self._get_or_create_last_level(keys)
         if last_key not in last_level:
             if last_key_type == IndexKeyType.MATCH:
-                last_level.clear()
+                self._delete(last_level, keys[:-1])
             last_level[last_key] = thunk()
         return last_level[last_key]
 
     def __setitem__(self, keys: tuple[Key, ...], val: Val) -> None:
         last_level, last_key, last_key_type = self._get_or_create_last_level(keys)
         if last_key_type == IndexKeyType.MATCH:
-            last_level.clear()
+            self._delete(last_level, keys[:-1])
         last_level[last_key] = val
 
     def __delitem__(self, keys: tuple[Key, ...]) -> None:
