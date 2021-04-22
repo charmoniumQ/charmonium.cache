@@ -62,9 +62,8 @@ class DirObjStore(ObjStore):
         if self.path.exists() and any(
             not self._is_key(path) and not path.name.startswith(".") for path in self.path.iterdir()
         ):
-            bad_paths = [path for path in self.path.iterdir() if not self._is_key(path)]
             raise ValueError(
-                f"{self.path.resolve()=} contains junk I didn't make: {bad_paths}"
+                f"{self.path.resolve()=} contains junk I didn't make."
             )
 
     def _int2str(self, key: int) -> str:

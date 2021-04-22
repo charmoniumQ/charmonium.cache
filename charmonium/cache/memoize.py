@@ -24,6 +24,7 @@ from typing import (
 )
 
 import attr
+
 import bitmath
 
 from .index import Index, IndexKeyType

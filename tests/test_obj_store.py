@@ -28,5 +28,6 @@ def test_obj_store() -> None:
         with pytest.raises(KeyError):
             os[123]
 
+def test_init() -> None:
         with pytest.raises(ValueError):
             DirObjStore(path=".")
