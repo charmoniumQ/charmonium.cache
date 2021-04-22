@@ -27,9 +27,22 @@ def test_index() -> None:
         ((0, 3, 4), "hello4")
     }, "A different match var should invalidate children"
 
-    del index[(0, 3, 4)]
-    assert set(index.items()) == set(), "__delitem__ works"
 
+def test_index_del() -> None:
+    index = Index[int, str](
+        (IndexKeyType.MATCH, IndexKeyType.LOOKUP, IndexKeyType.MATCH,)
+    )
+    index[(0, 2, 4)] = "hello1"
+    index[(0, 3, 4)] = "hello2"
+    del index[(0, 3, 4)]
+    del index[(1, 2, 5)] # delete non-existent item
+    del index[(0, 2, 5)] # delete non-existent item
+    assert set(index.items()) == {((0, 2, 4), "hello1")}, "__delitem__ works"
+
+def test_thunk() -> None:
+    index = Index[int, str](
+        (IndexKeyType.MATCH, IndexKeyType.LOOKUP, IndexKeyType.MATCH,)
+    )
     assert (
         index.get_or((0, 3, 4), Constant("hello3")) == "hello3"
     ), "Key not found; call the thunk"
@@ -38,26 +51,24 @@ def test_index() -> None:
     ), "Key found; don't call the thunk"
     assert set(index.items()) == {((0, 3, 4), "hello3")}
 
+def test_contains() -> None:
+    index = Index[int, str](
+        (IndexKeyType.MATCH, IndexKeyType.LOOKUP, IndexKeyType.MATCH,)
+    )
+    index[(0, 3, 4)] = "hello2"
+    assert (0, 3, 4) in index
+    assert (0, 3, 5) not in index
+
+def test_raises_wrong_schema() -> None:
+    index = Index[int, str](
+        (IndexKeyType.MATCH, IndexKeyType.LOOKUP, IndexKeyType.MATCH,)
+    )
     with pytest.raises(ValueError):
         index[(1, 2)] = "hello5"
 
     index2 = Index[int, str](
-        (IndexKeyType.LOOKUP, IndexKeyType.MATCH, IndexKeyType.LOOKUP,)
+        (IndexKeyType.MATCH, IndexKeyType.LOOKUP)
     )
-    index2[(0, 2, 3)] = "hello"
-    assert set(index2.items()) == {((0, 2, 3), "hello")}
-
-    index2[(0, 3, 4)] = "hello2"
-    assert set(index2.items()) == {((0, 3, 4), "hello2")}
-
-    del index2[(0, 4, 5)]
-    assert set(index2.items()) == {
-        ((0, 3, 4), "hello2")
-    }, "deleting an item that should't exist doesn't affect anything"
-
-    assert (0, 3, 4) in index
-    assert (0, 3, 5) not in index
-
     with pytest.raises(ValueError):
         index.update(index2)
 

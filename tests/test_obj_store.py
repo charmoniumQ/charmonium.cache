@@ -20,12 +20,13 @@ def test_obj_store() -> None:
 
         del os[567]
 
-        assert os[123] == b"987", "Value was not deleted"
+        with pytest.raises(KeyError):
+            os[567]
 
         os.clear()
 
         with pytest.raises(KeyError):
-            os[123], "clear() does not work"
+            os[123]
 
         with pytest.raises(ValueError):
             DirObjStore(path=".")

@@ -43,14 +43,14 @@ def test_filecontents() -> None:
         assert square_file.would_hit(FileContents(file1))  # type: ignore
         assert square_file.would_hit(FileContents(file2))  # type: ignore
         file1.write_text("5")
-        assert not square_file.would_hit(FileContents(file1))  # type: ignore
-        assert square_file.would_hit(FileContents(file2))  # type: ignore
+        assert not square_file.would_hit(FileContents(file1)), "unchanged file still hits"  # type: ignore
+        assert square_file.would_hit(FileContents(file2)), "changed file misses"  # type: ignore
 
         assert square_file(FileContents(file1)) == 25  # type: ignore
         assert square_file(FileContents(str(file1))) == 25  # type: ignore
 
 
-dt = datetime.timedelta(seconds=0.1)
+dt = datetime.timedelta(seconds=0.01)
 
 @memoize(extra_func_state=TTLInterval(dt))
 def get_now() -> datetime.datetime:

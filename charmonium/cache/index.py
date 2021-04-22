@@ -78,7 +78,8 @@ class Index(Generic[Key, Val]):
         result = self._get_last_level(keys)
         if result:
             last_level, last_key, _ = result
-            del last_level[last_key]
+            if last_key in last_level:
+                del last_level[last_key]
 
     def __getitem__(self, keys: tuple[Key, ...]) -> Val:
         result = self._get_last_level(keys)

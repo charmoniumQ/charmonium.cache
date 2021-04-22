@@ -58,11 +58,11 @@ class TTLInterval:
     Underlying usage:
 
         >>> import datetime, time
-        >>> interval = TTLInterval(datetime.timedelta(seconds=0.1))
+        >>> interval = TTLInterval(datetime.timedelta(seconds=0.01))
         >>> start = interval()
         >>> start == interval()
         True
-        >>> time.sleep(0.1)
+        >>> time.sleep(0.01)
         >>> start == interval()
         False
 
