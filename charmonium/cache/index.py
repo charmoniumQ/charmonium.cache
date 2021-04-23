@@ -14,10 +14,20 @@ Val = TypeVar("Val")
 
 
 class Index(Generic[Key, Val]):
-    def __init__(self, schema: tuple[IndexKeyType, ...], _deleter: Optional[Callable[[tuple[tuple[Key, ...], Val]], None]] = None) -> None:
+    def __init__(self, schema: tuple[IndexKeyType, ...], deleter: Optional[Callable[[tuple[tuple[Key, ...], Val]], None]] = None) -> None:
         self.schema = schema
         self._data = dict[Key, Any]()
-        self._deleter = _deleter
+        self._deleter = deleter
+
+    def __getstate__(self) -> dict[str, Any]:
+        return {
+            "schema": self.schema,
+            "_data": self._data,
+        }
+
+    def __setstate__(self, state: dict[str, Any]) -> None:
+        self.schema = state["schema"]
+        self._data = state["_data"]
 
     @staticmethod
     def _items(data: dict[Key, Any], keys: tuple[Key, ...], max_depth: int) -> Iterable[tuple[tuple[Key, ...], Val]]:

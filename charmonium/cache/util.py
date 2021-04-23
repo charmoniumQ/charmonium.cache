@@ -153,6 +153,7 @@ class Sentinel:
     pass
 
 
+# TODO: emulate object by getting attrs
 class Future(Generic[_T]):
     def __init__(self, fulfill_twice: bool = False) -> None:
         self.computed = False

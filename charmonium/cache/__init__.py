@@ -2,12 +2,11 @@ from .helpers import FileContents as FileContents, TTLInterval as TTLInterval
 from .memoize import (
     DEFAULT_MEMOIZED_GROUP as DEFAULT_MEMOIZED_GROUP,
     MemoizedGroup as MemoizedGroup,
-    __version__,
+    __version__ as __version__,
     memoize as memoize,
 )
 from .obj_store import DirObjStore as DirObjStore, ObjStore as ObjStore
 from .persistent_hash import hashable as hashable, persistent_hash as persistent_hash
-from .replacement_policies import ReplacementPolicy as ReplacementPolicy
 from .rw_lock import (
     FileRWLock as FileRWLock,
     Lock as Lock,

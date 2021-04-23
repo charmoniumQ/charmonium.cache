@@ -108,7 +108,7 @@ def _hashable(obj: Any, _tabu: set[int], _level: int) -> Hashable:
     elif isinstance(obj, list):
         _tabu = _tabu | {id(cast(Any, obj))}
         return (
-            b"list",
+            # b"list",
             tuple(_hashable(elem, _tabu, _level+1) for elem in cast(list[Any], obj)),
         )
     elif isinstance(obj, frozenset):
@@ -116,13 +116,13 @@ def _hashable(obj: Any, _tabu: set[int], _level: int) -> Hashable:
     elif isinstance(obj, set):
         _tabu = _tabu | {id(cast(Any, obj))}
         return (
-            b"set",
+            # b"set",
             frozenset(_hashable(elem, _tabu, _level+1) for elem in cast(set[Any], obj)),
         )
     elif isinstance(obj, dict):
         _tabu = _tabu | {id(cast(Any, obj))}
         return (
-            b"dict",
+            # b"dict",
             frozenset((key, _hashable(val, _tabu, _level+1)) for key, val in cast(dict[Any, Any], obj).items()),
         )
     elif hasattr(obj, "__persistent_hash__"):
@@ -134,14 +134,19 @@ def _hashable(obj: Any, _tabu: set[int], _level: int) -> Hashable:
             _hashable(GetAttr[str]()(obj, "__version__", "", check_callable=False), _tabu, _level+1),
         )
     elif isinstance(obj, Path):
-        return (b"Path", obj.__fspath__())
+        return (
+            # b"Path",
+            obj.__fspath__(),
+        )
     elif isinstance(obj, FunctionType):
         _tabu = _tabu | {id(cast(Any, obj))}
         func = cast(Callable[..., Any], obj)
+        closure = inspect.getclosurevars(func)
         return (
             func.__code__.co_code,
             _hashable(func.__code__.co_consts, _tabu, _level+1),
-            _hashable(inspect.getclosurevars(func), _tabu, _level+1),
+            _hashable(closure.nonlocals, _tabu, _level+1),
+            _hashable(closure.globals, _tabu, _level+1),
         )
     else:
         # return _persistent_hash(pickle.dumps(obj), _tabu, _level+1)
@@ -151,7 +156,7 @@ def _hashable(obj: Any, _tabu: set[int], _level: int) -> Hashable:
             for attr_name in dir(obj)
             if (not attr_name.startswith('__') # skip dunder methods
                 and hasattr(obj, attr_name) # double-check hasattr
-                # and (not hasattr(type(obj), attr_name) or not isinstance(getattr(type(obj), attr_name), property)) # skip properties; they might return self
-                # and not callable(getattr(obj, attr_name)) # skip callables
+                and (not hasattr(type(obj), attr_name) or not isinstance(getattr(type(obj), attr_name), property)) # skip properties; they might return self
+                and not callable(getattr(obj, attr_name)) # skip callables
             )
         }, _tabu, _level+1))

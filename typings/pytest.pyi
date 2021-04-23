@@ -9,6 +9,10 @@ class _Mark:
     def parametrize(
             self, args: str, vals: Any,
     ) -> Callable[[_T], _T]: ...
+    def xfail(
+            self, fn: _T
+    ) -> _T:
+        ...
 
 mark: _Mark = ...
 

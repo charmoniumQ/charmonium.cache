@@ -31,7 +31,7 @@ foo: list[Any] = [
     -1,
     Bar(),
 ]
-expected = 943999726
+expected = 252824171
 
 def test_persistence() -> None:
     p = persistent_hash(hashable(foo))

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import shutil
 from pathlib import Path
-from typing import Callable, Protocol
+from typing import Any, Callable, Protocol
 
 import attr
 
@@ -49,6 +49,9 @@ class DirObjStore(ObjStore):
 
     path: PathLike
     _key_bytes: int
+
+    def __persistent_hash__(self) -> Any:
+        return (str(self.path), self._key_bytes)
 
     def __init__(self, path: PathLikeFrom, key_bytes: int = 8) -> None:
         """

@@ -66,7 +66,7 @@ flag_check=$([ -n "${check}" ] && echo "--check")
 [[ -n "${skip_lint}" ]] || \
 	capture \
 		poetry run \
-			autoflake --recursive ${flag_check_or_in_place} ${srcs}
+			autoflake --remove-all-unused-imports --remove-duplicate-keys --recursive ${flag_check_or_in_place} ${srcs}
 
 [[ -n "${skip_lint}" ]] || \
 	capture \

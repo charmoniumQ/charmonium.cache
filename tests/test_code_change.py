@@ -65,7 +65,7 @@ serializers = dict(
 )
 
 print(json.dumps(dict(
-    recomputed=[dict(x[0])["0"] for (_, _, _, x, _), _ in func._group._._index.items()],
+    recomputed=[dict(x[0])[0] for (_, _, _, x, _), _ in func._group._._index.items()],
     returns=returns,
     serialized={{
         serializer_name: base64.b64encode(serializer(func._func)).decode()

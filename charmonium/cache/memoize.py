@@ -5,26 +5,14 @@ import datetime
 import importlib
 # import functools
 # import heapq
-import itertools
 import logging
 import pickle
 import sys
 import threading
 import warnings
-from typing import (
-    Any,
-    Callable,
-    Final,
-    Generic,
-    Iterator,
-    Mapping,
-    Optional,
-    Union,
-    cast,
-)
+from typing import Any, Callable, Final, Generic, Mapping, Optional, Union, cast
 
 import attr
-
 import bitmath
 
 from .index import Index, IndexKeyType
@@ -89,7 +77,6 @@ class MemoizedGroup:
     _fine_grain_eviction: bool
     _index_key: int
     _extra_system_state: Callable[[], Any]
-    _use_count: Iterator[int]
 
     def __init__(
             self,
@@ -124,7 +111,8 @@ class MemoizedGroup:
                 IndexKeyType.MATCH,  # func state
                 IndexKeyType.LOOKUP,  # args key
                 IndexKeyType.MATCH,  # args version
-            )
+            ),
+            self._deleter,
         )
         self._obj_store = obj_store if obj_store is not None else DirObjStore(path=DEFAULT_OBJ_STORE_PATH)
         self._key_gen = KeyGen()
@@ -141,29 +129,36 @@ class MemoizedGroup:
         self._extra_system_state = extra_system_state
         self._index_key = 0
         self._index_read()
-        self._use_count = itertools.count()
         atexit.register(self._index_write)
+
+    def _deleter(self, item: tuple[Any, Entry]) -> None:
+        key, entry = item
+        if entry.obj_store:
+            del self._obj_store[entry.value]
+        self._replacement_policy.invalidate(key, entry)
 
     def _index_read(self) -> None:
         with self._lock.reader:
             if self._index_key in self._obj_store:
                 # TODO: persist ReplacementPolicy state and friends
-                other = cast(
-                    Index[Any, Entry],
+                other_index, other_rp = cast(
+                    tuple[Index[Any, Entry], ReplacementPolicy],
                     self._pickler.loads(self._obj_store[self._index_key]),
                 )
-                self._index.update(other)
+                self._index.update(other_index)
+                self._replacement_policy.update(other_rp)
 
     def _index_write(self) -> None:
         with self._lock.writer:
             if self._index_key in self._obj_store:
-                other = cast(
-                    Index[Any, Entry],
+                other_index, other_rp = cast(
+                    tuple[Index[Any, Entry], ReplacementPolicy],
                     self._pickler.loads(self._obj_store[self._index_key]),
                 )
-                self._index.update(other)
+                self._index.update(other_index)
+                self._replacement_policy.update(other_rp)
             self._evict()
-            self._obj_store[self._index_key] = self._pickler.dumps(self._index)
+            self._obj_store[self._index_key] = self._pickler.dumps((self._index, self._replacement_policy))
 
     def _system_state(self) -> Any:
         """Functions are deterministic with (global state, function-specific state, args key, args version).
@@ -172,7 +167,7 @@ class MemoizedGroup:
           - Package version
 
         """
-        return (__version__, self._extra_system_state())
+        return (__version__,) + none_tuple(self._extra_system_state())
 
     def _evict(self) -> None:
         # heap = list[tuple[float, tuple[Any, ...], Entry]]()
@@ -332,15 +327,14 @@ class Memoized(Generic[FuncParams, FuncReturn]):
             # Group is a "friend class", so pylint disable
             self._group._._obj_store,  # pylint: disable=protected-access
             GetAttr[Callable[[], Any]]()(self._func, "__version__", lambda: None)(),
-            self._extra_func_state(self._func),
-        )
+        ) + none_tuple(self._extra_func_state(self._func))
 
     @staticmethod
     def _combine_args(
         *args: FuncParams.args, **kwargs: FuncParams.kwargs
-    ) -> Mapping[str, Any]:
+    ) -> Mapping[Any, Any]:
         return {
-            **{str(key): val for key, val in enumerate(args)},
+            **dict(enumerate(args)),
             **kwargs,
         }
 
@@ -375,8 +369,7 @@ class Memoized(Generic[FuncParams, FuncReturn]):
                     for key, val in self._combine_args(*args, **kwargs).items()
                 }.items()
             ),
-            self._extra_args2key(*args, **kwargs),
-        )
+        ) + none_tuple(self._extra_args2key(*args, **kwargs))
 
     def _args2ver(self, *args: FuncParams.args, **kwargs: FuncParams.kwargs) -> Any:
         """Convert arguments to their version for caching.
@@ -391,13 +384,12 @@ class Memoized(Generic[FuncParams, FuncReturn]):
             frozenset(
                 {
                     key: GetAttr[Callable[[Any], Any]]()(
-                        type(val), "__cache_ver__", Constant(None)
+                        type(val), "__cache_ver__", Constant(())
                     )(val)
                     for key, val in self._combine_args(*args, **kwargs).items()
                 }.items()
             ),
-            self._extra_args2ver(*args, **kwargs),
-        )
+        ) + none_tuple(self._extra_args2ver(*args, **kwargs))
 
     def enable_logging(self) -> None:
         self._logger.addHandler(self._handler)
@@ -478,10 +470,6 @@ class Memoized(Generic[FuncParams, FuncReturn]):
                     entry.data_size += bitmath.Byte(len(self._group._._pickler.dumps(key)))
                 self._group._._index[key] = entry
                 self._group._._replacement_policy.add(key, entry)
-                # TODO: Propagate possible deletions from index to obj_store.
-
-            entry.last_use = datetime.datetime.now()
-            # entry.last_use_count = next(self._group._._use_count)
 
             if self._group._._fine_grain_eviction:
                 self._group._._evict()
@@ -525,3 +513,9 @@ class Memoized(Generic[FuncParams, FuncReturn]):
 
         key = self.key(*args, **kwargs)
         return key in self._group._._index # pylint: disable=protected-access
+
+def none_tuple(obj: Any) -> tuple[Any, ...]:
+    if obj is not None:
+        return (obj,)
+    else:
+        return ()
