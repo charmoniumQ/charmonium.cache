@@ -7,10 +7,19 @@ from .util import PathLike, PathLikeFrom, pathlike_from
 
 
 class FileContents:
-    """Use FileContents instead of filenames to make your func pure.
+    """wraps the path and its contents, to make your function pure
 
-    FileContents is `os.PathLike`_, so you can `open(FileContents("file"))`. You won't even know its not a string :)
+    - When FileContents is un/pickled, the contents of path get
+      restored/snapshotted.
 
+    - When FileContents is used as an argument, the path is the key
+      and the contents are the version.
+
+    FileContents is |os.PathLike|_, so you can
+    ``open(FileContents("file"), "rb")``. You won't even know its not
+    a string.
+
+    .. |os.PathLike| replace:: ``os.PathLike``
     .. _`os.PathLike`: https://docs.python.org/3/library/os.html#os.PathLike
 
     """
@@ -24,15 +33,25 @@ class FileContents:
         return self.path.__fspath__()
 
     def __cache_key__(self) -> str:
-        """Returns the path."""
+        """Returns the path"""
         return str(self.path)
 
     def __cache_ver__(self) -> bytes:
-        """Returns the contents of the file."""
+        """Returns the contents of the file"""
         if self.path.exists():
             return self.path.read_bytes()
         else:
             return b""
+
+    def __getstate__(self) -> Any:
+        """Captures the path and its contents"""
+        return (self.path, self.path.read_bytes() if self.path.exists() else b"")
+
+    def __setstate__(self, state: Any) -> None:
+        """Restore the contents to the path"""
+        self.path, contents = cast(tuple[PathLike, bytes], state)
+        self.path.write_bytes(contents)
+
 
 class TTLInterval:
     """TTLInterval(td)() returns a value that changes once every td.

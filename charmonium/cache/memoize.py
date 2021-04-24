@@ -17,7 +17,7 @@ import bitmath
 
 from .index import Index, IndexKeyType
 from .obj_store import DirObjStore, ObjStore
-from .persistent_hash import hashable, persistent_hash
+from .determ_hash import hashable, determ_hash
 from .replacement_policies import REPLACEMENT_POLICIES, Entry, ReplacementPolicy
 from .rw_lock import FileRWLock, Lock, RWLock
 from .util import (
@@ -339,57 +339,20 @@ class Memoized(Generic[FuncParams, FuncReturn]):
         }
 
     def _args2key(self, *args: FuncParams.args, **kwargs: FuncParams.kwargs) -> Any:
-        """Convert arguments to their key for caching.
-
-        - The cache uses the "args key" to mean "this is the same
-          resource but possibly a different version." If the "args
-          key" is the same, then "args version" assesses if the
-          verison is new. For arguments which are not versioned
-          resources, using that argument as the key and a constant as
-          the version will work. This is the default."
-
-        - The args2key consists of the default and the
-          `extra_args2key(*args, **kwargs)`. The default is
-          `obj.__cache_key__()` if it exists and `obj` otherwise.
-
-        - Therefore, this can be customized two ways: by
-          `obj.__cache_key__()` and `extra_args2key`. If you can
-          modify the type, prefer adding `__cache_key__` over adding
-          `extra_args2key`. This is will be used universally when you
-          use that type, and you don't have to "remember" to add the
-          args2key.
-
-        """
-        return (
-            frozenset(
-                {
-                    key: GetAttr[Callable[[Any], Any]]()(
-                        type(val), "__cache_key__", identity
-                    )(val)
-                    for key, val in self._combine_args(*args, **kwargs).items()
-                }.items()
-            ),
-        ) + none_tuple(self._extra_args2key(*args, **kwargs))
+        return {
+            key: GetAttr[Callable[[Any], Any]]()(
+                type(val), "__cache_key__", identity
+            )(val)
+            for key, val in self._combine_args(*args, **kwargs).items()
+        }
 
     def _args2ver(self, *args: FuncParams.args, **kwargs: FuncParams.kwargs) -> Any:
-        """Convert arguments to their version for caching.
-
-        - See `args2key`. The version consists of the default and
-          `extra_args2ver`. The default is `obj.__cache_ver__()` if it
-          exists and None (no version) otherwise. Prefer to change
-          `__cache_ver__` rather than `extra_args2ver`.
-
-        """
-        return (
-            frozenset(
-                {
-                    key: GetAttr[Callable[[Any], Any]]()(
-                        type(val), "__cache_ver__", Constant(())
-                    )(val)
-                    for key, val in self._combine_args(*args, **kwargs).items()
-                }.items()
-            ),
-        ) + none_tuple(self._extra_args2ver(*args, **kwargs))
+        return {
+            key: GetAttr[Callable[[Any], Any]]()(
+                type(val), "__cache_ver__", Constant(())
+            )(val)
+            for key, val in self._combine_args(*args, **kwargs).items()
+        }
 
     def enable_logging(self) -> None:
         self._logger.addHandler(self._handler)
@@ -423,6 +386,8 @@ class Memoized(Generic[FuncParams, FuncReturn]):
             data_size = bitmath.Byte(0)
 
         stop = datetime.datetime.now()
+
+        # TODO: cache stdout?
 
         # Returning value in addition to Entry elides the redundant `loads(dumps(...))` when obj_store is True.
         return (
@@ -490,7 +455,7 @@ class Memoized(Generic[FuncParams, FuncReturn]):
 
     def _compress(self, obj: Any) -> Any:
         if self._lossy_compression:
-            return persistent_hash(obj)
+            return determ_hash(obj)
         else:
             return obj
 

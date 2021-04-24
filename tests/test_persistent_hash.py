@@ -4,13 +4,13 @@ from typing import Any
 
 import pytest
 
-from charmonium.cache.persistent_hash import hashable, persistent_hash
+from charmonium.cache.determ_hash import hashable, determ_hash
 
 recursive_list: list[Any] = [1]
 recursive_list.append(recursive_list)
 
 class Baz:
-    def __persistent_hash__(self) -> Any:
+    def __determ_hash__(self) -> Any:
         return 3.1
 
 class Bar:
@@ -34,9 +34,9 @@ foo: list[Any] = [
 expected = 252824171
 
 def test_persistence() -> None:
-    p = persistent_hash(hashable(foo))
+    p = determ_hash(hashable(foo))
     assert p == expected, f"If you changed how persistent hash works, just change the `expected` to {p}."
-    persistent_hash(Baz())
+    determ_hash(Baz())
 
 
 def test_lambda_consts() -> None:
@@ -54,4 +54,4 @@ def test_closure() -> None:
 
 def test_nonhashable() -> None:
     with pytest.raises(TypeError):
-        persistent_hash({})
+        determ_hash({})

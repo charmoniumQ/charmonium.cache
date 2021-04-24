@@ -39,7 +39,7 @@ def run_script(
         f"""
 import base64
 import json
-from charmonium.cache import memoize, hashable, persistent_hash
+from charmonium.cache import memoize, hashable, determ_hash
 
 def closure_func():
     return {closure_func_source_var}
@@ -61,7 +61,7 @@ import pickle
 serializers = dict(
     # dill=dill.dumps,
     # cloudpickle=cloudpickle.dumps,
-    func_version=lambda fn: pickle.dumps(persistent_hash(hashable(fn))),
+    func_version=lambda fn: pickle.dumps(determ_hash(hashable(fn))),
 )
 
 print(json.dumps(dict(

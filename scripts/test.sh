@@ -15,9 +15,7 @@ srcs="${package_path} tests/ typings/ $(find scripts/ -name '*.py')"
 # TODO: Rewrite in Python
 # TODO: Start from last failure
 # TODO: Make colors work
-# TODO: Make TTY work in serial mode
 # TODO: Dispatch testing, docs, and publish from the same script
-# todo: Checker parallelism (this has a low reward/difficulty ratio)
 
 function excluding() {
 	# Usage: excluding needle haystack...

@@ -12,7 +12,7 @@ from .util import GetAttr
 
 HASH_BITS = 64
 
-def persistent_hash(obj: Any) -> int:
+def determ_hash(obj: Any) -> int:
     """A persistent hash protocol.
 
     The hash is persistent across:
@@ -27,15 +27,15 @@ def persistent_hash(obj: Any) -> int:
     - Immutable container types (tuple, frozenset) are hashed by the
       XOR of their elements.
 
-    - Objects containing a __persistent_hash__ hashed by calling
-      persistent_hash on its return (it need not be an int).
+    - Objects containing a __determ_hash__ hashed by calling
+      determ_hash on its return (it need not be an int).
 
     """
     # Make sure I XOR the typename with the hash of contents. This makes an empty tuple hash differently than an empty dict, avoiding a collision.
 
     # print(_level*" ", repr(obj))
     if isinstance(obj, type(None)):
-        # This way, persistent_hash(None) != persistent_hash(b"").
+        # This way, determ_hash(None) != determ_hash(b"").
         return checksum(b"None")
     elif isinstance(obj, bytes):
         return checksum(b"bytes") ^ checksum(obj)
@@ -44,22 +44,22 @@ def persistent_hash(obj: Any) -> int:
     elif isinstance(obj, int):
         # return cheksum(b"int") ^ (obj & ~(1 << HASH_BITS))
         # I use a non-trivial hash to scramble the bits more.
-        # The trivial hash function doesn't scramble the residue (x % 2 == 0 implies persistent_hash(x) % 2 == 0), which leads to hash table collisions.
+        # The trivial hash function doesn't scramble the residue (x % 2 == 0 implies determ_hash(x) % 2 == 0), which leads to hash table collisions.
         return checksum(int2bytes(obj))
     elif isinstance(obj, float):
         return checksum(b"float") ^ checksum(float2bytes(obj))
     elif isinstance(obj, complex):
         return checksum(b"complex") ^ checksum(float2bytes(obj.imag)) ^ checksum(float2bytes(obj.real))
     elif isinstance(obj, tuple):
-        contents = [persistent_hash(elem) for elem in cast(tuple[Any], obj)]
+        contents = [determ_hash(elem) for elem in cast(tuple[Any], obj)]
         return checksum(b"tuple") ^ functools.reduce(operator.xor, contents, 0)
     elif isinstance(obj, frozenset):
-        contents = sorted([persistent_hash(elem) for elem in cast(frozenset[Any], obj)])
+        contents = sorted([determ_hash(elem) for elem in cast(frozenset[Any], obj)])
         return checksum(b"frozenset") ^ functools.reduce(operator.xor, contents, 0)
-    elif hasattr(obj, "__persistent_hash__"):
-        return checksum(b"persistent_hashable") ^ persistent_hash(GetAttr[Callable[[], Any]]()(obj, "__persistent_hash__")())
+    elif hasattr(obj, "__determ_hash__"):
+        return checksum(b"determ_hashable") ^ determ_hash(GetAttr[Callable[[], Any]]()(obj, "__determ_hash__")())
     else:
-        raise TypeError(f"{obj} ({type(obj)=}) is not persistent_hashable")
+        raise TypeError(f"{obj} ({type(obj)=}) is not determ_hashable")
 
 
 def checksum(i: bytes) -> int:
@@ -81,7 +81,7 @@ def hashable(obj: Any) -> Hashable:
     totally obfuscate debugging.
 
     Special cases:
-    - Objects with `__persistent_hash__` are hashed by making whatever that returns hashable.
+    - Objects with `__determ_hash__` are hashed by making whatever that returns hashable.
     - Modules are hashed by their `__name__` and `__version__`.
     - Functions are hashed by their bytecode, constants, and closure-vars. This means changing comments will not change the hashable value.
     - Other objects are hashed as a dict of their attributes, excluding dunder-attributes.
@@ -95,7 +95,7 @@ def hashable(obj: Any) -> Hashable:
 
 def _hashable(obj: Any, _tabu: set[int], _level: int) -> Hashable:
     # Make sure I remember to pass _tabu and _level
-    # Make sure I update _tabu when I call _persistent_hash on a mutable object.
+    # Make sure I update _tabu when I call _determ_hash on a mutable object.
     # I prepend the type if it is a container so that an empty tuple and empty list hash to different keys.
 
     # print(_level*" ", repr(obj))
@@ -125,9 +125,9 @@ def _hashable(obj: Any, _tabu: set[int], _level: int) -> Hashable:
             # b"dict",
             frozenset((key, _hashable(val, _tabu, _level+1)) for key, val in cast(dict[Any, Any], obj).items()),
         )
-    elif hasattr(obj, "__persistent_hash__"):
+    elif hasattr(obj, "__determ_hash__"):
         _tabu = _tabu | {id(cast(Any, obj))}
-        return _hashable(GetAttr[Callable[[], Any]]()(obj, "__persistent_hash__")(), _tabu, _level+1)
+        return _hashable(GetAttr[Callable[[], Any]]()(obj, "__determ_hash__")(), _tabu, _level+1)
     elif isinstance(obj, ModuleType):
         return (
             obj.__name__,
@@ -149,7 +149,7 @@ def _hashable(obj: Any, _tabu: set[int], _level: int) -> Hashable:
             _hashable(closure.globals, _tabu, _level+1),
         )
     else:
-        # return _persistent_hash(pickle.dumps(obj), _tabu, _level+1)
+        # return _determ_hash(pickle.dumps(obj), _tabu, _level+1)
         _tabu = _tabu | {id(obj)}
         return (b"obj", _hashable({
             attr_name: getattr(obj, attr_name)

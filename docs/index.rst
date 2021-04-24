@@ -6,6 +6,7 @@
    tutorial
    theory
    api_reference
+   cli
    contributors_guide
    authors
 

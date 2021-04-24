@@ -97,22 +97,6 @@ Unlike GNU Make, the
 
 ``memoize`` uses ``strace`` to learn the input and output files.
 
-The following items are matched in order. If any item is not found, then the
-rest do not need to be checked; the cache needs to be refreshed. If a
-key-to-check is not matched, then the prior entry is *deleted*. If a
-key-to-lookup is not matched, the prior entry *co-exists* beside the newer
-entry. key-to-check helps cull the cache early.
-
-1. The ``--obj-store`` (implicitly) forms a key-to-lookup.
-2. The ``--env`` forms a key-to-check.
-3. The ``command`` form a key-to-lookup.
-4. The contents of ``command`` is a key-to-check.
-5. ``arg1, arg2, ...`` and ``--key`` form a key-to-lookup.
-6. The input files and ``--ver`` form a key-to-check.
-
-This is useful for ``memoizing`` parts of a shell-script pipeline. It can be
-safely used in a pipe.
-
 Code quality
 ------------
 

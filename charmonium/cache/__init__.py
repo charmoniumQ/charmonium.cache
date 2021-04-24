@@ -6,7 +6,7 @@ from .memoize import (
     memoize as memoize,
 )
 from .obj_store import DirObjStore as DirObjStore, ObjStore as ObjStore
-from .persistent_hash import hashable as hashable, persistent_hash as persistent_hash
+from .determ_hash import hashable as hashable, determ_hash as determ_hash
 from .rw_lock import (
     FileRWLock as FileRWLock,
     Lock as Lock,
