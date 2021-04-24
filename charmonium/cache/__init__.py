@@ -1,8 +1,10 @@
 from .helpers import FileContents as FileContents, TTLInterval as TTLInterval
+from .replacement_policies import ReplacementPolicy as ReplacementPolicy, GDSize as GDSize
 from .memoize import (
     DEFAULT_MEMOIZED_GROUP as DEFAULT_MEMOIZED_GROUP,
     MemoizedGroup as MemoizedGroup,
     __version__ as __version__,
+    Memoized as Memoized,
     memoize as memoize,
 )
 from .obj_store import DirObjStore as DirObjStore, ObjStore as ObjStore
@@ -15,7 +17,6 @@ from .rw_lock import (
 )
 from .util import (
     Future as Future,
-    KeyGen as KeyGen,
     PathLike as PathLike,
     Pickler as Pickler,
 )

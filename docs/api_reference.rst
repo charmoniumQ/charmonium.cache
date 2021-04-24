@@ -7,11 +7,21 @@ API Reference
 
 .. automodule:: charmonium.cache
 
+Core
+----
+
     .. autodecorator:: memoize
+
+    .. autoclass:: Memoized
+        :members:
+        :special-members: __init__
 
     .. autoclass:: MemoizedGroup
         :members:
         :special-members: __init__
+
+Components
+----------
 
     .. autoclass:: ObjStore
         :members:
@@ -25,9 +35,11 @@ API Reference
         :members:
         :special-members: __init__
 
-    .. autoclass:: FileContents
+    .. autoclass:: GDSize
         :members:
-        :special-members: __init__, __cache_key__, __cache_val__
+
+    .. autoclass:: Pickler
+        :members:
 
     .. autoclass:: RWLock
         :members:
@@ -43,14 +55,28 @@ API Reference
     .. autoclass:: Lock
         :members:
 
-    .. autoclass:: KeyGen
+Helpers
+-------
+
+    .. autoclass:: FileContents
         :members:
-        :special-members: __init__, __next__
+        :special-members: __init__, __cache_key__, __cache_val__
+
+    .. autoclass:: TTLInterval
+        :members:
+        :special-members: __init__
+
+Utils
+-----
+
+    .. autoclass:: PathLike
+        :members:
+        :special-members: __truediv__
 
     .. autoclass:: Future
         :members:
         :special-members: __init__
 
-    .. autoclass:: PathLike
-        :members:
-        :special-members: __truediv__
+    .. autofunction:: determ_hash
+
+    .. autofunction:: hashable

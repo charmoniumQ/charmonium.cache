@@ -54,20 +54,16 @@ class FileContents:
 
 
 class TTLInterval:
-    """TTLInterval(td)() returns a value that changes once every td.
+    """``TTLInterval(td)()`` returns a value that changes once every ``td``.
 
-    MemoizedGroup usage:
+    ``td`` may be a a timedelta or a number of seconds.
 
-        >>> from charmonium.cache import memoize, Future, DEFAULT_MEMOIZED_GROUP, MemoizedGroup
-        >>> # applies a 5-minute TTL to the whole memoized group
-        >>> @memoize()
-        ... def func():
-        ...     pass
-        >>> interval = TTLInterval(datetime.timedelta(seconds=0.1))
-        >>> DEFAULT_MEMOIZED_GROUP.fulfill(MemoizedGroup(extra_system_state=interval))
+    It can be used as ``extra_system_state`` or
+    ``extra_func_state``. For example,
 
-    Memoized usage:
+    .. code:: python
 
+        >>> from charmonium.cache import memoize
         >>> interval = TTLInterval(datetime.timedelta(seconds=0.1))
         >>> # applies a 5-minute TTL to justthis function
         >>> @memoize(extra_func_state=interval)
@@ -75,6 +71,8 @@ class TTLInterval:
         ...     pass
 
     Underlying usage:
+
+    .. code:: python
 
         >>> import datetime, time
         >>> interval = TTLInterval(datetime.timedelta(seconds=0.01))
@@ -86,8 +84,9 @@ class TTLInterval:
         False
 
     """
-    def __init__(self, interval: datetime.timedelta) -> None:
-        self.interval = interval
+
+    def __init__(self, interval: Union[int, float, datetime.timedelta]) -> None:
+        self.interval = interval if isinstance(interval, datetime.timedelta) else datetime.timedelta(seconds=interval)
 
     def __call__(self, func: Any=None) -> int:
         delta = datetime.datetime.now() - datetime.datetime.fromtimestamp(0)

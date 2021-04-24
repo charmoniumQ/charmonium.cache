@@ -36,7 +36,7 @@ guide`_. Then run:
     16
     >>> square(4)
     16
-    >>> i = 2
+    >>> i = 1
     >>> square(4)
     recomputing
     17
@@ -68,34 +68,43 @@ one is unique because it is:
 3. **Easy to adopt:** Only requires adding one line (decorator) to the function
    definition.
 
-4. **Bounded in size:** The cache won't take up too much space.
+4. **Bounded in size:** The cache won't take up too much space. This
+   space is partitioned across all memoized functions according to the
+   heuristic.
 
-5. **Shared for multiple functions:** The functions for which memoization has
-   the best "bang for the buck" will take space from functions with a worse
-   tradeoff.
-
-6. **Supports smart heuristics:** They can take into account time-to-recompute
+5. **Supports smart heuristics:** They can take into account time-to-recompute
    and storage-size in addition to recency, unlike naive `LRU`_.
 
-7. **Overhead aware:** The library measures the time saved versus overhead. It
+6. **Overhead aware:** The library measures the time saved versus overhead. It
    warns the user if the overhead of caching is not worth it.
 
 CLI
 ---
 
 ::
-   memoize [--obj-store path] [--env env] [--key key] [--ver ver] [--comparison (mtim|crc32)] [--replacement (gd-size|luv)] [--max-size '123 MiB'] [--verbose] -- command arg1 arg2 ...
+
+   memoize -- command arg1 arg2 ...
 
 ``memoize`` memoizes ``command arg1 arg2 ...``. If the command, its arguments,
  or its input files change, then ``command arg1 arg2 ...`` will be
  rerun. Otherwise, the output files (including stderr and stdout) will be
  produced from a prior run.
 
-Unlike GNU Make, the 
+Make is good, but it has a hard time with dependencies that are not files. Many
+dependencies are not well-contained in files. For example, you may want
+recompute some command every time some status command returns a different value.
 
-``command`` may require stdin, but no TTY interactivity.
+::
 
-``memoize`` uses ``strace`` to learn the input and output files.
+    # make status=$(status) will not do the right thing.
+    make var=1
+    make var=2 # usually, nothing recompiles here, contrary to user's intent
+
+    # memoize --key=$(status) -- command args will do the right thing
+    memoize --key=1 -- command args
+    memoize --key=2 -- command args # key changed, command is recomptued.
+
+``memoize`` also makes it easy to memoize commands within existing shell scripts.
 
 Code quality
 ------------

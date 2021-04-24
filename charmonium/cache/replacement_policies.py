@@ -38,8 +38,9 @@ class ReplacementPolicy:  # pylint: disable=no-self-use,unused-argument
         # TODO: Unlike dict update, self overrides other
         ...
 
-
 # TODO: implement other replacement policies
+class GDSize:
+    ...
 
 class Dummy(ReplacementPolicy):  # pylint: disable=no-self-use,unused-argument
     def __init__(self) -> None:

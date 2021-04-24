@@ -240,6 +240,37 @@ class Memoized(Generic[FuncParams, FuncReturn]):
     ) -> None:
         """
 
+Storing the whole argument is usually overkill; just storing a hash will do (the default
+behavior). Python's |hash|_ will return different values across different runs, so I use
+|determ_hash|_.  If for some reason you *do* want to keep the whole object, set ``memoize(...,
+use_hash=False)``.
+
+.. |hash| replace:: ``hash``
+.. _`hash`: https://docs.python.org/3/library/functions.html?highlight=hash#hash
+
+.. |determ_hash| replace:: ``determ_hash``
+.. _`determ_hash`: http://example.com
+
+.. TODO: API URLs
+
+By default, the index entry just holds an object key and the object store maps that to the actual
+returned object. This level of indirection means that the index is small and can be loaded quickly
+even if the returned objects are big. If the returned objects are small, you can omit the
+indirection by setting ``memoize(..., use_obj_store=False)``.
+
+By default, only the object size (not index metadata) is counted towards the size of retaining an
+object, but if the object is stored in the index, the object size will be zero.  then the
+metadata. Set ``memoize(..., use_metadata_size)`` to include metadata in the size calculation. This
+is a bit slower, so it is not the default.
+
+By default, the cache is only culled to the desired size just before serialization. To cull the
+cache after every store, set ``memoize(..., fine_grain_eviction=True)``. This is useful if the cache
+would run out of memory without an eviction.
+
+Be aware of ``memoize(..., verbose=True|False)``. If verbose is enabled, the cache will emit a
+report at process-exit saying how much time was saved. This is useful to determine if caching is
+"worth it."
+
         :param use_metadata_size: whether to include the size of the metadata in the size threshold calculation for eviction.
         :param lossy_compression: whether to use a hash of the arguments or the actual arguments. A hash will be faster and smaller, but the actual values are more useful for debugging.
 
@@ -484,3 +515,5 @@ def none_tuple(obj: Any) -> tuple[Any, ...]:
         return (obj,)
     else:
         return ()
+
+# TODO: work for methods (@memoize def foo(self) ...)

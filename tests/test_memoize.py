@@ -153,3 +153,5 @@ def test_verbose(caplog: pytest.Caplog) -> None:
         @memoize(use_metadata_size=False, use_obj_store=False)
         def foo() -> None: # type: ignore
             pass
+
+# Test multiprocessing
