@@ -33,12 +33,15 @@ class _LoudPickle:
         globals()["used_loads"] = True
         return pickle.loads(buffer)
 
+    def __persistent_hash__(self) -> Any:
+        return "_LoudPickle"
+
 loud_pickle = _LoudPickle()
 
 
 i = 0
 
-@memoize(verbose=False, use_obj_store=False, use_metadata_size=True, pickler=loud_pickle)
+@memoize(verbose=False, pickler=loud_pickle)
 def square(x: int) -> int:
     # I don't want `calls` to be in the closure.
     globals()["calls"].append(x)
@@ -105,7 +108,7 @@ def test_eviction() -> None:
         assert big_fn.would_hit(2)
         assert big_fn.would_hit(3)
 
-@memoize(lossy_compression=False)
+@memoize(lossy_compression=False, use_obj_store=False, use_metadata_size=True)
 def square_loud(x: int) -> int:
     return x**2
 
@@ -126,11 +129,12 @@ def test_verbose(caplog: pytest.Caplog) -> None:
         def foo() -> None: # type: ignore
             pass
 
-def square_all(lst: list[int]) -> list[int]:
+def square_all(lst: list[int]) -> tuple[list[int], list[int]]:
+    calls.clear()
     ret: list[int] = []
     for elem in lst:
         ret.append(square(elem))
-    return ret
+    return ret, calls
 
 def test_multiprocessing() -> None:
     with tempfile.TemporaryDirectory() as path:
@@ -138,10 +142,9 @@ def test_multiprocessing() -> None:
             obj_store=DirObjStore(path),
             fine_grain_persistence=True,
         )
-        calls.clear()
-        procs = [multiprocessing.Process(target=square_all, args=([0, x],)) for x in range(10)]
+        n_procs = 5
+        procs = [multiprocessing.Process(target=square_all, args=([0, x, x+n_procs],)) for x in range(n_procs)]
         for proc in procs:
             proc.start()
         for proc in procs:
             proc.join()
-        assert calls == [1]

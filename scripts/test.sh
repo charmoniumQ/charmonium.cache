@@ -96,9 +96,13 @@ capture poetry run pyright
 # Note that I can't use dmypy because I have a package (-p) and files
 # to check, which are (unfortunately) mutually exclusive arguments.
 
+rm -rf .cache
+
 capture \
 	poetry run \
 		pytest --quiet --exitfirst .
+
+rm -rf .cache
 
 capture \
 	poetry run \

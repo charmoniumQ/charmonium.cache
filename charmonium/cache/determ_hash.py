@@ -42,10 +42,9 @@ def determ_hash(obj: Any) -> int:
     elif isinstance(obj, str):
         return checksum(b"str") ^ checksum(obj.encode())
     elif isinstance(obj, int):
-        # return cheksum(b"int") ^ (obj & ~(1 << HASH_BITS))
         # I use a non-trivial hash to scramble the bits more.
         # The trivial hash function doesn't scramble the residue (x % 2 == 0 implies determ_hash(x) % 2 == 0), which leads to hash table collisions.
-        return checksum(int2bytes(obj))
+        return checksum(b"int") ^ checksum(int2bytes(obj))
     elif isinstance(obj, float):
         return checksum(b"float") ^ checksum(float2bytes(obj))
     elif isinstance(obj, complex):
@@ -103,41 +102,22 @@ def _hashable(obj: Any, _tabu: set[int], _level: int) -> Hashable:
         return obj
     elif id(obj) in _tabu:
         return b"cycle detected"
-    elif isinstance(obj, tuple):
-        return tuple(_hashable(elem, _tabu, _level+1) for elem in cast(tuple[Any], obj))
-    elif isinstance(obj, list):
+    elif isinstance(obj, (tuple, list)):
         _tabu = _tabu | {id(cast(Any, obj))}
-        return (
-            # b"list",
-            tuple(_hashable(elem, _tabu, _level+1) for elem in cast(list[Any], obj)),
-        )
-    elif isinstance(obj, frozenset):
-        return frozenset(_hashable(elem, _tabu, _level+1) for elem in cast(frozenset[Any], obj))
-    elif isinstance(obj, set):
+        return tuple(_hashable(elem, _tabu, _level+1) for elem in cast(list[Any], obj))
+    elif isinstance(obj, (set, frozenset)):
         _tabu = _tabu | {id(cast(Any, obj))}
-        return (
-            # b"set",
-            frozenset(_hashable(elem, _tabu, _level+1) for elem in cast(set[Any], obj)),
-        )
+        return frozenset(_hashable(elem, _tabu, _level+1) for elem in cast(set[Any], obj))
     elif isinstance(obj, dict):
         _tabu = _tabu | {id(cast(Any, obj))}
-        return (
-            # b"dict",
-            frozenset((key, _hashable(val, _tabu, _level+1)) for key, val in cast(dict[Any, Any], obj).items()),
-        )
+        return frozenset((key, _hashable(val, _tabu, _level+1)) for key, val in cast(dict[Any, Any], obj).items())
     elif hasattr(obj, "__determ_hash__"):
         _tabu = _tabu | {id(cast(Any, obj))}
         return _hashable(GetAttr[Callable[[], Any]]()(obj, "__determ_hash__")(), _tabu, _level+1)
     elif isinstance(obj, ModuleType):
-        return (
-            obj.__name__,
-            _hashable(GetAttr[str]()(obj, "__version__", "", check_callable=False), _tabu, _level+1),
-        )
+        return (obj.__name__, GetAttr[str]()(obj, "__version__", "", check_callable=False))
     elif isinstance(obj, Path):
-        return (
-            # b"Path",
-            obj.__fspath__(),
-        )
+        return obj.__fspath__()
     elif isinstance(obj, FunctionType):
         _tabu = _tabu | {id(cast(Any, obj))}
         func = cast(Callable[..., Any], obj)
@@ -151,7 +131,7 @@ def _hashable(obj: Any, _tabu: set[int], _level: int) -> Hashable:
     else:
         # return _determ_hash(pickle.dumps(obj), _tabu, _level+1)
         _tabu = _tabu | {id(obj)}
-        return (b"obj", _hashable({
+        return _hashable({
             attr_name: getattr(obj, attr_name)
             for attr_name in dir(obj)
             if (not attr_name.startswith('__') # skip dunder methods
@@ -159,4 +139,4 @@ def _hashable(obj: Any, _tabu: set[int], _level: int) -> Hashable:
                 and (not hasattr(type(obj), attr_name) or not isinstance(getattr(type(obj), attr_name), property)) # skip properties; they might return self
                 and not callable(getattr(obj, attr_name)) # skip callables
             )
-        }, _tabu, _level+1))
+        }, _tabu, _level+1)

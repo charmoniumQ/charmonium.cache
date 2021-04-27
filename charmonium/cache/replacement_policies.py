@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import abc
 import datetime
-from typing import Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import attr
 import bitmath

@@ -20,7 +20,16 @@ from .obj_store import DirObjStore, ObjStore
 from .pickler import Pickler
 from .replacement_policies import REPLACEMENT_POLICIES, Entry, ReplacementPolicy
 from .rw_lock import FileRWLock, Lock, RWLock
-from .util import Constant, FuncParams, FuncReturn, Future, GetAttr, KeyGen, identity, none_tuple
+from .util import (
+    Constant,
+    FuncParams,
+    FuncReturn,
+    Future,
+    GetAttr,
+    KeyGen,
+    identity,
+    none_tuple,
+)
 
 __version__ = "1.0.0"
 
@@ -115,8 +124,8 @@ class MemoizedGroup:
         self._fine_grain_eviction = fine_grain_eviction
         self._extra_system_state = extra_system_state
         self._index_key = 0
-        self._index_read()
         self._version = 0
+        self._index_read()
         atexit.register(self._index_write)
 
     def _deleter(self, item: tuple[Any, Entry]) -> None:
@@ -130,7 +139,7 @@ class MemoizedGroup:
             if self._index_key in self._obj_store:
                 # TODO: persist ReplacementPolicy state and friends
                 other_version, other_index, other_rp = cast(
-                    tuple[Index[Any, Entry], ReplacementPolicy],
+                    tuple[int, Index[Any, Entry], ReplacementPolicy],
                     self._pickler.loads(self._obj_store[self._index_key]),
                 )
                 if other_version > self._version:
@@ -142,7 +151,7 @@ class MemoizedGroup:
         with self._lock.writer:
             if self._index_key in self._obj_store:
                 other_version, other_index, other_rp = cast(
-                    tuple[Index[Any, Entry], ReplacementPolicy],
+                    tuple[int, Index[Any, Entry], ReplacementPolicy],
                     self._pickler.loads(self._obj_store[self._index_key]),
                 )
                 if other_version > self._version:
