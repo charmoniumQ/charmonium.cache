@@ -7,7 +7,7 @@ from typing import Optional, Protocol, cast, runtime_checkable
 import attr
 import fasteners
 
-from .util import PathLikeFrom, pathlike_from
+from .pathlike import PathLikeFrom, pathlike_from
 
 
 @runtime_checkable

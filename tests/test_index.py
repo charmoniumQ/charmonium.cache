@@ -74,23 +74,23 @@ def test_raises_wrong_schema() -> None:
 
 
 def test_update() -> None:
-    index1 = Index[int, str](
+    old = Index[int, str](
         (IndexKeyType.MATCH, IndexKeyType.LOOKUP, IndexKeyType.MATCH,)
     )
-    index1[(1, 2, 3)] = "hello"
-    index1[(1, 3, 3)] = "hello2"
+    old[(1, 2, 3)] = "old"
+    old[(1, 3, 3)] = "old"
 
-    index2 = Index[int, str](index1.schema)
-    index2[(1, 2, 3)] = "hello3"
-    index2[(1, 4, 3)] = "hello4"
+    new = Index[int, str](old.schema)
+    new[(1, 2, 3)] = "new"
+    new[(1, 4, 3)] = "new"
 
-    index2.update(index1)
+    old.update(new)
     assert (
-        index2[(1, 2, 3)] == "hello3"
-    ), "update() shouldn't overwrite when they conflict"
+        old[(1, 2, 3)] == "new"
+    ), "update() should overwrite when they conflict"
     assert (
-        index2[(1, 4, 3)] == "hello4"
-    ), "keys not in index1 are unaffected but .update(index1)"
+        old[(1, 3, 3)] == "old"
+    ), "keys not in new are unaffected"
     assert (
-        index2[(1, 3, 3)] == "hello2"
-    ), "keys in index1 and not in index2 are brought over to index2"
+        old[(1, 4, 3)] == "new"
+    ), "keys in new and not in old are brought over to old"

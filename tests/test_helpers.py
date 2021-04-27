@@ -4,7 +4,6 @@ import time
 from pathlib import Path
 
 from charmonium.cache import (
-    DEFAULT_MEMOIZED_GROUP,
     DirObjStore,
     FileContents,
     MemoizedGroup,
@@ -21,11 +20,7 @@ def square_file(filename: str) -> int:
 def test_filecontents() -> None:
     with tempfile.TemporaryDirectory() as path_:
         path = Path(path_)
-        DEFAULT_MEMOIZED_GROUP.fulfill(
-            MemoizedGroup(
-                obj_store=DirObjStore(path),
-            )
-        )
+        square_file.group = MemoizedGroup(obj_store=DirObjStore(path))
 
         file1 = path / "file1"
         file2 = path / "file2"
@@ -58,11 +53,7 @@ def get_now() -> datetime.datetime:
 
 def test_ttl() -> None:
     with tempfile.TemporaryDirectory() as path:
-        DEFAULT_MEMOIZED_GROUP.fulfill(
-            MemoizedGroup(
-                obj_store=DirObjStore(path),
-            )
-        )
+        get_now.group = MemoizedGroup(obj_store=DirObjStore(path))
         assert datetime.datetime.now() - get_now() < dt
         time.sleep(dt.total_seconds())
         assert datetime.datetime.now() - get_now() < dt

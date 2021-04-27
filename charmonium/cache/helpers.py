@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 import datetime
-from typing import Any, Union
+from typing import Any, Union, cast
 
-from .util import PathLike, PathLikeFrom, pathlike_from
+from .pathlike import PathLike, PathLikeFrom, pathlike_from
 
 
 class FileContents:

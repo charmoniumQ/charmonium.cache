@@ -9,7 +9,7 @@ from typing import TypedDict, cast
 
 import pytest
 
-from charmonium.cache.util import PathLikeFrom, pathlike_from
+from charmonium.cache.pathlike import PathLikeFrom, pathlike_from
 
 ScriptResult = TypedDict(
     "ScriptResult",

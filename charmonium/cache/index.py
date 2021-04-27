@@ -74,6 +74,9 @@ class Index(Generic[Key, Val]):
             completed_keys += (key,)
         return cast(dict[Key, Val], obj), keys[-1], self.schema[-1]
 
+    # TODO: refactor for less complexity
+    # Maybe combine get_or_create with get
+
     def get_or(self, keys: tuple[Key, ...], thunk: Callable[[], Val]) -> Val:
         last_level, last_key, last_key_type = self._get_or_create_last_level(keys)
         if last_key not in last_level:
@@ -117,5 +120,4 @@ class Index(Generic[Key, Val]):
         if other.schema != self.schema:
             raise ValueError(f"Schema mismatch {self.schema=}, {other.schema=}")
         for key, val in other.items():
-            # this lambda confuses pyright, hence type ignore
-            self.get_or(key, lambda val=val: val)  # type: ignore
+            self[key] = val

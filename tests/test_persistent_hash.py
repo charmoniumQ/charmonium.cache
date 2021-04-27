@@ -4,7 +4,7 @@ from typing import Any
 
 import pytest
 
-from charmonium.cache.determ_hash import hashable, determ_hash
+from charmonium.cache.determ_hash import determ_hash, hashable
 
 recursive_list: list[Any] = [1]
 recursive_list.append(recursive_list)

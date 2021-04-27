@@ -100,6 +100,14 @@ capture \
 	poetry run \
 		pytest --quiet --exitfirst .
 
+capture \
+	poetry run \
+		radon cc --min b --show-complexity --average --no-assert "${package_path}" tests
+
+capture \
+	poetry run \
+		radon mi --min b --show --sort "${package_path}" tests
+
 poetry run \
 	coverage html -d htmlcov
 
@@ -113,6 +121,6 @@ poetry run \
 
 
 if which scc; then
-   scc --by-file "${package_path}"
-   scc --by-file "tests"
+   scc --no-complexity --by-file "${package_path}"
+   scc --no-complexity --by-file "tests"
 fi

@@ -6,7 +6,8 @@ from typing import Any, Callable, Protocol
 
 import attr
 
-from .util import GetAttr, PathLike, PathLikeFrom, pathlike_from
+from .pathlike import PathLike, PathLikeFrom, pathlike_from
+from .util import GetAttr
 
 
 class ObjStore(Protocol):

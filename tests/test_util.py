@@ -4,14 +4,8 @@ from typing import Callable, cast
 
 import pytest
 
-from charmonium.cache.util import (
-    Constant,
-    Future,
-    GetAttr,
-    KeyGen,
-    PathLike,
-    pathlike_from,
-)
+from charmonium.cache.pathlike import PathLike, pathlike_from
+from charmonium.cache.util import Constant, Future, GetAttr, KeyGen
 
 
 def test_key_gen() -> None:
@@ -39,19 +33,15 @@ def test_pathlike() -> None:
 
 
 def test_future() -> None:
-    future_int = Future[int]()
+    class Struct:
+        def __init__(self, x: int) -> None:
+            self.x = x
 
-    assert not future_int.computed
-    with pytest.raises(ValueError):
-        future_int.unwrap()
+    future = Future[Struct].create(lambda: Struct(3))
 
-    future_int.fulfill(3)
-
-    assert future_int.computed
-    assert future_int.unwrap() == 3 == future_int._
-    with pytest.raises(ValueError):
-        future_int.fulfill(4)
-
+    assert not cast(Future[Struct], future).computed
+    assert future.x == 3
+    assert cast(Future[Struct], future).computed
 
 def test_getattr() -> None:
     class Class:

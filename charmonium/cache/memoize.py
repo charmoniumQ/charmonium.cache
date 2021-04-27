@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import atexit
 import datetime
-import importlib
 # import functools
 # import heapq
 import logging
@@ -15,21 +14,13 @@ from typing import Any, Callable, Final, Generic, Mapping, Optional, Union, cast
 import attr
 import bitmath
 
+from .determ_hash import determ_hash, hashable
 from .index import Index, IndexKeyType
 from .obj_store import DirObjStore, ObjStore
-from .determ_hash import hashable, determ_hash
+from .pickler import Pickler
 from .replacement_policies import REPLACEMENT_POLICIES, Entry, ReplacementPolicy
 from .rw_lock import FileRWLock, Lock, RWLock
-from .util import (
-    Constant,
-    FuncParams,
-    FuncReturn,
-    Future,
-    GetAttr,
-    KeyGen,
-    Pickler,
-    identity,
-)
+from .util import Constant, FuncParams, FuncReturn, Future, GetAttr, KeyGen, identity, none_tuple
 
 __version__ = "1.0.0"
 
@@ -55,11 +46,6 @@ def memoize(
 
 DEFAULT_LOCK_PATH = ".cache/.lock"
 DEFAULT_OBJ_STORE_PATH = ".cache"
-PICKLERS: Mapping[str, Callable[[], Pickler]] = {
-    "pickle": lambda: pickle,
-    "dill": lambda: importlib.import_module("dill"),
-    "cloudpickle": lambda: importlib.import_module("cloudpickle"),
-}
 
 # pyright thinks attrs has ambiguous overload
 @attr.define(init=False)  # type: ignore
@@ -77,6 +63,7 @@ class MemoizedGroup:
     _fine_grain_eviction: bool
     _index_key: int
     _extra_system_state: Callable[[], Any]
+    _version: int
 
     def __init__(
             self,
@@ -84,7 +71,7 @@ class MemoizedGroup:
             obj_store: Optional[ObjStore] = None,
             replacement_policy: Union[str, ReplacementPolicy] = "dummy",
             size: Union[int, str, bitmath.Bitmath] = bitmath.MiB(1),
-            pickler: Union[str, Pickler] = "pickle",
+            pickler: Pickler = pickle,
             lock: Optional[RWLock] = None,
             fine_grain_persistence: bool = False,
             fine_grain_eviction: bool = False,
@@ -95,7 +82,7 @@ class MemoizedGroup:
         :param obj_store: The object store to use for return values.
         :param replacement_policy: See policies submodule for options. You can pass an object conforming to the ReplacementPolicy protocol or one of REPLACEMENT_POLICIES.
         :param size: The size as an int (in bytes), as a string (e.g. "3 MiB"), or as a `bitmath.Bitmath`_.
-        :param pickler: A de/serialization to use on the index. You can pass an object conforming to the Pickler protocol or one of PICKLERS.
+        :param pickler: A de/serialization to use on the index, conforming to the Pickler protocol.
         :param lock: A ReadersWriterLock to achieve exclusion. If the lock is wrong but the obj_store is atomic, then the memoization is still *correct*, but it may not be able to borrow values that another machine computed. Defaults to a FileRWLock.
         :param fine_grain_persistence: De/serialize the index at every access. This is useful if you need to update the cache for multiple simultaneous processes, but it compromises performance in the single-process case.
         :param fine_grain_eviction: Maintain the cache's size through eviction at every access (rather than just the de/serialization points). This is useful if the caches size would not otherwise fit in memory, but it compromises performance if not needed.
@@ -122,13 +109,14 @@ class MemoizedGroup:
             size if isinstance(size, bitmath.Bitmath) else \
             bitmath.Byte(size) if isinstance(size, int) else \
             bitmath.parse_string(size)
-        self._pickler = PICKLERS[pickler]() if isinstance(pickler, str) else pickler
+        self._pickler = pickler
         self._lock = lock if lock is not None else FileRWLock(DEFAULT_LOCK_PATH)
         self._fine_grain_persistence = fine_grain_persistence
         self._fine_grain_eviction = fine_grain_eviction
         self._extra_system_state = extra_system_state
         self._index_key = 0
         self._index_read()
+        self._version = 0
         atexit.register(self._index_write)
 
     def _deleter(self, item: tuple[Any, Entry]) -> None:
@@ -141,24 +129,29 @@ class MemoizedGroup:
         with self._lock.reader:
             if self._index_key in self._obj_store:
                 # TODO: persist ReplacementPolicy state and friends
-                other_index, other_rp = cast(
+                other_version, other_index, other_rp = cast(
                     tuple[Index[Any, Entry], ReplacementPolicy],
                     self._pickler.loads(self._obj_store[self._index_key]),
                 )
-                self._index.update(other_index)
-                self._replacement_policy.update(other_rp)
+                if other_version > self._version:
+                    self._version = other_version
+                    self._index.update(other_index)
+                    self._replacement_policy.update(other_rp)
 
     def _index_write(self) -> None:
         with self._lock.writer:
             if self._index_key in self._obj_store:
-                other_index, other_rp = cast(
+                other_version, other_index, other_rp = cast(
                     tuple[Index[Any, Entry], ReplacementPolicy],
                     self._pickler.loads(self._obj_store[self._index_key]),
                 )
-                self._index.update(other_index)
-                self._replacement_policy.update(other_rp)
+                if other_version > self._version:
+                    self._version = other_version
+                    self._index.update(other_index)
+                    self._replacement_policy.update(other_rp)
             self._evict()
-            self._obj_store[self._index_key] = self._pickler.dumps((self._index, self._replacement_policy))
+            self._version += 1
+            self._obj_store[self._index_key] = self._pickler.dumps((self._version, self._index, self._replacement_policy))
 
     def _system_state(self) -> Any:
         """Functions are deterministic with (global state, function-specific state, args key, args version).
@@ -185,9 +178,7 @@ class MemoizedGroup:
             del self._index[key]
 
 
-DEFAULT_MEMOIZED_GROUP = Future[MemoizedGroup](fulfill_twice=True)
-# TODO: Can I delay instantiating DirObjStore until I know that I am using it?
-DEFAULT_MEMOIZED_GROUP.fulfill(MemoizedGroup())
+DEFAULT_MEMOIZED_GROUP = Future[MemoizedGroup].create(cast(Callable[[], MemoizedGroup], MemoizedGroup))
 
 
 # pyright thinks attrs has ambiguous overload
@@ -195,7 +186,7 @@ DEFAULT_MEMOIZED_GROUP.fulfill(MemoizedGroup())
 class Memoized(Generic[FuncParams, FuncReturn]):
     _func: Callable[FuncParams, FuncReturn]
 
-    _group: Future[MemoizedGroup]
+    group: MemoizedGroup
 
     _name: str
 
@@ -227,13 +218,13 @@ class Memoized(Generic[FuncParams, FuncReturn]):
             self,
             func: Callable[FuncParams, FuncReturn],
             *,
-            group: Future[MemoizedGroup] = DEFAULT_MEMOIZED_GROUP,
+            group: MemoizedGroup = DEFAULT_MEMOIZED_GROUP,
             name: Optional[str] = None,
             use_obj_store: bool = True,
             use_metadata_size: bool = False,
             lossy_compression: bool = True,
             verbose: bool = True,
-            pickler: Union[Pickler, str, None] = None,
+            pickler: Optional[Pickler] = None,
             extra_func_state: Callable[[Callable[FuncParams, FuncReturn]], Any] = Constant(None), # type: ignore
             extra_args2key: Callable[FuncParams, Any] = Constant(None),
             extra_args2ver: Callable[FuncParams, Any] = Constant(None),
@@ -278,12 +269,12 @@ report at process-exit saying how much time was saved. This is useful to determi
 
         self._func = func
         self._name = name if name is not None else f"{self._func.__module__}.{self._func.__qualname__}"
-        self._group = group
+        self.group = group
         self._use_obj_store = use_obj_store
         self._use_metadata_size = use_metadata_size
         self._lossy_compression = lossy_compression
         self._verbose = verbose
-        self._pickler = PICKLERS[pickler]() if isinstance(pickler, str) else pickler
+        self._pickler = pickler
         self._lock = threading.RLock()
         self._extra_func_state = extra_func_state
         self._extra_args2key = extra_args2key
@@ -330,7 +321,7 @@ report at process-exit saying how much time was saved. This is useful to determi
         if self._pickler is None:
             return (
                 # Group is a "friend class", hence pylint disable
-                self._group._._pickler  # pylint: disable=protected-access
+                self.group._pickler  # pylint: disable=protected-access
             )
         else:
             return self._pickler
@@ -356,7 +347,7 @@ report at process-exit saying how much time was saved. This is useful to determi
             self._func,
             self.pickler,
             # Group is a "friend class", so pylint disable
-            self._group._._obj_store,  # pylint: disable=protected-access
+            self.group._obj_store,  # pylint: disable=protected-access
             GetAttr[Callable[[], Any]]()(self._func, "__version__", lambda: None)(),
         ) + none_tuple(self._extra_func_state(self._func))
 
@@ -407,9 +398,9 @@ report at process-exit saying how much time was saved. This is useful to determi
             data_size = bitmath.Byte(len(value_ser))
             # Group is a "friend class", hence pylint disable
             stored_value = next(
-                self._group._._key_gen  # pylint: disable=protected-access
+                self.group._key_gen  # pylint: disable=protected-access
             )
-            self._group._._obj_store[  # pylint: disable=protected-access
+            self.group._obj_store[  # pylint: disable=protected-access
                 stored_value
             ] = value_ser
         else:
@@ -441,37 +432,37 @@ report at process-exit saying how much time was saved. This is useful to determi
 
             key = self.key(*args, **kwargs)
 
-            if self._group._._fine_grain_persistence:
-                self._group._._index_read()
+            if self.group._fine_grain_persistence:
+                self.group._index_read()
 
-            if key in self._group._._index:
+            if key in self.group._index:
                 self._logger.debug("hit %s, %s", args, kwargs)
-                entry = self._group._._index[key]
+                entry = self.group._index[key]
                 if entry.obj_store:
                     value = cast(
                         FuncReturn,
                         self.pickler.loads(
-                            self._group._._obj_store[cast(int, entry.value)]
+                            self.group._obj_store[cast(int, entry.value)]
                         ),
                     )
                 else:
                     value = cast(FuncReturn, entry.value)
                 self.time_saved += entry.time_saved
-                self._group._._replacement_policy.access(key, entry)
+                self.group._replacement_policy.access(key, entry)
             else:
                 self._logger.debug("miss %s, %s", args, kwargs)
                 entry, value = self._recompute(*args, **kwargs)
                 if self._use_metadata_size:
-                    entry.data_size += bitmath.Byte(len(self._group._._pickler.dumps(entry)))
-                    entry.data_size += bitmath.Byte(len(self._group._._pickler.dumps(key)))
-                self._group._._index[key] = entry
-                self._group._._replacement_policy.add(key, entry)
+                    entry.data_size += bitmath.Byte(len(self.group._pickler.dumps(entry)))
+                    entry.data_size += bitmath.Byte(len(self.group._pickler.dumps(key)))
+                self.group._index[key] = entry
+                self.group._replacement_policy.add(key, entry)
 
-            if self._group._._fine_grain_eviction:
-                self._group._._evict()
+            if self.group._fine_grain_eviction:
+                self.group._evict()
 
-            if self._group._._fine_grain_persistence:
-                self._group._._index_write()
+            if self.group._fine_grain_persistence:
+                self.group._index_write()
 
             stop = datetime.datetime.now()
             self.time_cost += stop - start
@@ -496,7 +487,7 @@ report at process-exit saying how much time was saved. This is useful to determi
         # We will only hash the potentially large key items that are used exclusively by this Memoized function.
         return (
             # Group is a friend class, hence type ignore
-            hashable(self._group._._system_state()),  # pylint: disable=protected-access
+            hashable(self.group._system_state()),  # pylint: disable=protected-access
             hashable(self._name),
             self._compress(hashable(self._func_state())),
             self._compress(hashable(self._args2key(*args, **kwargs))),
@@ -504,16 +495,10 @@ report at process-exit saying how much time was saved. This is useful to determi
         )
 
     def would_hit(self, *args: FuncParams.args, **kwargs: FuncParams.kwargs) -> bool:
-        if self._group._._fine_grain_persistence:  # pylint: disable=protected-access
-            self._group._._index_read() # pylint: disable=protected-access
+        if self.group._fine_grain_persistence:  # pylint: disable=protected-access
+            self.group._index_read() # pylint: disable=protected-access
 
         key = self.key(*args, **kwargs)
-        return key in self._group._._index # pylint: disable=protected-access
-
-def none_tuple(obj: Any) -> tuple[Any, ...]:
-    if obj is not None:
-        return (obj,)
-    else:
-        return ()
+        return key in self.group._index # pylint: disable=protected-access
 
 # TODO: work for methods (@memoize def foo(self) ...)

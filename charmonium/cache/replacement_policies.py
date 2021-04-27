@@ -2,12 +2,10 @@ from __future__ import annotations
 
 import abc
 import datetime
-from typing import Any
+from typing import Any, TYPE_CHECKING
 
 import attr
 import bitmath
-
-from .util import GetAttr
 
 
 # pyright thinks attrs has ambiguous overload
@@ -39,8 +37,35 @@ class ReplacementPolicy:  # pylint: disable=no-self-use,unused-argument
         ...
 
 # TODO: implement other replacement policies
-class GDSize:
-    ...
+class GDSize(ReplacementPolicy):
+    """GreedyDual-Size policy, described by [Cao et al.]_.
+
+    .. [Cao et al.] Cao, Pei, and Sandy Irani. "Cost-aware www proxy caching algorithms." _Usenix symposium on internet technologies and systems_. Vol. 12. No. 97. 1997. https://www.usenix.org/legacy/publications/library/proceedings/usits97/full_papers/cao/cao.pdf
+
+    """
+    def __init__(self) -> None:
+        self.inflation = 0.0
+        self._data = dict[Any, float]()
+    def add(self, key: Any, entry: Entry) -> None:
+        self.access(key, entry)
+    def access(self, key: Any, entry: Entry) -> None:
+        self._data[key] = self.inflation + entry.recompute_time.total_seconds() / entry.data_size.to_KiB().value
+    def invalidate(self, key: Any, entry: Any) -> None: # pylint: disable=unused-argument
+        del self._data[key]
+    def evict(self) -> tuple[Any, Entry]:
+        if self._data:
+            self.inflation, key = min([(score, key) for key, score in self._data.items()])
+            return key
+        else:
+            raise ValueError("No data left to evict")
+    def update(self, other: ReplacementPolicy) -> None:
+        if isinstance(other, GDSize) or (type(other).__name__ == type(self).__name__ and not TYPE_CHECKING):
+            # I need the type(other).__name == type(self).__name__ because when this class is de/serialized, Python forgets that it is equal.
+            # However, I don't want the type checker to think too hard about it; it should just know isinstance(other, GDSIze), so I add not TYPE_CHECKING.
+            self._data.update(other._data) # pylint: disable=protected-access
+            self.inflation = other.inflation
+        else:
+            raise TypeError(f"Cannot update a {type(self)} from a {type(other)}")
 
 class Dummy(ReplacementPolicy):  # pylint: disable=no-self-use,unused-argument
     def __init__(self) -> None:
@@ -57,15 +82,12 @@ class Dummy(ReplacementPolicy):  # pylint: disable=no-self-use,unused-argument
         else:
             raise ValueError("No data left to evict")
     def update(self, other: ReplacementPolicy) -> None:
-        if type(other).__name__ == "Dummy":
-            # Python doesn't know that charmonium.cache.ReplacementPolicies.Dummy == cache.ReplacementPolicies.Dummy
-            # due to the relative import.
-            for key, val in GetAttr[dict[Any, Entry]]()(other, "_data", check_callable=False).items():
-                if key not in self._data:
-                    self._data[key] = val
+        if isinstance(other, Dummy) or (type(other).__name__ == type(self).__name__ and not TYPE_CHECKING):
+            self._data.update(other._data) # pylint: disable=protected-access
         else:
-            raise TypeError(f"Cannot update a Dummy ReplacementPolicy from a {type(other)} {type(self)}")
+            raise TypeError(f"Cannot update a {type(self)} from a {type(other)}")
 
 REPLACEMENT_POLICIES = dict[str, type[ReplacementPolicy]](
+    gdsize=GDSize,
     dummy=Dummy,
 )

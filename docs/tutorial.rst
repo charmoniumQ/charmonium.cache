@@ -135,7 +135,7 @@ invalidated. I use |inspect.getclosurevars|_ to read these.
 
     >>> import inspect
     >>> inspect.getclosurevars(foo)
-    ClosureVars(nonlocals={}, globals={'bar': <function bar at 0x7fe396b32940>, 'i': 42}, builtins={}, unbound=set())
+    ClosureVars(nonlocals={}, globals={'bar': <function bar at ...>, 'i': 42}, builtins={}, unbound=set())
 
 To assess if a function has changed, I compare the closure-variables and the compiled bytecode
 (e.g., ``foo.__code__.co_code``). See |determ_hash|_ for more details.

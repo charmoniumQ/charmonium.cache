@@ -1,22 +1,9 @@
 from __future__ import annotations
 
 import math
-import os
 import random
-import typing
 import warnings
-from pathlib import Path
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Generic,
-    Iterable,
-    Optional,
-    Protocol,
-    TypeVar,
-    Union,
-    cast,
-)
+from typing import TYPE_CHECKING, Any, Callable, Generic, Optional, TypeVar, Union, cast
 
 import attr
 
@@ -35,72 +22,7 @@ else:
 FuncReturn = TypeVar("FuncReturn")
 
 
-class Pickler(Protocol):
-    def loads(self, buffer: bytes) -> Any:
-        ...
-
-    def dumps(self, obj: Any) -> bytes:
-        ...
-
-
 # TODO: adapter for joblib's Pickler?
-
-
-_PathLikeSubclass = Any
-@typing.runtime_checkable
-class PathLike(Protocol):
-    """Duck type of `pathlib.Path`_
-
-    .. _`pathlib.Path`: https://docs.python.org/3/library/pathlib.html#pathlib.Path"""
-
-    def __truediv__(self, key: str) -> _PathLikeSubclass:
-        """Joins a segment onto this Path."""
-
-    def read_bytes(self) -> bytes:
-        ...
-
-    def write_bytes(self, data: bytes) -> int:
-        ...
-
-    def mkdir(self, *, parents: bool = ..., exist_ok: bool = ...) -> None:
-        ...
-
-    def unlink(self, missing_ok: bool = ...) -> None:
-        ...
-
-    def iterdir(self) -> Iterable[_PathLikeSubclass]:
-        ...
-
-    def stat(self) -> os.stat_result:
-        ...
-
-    @property
-    def parent(self) -> _PathLikeSubclass:
-        ...
-
-    def exists(self) -> bool:
-        ...
-
-    def resolve(self) -> _PathLikeSubclass:
-        ...
-
-    def __fspath__(self) -> str:
-        ...
-
-    name: str
-
-
-PathLikeFrom = Union[str, PathLike]
-
-
-def pathlike_from(path: PathLikeFrom) -> PathLike:
-    if isinstance(path, str):
-        return Path(path)
-    elif isinstance(path, PathLike): # type: ignore
-        # somehow pyright doesn't think that a Path can be PathLike
-        return path
-    else:
-        raise TypeError(f"Unable to interpret {path} as a PathLike.")
 
 
 # pyright thinks attrs has ambiguous overload
@@ -153,35 +75,30 @@ class Sentinel:
     pass
 
 
-# TODO: emulate object by getting attrs
 class Future(Generic[_T]):
-    def __init__(self, fulfill_twice: bool = False) -> None:
+    def __init__(self, thunk: Callable[[], _T]) -> None:
+        self._thunk = thunk
+        self._value: Optional[_T] = None
         self.computed = False
-        self.value: Optional[_T] = None
-        self.fulfill_twice = fulfill_twice
 
     def unwrap(self) -> _T:
         if not self.computed:
-            raise ValueError("Future is not yet fulfilled.")
-        else:
-            return cast(_T, self.value)
-
-    @property
-    def _(self) -> _T:
-        return self.unwrap()
-
-    def fulfill(self, value: _T) -> None:
-        if self.computed and not self.fulfill_twice:
-            raise ValueError("Cannot fulfill this future twice.")
-        else:
-            self.value = value
             self.computed = True
+            self._value = self._thunk()
+        return cast(_T, self._value)
+
+    def __getattr__(self, this_attr: str) -> Any:
+        return getattr(self.unwrap(), this_attr)
+
+    @classmethod
+    def create(cls, thunk: Callable[[], _T]) -> _T:
+        return cast(_T, cls(thunk))
 
 
 class GetAttr(Generic[_T]):
     """When you want to getattr or use a default, with static types.
 
-    Example: obj_hash = GetAttr[Callable[[], int]]()(obj, "__hash__", lambda: hash(obj))()
+    Example: ``obj_hash = GetAttr[Callable[[], int]]()(obj, "__hash__", lambda: hash(obj))()``
 
     """
 
@@ -201,7 +118,7 @@ class GetAttr(Generic[_T]):
             attr_val = getattr(obj, attr_name)
             if check_callable and not hasattr(attr_val, "__call__"):
                 raise TypeError(
-                    f"Expected ({obj!r}).{attr_name} to be callable, but it is {type(attr_val)}."
+                    f"GetAttr expected ({obj!r}).{attr_name} to be callable, but it is {type(attr_val)}. Add ``check_callable=False`` to ignore."
                 )
             else:
                 return cast(_T, attr_val)
@@ -214,3 +131,9 @@ class GetAttr(Generic[_T]):
 
 def identity(obj: _T) -> _T:
     return obj
+
+def none_tuple(obj: Any) -> tuple[Any, ...]:
+    if obj is not None:
+        return (obj,)
+    else:
+        return ()
