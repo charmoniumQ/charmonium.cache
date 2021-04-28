@@ -78,7 +78,7 @@ class MemoizedGroup:
             self,
             *,
             obj_store: Optional[ObjStore] = None,
-            replacement_policy: Union[str, ReplacementPolicy] = "dummy",
+            replacement_policy: Union[str, ReplacementPolicy] = "gdsize",
             size: Union[int, str, bitmath.Bitmath] = bitmath.MiB(1),
             pickler: Pickler = pickle,
             lock: Optional[RWLock] = None,
@@ -182,6 +182,7 @@ class MemoizedGroup:
         while total_size > self._size:
             key, entry = self._replacement_policy.evict()
             if entry.obj_store:
+                assert entry.value in self._obj_store, "Replacement policy tried to evict something that wasn't there"
                 del self._obj_store[entry.value]
             total_size -= entry.data_size
             del self._index[key]

@@ -32,7 +32,7 @@ def run_script(
     as_main: bool = False,
     inputs: list[int] = [2, 3, 2],
 ) -> ScriptResult:
-    script = pathlike_from(directory) / "script_{name}.py"
+    script = pathlike_from(directory) / f"script_{name}.py"
     script.parent.mkdir(exist_ok=True)
 
     script.write_text(
@@ -65,7 +65,7 @@ serializers = dict(
 )
 
 print(json.dumps(dict(
-    recomputed=[dict(x[0])[0] for (_, _, _, x, _), _ in func.group._index.items()],
+    recomputed=[dict(x)[0] for (_, _, _, x, _), _ in func.group._index.items()],
     returns=returns,
     serialized={{
         serializer_name: base64.b64encode(serializer(func._func)).decode()

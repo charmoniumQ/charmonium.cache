@@ -29,6 +29,12 @@ class FileContents:
     def __init__(self, path: PathLikeFrom) -> None:
         self.path = pathlike_from(path)
 
+    def __add__(self, path: str) -> FileContents:
+        return FileContents(type(self.path)(str(self.path) + path)) # type: ignore
+
+    def __radd__(self, path: str) -> FileContents:
+        return FileContents(type(self.path)(path + str(self.path))) # type: ignore
+
     def __fspath__(self) -> Union[bytes, str]:
         return self.path.__fspath__()
 

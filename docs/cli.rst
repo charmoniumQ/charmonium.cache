@@ -19,4 +19,4 @@ normal files, so it can be safely used in a pipe.
 
 ``command`` may require stdin, but no TTY interactivity.
 
-``memoize`` uses ``strace`` to learn the input and output files.
+``memoize`` uses syscall interception to learn the input and output files.

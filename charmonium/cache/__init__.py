@@ -7,6 +7,9 @@ from .memoize import (
     __version__ as __version__,
     memoize as memoize,
 )
+from .util import Future as Future
+from .pathlike import pathlike_from as pathlike_from, PathLike as PathLike
+from .pickler import Pickler as Pickler
 from .obj_store import DirObjStore as DirObjStore, ObjStore as ObjStore
 from .replacement_policies import (
     GDSize as GDSize,

@@ -45,17 +45,19 @@ class GDSize(ReplacementPolicy):
     """
     def __init__(self) -> None:
         self.inflation = 0.0
-        self._data = dict[Any, float]()
+        self._data = dict[Any, tuple[float, Entry]]()
     def add(self, key: Any, entry: Entry) -> None:
         self.access(key, entry)
     def access(self, key: Any, entry: Entry) -> None:
-        self._data[key] = self.inflation + entry.recompute_time.total_seconds() / entry.data_size.to_KiB().value
+        score = self.inflation + entry.recompute_time.total_seconds() / max(entry.data_size.to_Byte().value, 1)
+        self._data[key] = (score, entry)
     def invalidate(self, key: Any, entry: Any) -> None: # pylint: disable=unused-argument
         del self._data[key]
     def evict(self) -> tuple[Any, Entry]:
         if self._data:
-            self.inflation, key = min([(score, key) for key, score in self._data.items()])
-            return key
+            self.inflation, key, entry = min([(score, key, entry) for key, (score, entry) in self._data.items()])
+            del self._data[key]
+            return key, entry
         else:
             raise ValueError("No data left to evict")
     def update(self, other: ReplacementPolicy) -> None:
@@ -67,27 +69,6 @@ class GDSize(ReplacementPolicy):
         else:
             raise TypeError(f"Cannot update a {type(self)} from a {type(other)}")
 
-class Dummy(ReplacementPolicy):  # pylint: disable=no-self-use,unused-argument
-    def __init__(self) -> None:
-        self._data = dict[Any, Entry]()
-    def add(self, key: Any, entry: Entry) -> None:
-        self._data[key] = entry
-    def access(self, key: Any, entry: Entry) -> None:
-        pass
-    def invalidate(self, key: Any, entry: Any) -> None:
-        del self._data[key]
-    def evict(self) -> tuple[Any, Entry]:
-        if self._data:
-            return next(iter(self._data.items()))
-        else:
-            raise ValueError("No data left to evict")
-    def update(self, other: ReplacementPolicy) -> None:
-        if isinstance(other, Dummy) or (type(other).__name__ == type(self).__name__ and not TYPE_CHECKING):
-            self._data.update(other._data) # pylint: disable=protected-access
-        else:
-            raise TypeError(f"Cannot update a {type(self)} from a {type(other)}")
-
 REPLACEMENT_POLICIES = dict[str, type[ReplacementPolicy]](
     gdsize=GDSize,
-    dummy=Dummy,
 )

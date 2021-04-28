@@ -2,6 +2,7 @@ import datetime
 import tempfile
 import time
 from pathlib import Path
+from typing import cast
 
 from charmonium.cache import (
     DirObjStore,
@@ -13,37 +14,50 @@ from charmonium.cache import (
 
 
 @memoize()
-def square_file(filename: str) -> int:
-    with open(filename) as file:
-        return int(file.read().strip())**2
+def double(infilename: str) -> str:
+    outfilename = infilename + "doubled"
+    with open(outfilename, "w") as outfile:
+        try:
+            with open(infilename, "r") as infile:
+                buffer = infile.read()
+        except FileNotFoundError:
+            buffer = ""
+        outfile.write(buffer + " " + buffer)
+    return outfilename
 
 def test_filecontents() -> None:
     with tempfile.TemporaryDirectory() as path_:
         path = Path(path_)
-        square_file.group = MemoizedGroup(obj_store=DirObjStore(path))
+        double.group = MemoizedGroup(obj_store=DirObjStore(path))
 
-        file1 = path / "file1"
-        file2 = path / "file2"
+        file1 = cast(str, FileContents(path / "file1"))
 
-        # test __cache_key__ of non-existent file contents
-        FileContents(file1).__cache_key__()
+        Path(file1).write_text("hello")
 
-        file1.write_text("3")
-        # FileContents is masquerading as a str
-        assert square_file(FileContents(file1)) == 9  # type: ignore
+        outfile1 = double(file1)
+        assert Path(outfile1).read_text() == "hello hello", "reading and writing are transparent"
+        assert double.would_hit(file1), "cache ver is same since file didn't change"
 
-        file2.write_text("4")
-        assert square_file(FileContents(file2)) == 16  # type: ignore
+        Path(outfile1).write_text("blah blah")
 
-        assert square_file.would_hit(FileContents(file1))  # type: ignore
-        assert square_file.would_hit(FileContents(file2))  # type: ignore
-        file1.write_text("5")
-        assert not square_file.would_hit(FileContents(file1)), "unchanged file still hits"  # type: ignore
-        assert square_file.would_hit(FileContents(file2)), "changed file misses"  # type: ignore
+        outfile1 = double(file1)
+        assert Path(outfile1).read_text() == "hello hello", "recall from storage works"
 
-        assert square_file(FileContents(file1)) == 25  # type: ignore
-        assert square_file(FileContents(str(file1))) == 25  # type: ignore
+        Path(file1).write_text("world")
 
+        assert not double.would_hit(file1), "cache ver changes since file changed"
+
+def test_filecontents_empty() -> None:
+    with tempfile.TemporaryDirectory() as path_:
+        path = Path(path_)
+        double.group = MemoizedGroup(obj_store=DirObjStore(path))
+        file2 = cast(str, FileContents(path / "file2"))
+        double(file2)
+
+def test_filecontents_add() -> None:
+    file2 = FileContents("abc")
+    assert ("123" + file2).__fspath__() == "123abc"
+    assert (file2 + "123").__fspath__() == "abc123"
 
 dt = datetime.timedelta(seconds=0.01)
 
