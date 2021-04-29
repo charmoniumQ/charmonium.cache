@@ -2,14 +2,22 @@ from __future__ import annotations
 
 import atexit
 import datetime
-# import functools
-# import heapq
 import logging
 import pickle
 import sys
 import threading
 import warnings
-from typing import Any, Callable, Final, Generic, Mapping, Optional, Union, cast
+from typing import (
+    Any,
+    Callable,
+    DefaultDict,
+    Final,
+    Generic,
+    Mapping,
+    Optional,
+    Union,
+    cast,
+)
 
 import attr
 import bitmath
@@ -39,6 +47,7 @@ BYTE_ORDER: Final[str] = "big"
 def memoize(
     **kwargs: Any,
 ) -> Callable[[Callable[FuncParams, FuncReturn]], Memoized[FuncParams, FuncReturn]]:
+    """See :py:class:`charmonium.cache.Memoized`."""
     def actual_memoize(
         func: Callable[FuncParams, FuncReturn], /
     ) -> Memoized[FuncParams, FuncReturn]:
@@ -73,6 +82,8 @@ class MemoizedGroup:
     _index_key: int
     _extra_system_state: Callable[[], Any]
     _version: int
+    time_cost: dict[str, datetime.timedelta]
+    time_saved: dict[str, datetime.timedelta]
 
     def __init__(
             self,
@@ -86,7 +97,7 @@ class MemoizedGroup:
             fine_grain_eviction: bool = False,
             extra_system_state: Callable[[], Any] = Constant(None),
     ) -> None:
-        """Test
+        """Construct a memoized group. Use with :py:function:Memoized.
 
         :param obj_store: The object store to use for return values.
         :param replacement_policy: See policies submodule for options. You can pass an object conforming to the ReplacementPolicy protocol or one of REPLACEMENT_POLICIES.
@@ -125,6 +136,8 @@ class MemoizedGroup:
         self._extra_system_state = extra_system_state
         self._index_key = 0
         self._version = 0
+        self.time_cost = DefaultDict[str, datetime.timedelta](datetime.timedelta)
+        self.time_saved = DefaultDict[str, datetime.timedelta](datetime.timedelta)
         self._index_read()
         atexit.register(self._index_write)
 
@@ -138,29 +151,33 @@ class MemoizedGroup:
         with self._lock.reader:
             if self._index_key in self._obj_store:
                 # TODO: persist ReplacementPolicy state and friends
-                other_version, other_index, other_rp = cast(
-                    tuple[int, Index[Any, Entry], ReplacementPolicy],
+                other_version, other_index, other_rp, other_tc, other_ts = cast(
+                    tuple[int, Index[Any, Entry], ReplacementPolicy, DefaultDict[str, datetime.timedelta], DefaultDict[str, datetime.timedelta]],
                     self._pickler.loads(self._obj_store[self._index_key]),
                 )
                 if other_version > self._version:
                     self._version = other_version
                     self._index.update(other_index)
                     self._replacement_policy.update(other_rp)
+                    self.time_cost = other_tc
+                    self.time_saved = other_ts
 
     def _index_write(self) -> None:
         with self._lock.writer:
             if self._index_key in self._obj_store:
-                other_version, other_index, other_rp = cast(
-                    tuple[int, Index[Any, Entry], ReplacementPolicy],
+                other_version, other_index, other_rp, other_tc, other_ts = cast(
+                    tuple[int, Index[Any, Entry], ReplacementPolicy, DefaultDict[str, datetime.timedelta], DefaultDict[str, datetime.timedelta]],
                     self._pickler.loads(self._obj_store[self._index_key]),
                 )
                 if other_version > self._version:
                     self._version = other_version
                     self._index.update(other_index)
                     self._replacement_policy.update(other_rp)
+                    self.time_cost = other_tc
+                    self.time_saved = other_ts
             self._evict()
             self._version += 1
-            self._obj_store[self._index_key] = self._pickler.dumps((self._version, self._index, self._replacement_policy))
+            self._obj_store[self._index_key] = self._pickler.dumps((self._version, self._index, self._replacement_policy, self.time_cost, self.time_saved))
 
     def _system_state(self) -> Any:
         """Functions are deterministic with (global state, function-specific state, args key, args version).
@@ -198,7 +215,7 @@ class Memoized(Generic[FuncParams, FuncReturn]):
 
     group: MemoizedGroup
 
-    _name: str
+    name: str
 
     _use_obj_store: bool
 
@@ -209,20 +226,15 @@ class Memoized(Generic[FuncParams, FuncReturn]):
     # TODO: make this accept default_group_verbose = Sentinel()
     _verbose: bool
 
-    _pickler: Optional[Pickler]
+    _my_pickler: Optional[Pickler]
 
     _extra_func_state: Callable[[Callable[FuncParams, FuncReturn]], Any]
-    _extra_args2key: Callable[FuncParams, Any]
-    _extra_args2ver: Callable[FuncParams, Any]
 
     _lock: Lock
 
     _logger: logging.Logger
     _handler: logging.Handler
 
-    # TODO: persist time_cost, time_saved, date_began.
-    time_cost: datetime.timedelta
-    time_saved: datetime.timedelta
 
     def __init__(
             self,
@@ -236,61 +248,30 @@ class Memoized(Generic[FuncParams, FuncReturn]):
             verbose: bool = True,
             pickler: Optional[Pickler] = None,
             extra_func_state: Callable[[Callable[FuncParams, FuncReturn]], Any] = Constant(None), # type: ignore
-            extra_args2key: Callable[FuncParams, Any] = Constant(None),
-            extra_args2ver: Callable[FuncParams, Any] = Constant(None),
     ) -> None:
-        """
+        """Construct a memozied function
 
-Storing the whole argument is usually overkill; just storing a hash will do (the default
-behavior). Python's |hash|_ will return different values across different runs, so I use
-|determ_hash|_.  If for some reason you *do* want to keep the whole object, set ``memoize(...,
-use_hash=False)``.
-
-.. |hash| replace:: ``hash``
-.. _`hash`: https://docs.python.org/3/library/functions.html?highlight=hash#hash
-
-.. |determ_hash| replace:: ``determ_hash``
-.. _`determ_hash`: http://example.com
-
-.. TODO: API URLs
-
-By default, the index entry just holds an object key and the object store maps that to the actual
-returned object. This level of indirection means that the index is small and can be loaded quickly
-even if the returned objects are big. If the returned objects are small, you can omit the
-indirection by setting ``memoize(..., use_obj_store=False)``.
-
-By default, only the object size (not index metadata) is counted towards the size of retaining an
-object, but if the object is stored in the index, the object size will be zero.  then the
-metadata. Set ``memoize(..., use_metadata_size)`` to include metadata in the size calculation. This
-is a bit slower, so it is not the default.
-
-By default, the cache is only culled to the desired size just before serialization. To cull the
-cache after every store, set ``memoize(..., fine_grain_eviction=True)``. This is useful if the cache
-would run out of memory without an eviction.
-
-Be aware of ``memoize(..., verbose=True|False)``. If verbose is enabled, the cache will emit a
-report at process-exit saying how much time was saved. This is useful to determine if caching is
-"worth it."
-
+        :param group: see :py:class:`charmonium.cache.MemoizedGroup`.
+        :param lossy_compression: whether to use a hash of the arguments or the actual arguments.
+        :param name: A key-to-lookup distinguishing this funciton from others. Defaults to the Python module and name.
+        :param extra_func_state: An extra state function. The return-value is a key-to-match after the function name.
+        :param use_obj_store: whether the objects should be put behind object store, a layer of indirection.
         :param use_metadata_size: whether to include the size of the metadata in the size threshold calculation for eviction.
-        :param lossy_compression: whether to use a hash of the arguments or the actual arguments. A hash will be faster and smaller, but the actual values are more useful for debugging.
-
+        :param pickler: A custom pickler to use with the index. Pickle types must include tuples of picklable types, hashable types, and the arguments (``__cache_key__`` and ``__cache_val__``, if defined).
         """
 
         self._func = func
-        self._name = name if name is not None else f"{self._func.__module__}.{self._func.__qualname__}"
+        self.name = name if name is not None else f"{self._func.__module__}.{self._func.__qualname__}"
         self.group = group
         self._use_obj_store = use_obj_store
         self._use_metadata_size = use_metadata_size
         self._lossy_compression = lossy_compression
         self._verbose = verbose
-        self._pickler = pickler
+        self._my_pickler = pickler
         self._lock = threading.RLock()
         self._extra_func_state = extra_func_state
-        self._extra_args2key = extra_args2key
-        self._extra_args2ver = extra_args2ver
 
-        self._logger = logging.getLogger("charmonium.cache").getChild(self._name)
+        self._logger = logging.getLogger("charmonium.cache").getChild(self.name)
         self._logger.setLevel(logging.DEBUG)
         self._handler = logging.StreamHandler(sys.stderr)
         self._handler.setFormatter(logging.Formatter("%(asctime)s - %(message)s"))
@@ -311,30 +292,29 @@ report at process-exit saying how much time was saved. This is useful to determi
 
         # functools.update_wrapper(self, self._func)
 
-        self.time_cost = datetime.timedelta()
-        self.time_saved = datetime.timedelta()
-
     def log_usage_report(self) -> None:
+        tc = self.group.time_cost[self.name]
+        ts = self.group.time_saved[self.name]
         print(
             "Caching %s: cost %.1fs, saved %.1fs, net saved %.1fs" % (
-                self._name,
-                self.time_cost.total_seconds(),
-                self.time_saved.total_seconds(),
-                (self.time_saved - self.time_cost).total_seconds(),
+                self.name,
+                tc.total_seconds(),
+                ts.total_seconds(),
+                (ts - tc).total_seconds(),
             ),
             file=sys.stderr,
         )
 
 
     @property
-    def pickler(self) -> Pickler:
-        if self._pickler is None:
+    def _pickler(self) -> Pickler:
+        if self._my_pickler is None:
             return (
                 # Group is a "friend class", hence pylint disable
                 self.group._pickler  # pylint: disable=protected-access
             )
         else:
-            return self._pickler
+            return self._my_pickler
 
     def _func_state(self) -> Any:
         """Returns function-specific state.
@@ -355,7 +335,7 @@ report at process-exit saying how much time was saved. This is useful to determi
         """
         return (
             self._func,
-            self.pickler,
+            self._pickler,
             # Group is a "friend class", so pylint disable
             self.group._obj_store,  # pylint: disable=protected-access
             GetAttr[Callable[[], Any]]()(self._func, "__version__", lambda: None)(),
@@ -393,7 +373,7 @@ report at process-exit saying how much time was saved. This is useful to determi
         self._logger.removeHandler(self._handler)
 
     def __str__(self) -> str:
-        return f"memoized {self._name}"
+        return f"memoized {self.name}"
 
     def _recompute(
         self, *args: FuncParams.args, **kwargs: FuncParams.kwargs
@@ -404,7 +384,7 @@ report at process-exit saying how much time was saved. This is useful to determi
         mid = datetime.datetime.now()
 
         if self._use_obj_store:
-            value_ser = self.pickler.dumps(value)
+            value_ser = self._pickler.dumps(value)
             data_size = bitmath.Byte(len(value_ser))
             # Group is a "friend class", hence pylint disable
             stored_value = next(
@@ -451,13 +431,13 @@ report at process-exit saying how much time was saved. This is useful to determi
                 if entry.obj_store:
                     value = cast(
                         FuncReturn,
-                        self.pickler.loads(
+                        self._pickler.loads(
                             self.group._obj_store[cast(int, entry.value)]
                         ),
                     )
                 else:
                     value = cast(FuncReturn, entry.value)
-                self.time_saved += entry.time_saved
+                self.group.time_saved[self.name] += entry.time_saved
                 self.group._replacement_policy.access(key, entry)
             else:
                 self._logger.debug("miss %s, %s", args, kwargs)
@@ -475,11 +455,13 @@ report at process-exit saying how much time was saved. This is useful to determi
                 self.group._index_write()
 
             stop = datetime.datetime.now()
-            self.time_cost += stop - start
+            self.group.time_cost[self.name] += stop - start
 
-            if self.time_saved < self.time_cost and self.time_cost.total_seconds() > 5:
+            tc = self.group.time_cost[self.name]
+            ts = self.group.time_saved[self.name]
+            if ts < tc and tc.total_seconds() > 5:
                 warnings.warn(
-                    f"Caching {self._func} cost {self.time_cost.total_seconds():.1f}s but only saved {self.time_saved.total_seconds():.1f}s",
+                    f"Caching {self._func} cost {tc.total_seconds():.1f}s but only saved {ts.total_seconds():.1f}s",
                     UserWarning,
                 )
 
@@ -498,7 +480,7 @@ report at process-exit saying how much time was saved. This is useful to determi
         return (
             # Group is a friend class, hence type ignore
             hashable(self.group._system_state()),  # pylint: disable=protected-access
-            hashable(self._name),
+            hashable(self.name),
             self._compress(hashable(self._func_state())),
             self._compress(hashable(self._args2key(*args, **kwargs))),
             self._compress(hashable(self._args2ver(*args, **kwargs))),

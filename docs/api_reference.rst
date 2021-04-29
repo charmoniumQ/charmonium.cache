@@ -28,6 +28,7 @@ Components
         :special-members: __getitem__, __setitem__, __delitem__, __hash__
 
     .. autoclass:: DirObjStore
+        :show-inheritance:
         :members:
         :special-members: __init__
 
@@ -36,6 +37,7 @@ Components
         :special-members: __init__
 
     .. autoclass:: GDSize
+        :show-inheritance:
         :members:
 
     .. autoclass:: Pickler
@@ -45,10 +47,12 @@ Components
         :members:
 
     .. autoclass:: FileRWLock
+        :show-inheritance:
         :members:
         :special-members: __init__
 
     .. autoclass:: NaiveRWLock
+        :show-inheritance:
         :members:
         :special-members: __init__
 

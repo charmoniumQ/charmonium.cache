@@ -80,10 +80,18 @@ def hashable(obj: Any) -> Hashable:
     totally obfuscate debugging.
 
     Special cases:
-    - Objects with `__determ_hash__` are hashed by making whatever that returns hashable.
-    - Modules are hashed by their `__name__` and `__version__`.
-    - Functions are hashed by their bytecode, constants, and closure-vars. This means changing comments will not change the hashable value.
-    - Other objects are hashed as a dict of their attributes, excluding dunder-attributes.
+
+    - Objects with ``__determ_hash__`` are hashed by making whatever
+      that returns hashable.
+
+    - Modules are hashed by their ``__name__`` and ``__version__``.
+
+    - Functions are hashed by their bytecode, constants, and
+      closure-vars. This means changing comments will not change the
+      hashable value.
+
+    - Other objects are hashed as a dict of their attributes,
+      excluding dunder-attributes.
 
     """
     old_recursionlimit = sys.getrecursionlimit()

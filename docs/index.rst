@@ -4,11 +4,12 @@
    :maxdepth: 1
 
    tutorial
-   theory
+   features
    api_reference
    cli
    contributors_guide
    authors
+   works_cited
 
 * :ref:`genindex`
 * :ref:`modindex`

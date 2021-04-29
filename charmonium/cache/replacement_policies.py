@@ -36,13 +36,8 @@ class ReplacementPolicy:  # pylint: disable=no-self-use,unused-argument
         # TODO: Unlike dict update, self overrides other
         ...
 
-# TODO: implement other replacement policies
 class GDSize(ReplacementPolicy):
-    """GreedyDual-Size policy, described by [Cao et al.]_.
-
-    .. [Cao et al.] Cao, Pei, and Sandy Irani. "Cost-aware www proxy caching algorithms." _Usenix symposium on internet technologies and systems_. Vol. 12. No. 97. 1997. https://www.usenix.org/legacy/publications/library/proceedings/usits97/full_papers/cao/cao.pdf
-
-    """
+    """GreedyDual-Size policy, described by [Cao et al]_."""
     def __init__(self) -> None:
         self.inflation = 0.0
         self._data = dict[Any, tuple[float, Entry]]()

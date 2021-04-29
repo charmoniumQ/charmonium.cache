@@ -33,7 +33,7 @@ release = getattr(charmonium.cache, "__version__")
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
-    "sphinx_autodoc_typehints",
+    # "sphinx_autodoc_typehints",
     # "sphinx.ext.viewcode",
     # "sphinx.ext.napoleon",
     "sphinx.ext.intersphinx",
@@ -67,6 +67,19 @@ pygments_style = "sphinx"
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = False
 
+python_use_unqualified_type_names = True
+add_module_names = False
+autodoc_type_aliases = {
+    "ReplacementPolicy": "ReplacementPolicy",
+    "Entry": "Entry",
+    "bitmath.Bitmath": "bitmath.Bitmath",
+    "Pickler": "Pickler",
+    "RWLock": "RWLock",
+    "FuncParams": "FuncParams",
+    "FuncReturn": "FuncReturn",
+    "PathLike": "PathLike",
+}
+
 
 # -- Options for HTML output -------------------------------------------------
 
@@ -84,5 +97,5 @@ html_theme = "alabaster"
 autodoc_default_options = {
     "member-order": "bysource",
     "undoc-members": True,
-    "show-inheritance": True,
+    "show-inheritance": False,
 }

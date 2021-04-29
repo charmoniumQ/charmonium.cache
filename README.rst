@@ -66,8 +66,8 @@ one is unique because it is:
    network, so that if *any* machine has computed the function for the same
    source-source and arguments, this value can be reused by *any other* machine.
 
-3. **Easy to adopt:** Only requires adding one line (decorator) to the function
-   definition.
+3. **Easy to adopt:** Only requires adding one line (`decorator`_) to
+   the function definition.
 
 4. **Bounded in size:** The cache won't take up too much space. This
    space is partitioned across all memoized functions according to the
@@ -122,35 +122,14 @@ Code quality
   and required for merging with the ``main`` branch; This way they won't be
   easily forgotten.
 
-- I've implemented the complete feature-set in only 900 LoC. LoC count is an
-  imperfect but reasonable metric of how hard something is to maintain and how
-  likely it is to contain bugs according to [Zhang]_.
+- I've implemented the complete feature-set in under 1,000 LoC. LoC
+  count is an imperfect but reasonable metric of how hard something is
+  to maintain and how likely it is to contain bugs according to
+  [Zhang]_.
 
-Works Cited
------------
-
-.. [Guo] Guo, Philip Jia. *Software tools to facilitate research programming*. Stanford University, 2012. See Chapter 5. https://purl.stanford.edu/mb510fs4943
-.. [Podlipnig] Podlipnig, Stefan, and Laszlo Böszörmenyi. "A survey of web cache replacement strategies." *ACM Computing Surveys (CSUR) 35.4* (2003): 374-398. http://www.cs.ucf.edu/~dcm/Teaching/COT4810-Fall%202012/Literature/WebCacheReplacementStrategies.pdf
-.. [Zhang] Zhang, Hongyu. "An investigation of the relationships between lines of code and defects." *2009 IEEE International Conference on Software Maintenance*. IEEE, 2009. https://www.researchgate.net/profile/Hongyu-Zhang-46/publication/316922118_An_Investigation_of_the_Relationships_between_Lines_of_Code_and_Defects/links/591e31e1a6fdcc233fceb563/An-Investigation-of-the-Relationships-between-Lines-of-Code-and-Defects.pdf
-.. .. [Bahn] Bahn, Hyokyung, et al. "Efficient replacement of nonuniform objects in web caches." *Computer* 35.6 (2002): 65-73. https://8cc2ce98-a-f3569e9e-s-sites.googlegroups.com/a/necsst.ce.hongik.ac.kr/publication/jalyosil/getPDF3.pdf?attachauth=ANoY7cqOpLmcb_3TXLj9ACr1qQojQMNL2eTEpG_q5kZXKjl3C6XcW4J0HIA8-ncTm5s0gBFJSK08Ju-on-O5Fu44GHhlOzaIzNkdCV-NaSCZhDpWBOiqJ7FjETvER92tnjJRuDtfRznLahZ7BJ4x2o6lliM00z22ZcAfL8TUVsy9sltZ_CX5WA28Dj2U647XrBjI8xv73GjIKC77J0ubdNuzTIQVDpf16nbqq0RUHzST0EupaNDlNR0%3D&attredirects=0
 .. _`PEP 561`: https://www.python.org/dev/peps/pep-0561/
-.. _`pure functions`: https://en.wikipedia.org/wiki/Pure_function
-.. _`cache thrashing`: https://en.wikipedia.org/wiki/Thrashing_(computer_science)
 .. _`LRU`: https://en.wikipedia.org/wiki/Cache_replacement_policies#Least_recently_used_(LRU)
 .. _`closure`: https://en.wikipedia.org/wiki/Closure_(computer_programming)
-.. _`Universal Pathlib`: https://github.com/Quansight/universal_pathlib/
-.. _`dill`: https://dill.readthedocs.io/en/latest/
 .. _`decorator`: https://en.wikipedia.org/wiki/Python_syntax_and_semantics#Decorators
-.. _`functools.lru_cache`: https://docs.python.org/3/library/functools.html#functools.lru_cache
-.. _`joblib.Memory`: https://joblib.readthedocs.io/en/latest/memory.html
-.. _`Klepto`: https://klepto.readthedocs.io/en/latest/
-.. _`Cachier`: https://github.com/shaypal5/cachier
-.. _`DiskCache`: http://www.grantjenks.com/docs/diskcache/
-.. _`IncPy`: https://web.archive.org/web/20120703015846/http://www.pgbovine.net/incpy.html
-.. _`python-memoization`: https://github.com/lonelyenvoy/python-memoization
-.. _`Object-Relational Mappings`: https://en.wikipedia.org/wiki/Object%E2%80%93relational_mapping
-.. _`lazily evaluating`: https://en.wikipedia.org/wiki/Lazy_evaluation
-.. _`Dask`: https://docs.dask.org/en/latest/
-.. _`mypy`: http://mypy-lang.org/
 .. _`pip install guide`: https://pip.pypa.io/en/latest/installing/
 .. _`pyright`: https://github.com/microsoft/pyright
