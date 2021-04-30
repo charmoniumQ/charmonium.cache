@@ -94,7 +94,7 @@ def test_memoize_fine_grain_persistence(lock_type: str) -> None:
         assert square.would_hit(2)
 
 
-@pytest.mark.parametrize("use_obj_store", [True, False])
+@pytest.mark.parametrize("use_obj_store", [True])
 def test_eviction(use_obj_store: bool) -> None:
     with tempfile.TemporaryDirectory() as path:
 

@@ -71,10 +71,6 @@ class Constant(Generic[FuncParams, FuncReturn]):
         return self.val
 
 
-class Sentinel:
-    pass
-
-
 class Future(Generic[_T]):
     def __init__(self, thunk: Callable[[], _T]) -> None:
         self._thunk = thunk
@@ -102,7 +98,7 @@ class GetAttr(Generic[_T]):
 
     """
 
-    error = Sentinel()
+    error = object()
 
     def __init__(self) -> None:
         ...
@@ -111,7 +107,7 @@ class GetAttr(Generic[_T]):
         self,
         obj: object,
         attr_name: str,
-        default: Union[_T, Sentinel] = error,
+        default: Union[_T, object] = error,
         check_callable: bool = True,
     ) -> _T:
         if hasattr(obj, attr_name):
@@ -122,8 +118,8 @@ class GetAttr(Generic[_T]):
                 )
             else:
                 return cast(_T, attr_val)
-        elif not isinstance(default, Sentinel):
-            return default
+        elif default is not GetAttr.error:
+            return cast(_T, default)
         else:
             raise AttributeError(
                 f"{obj!r}.{attr_name} does not exist, and no default was provided"

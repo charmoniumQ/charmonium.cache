@@ -1,5 +1,4 @@
 {
 	"typeCheckingMode": "strict",
 	"reportPrivateUsage": false,
-	"exclude": ["tmp2"],
 }

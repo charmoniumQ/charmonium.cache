@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import datetime
-from typing import Any, Union, cast
+from typing import Any, Tuple, Union, cast
 
 from .pathlike import PathLike, PathLikeFrom, pathlike_from
 
@@ -55,7 +55,7 @@ class FileContents:
 
     def __setstate__(self, state: Any) -> None:
         """Restore the contents to the path"""
-        self.path, contents = cast(tuple[PathLike, bytes], state)
+        self.path, contents = cast(Tuple[PathLike, bytes], state)
         self.path.write_bytes(contents)
 
 

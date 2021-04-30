@@ -15,10 +15,12 @@ include = ["res/"]
 cache = "charmonium.cache._cli:main"
 
 [tool.poetry.dependencies]
-python = ">=3.9,<3.10"
-attr = "^0.3.1"
+# Note that versions <3.7 cannot be supported because they do not have "delayed evaluation of type annotations."
+# It is too burdensome to rewrite my code with that in mind.
+python = ">=3.6,<3.10"
 bitmath = "^1.3.3"
 fasteners = "^0.16"
+attrs = "^20.3.0"
 
 [tool.poetry.dev-dependencies]
 autoflake = "^1.3.1"
@@ -36,33 +38,13 @@ tox = "^3.15.2"
 rstctl = "^0.4"
 twine = "^3.1.1"
 mypy = "^0.812"
-ipython = "^7.22.0"
 pytest-assume = "^2.4.2"
 pytest-parallel = "^0.1.0"
 sphinx-autodoc-typehints = "^1.12.0"
 sphinxcontrib-spelling = "^7.1.0"
 radon = "^4.5.0"
+tox-pyenv = "^1.1.0"
 
-[tool.tox]
-# According to tox docs
-# The tox configuration can also be in pyproject.toml (if you want to avoid an extra file).
-# Currently only the old format is supported via legacy_tox_ini, a native implementation is planned though.
-legacy_tox_ini = """
-[tox]
-envlist = py36
-isolated_build = True
-
-[tox:.package]
-# note tox will use the same python version as under what tox is installed to package
-# so unless this is python 3 you can require a given python version for the packaging
-# environment via the basepython key
-basepython = python3
-
-[testenv]
-commands =
-    poetry install
-    pytest --quiet --exitfirst tests
-"""
 [build-system]
-requires = ["poetry>=0.12"]
-build-backend = "poetry.masonry.api"
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

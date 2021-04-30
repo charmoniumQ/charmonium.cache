@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import itertools
 import json
 import subprocess
@@ -5,21 +7,30 @@ import sys
 import tempfile
 import textwrap
 import time
-from typing import TypedDict, cast
+from typing import TYPE_CHECKING, cast
+
+if TYPE_CHECKING:
+    from typing import TypedDict
+else:
+    TypedDict = lambda a, b: b
 
 import pytest
 
 from charmonium.cache.pathlike import PathLikeFrom, pathlike_from
 
-ScriptResult = TypedDict(
-    "ScriptResult",
-    {
-        "returns": list[int],
-        "recomputed": list[int],
-        "serialized": dict[str, bytes],
-        "expected": list[int],
-    },
-)
+if TYPE_CHECKING:
+    ScriptResult = TypedDict(
+        "ScriptResult",
+        {
+            "returns": list[int],
+            "recomputed": list[int],
+            "serialized": dict[str, bytes],
+            "expected": list[int],
+        },
+    )
+else:
+    from typing import Any
+    ScriptResult = Any
 
 
 def run_script(

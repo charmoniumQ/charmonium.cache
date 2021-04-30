@@ -1,12 +1,15 @@
 from __future__ import annotations
 
 import os
-import typing
 from pathlib import Path
-from typing import Any, Iterable, Protocol, Union
+from typing import Any, Iterable, Union, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from typing import Protocol
+else:
+    Protocol = object
 
 _PathLikeSubclass = Any
-@typing.runtime_checkable
 class PathLike(Protocol):
     """Duck type of `pathlib.Path`_
 
@@ -55,8 +58,7 @@ PathLikeFrom = Union[str, PathLike]
 def pathlike_from(path: PathLikeFrom) -> PathLike:
     if isinstance(path, str):
         return Path(path)
-    elif isinstance(path, PathLike): # type: ignore
-        # somehow pyright doesn't think that a Path can be PathLike
+    elif hasattr(path, "read_bytes"):
         return path
     else:
         raise TypeError(f"Unable to interpret {path} as a PathLike.")

@@ -2,9 +2,13 @@ from __future__ import annotations
 
 import shutil
 from pathlib import Path
-from typing import Any, Callable, Protocol
+from typing import Any, Callable, TYPE_CHECKING
 
 import attr
+if TYPE_CHECKING:
+    from typing import Protocol
+else:
+    Protocol = object
 
 from .pathlike import PathLike, PathLikeFrom, pathlike_from
 from .util import GetAttr
@@ -67,7 +71,7 @@ class DirObjStore(ObjStore):
             not self._is_key(path) and not path.name.startswith(".") for path in self.path.iterdir()
         ):
             raise ValueError(
-                f"{self.path.resolve()=} contains junk I didn't make."
+                f"{self.path.resolve()} contains junk I didn't make."
             )
 
     def _int2str(self, key: int) -> str:
@@ -91,7 +95,8 @@ class DirObjStore(ObjStore):
             return path.read_bytes()
 
     def __delitem__(self, key: int) -> None:
-        (self.path / self._int2str(key)).unlink(missing_ok=True)
+        if key in self:
+            (self.path / self._int2str(key)).unlink()
 
     def __contains__(self, key: int) -> bool:
         return (self.path / self._int2str(key)).exists()

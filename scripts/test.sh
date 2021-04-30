@@ -100,7 +100,7 @@ rm -rf .cache
 
 capture \
 	poetry run \
-		pytest --quiet --exitfirst .
+		pytest --cov=charmonium/cache --cov-report=term-missing --quiet --exitfirst .
 
 rm -rf .cache
 

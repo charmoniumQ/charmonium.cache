@@ -10,7 +10,7 @@ import sys
 import os
 sys.path.insert(0, os.path.abspath(".."))
 
-from typing import Optional
+from typing import Dict, Optional, Tuple
 
 import charmonium.cache
 
@@ -42,7 +42,7 @@ extensions = [
 
 autodoc_typehints = "description"
 
-intersphinx_mapping: dict[str, tuple[str, Optional[str]]] = {
+intersphinx_mapping: Dict[str, Tuple[str, Optional[str]]] = {
     "python": ("https://docs.python.org/3", None),
 }
 

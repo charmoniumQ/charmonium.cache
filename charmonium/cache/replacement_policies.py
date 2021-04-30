@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import abc
 import datetime
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Mapping
 
 import attr
 import bitmath
@@ -40,7 +40,7 @@ class GDSize(ReplacementPolicy):
     """GreedyDual-Size policy, described by [Cao et al]_."""
     def __init__(self) -> None:
         self.inflation = 0.0
-        self._data = dict[Any, tuple[float, Entry]]()
+        self._data: dict[Any, tuple[float, Entry]] = {}
     def add(self, key: Any, entry: Entry) -> None:
         self.access(key, entry)
     def access(self, key: Any, entry: Entry) -> None:
@@ -64,6 +64,6 @@ class GDSize(ReplacementPolicy):
         else:
             raise TypeError(f"Cannot update a {type(self)} from a {type(other)}")
 
-REPLACEMENT_POLICIES = dict[str, type[ReplacementPolicy]](
+REPLACEMENT_POLICIES: Mapping[str, type[ReplacementPolicy]] = dict(
     gdsize=GDSize,
 )

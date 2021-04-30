@@ -9,10 +9,14 @@ fi
 
 part="${1}"
 
+poetry run tox -p
 poetry run bump2version "${part}"
 poetry build
 poetry run twine check dist/*
 
 if [ -z "${dry_run}" ]; then
-	poetry publish
+    read -p "Last chance to abort. Continue?" yn
+	if [ "${yn}" = y ]; then
+		poetry publish
+	fi
 fi

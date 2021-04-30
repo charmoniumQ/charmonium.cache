@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import enum
-from typing import Any, Callable, Generic, Iterable, Optional, TypeVar, cast
+from typing import Any, Callable, Dict, Generic, Iterable, Optional, TypeVar, cast
 
 
 class IndexKeyType(enum.IntEnum):
@@ -16,7 +16,7 @@ Val = TypeVar("Val")
 class Index(Generic[Key, Val]):
     def __init__(self, schema: tuple[IndexKeyType, ...], deleter: Optional[Callable[[tuple[tuple[Key, ...], Val]], None]] = None) -> None:
         self.schema = schema
-        self._data = dict[Key, Any]()
+        self._data: dict[Key, Any] = {}
         self._deleter = deleter
 
     def __getstate__(self) -> dict[str, Any]:
@@ -35,7 +35,7 @@ class Index(Generic[Key, Val]):
             yield (keys, cast(Val, data))
         else:
             for key, subdict in data.items():
-                yield from Index._items(cast(dict[Key, Any], subdict), keys + (key,), max_depth)
+                yield from Index._items(cast(Dict[Key, Any], subdict), keys + (key,), max_depth)
 
     def items(self) -> Iterable[tuple[tuple[Key, ...], Val]]:
         yield from self._items(self._data, (), len(self.schema))
@@ -50,29 +50,29 @@ class Index(Generic[Key, Val]):
         self, keys: tuple[Key, ...]
     ) -> Optional[tuple[dict[Key, Val], Key, IndexKeyType]]:
         if len(keys) != len(self.schema):
-            raise ValueError(f"{keys=} should be the same len as {self.schema=}")
+            raise ValueError(f"Keys {keys} should be the same len as schema ({len(self.schema)})")
         obj = self._data
         for key in keys[:-1]:
             if key not in obj:
                 return None
-            obj = cast(dict[Key, Any], obj[key])
-        return cast(dict[Key, Val], obj), keys[-1], self.schema[-1]
+            obj = cast(Dict[Key, Any], obj[key])
+        return cast(Dict[Key, Val], obj), keys[-1], self.schema[-1]
 
     def _get_or_create_last_level(
             self, keys: tuple[Key, ...],
     ) -> tuple[dict[Key, Val], Key, IndexKeyType]:
         if len(keys) != len(self.schema):
-            raise ValueError(f"{keys=} should be the same len as {self.schema=}")
+            raise ValueError(f"Keys {keys} should be the same len as schema ({len(self.schema)})")
         obj = self._data
         completed_keys: tuple[Key, ...] = ()
         for key_type, key in zip(self.schema[:-1], keys[:-1]):
             if key not in obj:
                 if key_type == IndexKeyType.MATCH:
                     self._delete(obj, completed_keys)
-                obj[key] = dict[Key, Any]()
-            obj = cast(dict[Key, Any], obj[key])
+                obj[key] = cast(Dict[Key, Any], {})
+            obj = cast(Dict[Key, Any], obj[key])
             completed_keys += (key,)
-        return cast(dict[Key, Val], obj), keys[-1], self.schema[-1]
+        return cast(Dict[Key, Val], obj), keys[-1], self.schema[-1]
 
     # TODO: refactor for less complexity
     # Maybe combine get_or_create with get
@@ -108,7 +108,7 @@ class Index(Generic[Key, Val]):
 
     def __contains__(self, keys: tuple[Key, ...]) -> bool:
         if len(keys) != len(self.schema):
-            raise ValueError(f"{keys=} should be the same len as {self.schema=}")
+            raise ValueError(f"Keys {keys} should be the same len as schema ({len(self.schema)})")
         result = self._get_last_level(keys)
         if result:
             last_level, last_key, _ = result
@@ -118,6 +118,6 @@ class Index(Generic[Key, Val]):
 
     def update(self, other: Index[Key, Val]) -> None:
         if other.schema != self.schema:
-            raise ValueError(f"Schema mismatch {self.schema=}, {other.schema=}")
+            raise ValueError(f"Schema mismatch {self.schema} != {other.schema}")
         for key, val in other.items():
             self[key] = val

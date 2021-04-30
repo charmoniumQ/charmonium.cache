@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import functools
 import inspect
 import operator
@@ -6,7 +8,7 @@ import sys
 import zlib
 from pathlib import Path
 from types import FunctionType, ModuleType
-from typing import Any, Callable, Hashable, cast
+from typing import Any, Callable, Dict, FrozenSet, Hashable, List, Set, Tuple, cast
 
 from .util import GetAttr
 
@@ -50,15 +52,15 @@ def determ_hash(obj: Any) -> int:
     elif isinstance(obj, complex):
         return checksum(b"complex") ^ checksum(float2bytes(obj.imag)) ^ checksum(float2bytes(obj.real))
     elif isinstance(obj, tuple):
-        contents = [determ_hash(elem) for elem in cast(tuple[Any], obj)]
+        contents = [determ_hash(elem) for elem in cast(Tuple[Any], obj)]
         return checksum(b"tuple") ^ functools.reduce(operator.xor, contents, 0)
     elif isinstance(obj, frozenset):
-        contents = sorted([determ_hash(elem) for elem in cast(frozenset[Any], obj)])
+        contents = sorted([determ_hash(elem) for elem in cast(FrozenSet[Any], obj)])
         return checksum(b"frozenset") ^ functools.reduce(operator.xor, contents, 0)
     elif hasattr(obj, "__determ_hash__"):
         return checksum(b"determ_hashable") ^ determ_hash(GetAttr[Callable[[], Any]]()(obj, "__determ_hash__")())
     else:
-        raise TypeError(f"{obj} ({type(obj)=}) is not determ_hashable")
+        raise TypeError(f"{obj} ({type(obj)}) is not determ_hashable")
 
 
 def checksum(i: bytes) -> int:
@@ -112,13 +114,13 @@ def _hashable(obj: Any, _tabu: set[int], _level: int) -> Hashable:
         return b"cycle detected"
     elif isinstance(obj, (tuple, list)):
         _tabu = _tabu | {id(cast(Any, obj))}
-        return tuple(_hashable(elem, _tabu, _level+1) for elem in cast(list[Any], obj))
+        return tuple(_hashable(elem, _tabu, _level+1) for elem in cast(List[Any], obj))
     elif isinstance(obj, (set, frozenset)):
         _tabu = _tabu | {id(cast(Any, obj))}
-        return frozenset(_hashable(elem, _tabu, _level+1) for elem in cast(set[Any], obj))
+        return frozenset(_hashable(elem, _tabu, _level+1) for elem in cast(Set[Any], obj))
     elif isinstance(obj, dict):
         _tabu = _tabu | {id(cast(Any, obj))}
-        return frozenset((key, _hashable(val, _tabu, _level+1)) for key, val in cast(dict[Any, Any], obj).items())
+        return frozenset((key, _hashable(val, _tabu, _level+1)) for key, val in cast(Dict[Any, Any], obj).items())
     elif hasattr(obj, "__determ_hash__"):
         _tabu = _tabu | {id(cast(Any, obj))}
         return _hashable(GetAttr[Callable[[], Any]]()(obj, "__determ_hash__")(), _tabu, _level+1)

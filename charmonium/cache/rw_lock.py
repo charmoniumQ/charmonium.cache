@@ -2,15 +2,17 @@ from __future__ import annotations
 
 from pathlib import Path
 from types import TracebackType
-from typing import Optional, Protocol, cast, runtime_checkable
+from typing import Optional, TYPE_CHECKING, cast
 
 import attr
 import fasteners
-
+if TYPE_CHECKING:
+    from typing import Protocol
+else:
+    Protocol = object
 from .pathlike import PathLikeFrom, pathlike_from
 
 
-@runtime_checkable
 class Lock(Protocol):
     def __enter__(self) -> Optional[bool]:
         ...
@@ -24,7 +26,6 @@ class Lock(Protocol):
         ...
 
 
-@runtime_checkable
 class RWLock(Protocol):
     """A `Readers-Writer Lock`_ guarantees N readers xor 1 writer.
 

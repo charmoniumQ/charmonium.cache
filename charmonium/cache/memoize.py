@@ -11,10 +11,10 @@ from typing import (
     Any,
     Callable,
     DefaultDict,
-    Final,
     Generic,
     Mapping,
     Optional,
+    Tuple,
     Union,
     cast,
 )
@@ -41,7 +41,7 @@ from .util import (
 
 __version__ = "1.0.0"
 
-BYTE_ORDER: Final[str] = "big"
+BYTE_ORDER: str = "big"
 
 
 def memoize(
@@ -49,7 +49,7 @@ def memoize(
 ) -> Callable[[Callable[FuncParams, FuncReturn]], Memoized[FuncParams, FuncReturn]]:
     """See :py:class:`charmonium.cache.Memoized`."""
     def actual_memoize(
-        func: Callable[FuncParams, FuncReturn], /
+        func: Callable[FuncParams, FuncReturn]
     ) -> Memoized[FuncParams, FuncReturn]:
         # pyright doesn't know attrs __init__, hence type ignore
         return Memoized[FuncParams, FuncReturn](func, **kwargs)  # type: ignore
@@ -152,7 +152,7 @@ class MemoizedGroup:
             if self._index_key in self._obj_store:
                 # TODO: persist ReplacementPolicy state and friends
                 other_version, other_index, other_rp, other_tc, other_ts = cast(
-                    tuple[int, Index[Any, Entry], ReplacementPolicy, DefaultDict[str, datetime.timedelta], DefaultDict[str, datetime.timedelta]],
+                    Tuple[int, Index[Any, Entry], ReplacementPolicy, DefaultDict[str, datetime.timedelta], DefaultDict[str, datetime.timedelta]],
                     self._pickler.loads(self._obj_store[self._index_key]),
                 )
                 if other_version > self._version:
@@ -166,7 +166,7 @@ class MemoizedGroup:
         with self._lock.writer:
             if self._index_key in self._obj_store:
                 other_version, other_index, other_rp, other_tc, other_ts = cast(
-                    tuple[int, Index[Any, Entry], ReplacementPolicy, DefaultDict[str, datetime.timedelta], DefaultDict[str, datetime.timedelta]],
+                    Tuple[int, Index[Any, Entry], ReplacementPolicy, DefaultDict[str, datetime.timedelta], DefaultDict[str, datetime.timedelta]],
                     self._pickler.loads(self._obj_store[self._index_key]),
                 )
                 if other_version > self._version:
