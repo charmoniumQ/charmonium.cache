@@ -2,16 +2,18 @@ from __future__ import annotations
 
 import shutil
 from pathlib import Path
-from typing import Any, Callable, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Callable
 
 import attr
+
+from .pathlike import PathLike, PathLikeFrom, pathlike_from
+from .util import GetAttr
+
 if TYPE_CHECKING:
     from typing import Protocol
 else:
     Protocol = object
 
-from .pathlike import PathLike, PathLikeFrom, pathlike_from
-from .util import GetAttr
 
 
 class ObjStore(Protocol):

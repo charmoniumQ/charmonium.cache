@@ -1,4 +1,7 @@
 {
 	"typeCheckingMode": "strict",
+
+	// I have pylint for these:
 	"reportPrivateUsage": false,
+	"reportUnusedVariable": false,
 }

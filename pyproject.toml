@@ -21,6 +21,11 @@ python = ">=3.6,<3.10"
 bitmath = "^1.3.3"
 fasteners = "^0.16"
 attrs = "^20.3.0"
+ptracer = {version = "^0.6", optional = true}
+click = {version = "^7.1.2", optional = true, extras = ["cli"]}
+
+[tool.poetry.extras]
+cli = ["ptracer"]
 
 [tool.poetry.dev-dependencies]
 autoflake = "^1.3.1"

@@ -2,15 +2,18 @@ from __future__ import annotations
 
 from pathlib import Path
 from types import TracebackType
-from typing import Optional, TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Optional, cast
 
 import attr
 import fasteners
+
+from .pathlike import PathLikeFrom, pathlike_from
+
 if TYPE_CHECKING:
     from typing import Protocol
 else:
     Protocol = object
-from .pathlike import PathLikeFrom, pathlike_from
+
 
 
 class Lock(Protocol):

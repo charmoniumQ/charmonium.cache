@@ -9,14 +9,16 @@ import textwrap
 import time
 from typing import TYPE_CHECKING, cast
 
+import pytest
+
+from charmonium.cache.pathlike import PathLikeFrom, pathlike_from
+
 if TYPE_CHECKING:
     from typing import TypedDict
 else:
     TypedDict = lambda a, b: b
 
-import pytest
 
-from charmonium.cache.pathlike import PathLikeFrom, pathlike_from
 
 if TYPE_CHECKING:
     ScriptResult = TypedDict(

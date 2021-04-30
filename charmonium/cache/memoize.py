@@ -90,7 +90,7 @@ class MemoizedGroup:
             *,
             obj_store: Optional[ObjStore] = None,
             replacement_policy: Union[str, ReplacementPolicy] = "gdsize",
-            size: Union[int, str, bitmath.Bitmath] = bitmath.MiB(1),
+            size: Union[int, str, bitmath.Bitmath] = bitmath.KiB(100),
             pickler: Pickler = pickle,
             lock: Optional[RWLock] = None,
             fine_grain_persistence: bool = False,

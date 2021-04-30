@@ -1,9 +1,18 @@
 from __future__ import annotations
 
 import datetime
-from typing import Any, Tuple, Union, cast
+import stat
+import zlib
+from typing import Any, Callable, Mapping, Tuple, Union, cast
+
+import attr
 
 from .pathlike import PathLike, PathLikeFrom, pathlike_from
+
+FILE_COMPARISONS: Mapping[str, Callable[[PathLike], Any]] = {
+    "mtime": lambda p: p.stat()[stat.ST_MTIME] if p.exists() else None,
+    "crc32": lambda p: zlib.crc32(p.read_bytes()) if p.exists() else None,
+}
 
 
 class FileContents:
@@ -25,15 +34,19 @@ class FileContents:
     """
 
     path: PathLike
+    comparison: Callable[[PathLike], Any]
 
-    def __init__(self, path: PathLikeFrom) -> None:
+    def __init__(self, path: PathLikeFrom, comparison: Union[str, Callable[[PathLike], Any]] = "crc32") -> None:
         self.path = pathlike_from(path)
+        self.comparison = comparison if callable(comparison) else FILE_COMPARISONS[comparison]
 
     def __add__(self, path: str) -> FileContents:
-        return FileContents(type(self.path)(str(self.path) + path)) # type: ignore
+        new_path = type(self.path)(str(self.path) + path) # type: ignore
+        return FileContents(new_path, self.comparison)
 
     def __radd__(self, path: str) -> FileContents:
-        return FileContents(type(self.path)(path + str(self.path))) # type: ignore
+        new_path = type(self.path)(path + str(self.path)) # type: ignore
+        return FileContents(new_path, self.comparison)
 
     def __fspath__(self) -> Union[bytes, str]:
         return self.path.__fspath__()
@@ -42,12 +55,9 @@ class FileContents:
         """Returns the path"""
         return str(self.path)
 
-    def __cache_ver__(self) -> bytes:
+    def __cache_ver__(self) -> Any:
         """Returns the contents of the file"""
-        if self.path.exists():
-            return self.path.read_bytes()
-        else:
-            return b""
+        return self.comparison(self.path)
 
     def __getstate__(self) -> Any:
         """Captures the path and its contents"""
@@ -97,3 +107,14 @@ class TTLInterval:
     def __call__(self, func: Any=None) -> int:
         delta = datetime.datetime.now() - datetime.datetime.fromtimestamp(0)
         return delta // self.interval
+
+
+# TODO: docs, testing
+@attr.frozen()  # type: ignore
+class KeyVer:
+    key: str
+    ver: str
+    def __cache_key__(self) -> str:
+        return self.key
+    def __cache_ver__(self) -> str:
+        return self.ver

@@ -106,7 +106,13 @@ rm -rf .cache
 
 capture \
 	poetry run \
-		radon cc --min b --show-complexity --average --no-assert "${package_path}" tests
+		tox --parallel
+
+rm -rf .cache
+
+capture \
+	poetry run \
+		radon cc --min b --show-complexity --no-assert "${package_path}" tests
 
 capture \
 	poetry run \

@@ -143,6 +143,16 @@ Feature Matrix
 
 9. **Python 3.x**
 
+Other features of ``charmonium.cache``:
+
+- `One- or two-level`_ caching
+
+- Time-to-live (TTL)
+
+- Lossy or non-lossy key compression
+
+- Exported static typing (PEP 561 and PEP 612).
+
 Limitations and Future Work
 ---------------------------
 
@@ -193,6 +203,10 @@ Limitations and Future Work
    cached, since they experience more reuse. If they hit in the cache, none of
    the inputs need to be accessed/reused. Future development of my cache may
    leverage Dask's task DAG.
+
+4. **Thread-safety**
+
+5. **Remove orphans**
 
 .. _`pure functions`: https://en.wikipedia.org/wiki/Pure_function
 .. _`cache thrashing`: https://en.wikipedia.org/wiki/Thrashing_(computer_science)
