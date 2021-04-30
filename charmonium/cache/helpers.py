@@ -109,12 +109,18 @@ class TTLInterval:
         return delta // self.interval
 
 
-# TODO: docs, testing
 @attr.frozen()  # type: ignore
 class KeyVer:
-    key: str
-    ver: str
-    def __cache_key__(self) -> str:
+    """A dummy key and version pair."""
+
+    key: Any
+    ver: Any
+
+    def __init__(self, key: Any, ver: Any) -> None:
+        object.__setattr__(self, "key", key)
+        object.__setattr__(self, "ver", ver)
+
+    def __cache_key__(self) -> Any:
         return self.key
-    def __cache_ver__(self) -> str:
+    def __cache_ver__(self) -> Any:
         return self.ver

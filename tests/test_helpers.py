@@ -7,6 +7,7 @@ from typing import cast
 from charmonium.cache import (
     DirObjStore,
     FileContents,
+    KeyVer,
     MemoizedGroup,
     TTLInterval,
     memoize,
@@ -71,3 +72,17 @@ def test_ttl() -> None:
         assert datetime.datetime.now() - get_now() < dt
         time.sleep(dt.total_seconds())
         assert datetime.datetime.now() - get_now() < dt
+
+@memoize()
+def function(key_ver: KeyVer) -> str:
+    return key_ver.key + key_ver.ver
+
+def test_key_ver() -> None:
+    with tempfile.TemporaryDirectory() as path:
+        function.group = MemoizedGroup(obj_store=DirObjStore(path))
+        function(KeyVer(3, 4))
+        function(KeyVer(3, 5))
+        function(KeyVer(2, 5))
+        assert not function.would_hit(KeyVer(3, 4))
+        assert function.would_hit(KeyVer(3, 5))
+        assert function.would_hit(KeyVer(3, 5))

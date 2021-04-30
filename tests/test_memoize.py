@@ -94,7 +94,7 @@ def test_memoize_fine_grain_persistence(lock_type: str) -> None:
         assert square.would_hit(2)
 
 
-@pytest.mark.parametrize("use_obj_store", [True])
+@pytest.mark.parametrize("use_obj_store", [True, False])
 def test_eviction(use_obj_store: bool) -> None:
     with tempfile.TemporaryDirectory() as path:
 
@@ -103,9 +103,9 @@ def test_eviction(use_obj_store: bool) -> None:
             verbose=False,
             use_obj_store=use_obj_store,
             use_metadata_size=not use_obj_store,
-            lossy_compression=False,
+            lossy_compression=True,
             group=MemoizedGroup(
-                obj_store=DirObjStore(path), fine_grain_eviction=True, size="1KiB",
+                obj_store=DirObjStore(path), fine_grain_eviction=True, size="1024B",
             ),
         )
         def big_fn(x: int) -> bytes:
@@ -113,11 +113,11 @@ def test_eviction(use_obj_store: bool) -> None:
 
         big_fn(2)
         big_fn(3)
-        big_fn(502)
+        big_fn(510)
         big_fn(2)
         big_fn(3)
-        big_fn(503)
-        assert not (big_fn.would_hit(502) and big_fn.would_hit(503)) # I don't know which one will actually get evicted
+        big_fn(511)
+        assert not big_fn.would_hit(502)
         assert big_fn.would_hit(2)
         assert big_fn.would_hit(3)
 
