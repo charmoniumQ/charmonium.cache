@@ -93,15 +93,20 @@ CLI
 
 Make is good, but it has a hard time with dependencies that are not files. Many
 dependencies are not well-contained in files. For example, you may want
-recompute some command every time some status command returns a different value.
+recompute some command every time some status command returns a different
+value.
+
+To get correct results you would have to incorporate *every* key you depend on
+into the filename, which can be messy, so most people don't do that. ``memoize``
+is easier to use correctly, for example:
 
 ::
 
-    # make status=$(status) will not do the right thing.
+    # `make status=$(status)` will not do the right thing.
     make var=1
     make var=2 # usually, nothing recompiles here, contrary to user's intent
 
-    # memoize --key=$(status) -- command args will do the right thing
+    # `memoize --key=$(status) -- command args` will do the right thing
     memoize --key=1 -- command args
     memoize --key=2 -- command args # key changed, command is recomptued.
 

@@ -21,6 +21,9 @@ class FileContents:
     - When FileContents is un/pickled, the contents of path get
       restored/snapshotted.
 
+    - When FileContents uses a hash of the path and contents as the
+      ``determ_hash``.
+
     - When FileContents is used as an argument, the path is the key
       and the contents are the version.
 
@@ -58,6 +61,9 @@ class FileContents:
     def __cache_ver__(self) -> Any:
         """Returns the contents of the file"""
         return self.comparison(self.path)
+
+    def __determ_hash__(self) -> Any:
+        return self.__getstate__()
 
     def __getstate__(self) -> Any:
         """Captures the path and its contents"""

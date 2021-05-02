@@ -15,13 +15,17 @@ from .util import GetAttr
 HASH_BITS = 64
 
 def determ_hash(obj: Any) -> int:
-    """A persistent hash protocol.
+    """A deterministic hash protocol.
 
-    The hash is persistent across:
+    Python's |hash|_ will return different values across different
+    processes. This hash is deterministic across:
+
     - different processes
     - different machines
     - different Python versions
     - different OSes
+
+    determ_hash is based on the contents:
 
     - Primitive types (bytes, str, int, float, complex, None) are
       hashed by their value or a checksum of their value.

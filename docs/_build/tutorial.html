@@ -1,0 +1,376 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tutorial &#8212; charmonium.cache 1.0.0 documentation</title>
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Features" href="features.html" />
+    <link rel="prev" title="charmonium.cache" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="tutorial">
+<h1>Tutorial<a class="headerlink" href="#tutorial" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="cache-functionality">
+<h2>Cache Functionality<a class="headerlink" href="#cache-functionality" title="Permalink to this headline">¶</a></h2>
+<p>The cache is organized into an <strong>index</strong> and an
+<a class="reference internal" href="api_reference.html#charmonium.cache.ObjStore" title="charmonium.cache.ObjStore"><code class="xref py py-class docutils literal notranslate"><span class="pre">ObjStore</span></code></a>. The index maps <strong>keys</strong> to
+<strong>entries</strong>. Each entry (usually) holds an <strong>object key</strong> that maps to an
+<strong>object</strong> in the object store. The object is the serialized return value of the
+function.</p>
+<p>The key is a tuple of <strong>subkeys</strong>. The index is hierarchical on each subkey (a
+dict of dict of dicts etc.). Each subkey is either a lookup or match
+subkey. During an insert, if a <strong>lookup subkey</strong> is not found in the index, the
+subkey is <em>inserted beside</em> the non-matching subkeys. If a <strong>match subkey</strong> is
+not found, the subkey <em>replaces</em> the old subkey.</p>
+<p>This replacing behavior saves space when revisiting prior versions is rare. A
+function’s source-code is monotonic; there is little use in holding results form
+a prior source-code version. While a healthy replacement policy may have evicted
+the old version on its own, a match subkey <em>guarantees</em> it gets evicted.</p>
+<p>The key has five subkeys:</p>
+<ol class="arabic simple">
+<li><p>The state of the system (match): this includes the package version</p></li>
+<li><p>The function name (lookup)</p></li>
+<li><p>The function version (match): this includes the source-code, closure-state,
+and memoization configuration.</p></li>
+<li><p>The arguments (lookup): this can be customized by <code class="docutils literal notranslate"><span class="pre">__cache_key__()</span></code> but
+defaults to the object itself.</p></li>
+<li><p>The argument versions (match): this can be customized by <code class="docutils literal notranslate"><span class="pre">__cache_ver__()</span></code>,
+but defaults to a constant.</p></li>
+</ol>
+<p>Different functions share a backend index and function store, and we will see
+why in a moment.</p>
+</div>
+<div class="section" id="how-to-use">
+<h2>How to Use<a class="headerlink" href="#how-to-use" title="Permalink to this headline">¶</a></h2>
+<p>First you need to identify candidates for memoization.</p>
+<ul class="simple">
+<li><p>They should be <em>mostly</em> <a class="reference external" href="https://en.wikipedia.org/wiki/Pure_function">pure</a>. The library is correct in the presence of
+global variables, if they change frequently, it will degrade performance.</p></li>
+<li><p>Likewise, The function and those it depends on should be relatively stable.</p></li>
+<li><p>The function should have a high rate of reused arguments.</p></li>
+<li><p>The returned value should have a low data storage size. You can customize the
+returned object with <a class="reference external" href="https://docs.python.org/3/library/pickle.html#object.__getstate__"><code class="docutils literal notranslate"><span class="pre">__getstate__</span></code></a>.</p></li>
+<li><p>The function should have a long compute time, so memoization can save a lot of
+work.</p></li>
+</ul>
+<p>Note that multiple functions are cached in the same backend store. This way, a
+good candidate for memoization can “steal space” from bad candidates, as long as
+the replacement policy is decent.</p>
+<p>Once you have your candidate, simply add <a class="reference internal" href="api_reference.html#charmonium.cache.memoize" title="charmonium.cache.memoize"><code class="xref py py-func docutils literal notranslate"><span class="pre">memoize()</span></code></a> to the line above the
+function definition. Per-function customizations go inside the parens. For
+example,</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">charmonium.cache</span> <span class="kn">import</span> <span class="n">memoize</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nd">@memoize</span><span class="p">()</span>
+<span class="gp">... </span><span class="k">def</span> <span class="nf">square</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;squaring </span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="k">return</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span>
+<span class="gp">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">square</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="go">squaring 2</span>
+<span class="go">4</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">square</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="go">4</span>
+</pre></div>
+</div>
+<p>Group-wide customizations are applied after definition through
+<a class="reference internal" href="api_reference.html#charmonium.cache.MemoizedGroup" title="charmonium.cache.MemoizedGroup"><code class="xref py py-func docutils literal notranslate"><span class="pre">MemoizedGroup()</span></code></a>. For example, size is applied like:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">charmonium.cache</span> <span class="kn">import</span> <span class="n">MemoizedGroup</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">square</span><span class="o">.</span><span class="n">group</span> <span class="o">=</span> <span class="n">MemoizedGroup</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="s2">&quot;100KiB&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="customizing-argument-keys">
+<h2>Customizing Argument Keys<a class="headerlink" href="#customizing-argument-keys" title="Permalink to this headline">¶</a></h2>
+<p>Some arguments might need to define their own notion of equality for the
+purposes of memoization. These arguments should have a <code class="docutils literal notranslate"><span class="pre">__cache_key__()</span></code>. It
+can return anything that can be made hashable with
+(<a class="reference internal" href="api_reference.html#charmonium.cache.hashable" title="charmonium.cache.hashable"><code class="xref py py-func docutils literal notranslate"><span class="pre">hashable()</span></code></a>). As far as I know, every python object can
+be made hashable with hashable. If <code class="docutils literal notranslate"><span class="pre">__cache_key__()</span></code> is not found, the object
+itself is used as the key. This yields basic memoization.</p>
+<p>Some arguments represent “versioned resources,” in the sense that old versions
+are not useful (rarely reused). In this case, <code class="docutils literal notranslate"><span class="pre">__cache_key__()</span></code> should return
+the name of the resource and <code class="docutils literal notranslate"><span class="pre">__cache__ver__()</span></code> should return the version. If
+<code class="docutils literal notranslate"><span class="pre">__cache_ver__()</span></code> is not found, a constant is used. If the version changes,
+then the older version is replaced rather than appended to.</p>
+</div>
+<div class="section" id="capturing-filesystem-side-effects">
+<h2>Capturing Filesystem Side-Effects<a class="headerlink" href="#capturing-filesystem-side-effects" title="Permalink to this headline">¶</a></h2>
+<p>Sadly, not all code is pure; many times, legacy code has impure side effects on
+the filesystem. To make legacy code memoizable, the library has a
+<a class="reference internal" href="api_reference.html#charmonium.cache.FileContents" title="charmonium.cache.FileContents"><code class="xref py py-class docutils literal notranslate"><span class="pre">FileContents</span></code></a> helper. This class represents a
+filepath <strong>and its contents</strong>. <code class="docutils literal notranslate"><span class="pre">fc.__cache_key__()</span></code> returns the path while
+<code class="docutils literal notranslate"><span class="pre">fc.__cache_ver__()</span></code> returns the contents. Furthemore, <code class="docutils literal notranslate"><span class="pre">pickle.dumps(fc)</span></code>
+dumps a snapshot of the contents, while <code class="docutils literal notranslate"><span class="pre">pickle.loads(fc_ser)</span></code> restores those
+contents.</p>
+<p>Suppose we have the following impure function:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="n">src</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">src_f</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">long_function</span><span class="p">(</span><span class="n">src_f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">src</span> <span class="o">+</span> <span class="s2">&quot;_copy&quot;</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">dst_f</span><span class="p">:</span>
+        <span class="n">dst_f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We can convert this to a pure function by:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@memoize</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">pure_copy</span><span class="p">(</span><span class="n">src</span><span class="p">:</span> <span class="n">FileContents</span><span class="p">,</span> <span class="n">dst</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FileContents</span><span class="p">:</span>
+    <span class="n">copy</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">dst</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">dst</span>
+</pre></div>
+</div>
+<p>This can be cached. If you give a <code class="docutils literal notranslate"><span class="pre">src</span></code> with the same path and same contents,
+then the output will be recalled instead of computed (<code class="docutils literal notranslate"><span class="pre">long_function</span></code> need not
+be called).</p>
+<p>See <a class="reference internal" href="api_reference.html#charmonium.cache.FileContents" title="charmonium.cache.FileContents"><code class="xref py py-class docutils literal notranslate"><span class="pre">FileContents</span></code></a> for more details.</p>
+</div>
+<div class="section" id="adapting-old-code">
+<h2>Adapting Old Code<a class="headerlink" href="#adapting-old-code" title="Permalink to this headline">¶</a></h2>
+<p>Suppose you wish to speed up an application which makes usage of this function
+called <code class="docutils literal notranslate"><span class="pre">work</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">work</span><span class="p">(</span><span class="n">input1</span><span class="p">,</span> <span class="n">input2</span><span class="p">):</span>
+    <span class="o">...</span>
+</pre></div>
+</div>
+<p>Memoization is most effective when the function is pure, so <code class="docutils literal notranslate"><span class="pre">work</span></code> needs to be
+purified. This can be accomplished with minimal code change by creating a
+<strong>wrapper function</strong> that maintains the same signature, but sets up a call to a
+pure function.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Signature does not change; compatibility maintained</span>
+<span class="k">def</span> <span class="nf">work</span><span class="p">(</span><span class="n">input1</span><span class="p">,</span> <span class="n">input2</span><span class="p">):</span>
+    <span class="c1"># Defer to FileContents</span>
+    <span class="n">real_input1</span> <span class="o">=</span> <span class="n">FileContents</span><span class="p">(</span><span class="n">input1</span><span class="p">)</span>
+
+    <span class="c1"># Make a custom cache key</span>
+    <span class="n">input2</span><span class="o">.</span><span class="n">__cache_key__</span> <span class="o">=</span> <span class="k">lambda</span><span class="p">:</span> <span class="o">...</span>
+
+    <span class="c1"># Turn global variables into parameters</span>
+    <span class="n">input3</span> <span class="o">=</span> <span class="n">global_var</span>
+
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">_real_work</span><span class="p">(</span><span class="n">input1</span><span class="p">,</span> <span class="n">input2</span><span class="p">,</span> <span class="n">input3</span><span class="p">)</span>
+
+    <span class="c1"># Output side-effects</span>
+    <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ret</span>
+
+<span class="nd">@memoize</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">_real_work</span><span class="p">(</span><span class="n">input1</span><span class="p">,</span> <span class="n">input2</span><span class="p">,</span> <span class="n">global_var</span><span class="p">):</span>
+    <span class="c1"># old code, unchanged</span>
+    <span class="o">...</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="detecting-changes-in-functions">
+<h2>Detecting Changes in Functions<a class="headerlink" href="#detecting-changes-in-functions" title="Permalink to this headline">¶</a></h2>
+<p>If any global variables (including other functions) referenced by the target
+change, the cache is invalidated. I use <a class="reference external" href="https://docs.python.org/3/library/inspect.html#inspect.getclosurevars"><code class="docutils literal notranslate"><span class="pre">inspect.getclosurevars</span></code></a> to read these.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">i</span> <span class="o">=</span> <span class="mi">42</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">bar</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">return</span> <span class="n">x</span><span class="o">+</span><span class="mi">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">foo</span><span class="p">():</span>
+<span class="gp">... </span>    <span class="k">return</span> <span class="n">bar</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">inspect</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">inspect</span><span class="o">.</span><span class="n">getclosurevars</span><span class="p">(</span><span class="n">foo</span><span class="p">)</span>
+<span class="go">ClosureVars(nonlocals={}, globals={&#39;bar&#39;: &lt;function bar at ...&gt;, &#39;i&#39;: 42}, builtins={}, unbound=set())</span>
+</pre></div>
+</div>
+<p>To assess if a function has changed, I compare the closure-variables and the
+compiled bytecode (e.g., <code class="docutils literal notranslate"><span class="pre">foo.__code__.co_code</span></code>). See
+<a class="reference internal" href="api_reference.html#charmonium.cache.determ_hash" title="charmonium.cache.determ_hash"><code class="xref py py-func docutils literal notranslate"><span class="pre">determ_hash()</span></code></a> for more details.</p>
+</div>
+<div class="section" id="using-in-the-cloud">
+<h2>Using in the Cloud<a class="headerlink" href="#using-in-the-cloud" title="Permalink to this headline">¶</a></h2>
+<p>The library can be used to reuse results <em>between</em> machines, but you must
+satisfy some invariants:</p>
+<ul>
+<li><p>Use a pickler that will work between the platforms in question. Consider OS,
+Python version, and library versions.</p></li>
+<li><p>Use an <a class="reference internal" href="api_reference.html#charmonium.cache.ObjStore" title="charmonium.cache.ObjStore"><code class="xref py py-class docutils literal notranslate"><span class="pre">ObjStore</span></code></a> that is accessible between the
+machines in question. <a class="reference internal" href="api_reference.html#charmonium.cache.DirObjStore" title="charmonium.cache.DirObjStore"><code class="xref py py-class docutils literal notranslate"><span class="pre">DirObjStore</span></code></a> is accessible
+between machines if you provide a <a class="reference internal" href="api_reference.html#charmonium.cache.PathLike" title="charmonium.cache.PathLike"><code class="xref py py-class docutils literal notranslate"><span class="pre">PathLike</span></code></a>
+object that is accessible between machines. For example, <a class="reference external" href="https://github.com/Quansight/universal_pathlib">Universal Pathlib</a>
+provides a PathLike object representing an AWS S3 path or a GitHub path.</p></li>
+<li><p>The object store should support atomic concurrent accesses to the same key. If
+there is a write-write race, it doesn’t matter which one wins, as long as the
+write is atomic (not mangling together both writes). If there is a read-write
+race, the reader can see the value before the writer or after, but not during.</p></li>
+<li><p>Consider setting fine-grain persistence
+(<code class="docutils literal notranslate"><span class="pre">&#64;memoized(fine_grain_persistence=True)</span></code>) and using a lock
+(<code class="docutils literal notranslate"><span class="pre">MemoizedGroup(...,</span> <span class="pre">lock=RWLock())</span></code>). Without fine-grain persistence, if
+the processes overlap, then whichever process “wins” will overwrite the index
+of the others. In the following example, even though <code class="docutils literal notranslate"><span class="pre">f(1)</span></code> and <code class="docutils literal notranslate"><span class="pre">f(2)</span></code>
+were both computed, only one will be remembered, depending on which write
+“wins the race”.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Machine</span> <span class="mi">1</span>                        <span class="o">|</span> <span class="n">Machine</span> <span class="mi">2</span><span class="p">:</span>
+<span class="o">---------------------------------+--------------------------------</span>
+<span class="n">read</span> <span class="n">index</span><span class="p">;</span> <span class="n">index</span> <span class="o">=</span> <span class="p">{}</span>           <span class="o">|</span> <span class="n">read</span> <span class="n">index</span><span class="p">;</span> <span class="n">index</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">compute</span> <span class="n">f</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span> <span class="n">index</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">:</span> <span class="n">f</span><span class="p">(</span><span class="mi">1</span><span class="p">)}</span>  <span class="o">|</span> <span class="n">compute</span> <span class="n">f</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span> <span class="n">index</span> <span class="o">=</span> <span class="p">{</span><span class="mi">2</span><span class="p">:</span> <span class="n">f</span><span class="p">(</span><span class="mi">2</span><span class="p">)}</span>
+<span class="n">write</span> <span class="n">index</span><span class="p">;</span> <span class="n">index</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">:</span> <span class="n">f</span><span class="p">(</span><span class="mi">1</span><span class="p">)}</span>   <span class="o">|</span> <span class="n">write</span> <span class="n">index</span><span class="p">;</span> <span class="n">index</span> <span class="o">=</span> <span class="p">{</span><span class="mi">2</span><span class="p">:</span> <span class="n">f</span><span class="p">(</span><span class="mi">2</span><span class="p">)}</span>
+</pre></div>
+</div>
+<p>But with fine-grain persistence, the index is read before every function-call
+and read-and-written after every function call. Reads and writes to the index
+are guarded by the readers-writer lock. This permits read
+concurrency. Evaluating misses (actually doing <code class="docutils literal notranslate"><span class="pre">f(x)</span></code>) can procede without
+locks.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Machine</span> <span class="mi">1</span>                        <span class="o">|</span> <span class="n">Machine</span> <span class="mi">2</span><span class="p">:</span>
+<span class="o">-------------------------------------------------------------------------</span>
+<span class="n">read</span> <span class="n">index</span><span class="p">;</span> <span class="n">index</span> <span class="o">=</span> <span class="p">{}</span>           <span class="o">|</span> <span class="n">read</span> <span class="n">index</span><span class="p">;</span> <span class="n">index</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">compute</span> <span class="n">f</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span> <span class="n">index</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">:</span> <span class="n">f</span><span class="p">(</span><span class="mi">1</span><span class="p">)}</span>  <span class="o">|</span> <span class="n">compute</span> <span class="n">f</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span> <span class="n">index</span> <span class="o">=</span> <span class="p">{</span><span class="mi">2</span><span class="p">:</span> <span class="n">f</span><span class="p">(</span><span class="mi">2</span><span class="p">)}</span>
+<span class="n">rmw</span> <span class="n">index</span><span class="p">;</span> <span class="n">index</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">:</span> <span class="n">f</span><span class="p">(</span><span class="mi">1</span><span class="p">)}</span>     <span class="o">|</span> <span class="n">blocked</span>
+<span class="n">blocked</span>                          <span class="o">|</span> <span class="n">rmw</span> <span class="n">index</span><span class="p">;</span> <span class="n">index</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">:</span> <span class="n">f</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="mi">2</span><span class="p">:</span> <span class="n">f</span><span class="p">(</span><span class="mi">2</span><span class="p">)}</span>
+</pre></div>
+</div>
+<p>This is important if you want machines to be able to reuse values that another
+machine produced concurrently.</p>
+</li>
+</ul>
+</div>
+<div class="section" id="using-the-cli">
+<h2>Using the CLI<a class="headerlink" href="#using-the-cli" title="Permalink to this headline">¶</a></h2>
+<p>There is a <a class="reference internal" href="cli.html"><span class="doc">CLI</span></a> as well. It can memoize UNIX or other commands from the shell.</p>
+</div>
+<div class="section" id="extra-state">
+<h2>Extra State<a class="headerlink" href="#extra-state" title="Permalink to this headline">¶</a></h2>
+<p>Sometimes, language-level closures are not enough to track state. For this, the
+user can supply <code class="docutils literal notranslate"><span class="pre">memoize(...,</span> <span class="pre">extra_function_state=callable_obj)</span></code>. The return
+value of <code class="docutils literal notranslate"><span class="pre">callable_obj</span></code> is a part of the 3rd match subkey. When it changes,
+then the cache for that function is dropped.</p>
+<p>State can be added to the whole system by <code class="docutils literal notranslate"><span class="pre">MemoizedGroup(...,</span>
+<span class="pre">extra_system_state=callable_obj)</span></code>. The return value of <code class="docutils literal notranslate"><span class="pre">callable_obj</span></code> is a
+part of the 1st match subkey. When it changes, the whole cache is dropped.</p>
+<p><a class="reference external" href="https://en.wikipedia.org/wiki/Time_to_live">Time-to-live (TTL)</a> is a common cache policy. For example, the memoized
+function may be an API that you can call afresh every minute, but need to cache
+it between those calls. TTL can easily be supported this way at either the
+function or group-level by customizing <code class="docutils literal notranslate"><span class="pre">extra_function_state</span></code> and
+<code class="docutils literal notranslate"><span class="pre">extra_system_state</span></code>. See <a class="reference internal" href="api_reference.html#charmonium.cache.TTLInterval" title="charmonium.cache.TTLInterval"><code class="xref py py-class docutils literal notranslate"><span class="pre">TTLInterval</span></code></a> for more
+details.</p>
+</div>
+<div class="section" id="other-behaviors">
+<h2>Other Behaviors<a class="headerlink" href="#other-behaviors" title="Permalink to this headline">¶</a></h2>
+<p>By default, the index entry just holds an object key and the object store maps
+that to the actual returned object. This level of indirection means that the
+index is small and can be loaded quickly even if the returned objects are
+big. If the returned objects are small, you can omit the indirection by setting
+<code class="docutils literal notranslate"><span class="pre">memoize(...,</span> <span class="pre">use_obj_store=False)</span></code>.</p>
+<p>By default, only the object size (not index metadata) is counted towards the
+size of retaining an object, but if the object is stored in the index, the
+object size will be zero.  then the metadata. Set <code class="docutils literal notranslate"><span class="pre">memoize(...,</span>
+<span class="pre">use_metadata_size)</span></code> to include metadata in the size calculation. This is a bit
+slower, so it is not the default.</p>
+<p>By default, the cache is only culled to the desired size just before
+serialization. To cull the cache after every store, set <code class="docutils literal notranslate"><span class="pre">memoize(...,</span>
+<span class="pre">fine_grain_eviction=True)</span></code>. This is useful if the cache would run out of memory
+without an eviction.</p>
+<p>By default, the cache only stores a hash of the keys, which is faster and
+smaller. Set <code class="docutils literal notranslate"><span class="pre">memoize(...,</span> <span class="pre">lossy_compression=False)</span></code> to store the whole keys
+(useful for debugging).</p>
+<p>Unfortunately, Python’s <a class="reference external" href="https://docs.python.org/3/library/functions.html?highlight=hash#hash"><code class="docutils literal notranslate"><span class="pre">hash</span></code></a> will return different values across different
+runs, so I use <a class="reference internal" href="api_reference.html#charmonium.cache.determ_hash" title="charmonium.cache.determ_hash"><code class="xref py py-func docutils literal notranslate"><span class="pre">determ_hash()</span></code></a>.  If for some reason you
+<em>do</em> want to keep the whole object, set <code class="docutils literal notranslate"><span class="pre">memoize(...,</span> <span class="pre">use_hash=False)</span></code>.</p>
+<p>Be aware of <code class="docutils literal notranslate"><span class="pre">memoize(...,</span> <span class="pre">verbose=True|False)</span></code>. If verbose is enabled, the
+cache will emit a report at process-exit saying how much time was saved. This is
+useful to determine if caching is “worth it.”</p>
+<p>See <a class="reference internal" href="api_reference.html#charmonium.cache.Memoized" title="charmonium.cache.Memoized"><code class="xref py py-class docutils literal notranslate"><span class="pre">Memoized</span></code></a> and <a class="reference internal" href="api_reference.html#charmonium.cache.MemoizedGroup" title="charmonium.cache.MemoizedGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">MemoizedGroup</span></code></a> for details.</p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">charmonium.cache</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="features.html">Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api_reference.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">CLI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributors_guide.html">Contributor’s Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authors.html">Authors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="works_cited.html">Works Cited</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">charmonium.cache</a></li>
+      <li>Next: <a href="features.html" title="next chapter">Features</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2021, Samuel Grayson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/tutorial.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

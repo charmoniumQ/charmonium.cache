@@ -1,0 +1,50 @@
+:mod:`cache`
+============
+
+.. py:module:: cache
+
+
+Submodules
+----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+
+   core/index.rst
+   func_version/index.rst
+   index/index.rst
+   obj_store/index.rst
+   policies/index.rst
+   readers_writer_lock/index.rst
+   util/index.rst
+
+
+Package Contents
+----------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   cache.memoize
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   cache.__version__
+
+
+.. data:: __version__
+   :annotation: = 1.0.0
+
+   
+
+.. function:: memoize(**kwargs)
+
+

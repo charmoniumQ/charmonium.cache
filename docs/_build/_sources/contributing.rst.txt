@@ -1,0 +1,66 @@
+.. highlight:: shell
+
+============
+Contributing
+============
+
+Contributions are welcome, and they are greatly appreciated! Every little bit
+helps, and credit will always be given.
+
+Report bugs and suggesting features
+-----------------------------------
+
+Report bugs and suggest features on our `issue tracker`_.
+
+For bugs:
+
+* State your operating system name and version.
+* Explain what you are trying to do and why.
+* Include a `minimal reproducible example`_.
+
+.. _`minimal reproducible example`: https://minimalworkingexample.com/
+
+Fix Bugs and Implementing Features
+----------------------------------
+
+1. File or find a bug report in the `issue tracker`_. Pay special
+   attention to those marked "help wanted".
+2. Pull the codebase and branch ``fix-${issue_number}`` off of master,
+   where ``${issue_number}`` is replaced with the number from the
+   `issue tracker`_. Ensure the test suite works on your machine.
+
+    .. code-block:: console
+
+        $ pip install poetry
+        $ git clone git@github.com:charmoniumQ/charmonium.cache.git
+		$ cd charmonium.cache
+        $ git switch -c fix-${issue_number}
+        $ poetry shell
+        (charmonium.cache-venv) $ poetry install
+        (charmonium.cache-venv) $ ./scripts/test.sh
+        (charmonium.cache-venv) $ ./scripts/docs.sh # if desired
+
+3. Add a failing unittest for the bug or feature.
+4. Fix the issue!
+5. Run ``./scripts/test.sh``, which will also format and lint your
+   code.
+
+   * There are no formatting style guidelines to check by hand; they
+     are enforced by code, automatically.
+
+   * `pylint`_ is quite pedantic, and some of its warnings can be
+     safely ignored in this project; However, I like keeping the code
+     clean where possible. `mypy`_ should rarely be ignored or overriden.
+
+   * ``skip_lint=true ./scripts/test.sh`` will go straight to the
+     static analysis and unittests, saving a second or two.
+
+   * Check the code-coverage emitted by ``./scripts/test.sh``. As a
+     shortcut, ``htmlcov=true ./scripts/test.sh`` will open the
+     coverage HTML report in your browser.
+
+6. When those pass, submit a pull-request.
+
+.. _`pylint`: https://www.pylint.org/
+.. _`mypy`: https://mypy.readthedocs.io/en/stable/
+.. _`issue tracker`: https://github.com/charmoniumQ/charmonium.cache/issues

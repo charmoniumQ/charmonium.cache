@@ -1,6 +1,9 @@
 CLI
 ===
 
+This feature is planned and NOT yet implemented. Please give me feedback through
+GitHub issues if you have any suggestions regarding it.
+
 ::
 
    memoize [--obj-store path] [--env env] [--key key] [--ver ver] [--comparison (mtime|crc32)] [--replacement gdsize] [--max-size '123 MiB'] [--verbose] -- command arg1 arg2 ...
@@ -14,8 +17,8 @@ The following items are matched in order.
 5. ``arg1, arg2, ...`` and ``--key`` (lookup)
 6. The input files and ``--ver`` (match)
 
-This is useful for ``memoizing`` parts of a shell-script pipeline. stdin and stdout work just like
-normal files, so it can be safely used in a pipe.
+This is useful for ``memoizing`` parts of a shell-script pipeline. stdin and
+stdout work just like normal files, so it can be safely used in a pipe.
 
 ``command`` may require stdin, but no TTY interactivity.
 

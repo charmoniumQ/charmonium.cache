@@ -1,0 +1,26 @@
+:mod:`cache.func_version`
+=========================
+
+.. py:module:: cache.func_version
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   cache.func_version.closure_vars_version
+   cache.func_version.func_version
+
+
+
+.. function:: closure_vars_version(closure_vars)
+
+
+.. function:: func_version(func)
+
+

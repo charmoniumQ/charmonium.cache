@@ -1,0 +1,216 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>cache.policies &#8212; charmonium.cache 1.0.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="cache.readers_writer_lock" href="../readers_writer_lock/index.html" />
+    <link rel="prev" title="cache.obj_store" href="../obj_store/index.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-cache.policies">
+<span id="cache-policies"></span><h1><a class="reference internal" href="#module-cache.policies" title="cache.policies"><code class="xref py py-mod docutils literal notranslate"><span class="pre">cache.policies</span></code></a><a class="headerlink" href="#module-cache.policies" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="classes">
+<h3>Classes<a class="headerlink" href="#classes" title="Permalink to this headline">¶</a></h3>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#cache.policies.Entry" title="cache.policies.Entry"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Entry</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h3>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#cache.policies.luv" title="cache.policies.luv"><code class="xref py py-obj docutils literal notranslate"><span class="pre">luv</span></code></a>(entry)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="attributes">
+<h3>Attributes<a class="headerlink" href="#attributes" title="Permalink to this headline">¶</a></h3>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#cache.policies.T" title="cache.policies.T"><code class="xref py py-obj docutils literal notranslate"><span class="pre">T</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#cache.policies.policies" title="cache.policies.policies"><code class="xref py py-obj docutils literal notranslate"><span class="pre">policies</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py data">
+<dt id="cache.policies.T">
+<code class="sig-prename descclassname"><span class="pre">cache.policies.</span></code><code class="sig-name descname"><span class="pre">T</span></code><a class="headerlink" href="#cache.policies.T" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="cache.policies.Entry">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">cache.policies.</span></code><code class="sig-name descname"><span class="pre">Entry</span></code><a class="headerlink" href="#cache.policies.Entry" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py attribute">
+<dt id="cache.policies.Entry.value">
+<code class="sig-name descname"><span class="pre">value</span></code><em class="property"> <span class="pre">:Any</span></em><a class="headerlink" href="#cache.policies.Entry.value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="cache.policies.Entry.data_size">
+<code class="sig-name descname"><span class="pre">data_size</span></code><em class="property"> <span class="pre">:int</span></em><a class="headerlink" href="#cache.policies.Entry.data_size" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="cache.policies.Entry.recompute_time">
+<code class="sig-name descname"><span class="pre">recompute_time</span></code><em class="property"> <span class="pre">:datetime.timedelta</span></em><a class="headerlink" href="#cache.policies.Entry.recompute_time" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="cache.policies.Entry.time_saved">
+<code class="sig-name descname"><span class="pre">time_saved</span></code><em class="property"> <span class="pre">:datetime.timedelta</span></em><a class="headerlink" href="#cache.policies.Entry.time_saved" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="cache.policies.Entry.obj_store">
+<code class="sig-name descname"><span class="pre">obj_store</span></code><em class="property"> <span class="pre">:bool</span></em><a class="headerlink" href="#cache.policies.Entry.obj_store" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="cache.policies.Entry.last_use">
+<code class="sig-name descname"><span class="pre">last_use</span></code><em class="property"> <span class="pre">:datetime.datetime</span></em><a class="headerlink" href="#cache.policies.Entry.last_use" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="cache.policies.luv">
+<code class="sig-prename descclassname"><span class="pre">cache.policies.</span></code><code class="sig-name descname"><span class="pre">luv</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">entry</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cache.policies.luv" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt id="cache.policies.policies">
+<code class="sig-prename descclassname"><span class="pre">cache.policies.</span></code><code class="sig-name descname"><span class="pre">policies</span></code><a class="headerlink" href="#cache.policies.policies" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">charmonium.cache</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">cache</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../authors.html">Credits</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">API Reference</a><ul>
+  <li><a href="../index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">cache</span></code></a><ul>
+      <li>Previous: <a href="../obj_store/index.html" title="previous chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">cache.obj_store</span></code></a></li>
+      <li>Next: <a href="../readers_writer_lock/index.html" title="next chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">cache.readers_writer_lock</span></code></a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Samuel Grayson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../../../_sources/autoapi/cache/policies/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

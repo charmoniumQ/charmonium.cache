@@ -1,0 +1,301 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>cache.core &#8212; charmonium.cache 1.0.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="cache.func_version" href="../func_version/index.html" />
+    <link rel="prev" title="cache" href="../index.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-cache.core">
+<span id="cache-core"></span><h1><a class="reference internal" href="#module-cache.core" title="cache.core"><code class="xref py py-mod docutils literal notranslate"><span class="pre">cache.core</span></code></a><a class="headerlink" href="#module-cache.core" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="classes">
+<h3>Classes<a class="headerlink" href="#classes" title="Permalink to this headline">¶</a></h3>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#cache.core.MemoizedGroup" title="cache.core.MemoizedGroup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MemoizedGroup</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#cache.core.Memoized" title="cache.core.Memoized"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Memoized</span></code></a></p></td>
+<td><p>Abstract base class for generic types.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h3>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#cache.core.memoize" title="cache.core.memoize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">memoize</span></code></a>(**kwargs)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="attributes">
+<h3>Attributes<a class="headerlink" href="#attributes" title="Permalink to this headline">¶</a></h3>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#cache.core.__version__" title="cache.core.__version__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__version__</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#cache.core.BYTE_ORDER" title="cache.core.BYTE_ORDER"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BYTE_ORDER</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#cache.core.LOCK_PATH" title="cache.core.LOCK_PATH"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LOCK_PATH</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#cache.core.OBJ_STORE_PATH" title="cache.core.OBJ_STORE_PATH"><code class="xref py py-obj docutils literal notranslate"><span class="pre">OBJ_STORE_PATH</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#cache.core.DEFAULT_MEMOIZED_GROUP" title="cache.core.DEFAULT_MEMOIZED_GROUP"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DEFAULT_MEMOIZED_GROUP</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#cache.core.GROUP_DEFAULT" title="cache.core.GROUP_DEFAULT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GROUP_DEFAULT</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py data">
+<dt id="cache.core.__version__">
+<code class="sig-prename descclassname"><span class="pre">cache.core.</span></code><code class="sig-name descname"><span class="pre">__version__</span></code><em class="property"> <span class="pre">=</span> <span class="pre">1.0.0</span></em><a class="headerlink" href="#cache.core.__version__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt id="cache.core.BYTE_ORDER">
+<code class="sig-prename descclassname"><span class="pre">cache.core.</span></code><code class="sig-name descname"><span class="pre">BYTE_ORDER</span></code><em class="property"> <span class="pre">:Final[str]</span> <span class="pre">=</span> <span class="pre">big</span></em><a class="headerlink" href="#cache.core.BYTE_ORDER" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="cache.core.memoize">
+<code class="sig-prename descclassname"><span class="pre">cache.core.</span></code><code class="sig-name descname"><span class="pre">memoize</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cache.core.memoize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt id="cache.core.LOCK_PATH">
+<code class="sig-prename descclassname"><span class="pre">cache.core.</span></code><code class="sig-name descname"><span class="pre">LOCK_PATH</span></code><em class="property"> <span class="pre">=</span> <span class="pre">.cache_lock</span></em><a class="headerlink" href="#cache.core.LOCK_PATH" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt id="cache.core.OBJ_STORE_PATH">
+<code class="sig-prename descclassname"><span class="pre">cache.core.</span></code><code class="sig-name descname"><span class="pre">OBJ_STORE_PATH</span></code><em class="property"> <span class="pre">=</span> <span class="pre">.cache</span></em><a class="headerlink" href="#cache.core.OBJ_STORE_PATH" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="cache.core.MemoizedGroup">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">cache.core.</span></code><code class="sig-name descname"><span class="pre">MemoizedGroup</span></code><a class="headerlink" href="#cache.core.MemoizedGroup" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt id="cache.core.MemoizedGroup.__attrs_post_init__">
+<code class="sig-name descname"><span class="pre">__attrs_post_init__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cache.core.MemoizedGroup.__attrs_post_init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py data">
+<dt id="cache.core.DEFAULT_MEMOIZED_GROUP">
+<code class="sig-prename descclassname"><span class="pre">cache.core.</span></code><code class="sig-name descname"><span class="pre">DEFAULT_MEMOIZED_GROUP</span></code><a class="headerlink" href="#cache.core.DEFAULT_MEMOIZED_GROUP" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt id="cache.core.GROUP_DEFAULT">
+<code class="sig-prename descclassname"><span class="pre">cache.core.</span></code><code class="sig-name descname"><span class="pre">GROUP_DEFAULT</span></code><a class="headerlink" href="#cache.core.GROUP_DEFAULT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="cache.core.Memoized">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">cache.core.</span></code><code class="sig-name descname"><span class="pre">Memoized</span></code><a class="headerlink" href="#cache.core.Memoized" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">Generic</span></code>[<a class="reference internal" href="../util/index.html#cache.util.FuncParams" title="cache.util.FuncParams"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cache.util.FuncParams</span></code></a>, <a class="reference internal" href="../util/index.html#cache.util.FuncReturn" title="cache.util.FuncReturn"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cache.util.FuncReturn</span></code></a>]</p>
+<p>Abstract base class for generic types.</p>
+<p>A generic type is typically declared by inheriting from
+this class parameterized with one or more type variables.
+For example, a generic mapping type might be defined as:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Mapping</span><span class="p">(</span><span class="n">Generic</span><span class="p">[</span><span class="n">KT</span><span class="p">,</span> <span class="n">VT</span><span class="p">]):</span>
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="n">KT</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VT</span><span class="p">:</span>
+        <span class="o">...</span>
+    <span class="c1"># Etc.</span>
+</pre></div>
+</div>
+<p>This class can then be used as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">lookup_name</span><span class="p">(</span><span class="n">mapping</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="n">KT</span><span class="p">,</span> <span class="n">VT</span><span class="p">],</span> <span class="n">key</span><span class="p">:</span> <span class="n">KT</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="n">VT</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VT</span><span class="p">:</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">mapping</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">default</span>
+</pre></div>
+</div>
+<dl class="py attribute">
+<dt id="cache.core.Memoized.time_cost">
+<code class="sig-name descname"><span class="pre">time_cost</span></code><em class="property"> <span class="pre">:datetime.timedelta</span></em><a class="headerlink" href="#cache.core.Memoized.time_cost" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="cache.core.Memoized.time_saved">
+<code class="sig-name descname"><span class="pre">time_saved</span></code><em class="property"> <span class="pre">:datetime.timedelta</span></em><a class="headerlink" href="#cache.core.Memoized.time_saved" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="cache.core.Memoized.__attrs_post_init__">
+<code class="sig-name descname"><span class="pre">__attrs_post_init__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cache.core.Memoized.__attrs_post_init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="cache.core.Memoized.print_usage_report">
+<code class="sig-name descname"><span class="pre">print_usage_report</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cache.core.Memoized.print_usage_report" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="cache.core.Memoized.return_val_pickler">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">return_val_pickler</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cache.core.Memoized.return_val_pickler" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="cache.core.Memoized.enable_logging">
+<code class="sig-name descname"><span class="pre">enable_logging</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cache.core.Memoized.enable_logging" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="cache.core.Memoized.disable_logging">
+<code class="sig-name descname"><span class="pre">disable_logging</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cache.core.Memoized.disable_logging" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="cache.core.Memoized.__str__">
+<code class="sig-name descname"><span class="pre">__str__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cache.core.Memoized.__str__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return str(self).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="cache.core.Memoized.__call__">
+<code class="sig-name descname"><span class="pre">__call__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cache.core.Memoized.__call__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="cache.core.Memoized.would_hit">
+<code class="sig-name descname"><span class="pre">would_hit</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cache.core.Memoized.would_hit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">charmonium.cache</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">cache</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../authors.html">Credits</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">API Reference</a><ul>
+  <li><a href="../index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">cache</span></code></a><ul>
+      <li>Previous: <a href="../index.html" title="previous chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">cache</span></code></a></li>
+      <li>Next: <a href="../func_version/index.html" title="next chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">cache.func_version</span></code></a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Samuel Grayson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../../../_sources/autoapi/cache/core/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

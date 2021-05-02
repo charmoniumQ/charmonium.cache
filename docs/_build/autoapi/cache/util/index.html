@@ -1,0 +1,465 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>cache.util &#8212; charmonium.cache 1.0.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Contributing" href="../../../contributing.html" />
+    <link rel="prev" title="cache.readers_writer_lock" href="../readers_writer_lock/index.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-cache.util">
+<span id="cache-util"></span><h1><a class="reference internal" href="#module-cache.util" title="cache.util"><code class="xref py py-mod docutils literal notranslate"><span class="pre">cache.util</span></code></a><a class="headerlink" href="#module-cache.util" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="classes">
+<h3>Classes<a class="headerlink" href="#classes" title="Permalink to this headline">¶</a></h3>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#cache.util.Pickler" title="cache.util.Pickler"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Pickler</span></code></a></p></td>
+<td><p>Base class for protocol classes.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#cache.util.PathLike" title="cache.util.PathLike"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PathLike</span></code></a></p></td>
+<td><p>Based on [pathlib.Path]</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#cache.util.KeyGen" title="cache.util.KeyGen"><code class="xref py py-obj docutils literal notranslate"><span class="pre">KeyGen</span></code></a></p></td>
+<td><p>Generates unique keys (not cryptographically secure).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#cache.util.Constant" title="cache.util.Constant"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Constant</span></code></a></p></td>
+<td><p>Abstract base class for generic types.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#cache.util.Sentinel" title="cache.util.Sentinel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Sentinel</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#cache.util.Future" title="cache.util.Future"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Future</span></code></a></p></td>
+<td><p>Abstract base class for generic types.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#cache.util.GetAttr" title="cache.util.GetAttr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GetAttr</span></code></a></p></td>
+<td><p>When you want to getattr or use a default, with static types.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h3>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#cache.util.pathlike_from" title="cache.util.pathlike_from"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pathlike_from</span></code></a>(path)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="attributes">
+<h3>Attributes<a class="headerlink" href="#attributes" title="Permalink to this headline">¶</a></h3>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#cache.util.T" title="cache.util.T"><code class="xref py py-obj docutils literal notranslate"><span class="pre">T</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#cache.util.FuncParams" title="cache.util.FuncParams"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FuncParams</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#cache.util.FuncReturn" title="cache.util.FuncReturn"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FuncReturn</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#cache.util.PathLikeSubclass" title="cache.util.PathLikeSubclass"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PathLikeSubclass</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#cache.util.PathLikeFrom" title="cache.util.PathLikeFrom"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PathLikeFrom</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py data">
+<dt id="cache.util.T">
+<code class="sig-prename descclassname"><span class="pre">cache.util.</span></code><code class="sig-name descname"><span class="pre">T</span></code><a class="headerlink" href="#cache.util.T" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt id="cache.util.FuncParams">
+<code class="sig-prename descclassname"><span class="pre">cache.util.</span></code><code class="sig-name descname"><span class="pre">FuncParams</span></code><a class="headerlink" href="#cache.util.FuncParams" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt id="cache.util.FuncReturn">
+<code class="sig-prename descclassname"><span class="pre">cache.util.</span></code><code class="sig-name descname"><span class="pre">FuncReturn</span></code><a class="headerlink" href="#cache.util.FuncReturn" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="cache.util.Pickler">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">cache.util.</span></code><code class="sig-name descname"><span class="pre">Pickler</span></code><a class="headerlink" href="#cache.util.Pickler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">Protocol</span></code></p>
+<p>Base class for protocol classes.</p>
+<p>Protocol classes are defined as:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Proto</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">meth</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="o">...</span>
+</pre></div>
+</div>
+<p>Such classes are primarily used with static type checkers that recognize
+structural subtyping (static duck-typing), for example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">C</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">meth</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">0</span>
+
+<span class="k">def</span> <span class="nf">func</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">Proto</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">x</span><span class="o">.</span><span class="n">meth</span><span class="p">()</span>
+
+<span class="n">func</span><span class="p">(</span><span class="n">C</span><span class="p">())</span>  <span class="c1"># Passes static type check</span>
+</pre></div>
+</div>
+<p>See PEP 544 for details. Protocol classes decorated with
+&#64;typing.runtime_checkable act as simple-minded runtime protocols that check
+only the presence of given attributes, ignoring their type signatures.
+Protocol classes can be generic, they are defined as:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">GenProto</span><span class="p">(</span><span class="n">Protocol</span><span class="p">[</span><span class="n">T</span><span class="p">]):</span>
+    <span class="k">def</span> <span class="nf">meth</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
+        <span class="o">...</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt id="cache.util.Pickler.loads">
+<code class="sig-name descname"><span class="pre">loads</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cache.util.Pickler.loads" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="cache.util.Pickler.dumps">
+<code class="sig-name descname"><span class="pre">dumps</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cache.util.Pickler.dumps" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py data">
+<dt id="cache.util.PathLikeSubclass">
+<code class="sig-prename descclassname"><span class="pre">cache.util.</span></code><code class="sig-name descname"><span class="pre">PathLikeSubclass</span></code><a class="headerlink" href="#cache.util.PathLikeSubclass" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="cache.util.PathLike">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">cache.util.</span></code><code class="sig-name descname"><span class="pre">PathLike</span></code><a class="headerlink" href="#cache.util.PathLike" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">Protocol</span></code></p>
+<p>Based on [pathlib.Path]</p>
+<p>[pathlib.Path]: <a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path">https://docs.python.org/3/library/pathlib.html#pathlib.Path</a></p>
+<dl class="py attribute">
+<dt id="cache.util.PathLike.name">
+<code class="sig-name descname"><span class="pre">name</span></code><em class="property"> <span class="pre">:str</span></em><a class="headerlink" href="#cache.util.PathLike.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="cache.util.PathLike.__truediv__">
+<code class="sig-name descname"><span class="pre">__truediv__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cache.util.PathLike.__truediv__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Joins a segment onto this Path.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="cache.util.PathLike.read_bytes">
+<code class="sig-name descname"><span class="pre">read_bytes</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cache.util.PathLike.read_bytes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="cache.util.PathLike.write_bytes">
+<code class="sig-name descname"><span class="pre">write_bytes</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cache.util.PathLike.write_bytes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="cache.util.PathLike.mkdir">
+<code class="sig-name descname"><span class="pre">mkdir</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parents</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">...</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exist_ok</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">...</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cache.util.PathLike.mkdir" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="cache.util.PathLike.unlink">
+<code class="sig-name descname"><span class="pre">unlink</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">missing_ok</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">...</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cache.util.PathLike.unlink" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="cache.util.PathLike.iterdir">
+<code class="sig-name descname"><span class="pre">iterdir</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cache.util.PathLike.iterdir" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="cache.util.PathLike.stat">
+<code class="sig-name descname"><span class="pre">stat</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cache.util.PathLike.stat" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="cache.util.PathLike.parent">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">parent</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cache.util.PathLike.parent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="cache.util.PathLike.exists">
+<code class="sig-name descname"><span class="pre">exists</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cache.util.PathLike.exists" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="cache.util.PathLike.resolve">
+<code class="sig-name descname"><span class="pre">resolve</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cache.util.PathLike.resolve" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py data">
+<dt id="cache.util.PathLikeFrom">
+<code class="sig-prename descclassname"><span class="pre">cache.util.</span></code><code class="sig-name descname"><span class="pre">PathLikeFrom</span></code><a class="headerlink" href="#cache.util.PathLikeFrom" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="cache.util.pathlike_from">
+<code class="sig-prename descclassname"><span class="pre">cache.util.</span></code><code class="sig-name descname"><span class="pre">pathlike_from</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cache.util.pathlike_from" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="cache.util.KeyGen">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">cache.util.</span></code><code class="sig-name descname"><span class="pre">KeyGen</span></code><a class="headerlink" href="#cache.util.KeyGen" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates unique keys (not cryptographically secure).</p>
+<dl class="py attribute">
+<dt id="cache.util.KeyGen.key_bytes">
+<code class="sig-name descname"><span class="pre">key_bytes</span></code><em class="property"> <span class="pre">:int</span></em><a class="headerlink" href="#cache.util.KeyGen.key_bytes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="cache.util.KeyGen.tolerance">
+<code class="sig-name descname"><span class="pre">tolerance</span></code><em class="property"> <span class="pre">:float</span></em><a class="headerlink" href="#cache.util.KeyGen.tolerance" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="cache.util.KeyGen.counter">
+<code class="sig-name descname"><span class="pre">counter</span></code><em class="property"> <span class="pre">:int</span> <span class="pre">=</span> <span class="pre">0</span></em><a class="headerlink" href="#cache.util.KeyGen.counter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="cache.util.KeyGen.key_space">
+<code class="sig-name descname"><span class="pre">key_space</span></code><em class="property"> <span class="pre">:int</span> <span class="pre">=</span> <span class="pre">0</span></em><a class="headerlink" href="#cache.util.KeyGen.key_space" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="cache.util.KeyGen.__attrs_post_init__">
+<code class="sig-name descname"><span class="pre">__attrs_post_init__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cache.util.KeyGen.__attrs_post_init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="cache.util.KeyGen.__iter__">
+<code class="sig-name descname"><span class="pre">__iter__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cache.util.KeyGen.__iter__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="cache.util.KeyGen.__next__">
+<code class="sig-name descname"><span class="pre">__next__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cache.util.KeyGen.__next__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a new key.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="cache.util.KeyGen.probability_of_collision">
+<code class="sig-name descname"><span class="pre">probability_of_collision</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keys</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cache.util.KeyGen.probability_of_collision" title="Permalink to this definition">¶</a></dt>
+<dd><p>Use to assert the probability of collision is acceptable.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="cache.util.Constant">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">cache.util.</span></code><code class="sig-name descname"><span class="pre">Constant</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cache.util.Constant" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">Generic</span></code>[<a class="reference internal" href="#cache.util.FuncParams" title="cache.util.FuncParams"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FuncParams</span></code></a>, <a class="reference internal" href="#cache.util.FuncReturn" title="cache.util.FuncReturn"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FuncReturn</span></code></a>]</p>
+<p>Abstract base class for generic types.</p>
+<p>A generic type is typically declared by inheriting from
+this class parameterized with one or more type variables.
+For example, a generic mapping type might be defined as:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Mapping</span><span class="p">(</span><span class="n">Generic</span><span class="p">[</span><span class="n">KT</span><span class="p">,</span> <span class="n">VT</span><span class="p">]):</span>
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="n">KT</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VT</span><span class="p">:</span>
+        <span class="o">...</span>
+    <span class="c1"># Etc.</span>
+</pre></div>
+</div>
+<p>This class can then be used as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">lookup_name</span><span class="p">(</span><span class="n">mapping</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="n">KT</span><span class="p">,</span> <span class="n">VT</span><span class="p">],</span> <span class="n">key</span><span class="p">:</span> <span class="n">KT</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="n">VT</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VT</span><span class="p">:</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">mapping</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">default</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt id="cache.util.Constant.__call__">
+<code class="sig-name descname"><span class="pre">__call__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cache.util.Constant.__call__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="cache.util.Sentinel">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">cache.util.</span></code><code class="sig-name descname"><span class="pre">Sentinel</span></code><a class="headerlink" href="#cache.util.Sentinel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="cache.util.Future">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">cache.util.</span></code><code class="sig-name descname"><span class="pre">Future</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fulfill_twice</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cache.util.Future" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">Generic</span></code>[<a class="reference internal" href="#cache.util.T" title="cache.util.T"><code class="xref py py-obj docutils literal notranslate"><span class="pre">T</span></code></a>]</p>
+<p>Abstract base class for generic types.</p>
+<p>A generic type is typically declared by inheriting from
+this class parameterized with one or more type variables.
+For example, a generic mapping type might be defined as:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Mapping</span><span class="p">(</span><span class="n">Generic</span><span class="p">[</span><span class="n">KT</span><span class="p">,</span> <span class="n">VT</span><span class="p">]):</span>
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="n">KT</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VT</span><span class="p">:</span>
+        <span class="o">...</span>
+    <span class="c1"># Etc.</span>
+</pre></div>
+</div>
+<p>This class can then be used as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">lookup_name</span><span class="p">(</span><span class="n">mapping</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="n">KT</span><span class="p">,</span> <span class="n">VT</span><span class="p">],</span> <span class="n">key</span><span class="p">:</span> <span class="n">KT</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="n">VT</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VT</span><span class="p">:</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">mapping</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">default</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt id="cache.util.Future.unwrap">
+<code class="sig-name descname"><span class="pre">unwrap</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cache.util.Future.unwrap" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="cache.util.Future.fulfill">
+<code class="sig-name descname"><span class="pre">fulfill</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cache.util.Future.fulfill" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="cache.util.GetAttr">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">cache.util.</span></code><code class="sig-name descname"><span class="pre">GetAttr</span></code><a class="headerlink" href="#cache.util.GetAttr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">Generic</span></code>[<a class="reference internal" href="#cache.util.T" title="cache.util.T"><code class="xref py py-obj docutils literal notranslate"><span class="pre">T</span></code></a>]</p>
+<p>When you want to getattr or use a default, with static types.</p>
+<p>Example: obj_hash = GetAttr[Callable[[], int]]()(obj, “__hash__”, lambda: hash(obj))()</p>
+<dl class="py attribute">
+<dt id="cache.util.GetAttr.error">
+<code class="sig-name descname"><span class="pre">error</span></code><a class="headerlink" href="#cache.util.GetAttr.error" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="cache.util.GetAttr.__call__">
+<code class="sig-name descname"><span class="pre">__call__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attr_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">error</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_callable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cache.util.GetAttr.__call__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">charmonium.cache</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">cache</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../authors.html">Credits</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">API Reference</a><ul>
+  <li><a href="../index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">cache</span></code></a><ul>
+      <li>Previous: <a href="../readers_writer_lock/index.html" title="previous chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">cache.readers_writer_lock</span></code></a></li>
+      <li>Next: <a href="../../../contributing.html" title="next chapter">Contributing</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Samuel Grayson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../../../_sources/autoapi/cache/util/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
