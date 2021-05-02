@@ -11,8 +11,10 @@ fi
 
 part="${1}"
 
-./scripts/test.sh
-./scripts/docs.sh
+if [ -z "${skip_checks}" ]; then
+	./scripts/test.sh
+	./scripts/docs.sh
+fi
 
 if [ -n "$(git status --porcelain)" ]; then
 	echo "Should be clean commit"
@@ -27,5 +29,6 @@ if [ -z "${dry_run}" ]; then
     read -p "Last chance to abort. Continue?" yn
 	if [ "${yn}" = y ]; then
 		poetry publish
+		git push
 	fi
 fi

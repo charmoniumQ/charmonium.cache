@@ -127,10 +127,11 @@ Code quality
   and required for merging with the ``main`` branch; This way they won't be
   easily forgotten.
 
-- I've implemented the complete feature-set in under 1,000 LoC. LoC
-  count is an imperfect but reasonable metric of how hard something is
-  to maintain and how likely it is to contain bugs according to
-  [Zhang]_.
+..
+   - I've implemented the complete feature-set in under 1,000 LoC. LoC
+	 count is an imperfect but reasonable metric of how hard something is
+	 to maintain and how likely it is to contain bugs according to
+	 [Zhang]_.
 
 .. _`PEP 561`: https://www.python.org/dev/peps/pep-0561/
 .. _`LRU`: https://en.wikipedia.org/wiki/Cache_replacement_policies#Least_recently_used_(LRU)
