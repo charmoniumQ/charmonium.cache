@@ -1,8 +1,0 @@
-Works Cited
-===========
-
-.. [Guo] Guo, Philip Jia. *Software tools to facilitate research programming*. Stanford University, 2012. See Chapter 5. https://purl.stanford.edu/mb510fs4943
-.. [Podlipnig] Podlipnig, Stefan, and Laszlo Böszörmenyi. "A survey of web cache replacement strategies." *ACM Computing Surveys (CSUR) 35.4* (2003): 374-398. http://www.cs.ucf.edu/~dcm/Teaching/COT4810-Fall%202012/Literature/WebCacheReplacementStrategies.pdf
-.. [Zhang] Zhang, Hongyu. "An investigation of the relationships between lines of code and defects." *2009 IEEE International Conference on Software Maintenance*. IEEE, 2009. https://www.researchgate.net/profile/Hongyu-Zhang-46/publication/316922118_An_Investigation_of_the_Relationships_between_Lines_of_Code_and_Defects/links/591e31e1a6fdcc233fceb563/An-Investigation-of-the-Relationships-between-Lines-of-Code-and-Defects.pdf
-.. [Cao et al] Cao, Pei, and Sandy Irani. "Cost-aware www proxy caching algorithms." _Usenix symposium on internet technologies and systems_. Vol. 12. No. 97. 1997. https://www.usenix.org/legacy/publications/library/proceedings/usits97/full_papers/cao/cao.pdf
-.. .. [Bahn] Bahn, Hyokyung, et al. "Efficient replacement of nonuniform objects in web caches." *Computer* 35.6 (2002): 65-73. https://8cc2ce98-a-f3569e9e-s-sites.googlegroups.com/a/necsst.ce.hongik.ac.kr/publication/jalyosil/getPDF3.pdf?attachauth=ANoY7cqOpLmcb_3TXLj9ACr1qQojQMNL2eTEpG_q5kZXKjl3C6XcW4J0HIA8-ncTm5s0gBFJSK08Ju-on-O5Fu44GHhlOzaIzNkdCV-NaSCZhDpWBOiqJ7FjETvER92tnjJRuDtfRznLahZ7BJ4x2o6lliM00z22ZcAfL8TUVsy9sltZ_CX5WA28Dj2U647XrBjI8xv73GjIKC77J0ubdNuzTIQVDpf16nbqq0RUHzST0EupaNDlNR0%3D&attredirects=0
