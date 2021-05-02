@@ -39,21 +39,12 @@ guide`_. Then run:
     >>> square(4)
     recomputing
     16
-    >>> square(4)
+    >>> square(4) # no need to recompute
     16
     >>> i = 1
-    >>> square(4)
+    >>> square(4) # global i changed; must recompute
     recomputing
     17
-
-The function must be pure with respect to its arguments and its `closure`_ (``i``
-part of the closure in the previous example). This library will not detect:
-
-- Reading **directly** from the filesystem (this library offers a wrapper over files
-  that permits it to detect changes; use that instead).
-
-- Non-static references (the caching library can't detect a dependency if the
-  function references ``globals()["i"]``).
 
 Advantages
 ----------
@@ -65,6 +56,11 @@ one is unique because it is:
    edit the source code or change a file which the program reads (provided they
    use this library's right file abstraction). Users never need to manually
    invalidate the cache, so long as the functions are pure.
+
+   It is precise enough that it will ignore changes in unrelated functions in
+   the file, but it will detect changes in relevant functions in other files. It
+   even detects changes in global variables (as in the example above). See
+   :ref:`Detecting Changes in Functions` for details.
 
 2. **Useful between runs and across machines:** A cache can be shared on the
    network, so that if *any* machine has computed the function for the same

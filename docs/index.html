@@ -64,32 +64,29 @@ guide</a>. Then run:</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">square</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
 <span class="go">recomputing</span>
 <span class="go">16</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">square</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">square</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span> <span class="c1"># no need to recompute</span>
 <span class="go">16</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">i</span> <span class="o">=</span> <span class="mi">1</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">square</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">square</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span> <span class="c1"># global i changed; must recompute</span>
 <span class="go">recomputing</span>
 <span class="go">17</span>
 </pre></div>
 </div>
-<p>The function must be pure with respect to its arguments and its <a class="reference external" href="https://en.wikipedia.org/wiki/Closure_(computer_programming)">closure</a> (<code class="docutils literal notranslate"><span class="pre">i</span></code>
-part of the closure in the previous example). This library will not detect:</p>
-<ul class="simple">
-<li><p>Reading <strong>directly</strong> from the filesystem (this library offers a wrapper over files
-that permits it to detect changes; use that instead).</p></li>
-<li><p>Non-static references (the caching library can’t detect a dependency if the
-function references <code class="docutils literal notranslate"><span class="pre">globals()[&quot;i&quot;]</span></code>).</p></li>
-</ul>
 </div>
 <div class="section" id="advantages">
 <h2>Advantages<a class="headerlink" href="#advantages" title="Permalink to this headline">¶</a></h2>
 <p>While there are other libraries and techniques for memoization, I believe this
 one is unique because it is:</p>
-<ol class="arabic simple">
+<ol class="arabic">
 <li><p><strong>Correct with respect to source-code changes:</strong> The cache detects if you
 edit the source code or change a file which the program reads (provided they
 use this library’s right file abstraction). Users never need to manually
-invalidate the cache, so long as the functions are pure.</p></li>
+invalidate the cache, so long as the functions are pure.</p>
+<p>It is precise enough that it will ignore changes in unrelated functions in
+the file, but it will detect changes in relevant functions in other files. It
+even detects changes in global variables (as in the example above). See
+<a class="reference internal" href="tutorial.html#detecting-changes-in-functions"><span class="std std-ref">Detecting Changes in Functions</span></a> for details.</p>
+</li>
 <li><p><strong>Useful between runs and across machines:</strong> A cache can be shared on the
 network, so that if <em>any</em> machine has computed the function for the same
 source-source and arguments, this value can be reused by <em>any other</em> machine.</p></li>
