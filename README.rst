@@ -2,6 +2,10 @@
 charmonium.cache
 ================
 
+- `PyPI`_
+- `GitHub`_
+- `docs`_
+
 Provides a decorator for caching a function. Whenever the function is called
 with the same arguments, the result is loaded from the cache instead of
 computed. If the arguments, source code, or enclosing environment have changed,
@@ -139,3 +143,6 @@ Code quality
 .. _`decorator`: https://en.wikipedia.org/wiki/Python_syntax_and_semantics#Decorators
 .. _`pip install guide`: https://pip.pypa.io/en/latest/installing/
 .. _`pyright`: https://github.com/microsoft/pyright
+.. _`PyPI`: https://pypi.org/project/charmonium.time-block/
+.. _`GitHub`: https://github.com/charmoniumQ/charmonium.cache
+.. _`docs`: https://charmoniumq.github.io/charmonium.cache/
