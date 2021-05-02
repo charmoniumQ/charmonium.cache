@@ -64,11 +64,15 @@ Helpers
 
     .. autoclass:: FileContents
         :members:
-        :special-members: __init__, __cache_key__, __cache_val__
+        :special-members: __init__, __cache_key__, __cache_ver__
 
     .. autoclass:: TTLInterval
         :members:
         :special-members: __init__
+
+    .. autoclass:: KeyVer
+        :members:
+        :special-members: __cache_key__, __cache_ver__
 
 Utils
 -----

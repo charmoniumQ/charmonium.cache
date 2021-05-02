@@ -285,8 +285,6 @@ details.
 Other Behaviors
 ---------------
 
-.. _`One- or two-level`:
-
 By default, the index entry just holds an object key and the object store maps
 that to the actual returned object. This level of indirection means that the
 index is small and can be loaded quickly even if the returned objects are

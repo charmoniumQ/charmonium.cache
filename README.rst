@@ -79,8 +79,8 @@ one is unique because it is:
 6. **Overhead aware:** The library measures the time saved versus overhead. It
    warns the user if the overhead of caching is not worth it.
 
-CLI
----
+Memoize CLI
+-----------
 
 ::
 

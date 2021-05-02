@@ -36,6 +36,9 @@ def determ_hash(obj: Any) -> int:
     - Objects containing a __determ_hash__ hashed by calling
       determ_hash on its return (it need not be an int).
 
+.. |hash| replace:: ``hash``
+.. _`hash`: https://docs.python.org/3/library/functions.html?highlight=hash#hash
+
     """
     # Make sure I XOR the typename with the hash of contents. This makes an empty tuple hash differently than an empty dict, avoiding a collision.
 

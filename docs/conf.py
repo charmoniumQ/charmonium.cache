@@ -33,6 +33,7 @@ release = getattr(charmonium.cache, "__version__")
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
+    "sphinx.ext.autosectionlabel",
     # "sphinx_autodoc_typehints",
     # "sphinx.ext.viewcode",
     # "sphinx.ext.napoleon",

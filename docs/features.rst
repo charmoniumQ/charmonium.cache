@@ -145,13 +145,19 @@ Feature Matrix
 
 Other features of ``charmonium.cache``:
 
-- `One- or two-level`_ caching
+- :ref:`One- or two-level caching <Other Behaviors>`: One-level caches embed the
+  return-value in the index. Two-level caches have a layer of indirection, the
+  :ref:`object store <Cache Functionality>` in my case. This library supports the
+  choice between either.
 
-- Time-to-live (TTL)
+- :ref:`Time-to-live (TTL) <Extra State>`: This library supports dropping values
+  that are more stale than a certain time.
 
-- Lossy or non-lossy key compression
+- :ref:`Lossy or non-lossy key compression <Other Behaviors>`: This cache
+  supports storing a hash of the keys or storing the contents of the
+  keys.
 
-- Exported static typing (PEP 561 and PEP 612).
+- Exported static typing (`PEP 561`_ and `PEP 612`_).
 
 Limitations and Future Work
 ---------------------------
@@ -224,3 +230,5 @@ Limitations and Future Work
 .. _`Dask`: https://docs.dask.org/en/latest/
 .. _`mypy`: http://mypy-lang.org/
 .. _`pyright`: https://github.com/microsoft/pyright
+.. _`PEP 561`: https://www.python.org/dev/peps/pep-0561/
+.. _`PEP 612`: https://www.python.org/dev/peps/pep-0612/

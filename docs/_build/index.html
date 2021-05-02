@@ -99,8 +99,8 @@ and storage-size in addition to recency, unlike naive <a class="reference extern
 warns the user if the overhead of caching is not worth it.</p></li>
 </ol>
 </div>
-<div class="section" id="cli">
-<h2>CLI<a class="headerlink" href="#cli" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="memoize-cli">
+<h2>Memoize CLI<a class="headerlink" href="#memoize-cli" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">memoize</span> <span class="o">--</span> <span class="n">command</span> <span class="n">arg1</span> <span class="n">arg2</span> <span class="o">...</span>
 </pre></div>
 </div>
@@ -112,12 +112,16 @@ produced from a prior run.</p>
 </dl>
 <p>Make is good, but it has a hard time with dependencies that are not files. Many
 dependencies are not well-contained in files. For example, you may want
-recompute some command every time some status command returns a different value.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># make status=$(status) will not do the right thing.</span>
+recompute some command every time some status command returns a different
+value.</p>
+<p>To get correct results you would have to incorporate <em>every</em> key you depend on
+into the filename, which can be messy, so most people don’t do that. <code class="docutils literal notranslate"><span class="pre">memoize</span></code>
+is easier to use correctly, for example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># `make status=$(status)` will not do the right thing.</span>
 <span class="n">make</span> <span class="n">var</span><span class="o">=</span><span class="mi">1</span>
 <span class="n">make</span> <span class="n">var</span><span class="o">=</span><span class="mi">2</span> <span class="c1"># usually, nothing recompiles here, contrary to user&#39;s intent</span>
 
-<span class="c1"># memoize --key=$(status) -- command args will do the right thing</span>
+<span class="c1"># `memoize --key=$(status) -- command args` will do the right thing</span>
 <span class="n">memoize</span> <span class="o">--</span><span class="n">key</span><span class="o">=</span><span class="mi">1</span> <span class="o">--</span> <span class="n">command</span> <span class="n">args</span>
 <span class="n">memoize</span> <span class="o">--</span><span class="n">key</span><span class="o">=</span><span class="mi">2</span> <span class="o">--</span> <span class="n">command</span> <span class="n">args</span> <span class="c1"># key changed, command is recomptued.</span>
 </pre></div>

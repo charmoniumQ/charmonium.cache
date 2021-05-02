@@ -54,7 +54,7 @@
 <dd class="field-odd"><p><strong>kwargs</strong> (<em>Any</em>) – </p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p>Callable[[Callable[FuncParams, FuncReturn]], <a class="reference internal" href="#charmonium.cache.Memoized" title="charmonium.cache.Memoized">Memoized</a>[FuncParams, FuncReturn]]</p>
+<dd class="field-even"><p>Callable[[Callable[[FuncParams], FuncReturn]], charmonium.cache.memoize.Memoized[FuncParams, FuncReturn]]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -70,14 +70,14 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>group</strong> (<a class="reference internal" href="#charmonium.cache.MemoizedGroup" title="charmonium.cache.MemoizedGroup"><em>MemoizedGroup</em></a>) – see <a class="reference internal" href="#charmonium.cache.MemoizedGroup" title="charmonium.cache.MemoizedGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">charmonium.cache.MemoizedGroup</span></code></a>.</p></li>
+<li><p><strong>group</strong> (<em>charmonium.cache.memoize.MemoizedGroup</em>) – see <a class="reference internal" href="#charmonium.cache.MemoizedGroup" title="charmonium.cache.MemoizedGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">charmonium.cache.MemoizedGroup</span></code></a>.</p></li>
 <li><p><strong>lossy_compression</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – whether to use a hash of the arguments or the actual arguments.</p></li>
 <li><p><strong>name</strong> (<em>Optional</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>]</em>) – A key-to-lookup distinguishing this funciton from others. Defaults to the Python module and name.</p></li>
-<li><p><strong>extra_func_state</strong> (<em>Callable</em><em>[</em><em>[</em><em>Callable</em><em>[</em><em>FuncParams</em><em>, </em><em>FuncReturn</em><em>]</em><em>]</em><em>, </em><em>Any</em><em>]</em>) – An extra state function. The return-value is a key-to-match after the function name.</p></li>
+<li><p><strong>extra_func_state</strong> (<em>Callable</em><em>[</em><em>[</em><em>Callable</em><em>[</em><em>[</em><em>FuncParams</em><em>]</em><em>, </em><em>FuncReturn</em><em>]</em><em>]</em><em>, </em><em>Any</em><em>]</em>) – An extra state function. The return-value is a key-to-match after the function name.</p></li>
 <li><p><strong>use_obj_store</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – whether the objects should be put behind object store, a layer of indirection.</p></li>
 <li><p><strong>use_metadata_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – whether to include the size of the metadata in the size threshold calculation for eviction.</p></li>
 <li><p><strong>pickler</strong> (<em>Optional</em><em>[</em><a class="reference internal" href="#charmonium.cache.Pickler" title="charmonium.cache.Pickler"><em>Pickler</em></a><em>]</em>) – A custom pickler to use with the index. Pickle types must include tuples of picklable types, hashable types, and the arguments (<code class="docutils literal notranslate"><span class="pre">__cache_key__</span></code> and <code class="docutils literal notranslate"><span class="pre">__cache_val__</span></code>, if defined).</p></li>
-<li><p><strong>func</strong> (<em>Callable</em><em>[</em><em>FuncParams</em><em>, </em><em>FuncReturn</em><em>]</em>) – </p></li>
+<li><p><strong>func</strong> (<em>Callable</em><em>[</em><em>[</em><em>FuncParams</em><em>]</em><em>, </em><em>FuncReturn</em><em>]</em>) – </p></li>
 <li><p><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – </p></li>
 </ul>
 </dd>
@@ -163,12 +163,12 @@
 
 <dl class="py class">
 <dt id="charmonium.cache.MemoizedGroup">
-<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">MemoizedGroup</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">*</span></em>, <em class="sig-param"><span class="pre">obj_store=None</span></em>, <em class="sig-param"><span class="pre">replacement_policy='gdsize'</span></em>, <em class="sig-param"><span class="pre">size=MiB(1.0)</span></em>, <em class="sig-param"><span class="pre">pickler=&lt;module</span> <span class="pre">'pickle'</span> <span class="pre">from</span> <span class="pre">'/home/grayson5/.pyenv/versions/3.9.1/lib/python3.9/pickle.py'&gt;</span></em>, <em class="sig-param"><span class="pre">lock=None</span></em>, <em class="sig-param"><span class="pre">fine_grain_persistence=False</span></em>, <em class="sig-param"><span class="pre">fine_grain_eviction=False</span></em>, <em class="sig-param"><span class="pre">extra_system_state=lambda</span> <span class="pre">*args</span></em>, <em class="sig-param"><span class="pre">**kwargs:</span> <span class="pre">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#charmonium.cache.MemoizedGroup" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">MemoizedGroup</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">*</span></em>, <em class="sig-param"><span class="pre">obj_store=None</span></em>, <em class="sig-param"><span class="pre">replacement_policy='gdsize'</span></em>, <em class="sig-param"><span class="pre">size=KiB(100.0)</span></em>, <em class="sig-param"><span class="pre">pickler=&lt;module</span> <span class="pre">'pickle'</span> <span class="pre">from</span> <span class="pre">'/home/grayson5/.pyenv/versions/3.9.4/lib/python3.9/pickle.py'&gt;</span></em>, <em class="sig-param"><span class="pre">lock=None</span></em>, <em class="sig-param"><span class="pre">fine_grain_persistence=False</span></em>, <em class="sig-param"><span class="pre">fine_grain_eviction=False</span></em>, <em class="sig-param"><span class="pre">extra_system_state=lambda</span> <span class="pre">*args</span></em>, <em class="sig-param"><span class="pre">**kwargs:</span> <span class="pre">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#charmonium.cache.MemoizedGroup" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>A MemoizedGroup holds the memoization for multiple functions.</p>
 <dl class="py method">
 <dt id="charmonium.cache.MemoizedGroup.__init__">
-<code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">*</span></em>, <em class="sig-param"><span class="pre">obj_store=None</span></em>, <em class="sig-param"><span class="pre">replacement_policy='gdsize'</span></em>, <em class="sig-param"><span class="pre">size=MiB(1.0)</span></em>, <em class="sig-param"><span class="pre">pickler=&lt;module</span> <span class="pre">'pickle'</span> <span class="pre">from</span> <span class="pre">'/home/grayson5/.pyenv/versions/3.9.1/lib/python3.9/pickle.py'&gt;</span></em>, <em class="sig-param"><span class="pre">lock=None</span></em>, <em class="sig-param"><span class="pre">fine_grain_persistence=False</span></em>, <em class="sig-param"><span class="pre">fine_grain_eviction=False</span></em>, <em class="sig-param"><span class="pre">extra_system_state=lambda</span> <span class="pre">*args</span></em>, <em class="sig-param"><span class="pre">**kwargs:</span> <span class="pre">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#charmonium.cache.MemoizedGroup.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">*</span></em>, <em class="sig-param"><span class="pre">obj_store=None</span></em>, <em class="sig-param"><span class="pre">replacement_policy='gdsize'</span></em>, <em class="sig-param"><span class="pre">size=KiB(100.0)</span></em>, <em class="sig-param"><span class="pre">pickler=&lt;module</span> <span class="pre">'pickle'</span> <span class="pre">from</span> <span class="pre">'/home/grayson5/.pyenv/versions/3.9.4/lib/python3.9/pickle.py'&gt;</span></em>, <em class="sig-param"><span class="pre">lock=None</span></em>, <em class="sig-param"><span class="pre">fine_grain_persistence=False</span></em>, <em class="sig-param"><span class="pre">fine_grain_eviction=False</span></em>, <em class="sig-param"><span class="pre">extra_system_state=lambda</span> <span class="pre">*args</span></em>, <em class="sig-param"><span class="pre">**kwargs:</span> <span class="pre">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#charmonium.cache.MemoizedGroup.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Construct a memoized group. Use with :py:function:Memoized.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -208,8 +208,8 @@
 <blockquote>
 <div><dl class="py class">
 <dt id="charmonium.cache.ObjStore">
-<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">ObjStore</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#charmonium.cache.ObjStore" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></p>
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">ObjStore</span></code><a class="headerlink" href="#charmonium.cache.ObjStore" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>An <a class="reference external" href="https://en.wikipedia.org/wiki/Object_storage">object-store</a> is a persistent mapping from int to bytes.</p>
 <dl class="py method">
 <dt id="charmonium.cache.ObjStore.__setitem__">
@@ -473,8 +473,8 @@
 
 <dl class="py class">
 <dt id="charmonium.cache.Pickler">
-<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">Pickler</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#charmonium.cache.Pickler" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></p>
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">Pickler</span></code><a class="headerlink" href="#charmonium.cache.Pickler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <dl class="py method">
 <dt id="charmonium.cache.Pickler.loads">
 <code class="sig-name descname"><span class="pre">loads</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">buffer</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#charmonium.cache.Pickler.loads" title="Permalink to this definition">¶</a></dt>
@@ -505,8 +505,8 @@
 
 <dl class="py class">
 <dt id="charmonium.cache.RWLock">
-<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">RWLock</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#charmonium.cache.RWLock" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></p>
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">RWLock</span></code><a class="headerlink" href="#charmonium.cache.RWLock" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>A <a class="reference external" href="https://en.wikipedia.org/wiki/Readers%E2%80%93writer_lock">Readers-Writer Lock</a> guarantees N readers xor 1 writer.</p>
 <p>This permits read-concurrency in the underlying resource when
 there is no writer.</p>
@@ -594,8 +594,8 @@ writer.</p>
 
 <dl class="py class">
 <dt id="charmonium.cache.Lock">
-<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">Lock</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#charmonium.cache.Lock" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></p>
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">Lock</span></code><a class="headerlink" href="#charmonium.cache.Lock" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 </dd></dl>
 
 </div></blockquote>
@@ -605,12 +605,14 @@ writer.</p>
 <blockquote>
 <div><dl class="py class">
 <dt id="charmonium.cache.FileContents">
-<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">FileContents</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#charmonium.cache.FileContents" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">FileContents</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comparison</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'crc32'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#charmonium.cache.FileContents" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>wraps the path and its contents, to make your function pure</p>
 <ul class="simple">
 <li><p>When FileContents is un/pickled, the contents of path get
 restored/snapshotted.</p></li>
+<li><p>When FileContents uses a hash of the path and contents as the
+<code class="docutils literal notranslate"><span class="pre">determ_hash</span></code>.</p></li>
 <li><p>When FileContents is used as an argument, the path is the key
 and the contents are the version.</p></li>
 </ul>
@@ -619,11 +621,14 @@ and the contents are the version.</p></li>
 a string.</p>
 <dl class="py method">
 <dt id="charmonium.cache.FileContents.__init__">
-<code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#charmonium.cache.FileContents.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comparison</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'crc32'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#charmonium.cache.FileContents.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>path</strong> (<em>Union</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>, </em><em>charmonium.cache.pathlike.PathLike</em><em>]</em>) – </p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>Union</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>, </em><em>charmonium.cache.pathlike.PathLike</em><em>]</em>) – </p></li>
+<li><p><strong>comparison</strong> (<em>Union</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>, </em><em>Callable</em><em>[</em><em>[</em><a class="reference internal" href="#charmonium.cache.PathLike" title="charmonium.cache.PathLike"><em>PathLike</em></a><em>]</em><em>, </em><em>Any</em><em>]</em><em>]</em>) – </p></li>
+</ul>
 </dd>
 <dt class="field-even">Return type</dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)">None</a></p>
@@ -636,6 +641,11 @@ a string.</p>
 <code class="sig-name descname"><span class="pre">path</span></code><em class="property"><span class="pre">:</span> <a class="reference internal" href="#charmonium.cache.PathLike" title="charmonium.cache.PathLike"><span class="pre">PathLike</span></a></em><a class="headerlink" href="#charmonium.cache.FileContents.path" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<dl class="py attribute">
+<dt id="charmonium.cache.FileContents.comparison">
+<code class="sig-name descname"><span class="pre">comparison</span></code><em class="property"><span class="pre">:</span> <span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#charmonium.cache.PathLike" title="charmonium.cache.PathLike"><span class="pre">PathLike</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#charmonium.cache.FileContents.comparison" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt id="charmonium.cache.FileContents.__cache_key__">
 <code class="sig-name descname"><span class="pre">__cache_key__</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#charmonium.cache.FileContents.__cache_key__" title="Permalink to this definition">¶</a></dt>
@@ -643,6 +653,17 @@ a string.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="charmonium.cache.FileContents.__cache_ver__">
+<code class="sig-name descname"><span class="pre">__cache_ver__</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#charmonium.cache.FileContents.__cache_ver__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the contents of the file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Any</p>
 </dd>
 </dl>
 </dd></dl>
@@ -692,6 +713,43 @@ a string.</p>
 
 </dd></dl>
 
+<dl class="py class">
+<dt id="charmonium.cache.KeyVer">
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">KeyVer</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ver</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#charmonium.cache.KeyVer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>A dummy key and version pair.</p>
+<dl class="py attribute">
+<dt id="charmonium.cache.KeyVer.key">
+<code class="sig-name descname"><span class="pre">key</span></code><a class="headerlink" href="#charmonium.cache.KeyVer.key" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="charmonium.cache.KeyVer.ver">
+<code class="sig-name descname"><span class="pre">ver</span></code><a class="headerlink" href="#charmonium.cache.KeyVer.ver" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="charmonium.cache.KeyVer.__cache_key__">
+<code class="sig-name descname"><span class="pre">__cache_key__</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#charmonium.cache.KeyVer.__cache_key__" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Any</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="charmonium.cache.KeyVer.__cache_ver__">
+<code class="sig-name descname"><span class="pre">__cache_ver__</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#charmonium.cache.KeyVer.__cache_ver__" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Any</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </div></blockquote>
 </div>
 <div class="section" id="utils">
@@ -699,8 +757,8 @@ a string.</p>
 <blockquote>
 <div><dl class="py class">
 <dt id="charmonium.cache.PathLike">
-<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">PathLike</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#charmonium.cache.PathLike" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></p>
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">PathLike</span></code><a class="headerlink" href="#charmonium.cache.PathLike" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Duck type of <a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path">pathlib.Path</a></p>
 <dl class="py method">
 <dt id="charmonium.cache.PathLike.__truediv__">
@@ -866,12 +924,17 @@ a string.</p>
 <dl class="py function">
 <dt id="charmonium.cache.determ_hash">
 <code class="sig-name descname"><span class="pre">determ_hash</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#charmonium.cache.determ_hash" title="Permalink to this definition">¶</a></dt>
-<dd><p>A persistent hash protocol.</p>
-<p>The hash is persistent across:
-- different processes
-- different machines
-- different Python versions
-- different OSes</p>
+<dd><p>A deterministic hash protocol.</p>
+<blockquote>
+<div><p>Python’s <a class="reference external" href="https://docs.python.org/3/library/functions.html?highlight=hash#hash"><code class="docutils literal notranslate"><span class="pre">hash</span></code></a> will return different values across different
+processes. This hash is deterministic across:</p>
+<ul class="simple">
+<li><p>different processes</p></li>
+<li><p>different machines</p></li>
+<li><p>different Python versions</p></li>
+<li><p>different OSes</p></li>
+</ul>
+<p>determ_hash is based on the contents:</p>
 <ul class="simple">
 <li><p>Primitive types (bytes, str, int, float, complex, None) are
 hashed by their value or a checksum of their value.</p></li>
@@ -880,6 +943,7 @@ XOR of their elements.</p></li>
 <li><p>Objects containing a __determ_hash__ hashed by calling
 determ_hash on its return (it need not be an int).</p></li>
 </ul>
+</div></blockquote>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>obj</strong> (<em>Any</em>) – </p>
