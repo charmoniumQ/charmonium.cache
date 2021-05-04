@@ -5,7 +5,6 @@ import random
 import tempfile
 import warnings
 from pathlib import Path
-from types import TracebackType
 from typing import TYPE_CHECKING, Any, Callable, Generic, Optional, TypeVar, Union, cast
 
 import attr
@@ -154,17 +153,6 @@ class DontPickle(Generic[_T]):
     @staticmethod
     def create(init: str) -> _T:
         return cast(_T, DontPickle[_T](init))
-
-    def __enter__(self) -> Optional[bool]:
-        return self.obj.__enter__()  # type: ignore
-
-    def __exit__(
-        self,
-        exc_type: Optional[type[BaseException]],
-        exc_val: Optional[BaseException],
-        exc_tb: Optional[TracebackType],
-    ) -> Optional[bool]:
-        return self.obj.__exit__(exc_type, exc_val, exc_tb)  # type: ignore
 
 
 def with_attr(obj: _T, attr_name: str, attr_val: Any) -> _T:

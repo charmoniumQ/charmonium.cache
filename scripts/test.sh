@@ -106,7 +106,7 @@ rm -rf .cache
 
 capture \
 	poetry run \
-		tox --parallel
+		tox
 
 rm -rf .cache
 

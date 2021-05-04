@@ -5,8 +5,8 @@ import datetime
 import logging
 import pickle
 import sys
-import warnings
 import threading
+import warnings
 from typing import (
     Any,
     Callable,
@@ -90,7 +90,11 @@ class MemoizedGroup:
     temporary: bool
 
     def __getstate__(self) -> Any:
-        return {slot: getattr(self, slot) for slot in self.__slots__ if slot not in {"__weakref__", "_index", "_memory_lock"}}
+        return {
+            slot: getattr(self, slot)
+            for slot in self.__slots__
+            if slot not in {"__weakref__", "_index", "_memory_lock"}
+        }
 
     def __setstate__(self, state: Mapping[str, Any]) -> Any:
         for attr_name, attr_val in state.items():
@@ -175,7 +179,7 @@ class MemoizedGroup:
         self.temporary = temporary
         self._index_read()
         if self.temporary:
-            atexit.register(lambda: self._obj_store.clear())
+            atexit.register(self._obj_store.clear)
             # atexit handlers are run in the opposite order they are registered.
         atexit.register(self._index_write)
 
@@ -370,7 +374,7 @@ class Memoized(Generic[FuncParams, FuncReturn]):
         # functools.update_wrapper(self, self._func)
 
     def log_usage_report(self) -> None:
-        with self.group._memory_lock:
+        with self.group._memory_lock:  # pylint: disable=protected-access
             tc = self.group.time_cost[self.name]
             ts = self.group.time_saved[self.name]
             print(
@@ -573,11 +577,12 @@ class Memoized(Generic[FuncParams, FuncReturn]):
         )
 
     def would_hit(self, *args: FuncParams.args, **kwargs: FuncParams.kwargs) -> bool:
+        # pylint: disable=protected-access
         key = self.key(*args, **kwargs)
         with self.group._memory_lock:
             if self.group._fine_grain_persistence:
-                self.group._index_read()  # pylint: disable=protected-access
-            return key in self.group._index  # pylint: disable=protected-access
+                self.group._index_read()
+            return key in self.group._index
 
 
 # TODO: work for methods (@memoize def foo(self) ...)

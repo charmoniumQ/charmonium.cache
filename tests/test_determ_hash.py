@@ -17,34 +17,43 @@ class Baz:
         return 3.1
 
 
-class Bar:
+class PicklableObj:
     pass
 
 
-foo: list[Any] = [
-    recursive_list,
-    Baz(),
-    3 + 1j,
-    2.0,
-    "hello world",
-    pickle,
-    None,
-    frozenset({3, 4, 5}),
-    dict(a=1, b=2, c=dict(a=3)),
-    {1, 6, 7},
-    Path(),
-    -1,
-    Bar(),
-]
-expected = 2553475968
+def non_picklable_obj() -> Any:
+    class NotTopLevel:
+        pass
+
+    return NotTopLevel()
+
+
+foo: dict[str, Any] = {
+    "recursive_list": recursive_list,
+    "obj with __determ_hash__": Baz(),
+    "complex": 3 + 1j,
+    "float": 2.0,
+    "str": "hello world",
+    "module": pickle,
+    "none": None,
+    "frozenset": frozenset({3, 4, 5}),
+    "dict of dicts": dict(a=1, b=2, c=dict(a=3)),
+    "set": {1, 6, 7},
+    "Path obj": Path(),
+    "signed int": -1,
+    "picklable object": PicklableObj(),
+    "Nonpicklable object": non_picklable_obj(),
+}
+expected = 3232485285
 
 
 def test_persistence() -> None:
+    print(determ_hash(hashable(PicklableObj())))
+
     p = determ_hash(hashable(foo))
     assert (
         p == expected
     ), f"If you changed how persistent hash works, just change the `expected` to {p}."
-    determ_hash(Baz()) == determ_hash(Baz().__determ_hash__())
 
 
 def test_lambda_consts() -> None:

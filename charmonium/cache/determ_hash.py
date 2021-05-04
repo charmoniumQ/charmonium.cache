@@ -110,6 +110,8 @@ def hashable(obj: Any) -> Hashable:
       closure-vars. This means changing comments will not change the
       hashable value.
 
+    - Picklable objects are hashed as their pickle.dumps.
+
     - Other objects are hashed as a dict of their attributes,
       excluding dunder-attributes.
 
@@ -170,8 +172,8 @@ def _hashable(obj: Any, tabu: set[int], level: int) -> Hashable:
         return obj.__fspath__()
     else:
         try:
-            return pickle.dumps(obj)
-        except pickle.PickleError:
+            return pickle.dumps(obj, protocol=4)
+        except (pickle.PickleError, AttributeError):
             return frozenset(
                 (
                     (

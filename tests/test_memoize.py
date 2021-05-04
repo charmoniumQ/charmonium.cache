@@ -3,101 +3,79 @@ from __future__ import annotations
 import pickle
 from typing import Any
 
-import fasteners
 import pytest
 
-from charmonium.cache import (
-    DirObjStore,
-    FileRWLock,
-    MemoizedGroup,
-    NaiveRWLock,
-    memoize,
-)
+from charmonium.cache import DirObjStore, MemoizedGroup, memoize
 from charmonium.cache.util import temp_path
 
 # import from __init__ because this is an integration test.
 
 calls: list[int] = []
 
-used_dumps: bool = False
-used_loads: bool = False
 
+@pytest.mark.parametrize(
+    "kwargs,group_kwargs",
+    [
+        ({"name": "test"}, {}),
+        ({"lossy_compression": False}, {}),
+        ({"use_metadata_size": True}, {}),
+        ({"use_metadata_size": True, "use_obj_store": False}, {}),
+        ({"pickler": pickle}, {}),
+        ({"verbose": False}, {}),
+        ({"extra_func_state": lambda func: 3}, {}),  # type: ignore
+        ({}, {"size": 1000},),
+        ({}, {"size": "10KiB"},),
+        ({}, {"size": "10KiB"},),
+        ({}, {"pickler": pickle}),
+        ({}, {"fine_grain_persistence": True}),
+        ({}, {"fine_grain_eviction": True}),
+        ({}, {"extra_system_state": lambda: 3}),  # type: ignore
+        ({}, {"temporary": False}),
+    ],
+)
+def test_memoize(kwargs: dict[str, Any], group_kwargs: dict[str, Any]) -> None:
+    calls.clear()
+    kwargs["verbose"] = kwargs.get("verbose", False)
+    group_kwargs["temporary"] = group_kwargs.get("temporary", True)
 
-class _LoudPickle:
-    def dumps(self, obj: Any) -> bytes:
-        globals()["used_dumps"] = True
-        return pickle.dumps(obj)
+    @memoize(
+        **kwargs,
+        group=MemoizedGroup(obj_store=DirObjStore(temp_path()), **group_kwargs),
+    )
+    def square(x: int) -> int:
+        # I don't want `calls` to be in the closure.
+        globals()["calls"].append(x)
+        return x ** 2
 
-    def loads(self, buffer: bytes) -> Any:
-        globals()["used_loads"] = True
-        return pickle.loads(buffer)
-
-    def __persistent_hash__(self) -> Any:
-        return "_LoudPickle"
-
-
-loud_pickle = _LoudPickle()
-
-
-i = 0
-
-
-@memoize(verbose=False, pickler=loud_pickle)
-def square(x: int) -> int:
-    # I don't want `calls` to be in the closure.
-    globals()["calls"].append(x)
-    return x ** 2 + i
-
-
-def test_memoize() -> None:
-    square.group = MemoizedGroup(obj_store=DirObjStore(temp_path()), temporary=True)
     assert [square(2), square(3), square(2)] == [4, 9, 4]
     assert calls == [2, 3]
     square.log_usage_report()
     str(square)
 
 
+i = 0
+
+
 def test_memoize_impure_closure() -> None:
-    square.group = MemoizedGroup(obj_store=DirObjStore(temp_path()), temporary=True)
+    @memoize(
+        verbose=False,
+        group=MemoizedGroup(obj_store=DirObjStore(temp_path()), temporary=True),
+    )
+    def square(x: int) -> int:
+        return x ** 2 + i
+
     assert square(2) == 4
     global i
     i = 1
     assert square(2) == 5, "when closure updates, function should recompute"
 
 
-@pytest.mark.parametrize("lock_type", ["naive", "file"])
-def test_memoize_fine_grain_persistence(lock_type: str) -> None:
-    path = temp_path()
-    square.group = MemoizedGroup(
-        obj_store=DirObjStore(path),
-        fine_grain_persistence=True,
-        lock=(
-            NaiveRWLock(fasteners.InterProcessLock(path / "lock"))
-            if lock_type == "naive"
-            else FileRWLock(path / "lock")
-        ),
-    )
-
-    global used_dumps, used_loads
-    used_dumps = False
-    square(2)
-    assert used_dumps
-
-    used_loads = False
-    square(2)
-    assert used_loads
-
-    assert square.would_hit(2)
-
-
 @pytest.mark.parametrize("use_obj_store", [True, False])
 def test_eviction(use_obj_store: bool) -> None:
     @memoize(
-        name="cool_name",
         verbose=False,
         use_obj_store=use_obj_store,
         use_metadata_size=not use_obj_store,
-        lossy_compression=True,
         group=MemoizedGroup(
             obj_store=DirObjStore(temp_path()),
             fine_grain_eviction=True,
@@ -114,20 +92,16 @@ def test_eviction(use_obj_store: bool) -> None:
     big_fn(2)
     big_fn(3)
     big_fn(511)
-    assert not big_fn.would_hit(502)
+    assert not (big_fn.would_hit(510) and big_fn.would_hit(511))
     assert big_fn.would_hit(2)
     assert big_fn.would_hit(3)
 
 
-@memoize()
-def square_loud(x: int) -> int:
-    return x ** 2
-
-
 def test_verbose(caplog: pytest.Caplog) -> None:
-    square_loud.group = MemoizedGroup(
-        obj_store=DirObjStore(temp_path()), temporary=True
-    )
+    @memoize(group=MemoizedGroup(obj_store=DirObjStore(temp_path()), temporary=True))
+    def square_loud(x: int) -> int:
+        return x ** 2
+
     square_loud(2)
     assert "miss" in caplog.text
     square_loud(2)
