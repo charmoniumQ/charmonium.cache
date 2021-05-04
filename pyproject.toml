@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "charmonium.cache"
-version = "1.0.0"
+version = "1.1.0"
 description = "Provides a decorator for caching a function and an equivalent command-line util."
 authors = ["Samuel Grayson <sam+dev@samgrayson.me>"]
 license = "MPL-2.0"
@@ -32,7 +32,7 @@ pytest-cov = "^2.10.0"
 coverage = "^5.1"
 codecov = "^2.1.4"
 sphinx = "^3.1.0"
-bump2version = "^1.0.0"
+bump2version = "^1.1.0"
 tox = "^3.15.2"
 rstctl = "^0.4"
 twine = "^3.1.1"
@@ -49,5 +49,5 @@ dask = {extras = ["bag"], version = "^2021.4.1"}
 gitchangelog = "^3.0.4"
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
+requires = ["poetry-core>=1.1.0"]
 build-backend = "poetry.core.masonry.api"
