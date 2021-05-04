@@ -79,6 +79,7 @@ disable=
 	unsupported-assignment-operation,
 	unsupported-delete-operation,
 	too-many-function-args,
+	invalid-overriden-method,
 
     # We use classes like structs, so many will have no public methods.
     # I actually want to encourage fewer methods.

@@ -64,17 +64,17 @@ flag_check=$([ -n "${check}" ] && echo "--check")
 [[ -n "${skip_lint}" ]] || \
 	capture \
 		poetry run \
-			autoflake --remove-all-unused-imports --ignore-init-module-imports --remove-duplicate-keys --recursive ${flag_check_or_in_place} ${srcs}
+			autoimport $(find ${package_path} -name '*.py' | grep -v "__init__.py") $(find tests -name '*.py') $(find typings -name '*.pyi')
 
 [[ -n "${skip_lint}" ]] || \
 	capture \
 		poetry run \
 			isort --recursive ${flag_check_only} ${srcs}
 
-# [[ -n "${skip_lint}" ]] || \
-# 	capture \
-# 		poetry run \
-# 			black --quiet --target-version py38 ${flag_check} ${flag_verbose_or_quiet} ${srcs}
+[[ -n "${skip_lint}" ]] || \
+	capture \
+		poetry run \
+			black --quiet --target-version py38 ${flag_check} ${flag_verbose_or_quiet} ${srcs}
 
 [[ -n "${skip_lint}" ]] || \
 	capture \

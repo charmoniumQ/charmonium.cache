@@ -1,9 +1,5 @@
 from .determ_hash import determ_hash as determ_hash, hashable as hashable
-from .helpers import (
-    FileContents as FileContents,
-    KeyVer as KeyVer,
-    TTLInterval as TTLInterval,
-)
+from .helpers import FileContents as FileContents, TTLInterval as TTLInterval
 from .memoize import (
     DEFAULT_MEMOIZED_GROUP as DEFAULT_MEMOIZED_GROUP,
     Memoized as Memoized,
@@ -24,7 +20,7 @@ from .rw_lock import (
     NaiveRWLock as NaiveRWLock,
     RWLock as RWLock,
 )
-from .util import Future as Future
+from .util import Future as Future, with_attr as with_attr
 
 __author__ = "Samuel Grayson"
 __email__ = "sam+dev@samgrayson.me"

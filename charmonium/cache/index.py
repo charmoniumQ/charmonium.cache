@@ -14,7 +14,11 @@ Val = TypeVar("Val")
 
 
 class Index(Generic[Key, Val]):
-    def __init__(self, schema: tuple[IndexKeyType, ...], deleter: Optional[Callable[[tuple[tuple[Key, ...], Val]], None]] = None) -> None:
+    def __init__(
+        self,
+        schema: tuple[IndexKeyType, ...],
+        deleter: Optional[Callable[[tuple[tuple[Key, ...], Val]], None]] = None,
+    ) -> None:
         self.schema = schema
         self._data: dict[Key, Any] = {}
         self._deleter = deleter
@@ -30,12 +34,16 @@ class Index(Generic[Key, Val]):
         self._data = state["_data"]
 
     @staticmethod
-    def _items(data: dict[Key, Any], keys: tuple[Key, ...], max_depth: int) -> Iterable[tuple[tuple[Key, ...], Val]]:
+    def _items(
+        data: dict[Key, Any], keys: tuple[Key, ...], max_depth: int
+    ) -> Iterable[tuple[tuple[Key, ...], Val]]:
         if len(keys) == max_depth:
             yield (keys, cast(Val, data))
         else:
             for key, subdict in data.items():
-                yield from Index._items(cast(Dict[Key, Any], subdict), keys + (key,), max_depth)
+                yield from Index._items(
+                    cast(Dict[Key, Any], subdict), keys + (key,), max_depth
+                )
 
     def items(self) -> Iterable[tuple[tuple[Key, ...], Val]]:
         yield from self._items(self._data, (), len(self.schema))
@@ -50,7 +58,9 @@ class Index(Generic[Key, Val]):
         self, keys: tuple[Key, ...]
     ) -> Optional[tuple[dict[Key, Val], Key, IndexKeyType]]:
         if len(keys) != len(self.schema):
-            raise ValueError(f"Keys {keys} should be the same len as schema ({len(self.schema)})")
+            raise ValueError(
+                f"Keys {keys} should be the same len as schema ({len(self.schema)})"
+            )
         obj = self._data
         for key in keys[:-1]:
             if key not in obj:
@@ -59,10 +69,12 @@ class Index(Generic[Key, Val]):
         return cast(Dict[Key, Val], obj), keys[-1], self.schema[-1]
 
     def _get_or_create_last_level(
-            self, keys: tuple[Key, ...],
+        self, keys: tuple[Key, ...],
     ) -> tuple[dict[Key, Val], Key, IndexKeyType]:
         if len(keys) != len(self.schema):
-            raise ValueError(f"Keys {keys} should be the same len as schema ({len(self.schema)})")
+            raise ValueError(
+                f"Keys {keys} should be the same len as schema ({len(self.schema)})"
+            )
         obj = self._data
         completed_keys: tuple[Key, ...] = ()
         for key_type, key in zip(self.schema[:-1], keys[:-1]):
@@ -108,7 +120,9 @@ class Index(Generic[Key, Val]):
 
     def __contains__(self, keys: tuple[Key, ...]) -> bool:
         if len(keys) != len(self.schema):
-            raise ValueError(f"Keys {keys} should be the same len as schema ({len(self.schema)})")
+            raise ValueError(
+                f"Keys {keys} should be the same len as schema ({len(self.schema)})"
+            )
         result = self._get_last_level(keys)
         if result:
             last_level, last_key, _ = result

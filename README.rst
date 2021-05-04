@@ -29,7 +29,6 @@ guide`_. Then run:
 .. code:: python
 
     >>> from charmonium.cache import memoize
-    >>> import shutil; shutil.rmtree(".cache")
     >>> i = 0
     >>> @memoize()
     ... def square(x):

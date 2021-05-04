@@ -1,19 +1,17 @@
 from __future__ import annotations
 
 import shutil
-from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable
+from typing import TYPE_CHECKING, Any, Iterator
 
 import attr
 
 from .pathlike import PathLike, PathLikeFrom, pathlike_from
-from .util import GetAttr
 
 if TYPE_CHECKING:
     from typing import Protocol
+
 else:
     Protocol = object
-
 
 
 class ObjStore(Protocol):
@@ -22,6 +20,7 @@ class ObjStore(Protocol):
     .. _`object-store`: https://en.wikipedia.org/wiki/Object_storage
 
     """
+
     def __setitem__(self, key: int, val: bytes) -> None:
         ...
 
@@ -35,11 +34,10 @@ class ObjStore(Protocol):
         """The implementation is often slow, so it will be called rarely."""
         ...
 
-    def __hash__(self) -> int:
+    def __iter__(self) -> Iterator[int]:
         ...
 
-    def clear(self) -> None:  # pylint: disable=no-self-use
-        # Doesn't use self because I'm defining a Protocol
+    def clear(self) -> None:
         ...
 
 
@@ -69,12 +67,14 @@ class DirObjStore(ObjStore):
         object.__setattr__(self, "path", pathlike_from(path))
         object.__setattr__(self, "_key_bytes", key_bytes)
 
-        if self.path.exists() and any(
-            not self._is_key(path) and not path.name.startswith(".") for path in self.path.iterdir()
-        ):
-            raise ValueError(
-                f"{self.path.resolve()} contains junk I didn't make."
-            )
+        if self.path.exists():
+            if any(
+                not self._is_key(path) and not path.name.startswith(".")
+                for path in self.path.iterdir()
+            ):
+                raise ValueError(f"{self.path.resolve()} contains junk I didn't make.")
+        else:
+            self.path.mkdir(parents=True)
 
     def _int2str(self, key: int) -> str:
         assert key < (1 << (8 * self._key_bytes))
@@ -86,7 +86,6 @@ class DirObjStore(ObjStore):
         )
 
     def __setitem__(self, key: int, val: bytes) -> None:
-        self.path.mkdir(exist_ok=True)
         (self.path / self._int2str(key)).write_bytes(val)
 
     def __getitem__(self, key: int) -> bytes:
@@ -103,14 +102,15 @@ class DirObjStore(ObjStore):
     def __contains__(self, key: int) -> bool:
         return (self.path / self._int2str(key)).exists()
 
+    def __iter__(self) -> Iterator[int]:
+        yield from (
+            int(path.name, base=16)
+            for path in self.path.iterdir()
+            if not path.name.startswith(".") and self._is_key(path)
+        )
+
     def clear(self) -> None:
-        self.path.mkdir(exist_ok=True)
-        # somehow pyright doesn't think that a Path can be PathLike
-        if isinstance(self.path, Path): # type: ignore
-            shutil.rmtree(self.path)
+        if hasattr(self.path, "rmtree"):
+            self.path.rmtree()  # type: ignore
         else:
-            # "There is no syntax to indicate optional or keyword arguments; such function types are rarely used as callback types"
-            # :'(
-            # Therefore, I can't use Callable[[], None]
-            GetAttr[Callable[..., None]]()(self.path, "rm")(recursive=True)
-        self.path.mkdir()
+            shutil.rmtree(self.path)

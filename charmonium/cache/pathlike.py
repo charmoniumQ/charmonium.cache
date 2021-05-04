@@ -6,10 +6,13 @@ from typing import TYPE_CHECKING, Any, Iterable, Union
 
 if TYPE_CHECKING:
     from typing import Protocol
+
 else:
     Protocol = object
 
 _PathLikeSubclass = Any
+
+
 class PathLike(Protocol):
     """Duck type of `pathlib.Path`_
 

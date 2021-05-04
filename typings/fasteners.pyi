@@ -3,16 +3,13 @@ from types import TracebackType
 from typing import Optional, Protocol, Union
 
 class Lock(Protocol):
-    def __enter__(self) -> Optional[bool]:
-        ...
-
+    def __enter__(self) -> Optional[bool]: ...
     def __exit__(
         self,
         exc_type: Optional[type[BaseException]],
         exc_val: Optional[BaseException],
         exc_tb: Optional[TracebackType],
-    ) -> Optional[bool]:
-        ...
+    ) -> Optional[bool]: ...
 
 class InterProcessReaderWriterLock:
     def __init__(self, path: Union[Path, str]) -> None: ...

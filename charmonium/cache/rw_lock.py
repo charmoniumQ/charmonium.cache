@@ -11,9 +11,9 @@ from .pathlike import PathLikeFrom, pathlike_from
 
 if TYPE_CHECKING:
     from typing import Protocol
+
 else:
     Protocol = object
-
 
 
 class Lock(Protocol):
@@ -42,6 +42,7 @@ class RWLock(Protocol):
     @property
     def reader(self) -> Lock:
         ...
+
     @property
     def writer(self) -> Lock:
         ...

@@ -7,7 +7,7 @@ import sys
 import tempfile
 import textwrap
 import time
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Any, cast
 
 import pytest
 
@@ -15,9 +15,9 @@ from charmonium.cache.pathlike import PathLikeFrom, pathlike_from
 
 if TYPE_CHECKING:
     from typing import TypedDict
+
 else:
     TypedDict = lambda a, b: b
-
 
 
 if TYPE_CHECKING:
@@ -31,7 +31,6 @@ if TYPE_CHECKING:
         },
     )
 else:
-    from typing import Any
     ScriptResult = Any
 
 
@@ -139,7 +138,9 @@ def test_code_change(serializer: str, change: str, as_main: bool) -> None:
         # Without this sleep, the modtimes are too close for CPython to detect invalidation.
         time.sleep(0.01)
 
-        result2 = run_script(directory=directory, as_main=as_main, **{**vars_, change: 10})
+        result2 = run_script(
+            directory=directory, as_main=as_main, **{**vars_, change: 10}
+        )
         assert result2["expected"] == result2["returns"]
 
         if change in {"other_var"}:
@@ -147,4 +148,6 @@ def test_code_change(serializer: str, change: str, as_main: bool) -> None:
         elif change in {"closure_var", "closure_func_source_var", "source_var"}:
             assert result["serialized"][serializer] != result2["serialized"][serializer]
         else:
-            raise ValueError(f"Unknown change type {change}. Should be one of {list(vars_)}")
+            raise ValueError(
+                f"Unknown change type {change}. Should be one of {list(vars_)}"
+            )

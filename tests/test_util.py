@@ -43,6 +43,7 @@ def test_future() -> None:
     assert future.x == 3
     assert cast(Future[Struct], future).computed
 
+
 def test_getattr() -> None:
     class Class:
 

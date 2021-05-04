@@ -5,8 +5,6 @@ import stat
 import zlib
 from typing import Any, Callable, Mapping, Tuple, Union, cast
 
-import attr
-
 from .pathlike import PathLike, PathLikeFrom, pathlike_from
 
 FILE_COMPARISONS: Mapping[str, Callable[[PathLike], Any]] = {
@@ -39,16 +37,22 @@ class FileContents:
     path: PathLike
     comparison: Callable[[PathLike], Any]
 
-    def __init__(self, path: PathLikeFrom, comparison: Union[str, Callable[[PathLike], Any]] = "crc32") -> None:
+    def __init__(
+        self,
+        path: PathLikeFrom,
+        comparison: Union[str, Callable[[PathLike], Any]] = "crc32",
+    ) -> None:
         self.path = pathlike_from(path)
-        self.comparison = comparison if callable(comparison) else FILE_COMPARISONS[comparison]
+        self.comparison = (
+            comparison if callable(comparison) else FILE_COMPARISONS[comparison]
+        )
 
     def __add__(self, path: str) -> FileContents:
-        new_path = type(self.path)(str(self.path) + path) # type: ignore
+        new_path = type(self.path)(str(self.path) + path)  # type: ignore
         return FileContents(new_path, self.comparison)
 
     def __radd__(self, path: str) -> FileContents:
-        new_path = type(self.path)(path + str(self.path)) # type: ignore
+        new_path = type(self.path)(path + str(self.path))  # type: ignore
         return FileContents(new_path, self.comparison)
 
     def __fspath__(self) -> Union[bytes, str]:
@@ -108,25 +112,12 @@ class TTLInterval:
     """
 
     def __init__(self, interval: Union[int, float, datetime.timedelta]) -> None:
-        self.interval = interval if isinstance(interval, datetime.timedelta) else datetime.timedelta(seconds=interval)
+        self.interval = (
+            interval
+            if isinstance(interval, datetime.timedelta)
+            else datetime.timedelta(seconds=interval)
+        )
 
-    def __call__(self, func: Any=None) -> int:
+    def __call__(self, func: Any = None) -> int:
         delta = datetime.datetime.now() - datetime.datetime.fromtimestamp(0)
         return delta // self.interval
-
-
-@attr.frozen()  # type: ignore
-class KeyVer:
-    """A dummy key and version pair."""
-
-    key: Any
-    ver: Any
-
-    def __init__(self, key: Any, ver: Any) -> None:
-        object.__setattr__(self, "key", key)
-        object.__setattr__(self, "ver", ver)
-
-    def __cache_key__(self) -> Any:
-        return self.key
-    def __cache_ver__(self) -> Any:
-        return self.ver
