@@ -59,7 +59,7 @@ one is unique because it is:
    It is precise enough that it will ignore changes in unrelated functions in
    the file, but it will detect changes in relevant functions in other files. It
    even detects changes in global variables (as in the example above). See
-   :ref:`Detecting Changes in Functions` for details.
+   `Detecting Changes in Functions`_ for details.
 
 2. **Useful between runs and across machines:** A cache can be shared on the
    network, so that if *any* machine has computed the function for the same
@@ -141,3 +141,4 @@ Code quality
 .. _`PyPI`: https://pypi.org/project/charmonium.time-block/
 .. _`GitHub`: https://github.com/charmoniumQ/charmonium.cache
 .. _`docs`: https://charmoniumq.github.io/charmonium.cache/
+.. _`Detecting Changes in Functions`: https://charmoniumq.github.io/charmonium.cache/tutorial.html#detecting-changes-in-functions

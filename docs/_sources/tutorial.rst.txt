@@ -69,14 +69,14 @@ example,
 
     >>> from charmonium.cache import memoize
     >>> @memoize()
-    ... def square(x):
+    ... def squared(x):
     ...     print(f"squaring {x}")
     ...     return x**2
     ... 
-    >>> square(2)
+    >>> squared(2)
     squaring 2
     4
-    >>> square(2)
+    >>> squared(2)
     4
 
 Group-wide customizations are applied after definition through
@@ -85,7 +85,7 @@ Group-wide customizations are applied after definition through
 .. code:: python
 
     >>> from charmonium.cache import MemoizedGroup
-    >>> square.group = MemoizedGroup(size="100KiB")
+    >>> squared.group = MemoizedGroup(size="100KiB")
 
 Customizing Argument Keys
 -------------------------
@@ -102,6 +102,12 @@ are not useful (rarely reused). In this case, ``__cache_key__()`` should return
 the name of the resource and ``__cache__ver__()`` should return the version. If
 ``__cache_ver__()`` is not found, a constant is used. If the version changes,
 then the older version is replaced rather than appended to.
+
+If you can't modify the class, you can monkey-patch the object. See :py:func:`~with_attr`.
+
+.. code:: python
+
+    obj = with_attr(obj, "__cache_key__", lambda: ...)
 
 Capturing Filesystem Side-Effects
 ---------------------------------
@@ -313,6 +319,10 @@ runs, so I use :py:func:`~charmonium.cache.determ_hash`.  If for some reason you
 Be aware of ``memoize(..., verbose=True|False)``. If verbose is enabled, the
 cache will emit a report at process-exit saying how much time was saved. This is
 useful to determine if caching is "worth it."
+
+By default, I use the Greedy-Dual-Size Algorithm from [Cao et al.]_. This can be
+customized by specifying ``memoize(replacement_policy=YourPolicy())`` where
+``YourPolicy`` inherits from :py:class:`~charmonium.cache.ReplacementPolicy`.`
 
 See :py:class:`~charmonium.cache.Memoized` and :py:class:`~charmonium.cache.MemoizedGroup` for details.
 

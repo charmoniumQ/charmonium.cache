@@ -319,6 +319,19 @@ optional = false
 python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
 
 [[package]]
+name = "gitchangelog"
+version = "3.0.4"
+description = "gitchangelog generates a changelog thanks to git log."
+category = "dev"
+optional = false
+python-versions = "*"
+
+[package.extras]
+Mako = ["mako"]
+Mustache = ["pystache"]
+test = ["mako", "minimock", "nose", "pystache"]
+
+[[package]]
 name = "idna"
 version = "2.10"
 description = "Internationalized Domain Names in Applications (IDNA)"
@@ -1213,7 +1226,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=1.2.3)", "pytest-flake8", "pyt
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.7,<3.10"
-content-hash = "548cf1e5c22200c3d6202b6ddd437cacc3c17fef609a65d35a0470929ef47c23"
+content-hash = "59d85fbfd1077b0ef3bfe4879a5f2c2530d61a696e5382bdbfd62eb6b7b20868"
 
 [metadata.files]
 alabaster = [
@@ -1420,6 +1433,10 @@ fsspec = [
 ]
 future = [
     {file = "future-0.18.2.tar.gz", hash = "sha256:b1bead90b70cf6ec3f0710ae53a525360fa360d306a86583adc6bf83a4db537d"},
+]
+gitchangelog = [
+    {file = "gitchangelog-3.0.4-py2.py3-none-any.whl", hash = "sha256:45f8b8e64cece0d9bb03a35ecd8ee62c1c7157f8dac0ef3cb68381bfcc1bde29"},
+    {file = "gitchangelog-3.0.4.tar.gz", hash = "sha256:3d8d6a730450fbd5b0a9bc58d0dd3e269c967d7eb4fece0c5cff4372a3f77421"},
 ]
 idna = [
     {file = "idna-2.10-py2.py3-none-any.whl", hash = "sha256:b97d804b1e9b523befed77c48dacec60e6dcb0b5391d57af6a65a312a90648c0"},

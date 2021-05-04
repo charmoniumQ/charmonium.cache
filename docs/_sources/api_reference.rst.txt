@@ -70,9 +70,7 @@ Helpers
         :members:
         :special-members: __init__
 
-    .. autoclass:: KeyVer
-        :members:
-        :special-members: __cache_key__, __cache_ver__
+    .. autofunction:: with_attr
 
 Utils
 -----

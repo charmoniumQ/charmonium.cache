@@ -85,21 +85,21 @@ function definition. Per-function customizations go inside the parens. For
 example,</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">charmonium.cache</span> <span class="kn">import</span> <span class="n">memoize</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nd">@memoize</span><span class="p">()</span>
-<span class="gp">... </span><span class="k">def</span> <span class="nf">square</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+<span class="gp">... </span><span class="k">def</span> <span class="nf">squared</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
 <span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;squaring </span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 <span class="gp">... </span>    <span class="k">return</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span>
 <span class="gp">...</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">square</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">squared</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 <span class="go">squaring 2</span>
 <span class="go">4</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">square</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">squared</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 <span class="go">4</span>
 </pre></div>
 </div>
 <p>Group-wide customizations are applied after definition through
 <a class="reference internal" href="api_reference.html#charmonium.cache.MemoizedGroup" title="charmonium.cache.MemoizedGroup"><code class="xref py py-func docutils literal notranslate"><span class="pre">MemoizedGroup()</span></code></a>. For example, size is applied like:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">charmonium.cache</span> <span class="kn">import</span> <span class="n">MemoizedGroup</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">square</span><span class="o">.</span><span class="n">group</span> <span class="o">=</span> <span class="n">MemoizedGroup</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="s2">&quot;100KiB&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">squared</span><span class="o">.</span><span class="n">group</span> <span class="o">=</span> <span class="n">MemoizedGroup</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="s2">&quot;100KiB&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -116,6 +116,10 @@ are not useful (rarely reused). In this case, <code class="docutils literal notr
 the name of the resource and <code class="docutils literal notranslate"><span class="pre">__cache__ver__()</span></code> should return the version. If
 <code class="docutils literal notranslate"><span class="pre">__cache_ver__()</span></code> is not found, a constant is used. If the version changes,
 then the older version is replaced rather than appended to.</p>
+<p>If you can’t modify the class, you can monkey-patch the object. See <code class="xref py py-func docutils literal notranslate"><span class="pre">with_attr()</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">obj</span> <span class="o">=</span> <span class="n">with_attr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">&quot;__cache_key__&quot;</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="o">...</span><span class="p">)</span>
+</pre></div>
+</div>
 </div>
 <div class="section" id="capturing-filesystem-side-effects">
 <h2>Capturing Filesystem Side-Effects<a class="headerlink" href="#capturing-filesystem-side-effects" title="Permalink to this headline">¶</a></h2>
@@ -295,6 +299,9 @@ runs, so I use <a class="reference internal" href="api_reference.html#charmonium
 <p>Be aware of <code class="docutils literal notranslate"><span class="pre">memoize(...,</span> <span class="pre">verbose=True|False)</span></code>. If verbose is enabled, the
 cache will emit a report at process-exit saying how much time was saved. This is
 useful to determine if caching is “worth it.”</p>
+<p>By default, I use the Greedy-Dual-Size Algorithm from [Cao et al.]_. This can be
+customized by specifying <code class="docutils literal notranslate"><span class="pre">memoize(replacement_policy=YourPolicy())</span></code> where
+<code class="docutils literal notranslate"><span class="pre">YourPolicy</span></code> inherits from <a class="reference internal" href="api_reference.html#charmonium.cache.ReplacementPolicy" title="charmonium.cache.ReplacementPolicy"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplacementPolicy</span></code></a>.`</p>
 <p>See <a class="reference internal" href="api_reference.html#charmonium.cache.Memoized" title="charmonium.cache.Memoized"><code class="xref py py-class docutils literal notranslate"><span class="pre">Memoized</span></code></a> and <a class="reference internal" href="api_reference.html#charmonium.cache.MemoizedGroup" title="charmonium.cache.MemoizedGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">MemoizedGroup</span></code></a> for details.</p>
 </div>
 </div>
@@ -323,6 +330,7 @@ useful to determine if caching is “worth it.”</p>
 <li class="toctree-l1"><a class="reference internal" href="cli.html">CLI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="contributors_guide.html">Contributor’s Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="authors.html">Authors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
 <li class="toctree-l1"><a class="reference internal" href="works_cited.html">Works Cited</a></li>
 </ul>
 

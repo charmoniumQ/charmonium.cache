@@ -46,6 +46,7 @@ tox-pyenv = "^1.1.0"
 cloudpickle = "^1.6.0"
 autoimport = "^0.7.0"
 dask = {extras = ["bag"], version = "^2021.4.1"}
+gitchangelog = "^3.0.4"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

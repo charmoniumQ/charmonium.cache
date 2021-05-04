@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Authors &#8212; charmonium.cache 1.0.0 documentation</title>
+    <title>Changelog &#8212; charmonium.cache 1.0.0 documentation</title>
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -14,8 +14,8 @@
     <script src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Changelog" href="changelog.html" />
-    <link rel="prev" title="Contributor’s Guide" href="contributors_guide.html" />
+    <link rel="next" title="Works Cited" href="works_cited.html" />
+    <link rel="prev" title="Authors" href="authors.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -32,12 +32,24 @@
 
           <div class="body" role="main">
             
-  <div class="section" id="authors">
-<h1>Authors<a class="headerlink" href="#authors" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="maintainers">
-<h2>Maintainers<a class="headerlink" href="#maintainers" title="Permalink to this headline">¶</a></h2>
+  <div class="section" id="changelog">
+<h1>Changelog<a class="headerlink" href="#changelog" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="id1">
+<h2>1.1.0 (2021-05-07)<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li><p><a class="reference external" href="https://samgrayson.me">Samuel Grayson</a> &lt;<a class="reference external" href="mailto:sam+dev&#37;&#52;&#48;samgrayson&#46;me">sam+dev<span>&#64;</span>samgrayson<span>&#46;</span>me</a>&gt;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MemoizedGroup</span></code> is now picklable. This makes it usable by multiprocessing-based parallelism.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Memoized</span></code> and <code class="docutils literal notranslate"><span class="pre">MemoizedGroup</span></code> are now thread-safe.</p></li>
+<li><p>Improved log messages.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">determ_hash(obj)</span></code> uses a hash of the <code class="docutils literal notranslate"><span class="pre">pickle.dumps</span></code>. This makes it accept more datatypes such as <code class="docutils literal notranslate"><span class="pre">numpy.int64</span></code>, which could not be hashed by the old <code class="docutils literal notranslate"><span class="pre">determ_hash</span></code>. <code class="docutils literal notranslate"><span class="pre">determ_hash</span></code> still falls back to hashing-by-attributes for non-picklable objects.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">time_cost</span></code> used to over-estimate (include the time which would have been spent in the non-memoized case as well (recomputing f(x))).</p></li>
+<li><p>Tweaked documentation.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">with_attr(...,</span> <span class="pre">&quot;key&quot;,</span> <span class="pre">lambda:</span> <span class="pre">key)</span></code> replaces <code class="docutils literal notranslate"><span class="pre">KeyVer(key,</span> <span class="pre">ver)</span></code>.</p></li>
+</ul>
+</div>
+<div class="section" id="id2">
+<h2>1.0.0 (2021-05-02)<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>Initial public release</p></li>
 </ul>
 </div>
 </div>
@@ -65,8 +77,8 @@
 <li class="toctree-l1"><a class="reference internal" href="api_reference.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cli.html">CLI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="contributors_guide.html">Contributor’s Guide</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Authors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authors.html">Authors</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Changelog</a></li>
 <li class="toctree-l1"><a class="reference internal" href="works_cited.html">Works Cited</a></li>
 </ul>
 
@@ -74,8 +86,8 @@
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="contributors_guide.html" title="previous chapter">Contributor’s Guide</a></li>
-      <li>Next: <a href="changelog.html" title="next chapter">Changelog</a></li>
+      <li>Previous: <a href="authors.html" title="previous chapter">Authors</a></li>
+      <li>Next: <a href="works_cited.html" title="next chapter">Works Cited</a></li>
   </ul></li>
 </ul>
 </div>
@@ -109,7 +121,7 @@
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
-      <a href="_sources/authors.rst.txt"
+      <a href="_sources/changelog.rst.txt"
           rel="nofollow">Page source</a>
     </div>
 

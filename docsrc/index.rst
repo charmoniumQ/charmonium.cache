@@ -9,6 +9,7 @@
    cli
    contributors_guide
    authors
+   changelog
    works_cited
 
 * :ref:`genindex`
