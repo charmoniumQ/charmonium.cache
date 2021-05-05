@@ -13,6 +13,7 @@ from typing import TYPE_CHECKING, Any, Callable, Iterable, Type, TypeVar
 
 import cloudpickle
 import dask.bag  # type: ignore
+import dask # type: ignore
 import pytest
 
 from charmonium.cache import DirObjStore, MemoizedGroup, memoize
@@ -102,7 +103,7 @@ def test_parallelism(ParallelType: Type[Parallel]) -> None:
     for proc in procs:
         proc.join()
     recomputed = [int(log.read_text()) for log in tmp_root.iterdir()]
-    # Note thattwo parallel workers *can* sometimes compute redundant function values because they don't know that the other is in progress.
+    # Note that two parallel workers *can* sometimes compute redundant function values because they don't know that the other is in progress.
     # However, it would be improbable that *every* worker *always* is computing redundant values.
     assert len(recomputed) < overlap * n_procs
     assert set(recomputed) == unique_calls
@@ -118,12 +119,21 @@ def test_dask_bag() -> None:
     if tmp_root.exists():
         shutil.rmtree(tmp_root)
     tmp_root.mkdir(parents=True)
-    print(f"Here {tmp_root}")
     calls, unique_calls = make_overlapping_calls(n_procs, overlap)
     dask.bag.from_sequence(itertools.chain.from_iterable(calls), npartitions=n_procs).map(square).compute()  # type: ignore
     recomputed = [int(log.read_text()) for log in tmp_root.iterdir()]
-    # Note thattwo parallel workers *can* sometimes compute redundant function values because they don't know that the other is in progress.
-    # However, it would be improbable that *every* worker *always* is computing redundant values.
+    assert len(recomputed) < overlap * n_procs
+    assert set(recomputed) == unique_calls
+    assert all(square.would_hit(x) for x in unique_calls)
+
+def test_dask_delayed() -> None:
+    if tmp_root.exists():
+        shutil.rmtree(tmp_root)
+    tmp_root.mkdir(parents=True)
+    calls, unique_calls = make_overlapping_calls(n_procs, overlap)
+    square2 = dask.delayed(square)
+    results = dask.compute(*[square2(x) for call in calls for x in call])
+    recomputed = [int(log.read_text()) for log in tmp_root.iterdir()]
     assert len(recomputed) < overlap * n_procs
     assert set(recomputed) == unique_calls
     assert all(square.would_hit(x) for x in unique_calls)
