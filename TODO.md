@@ -1,0 +1,32 @@
+- [x] Implement FileContents helper.
+- [x] Implement TTL helper.
+- [x] Use tox to test multiple environments.
+- [x] Write tutorial.
+- [x] Clean up theory.
+- [x] Thread safety.
+- [x] Make `MemoizedGroup` picklable.
+- [x] Fix `determ_hash(numpy.inte64(1234))`
+- [x] Test usage in parallel environments.
+- [x] Fix `time_cost`.
+- [ ] Implement GitHub actions
+  - Use code quality/anlaysis services (codacy, codeclimate, coverity, coveralls, sonarqube)
+- [ ] Add "button" images to README.
+  - GitHub ACtions checks
+  - External code quality/analysis
+- [ ] Make working example of caching in S3.
+- [ ] Set up git-changelog.
+- [ ] Test for repeated use of multiprocessing
+  - setstate clears version and reads cache
+- [ ] Test for f(x), write, read, f.would_hit(x)
+  - Index.__setitem__ doesn't delete if last_level[last_key] = val
+- [ ] Found in index but not in obj_store
+- [ ] Remove orphans optional
+- [ ] Print log on {invalidation, eviction, orphan, miss, hit}
+  - Handle long arg message
+- [ ] Make resistant to errors
+  - Add commit()
+  - sys.excepthook
+- [ ] Humanize timedeltas
+- [ ] Hashable with verbose = True
+- [ ] Catch Pickle TypeError
+- [ ] Optionally repay stdout on cache hit

@@ -2,9 +2,20 @@
 charmonium.cache
 ================
 
+.. image: https://img.shields.io/pypi/dm/charmonium.cache
+   :alt: PyPI Downloads
+.. image: https://img.shields.io/pypi/l/charmonium.cache
+   :alt: PyPI Downloads
+.. image: https://img.shields.io/pypi/pyversions/charmonium.cache
+   :alt: Python versions
+.. image: https://img.shields.io/github/stars/charmoniumQ/charmonium.cache?style=social
+   :alt: GitHub stars
+.. image: https://img.shields.io/librariesio/sourcerank/pypi/charmonium.cache
+   :alt: libraries.io sourcerank
+
 - `PyPI`_
 - `GitHub`_
-- `docs`_
+- `Docs`_
 
 Provides a decorator for caching a function. Whenever the function is called
 with the same arguments, the result is loaded from the cache instead of
@@ -33,6 +44,7 @@ guide`_. Then run:
     >>> @memoize()
     ... def square(x):
     ...     print("recomputing")
+    ...     # Imagine a more expensive computation here.
     ...     return x**2 + i
     ...
     >>> square(4)
@@ -54,14 +66,16 @@ one is unique because it is:
 1. **Correct with respect to source-code changes:** The cache detects if you
    edit the source code or change a file which the program reads (provided they
    use this library's right file abstraction). Users never need to manually
-   invalidate the cache, so long as the functions are pure.
+   invalidate the cache, so long as the functions are pure (unlike
+   `joblib.Memory`_, `Klepto`_).
 
    It is precise enough that it will ignore changes in unrelated functions in
    the file, but it will detect changes in relevant functions in other files. It
    even detects changes in global variables (as in the example above). See
    `Detecting Changes in Functions`_ for details.
 
-2. **Useful between runs and across machines:** A cache can be shared on the
+2. **Useful between runs and across machines:** The cache can persist on the
+   disk (unlike `functools.lru_cache`_). Moreover, a cache can be shared on the
    network, so that if *any* machine has computed the function for the same
    source-source and arguments, this value can be reused by *any other* machine.
 
