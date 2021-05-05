@@ -138,7 +138,7 @@ Code quality
 .. _`decorator`: https://en.wikipedia.org/wiki/Python_syntax_and_semantics#Decorators
 .. _`pip install guide`: https://pip.pypa.io/en/latest/installing/
 .. _`pyright`: https://github.com/microsoft/pyright
-.. _`PyPI`: https://pypi.org/project/charmonium.time-block/
+.. _`PyPI`: https://pypi.org/project/charmonium.cache/
 .. _`GitHub`: https://github.com/charmoniumQ/charmonium.cache
 .. _`docs`: https://charmoniumq.github.io/charmonium.cache/
 .. _`Detecting Changes in Functions`: https://charmoniumq.github.io/charmonium.cache/tutorial.html#detecting-changes-in-functions
