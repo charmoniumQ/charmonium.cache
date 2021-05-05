@@ -9,7 +9,19 @@ repository = "https://github.com/charmoniumQ/charmonium.cache.git"
 packages = [
     { include = "charmonium" },
 ]
-include = ["res/"]
+documentation = "https://charmoniumq.github.io/charmonium.cache/"
+keywords = ["cache", "memoize", "decorator"]
+classifiers = [
+			"Development Status :: 4 - Beta",
+			"Operating System :: MacOS",
+			"Operating System :: Microsoft :: Windows",
+			"Operating System :: POSIX :: Linux",
+			"Intended Audience :: Developers",
+			"Intended Audience :: Science/Research",
+			"Natural Language :: English",
+			"Topic :: Scientific/Engineering",
+			"Topic :: Software Development :: Libraries",
+]
 
 [tool.poetry.scripts]
 cache = "charmonium.cache._cli:main"
