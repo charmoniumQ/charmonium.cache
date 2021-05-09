@@ -114,3 +114,20 @@ def test_verbose(caplog: pytest.Caplog) -> None:
         @memoize(group=square_loud.group, use_metadata_size=False, use_obj_store=False)
         def foo() -> None:  # type: ignore
             pass
+
+def test_composition() -> None:
+    @memoize(
+        verbose=False,
+        group=MemoizedGroup(obj_store=DirObjStore(temp_path()), temporary=True),
+    )
+    def double(x: int) -> int:
+        return x*2
+    @memoize(
+        verbose=False,
+        group=MemoizedGroup(obj_store=DirObjStore(temp_path()), temporary=True),
+    )
+    def double_square(x: int) -> int:
+        return double(x)**2
+
+    double_square(3)
+    assert double_square.would_hit(3)
