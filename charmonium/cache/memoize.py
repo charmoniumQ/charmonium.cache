@@ -89,6 +89,12 @@ class MemoizedGroup:
     time_saved: dict[str, datetime.timedelta]
     temporary: bool
 
+    def __determ_hash__(self) -> Any:
+        # I don't want to put anything about the actual state of Memoized here.
+        # Because then if a Memoized function,f, called a Memoized function, g, then f will think g changed when only the memoization state chaned.
+        # If the memoization is completely transparent, then the memoization state does not affect the behavior of the program/
+        return ()
+
     def __getstate__(self) -> Any:
         return {
             slot: getattr(self, slot)

@@ -8,25 +8,47 @@
 - [x] Fix `determ_hash(numpy.inte64(1234))`
 - [x] Test usage in parallel environments.
 - [x] Fix `time_cost`.
-- [ ] Implement GitHub actions
-  - Use code quality/anlaysis services (codacy, codeclimate, coverity, coveralls, sonarqube)
-- [ ] Add "button" images to README.
-  - GitHub ACtions checks
-  - External code quality/analysis
-- [ ] Make working example of caching in S3.
-- [ ] Set up git-changelog.
+
+- [ ] Last resort, fall back on __hash__
 - [ ] Test for repeated use of multiprocessing
   - setstate clears version and reads cache
 - [ ] Test for f(x), write, read, f.would_hit(x)
   - Index.__setitem__ doesn't delete if last_level[last_key] = val
+- [ ] Fix stepping on each others toes.
 - [ ] Found in index but not in obj_store
 - [ ] Remove orphans optional
 - [ ] Print log on {invalidation, eviction, orphan, miss, hit}
   - Handle long arg message
+  - Humanize timedeltas
+  - Print what part of key is invalidated
+- [ ] Catch Pickle TypeError
+- [x] Test that Memoized functions compose
+  - Write __determ_hash__ for memoized
+- [ ] Can't assume object is available while deserializing?
+
+- [ ] Do away with hashable. Just use determ_hash
+  - Hash a module by its contents (like an object).
+- [ ] Use xxHash
+- [ ] Support fastpath for hashing numpy arrays and pandas df
+- [ ] Hashable prints log on error
+- [ ] Content address object store or use hash(index keys)
+  - This recovers orphans automatically
+  - This makes the object-key deterministic, so if two parallel workers compute the same object, only one gets stored.
+  - Requires writes to be atomic
+- [ ] Make ch_time_block serializable
+- [ ] file-IO based pickle
+- [ ] Make fine_grain* apply to a Memoized level. All benefit from positive externalities.
+
+- [ ] Reset stats
+- [ ] Implement GitHub actions
+  - Use code quality/anlaysis services (codacy, codeclimate, coverity, coveralls, sonarqube)
+- [ ] Add "button" images to README.
+  - GitHub Actions checks
+  - External code quality/analysis
+- [ ] Make working example of caching in S3.
+- [ ] Set up git-changelog.
 - [ ] Make resistant to errors
   - Add commit()
   - sys.excepthook
-- [ ] Humanize timedeltas
-- [ ] Hashable with verbose = True
-- [ ] Catch Pickle TypeError
 - [ ] Optionally repay stdout on cache hit
+- [ ] Fix frozendict
