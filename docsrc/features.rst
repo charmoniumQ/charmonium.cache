@@ -157,7 +157,9 @@ Other features of ``charmonium.cache``:
   supports storing a hash of the keys or storing the contents of the
   keys.
 
-- Exported static typing (`PEP 561`_ and `PEP 612`_).
+- The whole codebase is staticall typed (including the decorator part `PEP
+  612`_) and these types are exported to clients with `PEP 561`_. Until `mypy`_
+  supports PEP 612, I recommend clients use `pyright`_.
 
 Limitations and Future Work
 ---------------------------

@@ -8,25 +8,40 @@
 - [x] Fix `determ_hash(numpy.inte64(1234))`
 - [x] Test usage in parallel environments.
 - [x] Fix `time_cost`.
-- [ ] Implement GitHub actions
-  - Use code quality/anlaysis services (codacy, codeclimate, coverity, coveralls, sonarqube)
-- [ ] Add "button" images to README.
-  - GitHub ACtions checks
-  - External code quality/analysis
-- [ ] Make working example of caching in S3.
-- [ ] Set up git-changelog.
+
+- [ ] Last resort, fall back on __hash__
 - [ ] Test for repeated use of multiprocessing
   - setstate clears version and reads cache
 - [ ] Test for f(x), write, read, f.would_hit(x)
   - Index.__setitem__ doesn't delete if last_level[last_key] = val
+- [ ] Fix stepping on each others toes.
 - [ ] Found in index but not in obj_store
 - [ ] Remove orphans optional
 - [ ] Print log on {invalidation, eviction, orphan, miss, hit}
   - Handle long arg message
+  - Humanize timedeltas
+  - Print what part of key is invalidated
+- [ ] Catch Pickle TypeError
+- [ ] Test that Memoized functions compose
+  - Write Memoized.__determ_hash__
+- [ ] ImportError: cannot import
+- [ ] file-IO based pickle
+- [ ] Make fine_grain* apply to a Memoized level. All benefit from positive externalities.
+
+- [ ] Hashable prints log on error
+- [ ] Content address object store or use hash(index keys)
+- [ ] Make ch_time_block serializable
+
+- [ ] Reset stats
+- [ ] Implement GitHub actions
+  - Use code quality/anlaysis services (codacy, codeclimate, coverity, coveralls, sonarqube)
+- [ ] Add "button" images to README.
+  - GitHub Actions checks
+  - External code quality/analysis
+- [ ] Make working example of caching in S3.
+- [ ] Set up git-changelog.
 - [ ] Make resistant to errors
   - Add commit()
   - sys.excepthook
-- [ ] Humanize timedeltas
-- [ ] Hashable with verbose = True
-- [ ] Catch Pickle TypeError
 - [ ] Optionally repay stdout on cache hit
+- [ ] Fix frozendict

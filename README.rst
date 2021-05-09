@@ -19,13 +19,14 @@ charmonium.cache
 
 Provides a decorator for caching a function. Whenever the function is called
 with the same arguments, the result is loaded from the cache instead of
-computed. If the arguments, source code, or enclosing environment have changed,
-the cache recomputes the data transparently (no need for manual invalidation).
+computed. This cache is **persistent across runs**. If the arguments, source
+code, or enclosing environment have changed, the cache recomputes the data
+transparently (**no need for manual invalidation**).
 
 The use case is meant for iterative development, especially on scientific
 experiments. Many times a developer will tweak some of the code but not
-all. Often, reusing prior intermediate computations saves a significant amount
-of time every run.
+all. Often, reusing intermediate results saves a significant amount of time
+every run.
 
 Quickstart
 ----------
@@ -77,7 +78,8 @@ one is unique because it is:
 2. **Useful between runs and across machines:** The cache can persist on the
    disk (unlike `functools.lru_cache`_). Moreover, a cache can be shared on the
    network, so that if *any* machine has computed the function for the same
-   source-source and arguments, this value can be reused by *any other* machine.
+   source-source and arguments, this value can be reused by *any other* machine,
+   provided your datatype is de/serializable on those platforms.
 
 3. **Easy to adopt:** Only requires adding one line (`decorator`_) to
    the function definition.
@@ -86,8 +88,9 @@ one is unique because it is:
    space is partitioned across all memoized functions according to the
    heuristic.
 
-5. **Supports smart heuristics:** They can take into account time-to-recompute
-   and storage-size in addition to recency, unlike naive `LRU`_.
+5. **Supports smart heuristics:** Motivated by academic literature, I use cache
+   policies that can take into account time-to-recompute and storage-size in
+   addition to recency, unlike `LRU`_.
 
 6. **Overhead aware:** The library measures the time saved versus overhead. It
    warns the user if the overhead of caching is not worth it.
@@ -95,56 +98,28 @@ one is unique because it is:
 Memoize CLI
 -----------
 
-::
+Make is good for compiling code, but falls short for data science. To get
+correct results, you have to incorporate *every* variable your result depends on
+into a file or part of the filename. If you put it in a file, you only have one
+version cached at a time; if you put it in the filename, you have to squeeze the
+variable into a short string. In either case, stale results will accumulate
+unboundedly, until you run ``make clean`` which also purges the fresh
+results. Finally, it is a significant effor to rewrite shell scripts in make.
 
-   memoize -- command arg1 arg2 ...
-
-``memoize`` memoizes ``command arg1 arg2 ...``. If the command, its arguments,
+``memoize`` makes it easy to memoize steps in shell scripts, correctly. Just add
+``memoize`` to the start of the line. If the command, its arguments,
  or its input files change, then ``command arg1 arg2 ...`` will be
  rerun. Otherwise, the output files (including stderr and stdout) will be
- produced from a prior run.
-
-Make is good, but it has a hard time with dependencies that are not files. Many
-dependencies are not well-contained in files. For example, you may want
-recompute some command every time some status command returns a different
-value.
-
-To get correct results you would have to incorporate *every* key you depend on
-into the filename, which can be messy, so most people don't do that. ``memoize``
-is easier to use correctly, for example:
+ produced from a prior run. ``memoize`` uses ptrace to automatically determine
+ what inputs you depend on and what outputs you produce.
 
 ::
 
-    # `make status=$(status)` will not do the right thing.
-    make var=1
-    make var=2 # usually, nothing recompiles here, contrary to user's intent
+   memoize command arg1 arg2
+   # or
+   memoize --key=key -- command arg1 arg2
 
-    # `memoize --key=$(status) -- command args` will do the right thing
-    memoize --key=1 -- command args
-    memoize --key=2 -- command args # key changed, command is recomptued.
-
-``memoize`` also makes it easy to memoize commands within existing shell scripts.
-
-Code quality
-------------
-
-- The code base is strictly and statically typed with `pyright`_. I export type
-  annotations in accordance with `PEP 561`_; clients will benefit from the type
-  annotations in this library.
-
-- I have unittests with >95% coverage.
-
-- I use pylint with few disabled warnings.
-
-- All of the above methods are incorporated into per-commit continuous-testing
-  and required for merging with the ``main`` branch; This way they won't be
-  easily forgotten.
-
-..
-   - I've implemented the complete feature-set in under 1,000 LoC. LoC
-	 count is an imperfect but reasonable metric of how hard something is
-	 to maintain and how likely it is to contain bugs according to
-	 [Zhang]_.
+See `CLI`_ for more details.
 
 .. _`PEP 561`: https://www.python.org/dev/peps/pep-0561/
 .. _`LRU`: https://en.wikipedia.org/wiki/Cache_replacement_policies#Least_recently_used_(LRU)
@@ -156,3 +131,7 @@ Code quality
 .. _`GitHub`: https://github.com/charmoniumQ/charmonium.cache
 .. _`docs`: https://charmoniumq.github.io/charmonium.cache/
 .. _`Detecting Changes in Functions`: https://charmoniumq.github.io/charmonium.cache/tutorial.html#detecting-changes-in-functions
+.. _`Klepto`: https://klepto.readthedocs.io/en/latest/
+.. _`joblib.Memory`: https://joblib.readthedocs.io/en/latest/memory.html
+.. _`functools.lru_cache`: https://docs.python.org/3/library/functools.html#functools.lru_cache
+.. _`CLI`: https://charmoniumq.github.io/charmonium.cache/cli.html
