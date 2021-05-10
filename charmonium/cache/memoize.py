@@ -75,7 +75,6 @@ class MemoizedGroup:
     _index: Index[Any, Entry]
     _obj_store: ObjStore
     _replacement_policy: ReplacementPolicy
-    _key_gen: KeyGen
     _size: bitmath.Bitmath
     _pickler: Pickler
     _index_lock: RWLock
@@ -99,7 +98,7 @@ class MemoizedGroup:
         return {
             slot: getattr(self, slot)
             for slot in self.__slots__
-            if slot not in {"__weakref__", "_index", "_memory_lock"}
+            if slot not in {"__weakref__", "_index", "_memory_lock", "_version"}
         }
 
     def __setstate__(self, state: Mapping[str, Any]) -> Any:
@@ -115,7 +114,9 @@ class MemoizedGroup:
             ),
             self._deleter,
         )
+        self._version = 0
         self._memory_lock = threading.RLock()
+        self._index_read()
 
     def __init__(
         self,
@@ -144,22 +145,11 @@ class MemoizedGroup:
         .. _`bitmath.Bitmath`: https://pypi.org/project/bitmath/
 
         """
-        self._index = Index[Any, Entry](
-            (
-                IndexKeyType.MATCH,  # system state
-                IndexKeyType.LOOKUP,  # func name
-                IndexKeyType.MATCH,  # func state
-                IndexKeyType.LOOKUP,  # args key
-                IndexKeyType.MATCH,  # args version
-            ),
-            self._deleter,
-        )
         self._obj_store = (
             obj_store
             if obj_store is not None
             else DirObjStore(path=DEFAULT_OBJ_STORE_PATH)
         )
-        self._key_gen = KeyGen()
         self._replacement_policy = (
             REPLACEMENT_POLICIES[replacement_policy.lower()]()
             if isinstance(replacement_policy, str)
@@ -174,26 +164,26 @@ class MemoizedGroup:
         )
         self._pickler = pickler
         self._index_lock = lock if lock is not None else FileRWLock(DEFAULT_LOCK_PATH)
-        self._memory_lock = threading.RLock()
         self._fine_grain_persistence = fine_grain_persistence
         self._fine_grain_eviction = fine_grain_eviction
         self._extra_system_state = extra_system_state
         self._index_key = 0
-        self._version = 0
         self.time_cost = DefaultDict[str, datetime.timedelta](datetime.timedelta)
         self.time_saved = DefaultDict[str, datetime.timedelta](datetime.timedelta)
         self.temporary = temporary
-        self._index_read()
+        self.__setstate__({})
         if self.temporary:
             atexit.register(self._obj_store.clear)
             # atexit handlers are run in the opposite order they are registered.
         atexit.register(self._index_write)
 
     def _deleter(self, item: tuple[Any, Entry]) -> None:
+        print(f"_deleter {item[0]} {determ_hash(item[0])}")
         with self._memory_lock:
             key, entry = item
             if entry.obj_store:
-                del self._obj_store[entry.value]
+                obj_key = determ_hash(key)
+                del self._obj_store[obj_key]
             self._replacement_policy.invalidate(key, entry)
 
     def _index_read(self) -> None:
@@ -267,17 +257,30 @@ class MemoizedGroup:
 
             while total_size > self._size:
                 key, entry = self._replacement_policy.evict()
+                obj_key = determ_hash(key)
                 if entry.obj_store:
                     assert (
-                        entry.value in self._obj_store
+                        obj_key in self._obj_store
                     ), "Replacement policy tried to evict something that wasn't there"
-                    del self._obj_store[entry.value]
+                    del self._obj_store[obj_key]
                 total_size -= entry.data_size
                 del self._index[key]
 
-            self.remove_orphans()
-
     def remove_orphans(self) -> None:
+        """Remove data in the objstore that are not referenced by the index.
+
+        Orphans can accumulate if there are multiple processes. They
+        might generate orphans if they crash or if there is a bug in
+        my code (yikes!). If you notice accumulation of orphans, I
+        recommend calling this function once or once-per-pipeline to
+        clean them up.
+
+        However, this can compromise performance if you do it while
+        peer processes are active. They may have a slightly different
+        index-state, and you might remove something they wanted to
+        keep. I recommend calling this before you fork off processes.
+
+        """
         with self._memory_lock:
             found_keys = {
                 entry.value for _, entry in self._index.items() if entry.obj_store
@@ -464,7 +467,7 @@ class Memoized(Generic[FuncParams, FuncReturn]):
         return f"memoized {self.name}"
 
     def _recompute(
-        self, *args: FuncParams.args, **kwargs: FuncParams.kwargs
+            self, obj_key: int, *args: FuncParams.args, **kwargs: FuncParams.kwargs
     ) -> tuple[Entry, FuncReturn]:
 
         start = datetime.datetime.now()
@@ -473,12 +476,13 @@ class Memoized(Generic[FuncParams, FuncReturn]):
         mid = datetime.datetime.now()
 
         if self._use_obj_store:
+            stored_value = None
             value_ser = self._pickler.dumps(value)
             data_size = bitmath.Byte(len(value_ser))
             # Group is a "friend class", hence pylint disable
-            stored_value = next(self.group._key_gen)  # pylint: disable=protected-access
+
             self.group._obj_store[  # pylint: disable=protected-access
-                stored_value
+                obj_key
             ] = value_ser
         else:
             stored_value = value
@@ -507,13 +511,14 @@ class Memoized(Generic[FuncParams, FuncReturn]):
         start = datetime.datetime.now()
 
         key = self.key(*args, **kwargs)
+        obj_key = determ_hash(key)
 
         if self.group._fine_grain_persistence:
             with self.group._memory_lock:
                 self.group._index_read()
 
         time_cost_inevitable = datetime.timedelta()
-        if key in self.group._index:
+        if key in self.group._index and (not self._use_obj_store or obj_key in self.group._obj_store):
             self._logger.debug("%s hit %s, %s", self.name, args, kwargs)
             with self.group._memory_lock:
                 entry = self.group._index[key]
@@ -521,7 +526,7 @@ class Memoized(Generic[FuncParams, FuncReturn]):
                     value = cast(
                         FuncReturn,
                         self._pickler.loads(
-                            self.group._obj_store[cast(int, entry.value)]
+                            self.group._obj_store[obj_key]
                         ),
                     )
                 else:
@@ -530,7 +535,7 @@ class Memoized(Generic[FuncParams, FuncReturn]):
                 self.group._replacement_policy.access(key, entry)
         else:
             self._logger.debug("%s miss %s, %s", self.name, args, kwargs)
-            entry, value = self._recompute(*args, **kwargs)
+            entry, value = self._recompute(obj_key, *args, **kwargs)
             with self.group._memory_lock:
                 time_cost_inevitable += entry.time_saved
                 if self._use_metadata_size:
@@ -585,10 +590,13 @@ class Memoized(Generic[FuncParams, FuncReturn]):
     def would_hit(self, *args: FuncParams.args, **kwargs: FuncParams.kwargs) -> bool:
         # pylint: disable=protected-access
         key = self.key(*args, **kwargs)
+        obj_key = determ_hash(key)
         with self.group._memory_lock:
             if self.group._fine_grain_persistence:
                 self.group._index_read()
-            return key in self.group._index
+            print(key in self.group._index, key, list(self.group._index.items()))
+            print(not self._use_obj_store or obj_key in self.group._obj_store, obj_key, list(self.group._obj_store))
+            return key in self.group._index and (not self._use_obj_store or obj_key in self.group._obj_store)
 
 
 # TODO: work for methods (@memoize def foo(self) ...)

@@ -1,54 +1,70 @@
-- [x] Implement FileContents helper.
-- [x] Implement TTL helper.
+- [x] Implement helpers:
+  - [x] FileContents helper
+  - [x] TTL helper
 - [x] Use tox to test multiple environments.
-- [x] Write tutorial.
-- [x] Clean up theory.
-- [x] Thread safety.
+- [x] Write documentation
+  - [x] Write tutorial.
+  - [x] Clean up theory.
+- [x] Make memoization Thread safety.
 - [x] Make `MemoizedGroup` picklable.
 - [x] Fix `determ_hash(numpy.inte64(1234))`
 - [x] Test usage in parallel environments.
-- [x] Fix `time_cost`.
+- [x] Fix `time_cost` overreporting bug.
+- [x] Test that Memoized functions compose
+  - Write __determ_hash__ for memoized
 
-- [ ] Last resort, fall back on __hash__
-- [ ] Test for repeated use of multiprocessing
+# Bug fix release
+
+- [x] Test for repeated use of multiprocessing
   - setstate clears version and reads cache
-- [ ] Test for f(x), write, read, f.would_hit(x)
+- [x] Test for f(x), write, read, f.would_hit(x)
   - Index.__setitem__ doesn't delete if last_level[last_key] = val
-- [ ] Fix stepping on each others toes.
-- [ ] Found in index but not in obj_store
-- [ ] Remove orphans optional
-- [ ] Print log on {invalidation, eviction, orphan, miss, hit}
+- [x] Content address object store or use hash(index keys)
+  - This makes the object-key deterministic, so if two parallel workers compute the same object, only one gets stored.
+  - Requires writes to be atomic
+- [x] Make remove orphans optional.
+- [x] Found in index but not in obj_store
+- [ ] Print log on {invalidation, eviction, orphan, miss, hit, miss-in-obj-store}
   - Handle long arg message
   - Humanize timedeltas
   - Print what part of key is invalidated
-- [ ] Catch Pickle TypeError
-- [x] Test that Memoized functions compose
-  - Write __determ_hash__ for memoized
-- [ ] Can't assume object is available while deserializing?
 
-- [ ] Do away with hashable. Just use determ_hash
-  - Hash a module by its contents (like an object).
-- [ ] Use xxHash
-- [ ] Support fastpath for hashing numpy arrays and pandas df
-- [ ] Hashable prints log on error
-- [ ] Content address object store or use hash(index keys)
-  - This recovers orphans automatically
-  - This makes the object-key deterministic, so if two parallel workers compute the same object, only one gets stored.
-  - Requires writes to be atomic
-- [ ] Make ch_time_block serializable
+# Minor release
+- [ ] Improve determ_hash
+  - Catch Pickle TypeError
+  - Last resort, fall back on __hash__
+  - Have a global strictness mode.
+  - Hash a module by its contents (like an object). Do I even need a special case here?
+  - Make it work for methods.
+  - Make it work for classes.
+  - Make it work for better for objects: include the source-code of methods.
+  - Make it work for C extensions. determ_hash should get a hash of the dynamic library.
+    - Some wouldn't like this. Different machines may have different dynamic libraries that are functionally equivalent, so this feature may break correctness of hashing (a == b implies determ_hash(a) == determ_hash(b)) and usefulness between machines.
+  - Use xxHash
+  - Support fastpath for hashing numpy arrays and pandas df
+    - `if hasattr(obj, "data") and isinstance(obj.data, memoryview): hashable(obj.data.tobytes())`
+    - Same for pandas df, but with `values`? Does this even need a special case?
+	- See https://joblib.readthedocs.io/en/latest/generated/joblib.hash.html
+  - Support out-of-band (zero-copy) pickle-hashing
+- [ ] Read-only memoization
 - [ ] file-IO based pickle
 - [ ] Make fine_grain* apply to a Memoized level. All benefit from positive externalities.
+- [ ] Make resistant to errors
+  - Add commit()
+  - sys.excepthook
+- [ ] Optionally repay stdout on cache hit
 
+# Low priorities
 - [ ] Reset stats
 - [ ] Implement GitHub actions
   - Use code quality/anlaysis services (codacy, codeclimate, coverity, coveralls, sonarqube)
 - [ ] Add "button" images to README.
   - GitHub Actions checks
   - External code quality/analysis
+- [ ] Hashable prints log on error
+- [ ] Make optional per-call performance logging like ch_time_block.
+- [ ] Line-profile big program.
+  - It's probably the de/serialization that hurts performance, but I'd like to check.
 - [ ] Make working example of caching in S3.
 - [ ] Set up git-changelog.
-- [ ] Make resistant to errors
-  - Add commit()
-  - sys.excepthook
-- [ ] Optionally repay stdout on cache hit
 - [ ] Fix frozendict

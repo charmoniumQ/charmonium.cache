@@ -37,6 +37,7 @@ class Index(Generic[Key, Val]):
     def _items(
         data: dict[Key, Any], keys: tuple[Key, ...], max_depth: int
     ) -> Iterable[tuple[tuple[Key, ...], Val]]:
+        print("_items", keys, data)
         if len(keys) == max_depth:
             yield (keys, cast(Val, data))
         else:
@@ -80,10 +81,11 @@ class Index(Generic[Key, Val]):
         for key_type, key in zip(self.schema[:-1], keys[:-1]):
             if key not in obj:
                 if key_type == IndexKeyType.MATCH:
+                    print("_get_or_create -> _delete", obj, completed_keys)
                     self._delete(obj, completed_keys)
                 obj[key] = cast(Dict[Key, Any], {})
-            obj = cast(Dict[Key, Any], obj[key])
             completed_keys += (key,)
+            obj = cast(Dict[Key, Any], obj[key])
         return cast(Dict[Key, Val], obj), keys[-1], self.schema[-1]
 
     # TODO: refactor for less complexity

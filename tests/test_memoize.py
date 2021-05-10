@@ -134,7 +134,7 @@ def test_composition() -> None:
 
 def test_read_write_cycle() -> None:
     @memoize(
-        verbose=False,
+        verbose=True,
         group=MemoizedGroup(obj_store=DirObjStore(temp_path()), temporary=True),
     )
     def double(x: int) -> int:
@@ -160,4 +160,3 @@ def test_read_write_cycle() -> None:
     assert double(2) == 4
     assert double.would_hit(3)
     assert double(3) == 6
-    assert len(list(double.group._obj_store)) == 3

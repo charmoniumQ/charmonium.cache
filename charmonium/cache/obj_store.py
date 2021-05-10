@@ -97,6 +97,7 @@ class DirObjStore(ObjStore):
 
     def __delitem__(self, key: int) -> None:
         if key in self:
+            print(f"delitem {key}")
             (self.path / self._int2str(key)).unlink()
 
     def __contains__(self, key: int) -> bool:
@@ -110,6 +111,7 @@ class DirObjStore(ObjStore):
         )
 
     def clear(self) -> None:
+        print("clear")
         if hasattr(self.path, "rmtree"):
             self.path.rmtree()  # type: ignore
         else:
