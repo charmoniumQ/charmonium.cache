@@ -76,12 +76,8 @@ overlap = 4
     verbose=False,
     use_obj_store=False,
     use_metadata_size=True,
-    group=MemoizedGroup(
-        obj_store=DirObjStore(temp_path()), fine_grain_persistence=True, temporary=True
-    ),
 )
 def square(x: int) -> int:
-    print(f"Writing {tmp_root}")
     (tmp_root / str(random.randint(0, 10000))).write_text(str(x))
     return x ** 2
 
@@ -95,6 +91,10 @@ def test_parallelism(ParallelType: Type[Parallel]) -> None:
     if tmp_root.exists():
         shutil.rmtree(tmp_root)
     tmp_root.mkdir(parents=True)
+
+    square.group = MemoizedGroup(
+        obj_store=DirObjStore(temp_path()), fine_grain_persistence=True, temporary=True
+    )
 
     calls, unique_calls = make_overlapping_calls(n_procs, overlap)
     procs = [ParallelType(target=square_all, args=(call,),) for call in calls]
@@ -112,13 +112,22 @@ def test_parallelism(ParallelType: Type[Parallel]) -> None:
 
 def test_cloudpickle() -> None:
     # I need to make Memoize compatible with cloudpickle so that it can be parallelized with dask.
-    cloudpickle.dumps(square)
+    global square
+    square.group = MemoizedGroup(
+        obj_store=DirObjStore(temp_path()), fine_grain_persistence=True, temporary=True
+    )
+    square(2)
+    square = cloudpickle.loads(cloudpickle.dumps(square))
+    assert square.would_hit(2)
 
 
 def test_dask_bag() -> None:
     if tmp_root.exists():
         shutil.rmtree(tmp_root)
     tmp_root.mkdir(parents=True)
+    square.group = MemoizedGroup(
+        obj_store=DirObjStore(temp_path()), fine_grain_persistence=True, temporary=True
+    )
     calls, unique_calls = make_overlapping_calls(n_procs, overlap)
     dask.bag.from_sequence(itertools.chain.from_iterable(calls), npartitions=n_procs).map(square).compute()  # type: ignore
     recomputed = [int(log.read_text()) for log in tmp_root.iterdir()]
@@ -130,6 +139,9 @@ def test_dask_delayed() -> None:
     if tmp_root.exists():
         shutil.rmtree(tmp_root)
     tmp_root.mkdir(parents=True)
+    square.group = MemoizedGroup(
+        obj_store=DirObjStore(temp_path()), fine_grain_persistence=True, temporary=True
+    )
     calls, unique_calls = make_overlapping_calls(n_procs, overlap)
     square2 = dask.delayed(square)
     results = dask.compute(*[square2(x) for call in calls for x in call])

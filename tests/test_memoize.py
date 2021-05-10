@@ -131,3 +131,33 @@ def test_composition() -> None:
 
     double_square(3)
     assert double_square.would_hit(3)
+
+def test_read_write_cycle() -> None:
+    @memoize(
+        verbose=False,
+        group=MemoizedGroup(obj_store=DirObjStore(temp_path()), temporary=True),
+    )
+    def double(x: int) -> int:
+        return x*2
+
+    # This simulates call, write, get overwritten by different copy from a peer, read, call.
+
+    double(2)
+
+    # This will be the different copy.
+    double.group._version += 1
+    double.group._index_write()
+    double.group._version -= 1
+
+    # Call
+    double(3)
+
+    # Read
+    double.group._index_read()
+
+    # Call
+    assert double.would_hit(2)
+    assert double(2) == 4
+    assert double.would_hit(3)
+    assert double(3) == 6
+    assert len(list(double.group._obj_store)) == 3
