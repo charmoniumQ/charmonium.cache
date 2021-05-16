@@ -24,28 +24,23 @@
   - Requires writes to be atomic
 - [x] Make remove orphans optional.
 - [x] Found in index but not in obj_store
-- [ ] Print log on {invalidation, eviction, orphan, miss, hit, miss-in-obj-store}
+- [ ] Print log on {invalidation, eviction, orphan, miss, hit}
   - Handle long arg message
   - Humanize timedeltas
   - Print what part of key is invalidated
-
-# Minor release
+- [ ] determ_hash Use xxHash
 - [ ] Improve determ_hash
   - Catch Pickle TypeError
-  - Last resort, fall back on __hash__
-  - Have a global strictness mode.
-  - Hash a module by its contents (like an object). Do I even need a special case here?
-  - Make it work for methods.
-  - Make it work for classes.
-  - Make it work for better for objects: include the source-code of methods.
-  - Make it work for C extensions. determ_hash should get a hash of the dynamic library.
-    - Some wouldn't like this. Different machines may have different dynamic libraries that are functionally equivalent, so this feature may break correctness of hashing (a == b implies determ_hash(a) == determ_hash(b)) and usefulness between machines.
-  - Use xxHash
-  - Support fastpath for hashing numpy arrays and pandas df
-    - `if hasattr(obj, "data") and isinstance(obj.data, memoryview): hashable(obj.data.tobytes())`
-    - Same for pandas df, but with `values`? Does this even need a special case?
-	- See https://joblib.readthedocs.io/en/latest/generated/joblib.hash.html
   - Support out-of-band (zero-copy) pickle-hashing
+- [ ] Make determ_hash work for more things
+  - Module: hash by contents (like an object). Do I even need a special case here?
+  - Objects: include the source-code of methods.
+  - C extensions. hashed by the contents of the dynamic library.
+  - methods
+  - classes
+  - fastpath for numpy arrays
+
+# Minor release
 - [ ] Read-only memoization
 - [ ] file-IO based pickle
 - [ ] Make fine_grain* apply to a Memoized level. All benefit from positive externalities.
