@@ -35,7 +35,6 @@ from .util import (
     FuncReturn,
     Future,
     GetAttr,
-    KeyGen,
     identity,
     none_tuple,
 )
@@ -88,7 +87,8 @@ class MemoizedGroup:
     time_saved: dict[str, datetime.timedelta]
     temporary: bool
 
-    def __determ_hash__(self) -> Any:
+    @classmethod
+    def __determ_hash__(cls) -> Any:
         # I don't want to put anything about the actual state of Memoized here.
         # Because then if a Memoized function,f, called a Memoized function, g, then f will think g changed when only the memoization state chaned.
         # If the memoization is completely transparent, then the memoization state does not affect the behavior of the program/
@@ -178,7 +178,7 @@ class MemoizedGroup:
         atexit.register(self._index_write)
 
     def _deleter(self, item: tuple[Any, Entry]) -> None:
-        print(f"_deleter {item[0]} {determ_hash(item[0])}")
+        # print(f"_deleter {item[0]} {determ_hash(item[0])}")
         with self._memory_lock:
             key, entry = item
             if entry.obj_store:
@@ -467,7 +467,7 @@ class Memoized(Generic[FuncParams, FuncReturn]):
         return f"memoized {self.name}"
 
     def _recompute(
-            self, obj_key: int, *args: FuncParams.args, **kwargs: FuncParams.kwargs
+        self, obj_key: int, *args: FuncParams.args, **kwargs: FuncParams.kwargs
     ) -> tuple[Entry, FuncReturn]:
 
         start = datetime.datetime.now()
@@ -518,23 +518,22 @@ class Memoized(Generic[FuncParams, FuncReturn]):
                 self.group._index_read()
 
         time_cost_inevitable = datetime.timedelta()
-        if key in self.group._index and (not self._use_obj_store or obj_key in self.group._obj_store):
-            self._logger.debug("%s hit %s, %s", self.name, args, kwargs)
+        if key in self.group._index and (
+            not self._use_obj_store or obj_key in self.group._obj_store
+        ):
+            self._logger.debug("%s hit %s", self.name, key)
             with self.group._memory_lock:
                 entry = self.group._index[key]
                 if entry.obj_store:
                     value = cast(
-                        FuncReturn,
-                        self._pickler.loads(
-                            self.group._obj_store[obj_key]
-                        ),
+                        FuncReturn, self._pickler.loads(self.group._obj_store[obj_key]),
                     )
                 else:
                     value = cast(FuncReturn, entry.value)
                 self.group.time_saved[self.name] += entry.time_saved
                 self.group._replacement_policy.access(key, entry)
         else:
-            self._logger.debug("%s miss %s, %s", self.name, args, kwargs)
+            self._logger.debug("%s miss %s", self.name, key)
             entry, value = self._recompute(obj_key, *args, **kwargs)
             with self.group._memory_lock:
                 time_cost_inevitable += entry.time_saved
@@ -594,9 +593,15 @@ class Memoized(Generic[FuncParams, FuncReturn]):
         with self.group._memory_lock:
             if self.group._fine_grain_persistence:
                 self.group._index_read()
-            print(key in self.group._index, key, list(self.group._index.items()))
-            print(not self._use_obj_store or obj_key in self.group._obj_store, obj_key, list(self.group._obj_store))
-            return key in self.group._index and (not self._use_obj_store or obj_key in self.group._obj_store)
+            # print(key in self.group._index, key, list(self.group._index.items()))
+            # print(
+            #     not self._use_obj_store or obj_key in self.group._obj_store,
+            #     obj_key,
+            #     list(self.group._obj_store),
+            # )
+            return key in self.group._index and (
+                not self._use_obj_store or obj_key in self.group._obj_store
+            )
 
 
 # TODO: work for methods (@memoize def foo(self) ...)

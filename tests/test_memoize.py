@@ -115,22 +115,25 @@ def test_verbose(caplog: pytest.Caplog) -> None:
         def foo() -> None:  # type: ignore
             pass
 
+
 def test_composition() -> None:
     @memoize(
         verbose=False,
         group=MemoizedGroup(obj_store=DirObjStore(temp_path()), temporary=True),
     )
     def double(x: int) -> int:
-        return x*2
+        return x * 2
+
     @memoize(
         verbose=False,
         group=MemoizedGroup(obj_store=DirObjStore(temp_path()), temporary=True),
     )
     def double_square(x: int) -> int:
-        return double(x)**2
+        return double(x) ** 2
 
     double_square(3)
     assert double_square.would_hit(3)
+
 
 def test_read_write_cycle() -> None:
     @memoize(
@@ -138,7 +141,7 @@ def test_read_write_cycle() -> None:
         group=MemoizedGroup(obj_store=DirObjStore(temp_path()), temporary=True),
     )
     def double(x: int) -> int:
-        return x*2
+        return x * 2
 
     # This simulates call, write, get overwritten by different copy from a peer, read, call.
 

@@ -7,7 +7,7 @@ import sys
 import tempfile
 import textwrap
 import time
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any, Dict, List, cast
 
 import pytest
 
@@ -24,10 +24,10 @@ if TYPE_CHECKING:
     ScriptResult = TypedDict(
         "ScriptResult",
         {
-            "returns": list[int],
-            "recomputed": list[int],
-            "serialized": dict[str, bytes],
-            "expected": list[int],
+            "returns": List[int],
+            "recomputed": List[int],
+            "serialized": Dict[str, bytes],
+            "expected": List[int],
         },
     )
 else:

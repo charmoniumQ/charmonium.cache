@@ -12,8 +12,8 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Iterable, Type, TypeVar
 
 import cloudpickle
+import dask  # type: ignore
 import dask.bag  # type: ignore
-import dask # type: ignore
 import pytest
 
 from charmonium.cache import DirObjStore, MemoizedGroup, memoize
@@ -73,9 +73,7 @@ overlap = 4
 
 
 @memoize(
-    verbose=False,
-    use_obj_store=False,
-    use_metadata_size=True,
+    verbose=False, use_obj_store=False, use_metadata_size=True,
 )
 def square(x: int) -> int:
     (tmp_root / str(random.randint(0, 10000))).write_text(str(x))
@@ -117,8 +115,8 @@ def test_cloudpickle() -> None:
         obj_store=DirObjStore(temp_path()), fine_grain_persistence=True, temporary=True
     )
     square(2)
-    square = cloudpickle.loads(cloudpickle.dumps(square))
-    assert square.would_hit(2)
+    square2 = cloudpickle.loads(cloudpickle.dumps(square))
+    assert square2.would_hit(2)
 
 
 def test_dask_bag() -> None:
@@ -135,6 +133,7 @@ def test_dask_bag() -> None:
     assert set(recomputed) == unique_calls
     assert all(square.would_hit(x) for x in unique_calls)
 
+
 def test_dask_delayed() -> None:
     if tmp_root.exists():
         shutil.rmtree(tmp_root)
@@ -143,8 +142,8 @@ def test_dask_delayed() -> None:
         obj_store=DirObjStore(temp_path()), fine_grain_persistence=True, temporary=True
     )
     calls, unique_calls = make_overlapping_calls(n_procs, overlap)
-    square2 = dask.delayed(square)
-    results = dask.compute(*[square2(x) for call in calls for x in call])
+    square2 = dask.delayed(square)  # type: ignore
+    results = dask.compute(*[square2(x) for call in calls for x in call])  # type: ignore
     recomputed = [int(log.read_text()) for log in tmp_root.iterdir()]
     assert len(recomputed) < overlap * n_procs
     assert set(recomputed) == unique_calls

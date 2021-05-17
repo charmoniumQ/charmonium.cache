@@ -1,4 +1,5 @@
 {
+	"pythonVersion": "3.10",
 	"typeCheckingMode": "strict",
 
 	// I have pylint for these:

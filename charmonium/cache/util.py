@@ -163,9 +163,9 @@ def with_attr(obj: _T, attr_name: str, attr_val: Any) -> _T:
 def temp_path(
     suffix: Optional[str] = None,
     prefix: Optional[str] = None,
-    dir: Optional[Union[str, Path]] = None,
+    directory: Optional[Union[str, Path]] = None,
 ) -> Path:
     temp_dir = Path(
-        tempfile.TemporaryDirectory(suffix=suffix, prefix=prefix, dir=dir).name
+        tempfile.TemporaryDirectory(suffix=suffix, prefix=prefix, dir=directory).name
     )
     return temp_dir

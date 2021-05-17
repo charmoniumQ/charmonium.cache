@@ -60,6 +60,9 @@ flag_check_or_in_place=$([ -n "${check}" ] && echo "--check" || echo "--in-place
 flag_check_only=$([ -n "${check}" ] && echo "--check-only")
 flag_check=$([ -n "${check}" ] && echo "--check")
 
+if ! poetry run python -c "import ${package_name}"; then
+   poetry install
+fi
 
 [[ -n "${skip_lint}" ]] || \
 	capture \

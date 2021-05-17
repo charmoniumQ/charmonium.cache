@@ -2,5 +2,9 @@
 { pkgs ? import <nixpkgs> {}}:
 
 pkgs.mkShell {
-  nativeBuildInputs = [ pkgs.python39 pkgs.poetry ];
+  nativeBuildInputs = [
+    pkgs.python310
+    pkgs.poetry
+    pkgs.nodePackages.pyright
+  ];
 }
