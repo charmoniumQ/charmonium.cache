@@ -13,8 +13,8 @@ import bitmath
 class Entry:
     value: Any
     data_size: bitmath.Bitmath
-    recompute_time: datetime.timedelta
-    time_saved: datetime.timedelta
+    function_time: datetime.timedelta
+    serialization_time: datetime.timedelta
     obj_store: bool
 
 
@@ -71,9 +71,9 @@ class GDSize(ReplacementPolicy):
         self.access(key, entry)
 
     def access(self, key: Any, entry: Entry) -> None:
-        score = self.inflation + entry.recompute_time.total_seconds() / max(
-            entry.data_size.to_Byte().value, 1
-        )
+        score = self.inflation + (
+            entry.function_time + entry.serialization_time
+        ).total_seconds() / max(entry.data_size.to_Byte().value, 1)
         self._data[key] = (score, entry)
 
     def invalidate(

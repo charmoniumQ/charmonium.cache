@@ -169,3 +169,13 @@ def temp_path(
         tempfile.TemporaryDirectory(suffix=suffix, prefix=prefix, dir=directory).name
     )
     return temp_dir
+
+def ellipsize(string: str, size: int, ellipsis: str = "...") -> str:
+    if size < 5:
+        raise ValueError("Size is too small")
+    elif len(string) < size:
+        return string
+    else:
+        break_point = (size - len(ellipsis)) // 2
+        odd = int((size - len(ellipsis)) % 2)
+        return string[:(break_point + odd)] + ellipsis + string[-break_point:]

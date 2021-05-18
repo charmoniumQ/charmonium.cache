@@ -79,9 +79,9 @@ class Index(Generic[Key, Val]):
         obj = self._data
         completed_keys: tuple[Key, ...] = ()
         for key_type, key in zip(self.schema[:-1], keys[:-1]):
+            assert key_type != IndexKeyType.MATCH or len(obj) < 2
             if key not in obj:
                 if key_type == IndexKeyType.MATCH:
-                    # print("_get_or_create -> _delete", obj, completed_keys)
                     self._delete(obj, completed_keys)
                 obj[key] = cast(Dict[Key, Any], {})
             completed_keys += (key,)
@@ -136,4 +136,5 @@ class Index(Generic[Key, Val]):
         if other.schema != self.schema:
             raise ValueError(f"Schema mismatch {self.schema} != {other.schema}")
         for key, val in other.items():
-            self[key] = val
+            if key not in self:
+                self[key] = val

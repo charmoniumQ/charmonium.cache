@@ -13,8 +13,8 @@ from typing import Any, Callable, Dict, FrozenSet, Hashable, List, Set, Tuple, c
 
 from .util import GetAttr
 
-HASH_BITS = 64
-
+HASH_BITS = 32
+HASH_BYTES = HASH_BITS // 8 + int(bool(HASH_BITS % 8))
 
 def determ_hash(obj: Any) -> int:
     """A deterministic hash protocol.

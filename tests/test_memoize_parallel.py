@@ -73,7 +73,7 @@ overlap = 4
 
 
 @memoize(
-    verbose=False, use_obj_store=False, use_metadata_size=True,
+    use_obj_store=False, use_metadata_size=True,
 )
 def square(x: int) -> int:
     (tmp_root / str(random.randint(0, 10000))).write_text(str(x))

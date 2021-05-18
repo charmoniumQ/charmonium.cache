@@ -86,6 +86,6 @@ def test_update() -> None:
     new[(1, 4, 3)] = "new"
 
     old.update(new)
-    assert old[(1, 2, 3)] == "new", "update() should overwrite when they conflict"
+    assert old[(1, 2, 3)] == "old", "update() should not overwrite when they conflict"
     assert old[(1, 3, 3)] == "old", "keys not in new are unaffected"
     assert old[(1, 4, 3)] == "new", "keys in new and not in old are brought over to old"

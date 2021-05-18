@@ -5,7 +5,7 @@ from typing import Callable, cast
 import pytest
 
 from charmonium.cache.pathlike import PathLike, pathlike_from
-from charmonium.cache.util import Constant, Future, GetAttr, KeyGen
+from charmonium.cache.util import Constant, Future, GetAttr, KeyGen, ellipsize
 
 
 def test_key_gen() -> None:
@@ -68,3 +68,9 @@ def test_getattr() -> None:
 def test_constant() -> None:
     c: Callable[[int, float], int] = cast(Callable[[int, float], int], Constant(3))
     assert c(4, 5.6) == 3
+
+def test_ellipsize() -> None:
+    assert ellipsize("abcdef", 5) == "a...f"
+    assert ellipsize("abcdefg", 5) == "a...g"
+    assert ellipsize("abcdefg", 6) == "ab...g"
+    assert ellipsize("abcdefgh", 6) == "ab...h"

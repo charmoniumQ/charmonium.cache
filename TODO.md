@@ -63,3 +63,4 @@
 - [ ] Make working example of caching in S3.
 - [ ] Set up git-changelog.
 - [ ] Fix frozendict
+- [ ] Make it work for instance methods.
