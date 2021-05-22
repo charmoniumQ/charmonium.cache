@@ -2,6 +2,10 @@
 
 cd "$(dirname "${0}")/.."
 
+if [ -z "${POETRY_ACTIVE}" ]; then
+	nix-shell --run "${0}"
+fi
+
 check=${check:-}
 verbose=${verbose:-}
 skip_lint=${skip_lint:-}
@@ -60,74 +64,48 @@ flag_check_or_in_place=$([ -n "${check}" ] && echo "--check" || echo "--in-place
 flag_check_only=$([ -n "${check}" ] && echo "--check-only")
 flag_check=$([ -n "${check}" ] && echo "--check")
 
-if ! poetry run python -c "import ${package_name}"; then
-   poetry install
-fi
+[[ -n "${skip_lint}" ]] || \
+	capture \
+		autoimport $(find ${package_path} -name '*.py' | grep -v "__init__.py") $(find tests -name '*.py') $(find typings -name '*.pyi')
 
 [[ -n "${skip_lint}" ]] || \
 	capture \
-		poetry run \
-			autoimport $(find ${package_path} -name '*.py' | grep -v "__init__.py") $(find tests -name '*.py') $(find typings -name '*.pyi')
+		isort --recursive ${flag_check_only} ${srcs}
 
 [[ -n "${skip_lint}" ]] || \
 	capture \
-		poetry run \
-			isort --recursive ${flag_check_only} ${srcs}
+		black --quiet ${flag_check} ${flag_verbose_or_quiet} ${srcs}
 
 [[ -n "${skip_lint}" ]] || \
 	capture \
-		poetry run \
-			black --quiet --target-version py38 ${flag_check} ${flag_verbose_or_quiet} ${srcs}
-
-[[ -n "${skip_lint}" ]] || \
-	capture \
-		poetry run \
-			sh -c "pylint ${flag_verbose} ${package_path} ${other_srcs} || poetry run pylint-exit -efail \${?} > /dev/null"
+		sh -c "pylint ${flag_verbose} ${package_path} ${other_srcs} || poetry run pylint-exit -efail \${?} > /dev/null"
 
 capture poetry run pyright
 
-# capture \
-# 	poetry run \
-# 		env PYTHONPATH=".:${PYTHONPATH}" MYPYPATH="./typings:${MYPYPATH}" \
-# 			mypy --namespace-packages -p ${package_name}
-# capture \
-# 	poetry run \
-# 		env PYTHONPATH=".:${PYTHONPATH}" MYPYPATH="./stubs:${MYPYPATH}" \
-# 			mypy --namespace-packages $(excluding "stubs" $(excluding "${package_path}" ${srcs}))
-# ${flag_verbose} is too verbose here
+rm -rf .cache
 
-# Note that I can't use dmypy because I have a package (-p) and files
-# to check, which are (unfortunately) mutually exclusive arguments.
+capture \
+	pytest --cov=charmonium/cache --cov-report=term-missing --quiet
 
 rm -rf .cache
 
 capture \
-	poetry run \
-		pytest --cov=charmonium/cache --cov-report=term-missing --quiet --exitfirst .
+	tox
 
 rm -rf .cache
 
 capture \
-	poetry run \
-		tox
-
-rm -rf .cache
+	radon cc --min b --show-complexity --no-assert "${package_path}" tests
 
 capture \
-	poetry run \
-		radon cc --min b --show-complexity --no-assert "${package_path}" tests
-
-capture \
-	poetry run \
-		radon mi --min b --show --sort "${package_path}" tests
+	radon mi --min b --show --sort "${package_path}" tests
 
 poetry run \
 	coverage html -d htmlcov
 
 [[ -z "${CODECOV_TOKEN}" ]] || \
 	capture \
-		poetry run \
-			codecov
+		codecov
 
 [[ -z "${htmlcov}" ]] || \
 	xdg-open htmlcov/index.html

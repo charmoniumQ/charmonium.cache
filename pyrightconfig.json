@@ -1,6 +1,8 @@
 {
-	"pythonVersion": "3.10",
 	"typeCheckingMode": "strict",
+
+	// ParamSpec is only supported in 3.10
+	"pythonVersion": "3.10",
 
 	// I have pylint for these:
 	"reportPrivateUsage": false,

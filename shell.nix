@@ -10,7 +10,9 @@
 
 pkgs.mkShell {
   nativeBuildInputs = [
-    pkgs.python310
+    pkgs.python37
+    pkgs.python38
+    pkgs.python39
     pkgs.poetry
     pkgs.nodePackages.pyright
     pkgs.python

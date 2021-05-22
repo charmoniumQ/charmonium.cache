@@ -3,6 +3,9 @@
 set -e -x
 cd "$(dirname "${0}")/.."
 
+if [ -z "${POETRY_ACTIVE}" ]; then
+	nix-shell --run "${0}"
+fi
 
 if [ "${1}" != "major" -a "${1}" != "minor" -a "${1}" != "patch" ]; then
 	echo "Usage: ${0} (major|minor|patch)"
@@ -23,7 +26,7 @@ fi
 
 poetry run bump2version "${part}"
 poetry build
-poetry run twine check dist/*
+twine check dist/*
 
 if [ -z "${dry_run}" ]; then
     read -p "Last chance to abort. Continue?" yn

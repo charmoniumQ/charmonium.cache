@@ -59,5 +59,8 @@ gitchangelog = "^3.0.4"
 bump2version = "^1.0.1"
 
 [build-system]
-requires = ["poetry-core>=1.1.0"]
+requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+target-version = ["py38"]
