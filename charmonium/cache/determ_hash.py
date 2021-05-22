@@ -16,6 +16,7 @@ from .util import GetAttr
 HASH_BITS = 32
 HASH_BYTES = HASH_BITS // 8 + int(bool(HASH_BITS % 8))
 
+
 def determ_hash(obj: Any) -> int:
     """A deterministic hash protocol.
 

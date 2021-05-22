@@ -170,6 +170,7 @@ def temp_path(
     )
     return temp_dir
 
+
 def ellipsize(string: str, size: int, ellipsis: str = "...") -> str:
     if size < 5:
         raise ValueError("Size is too small")
@@ -178,4 +179,4 @@ def ellipsize(string: str, size: int, ellipsis: str = "...") -> str:
     else:
         break_point = (size - len(ellipsis)) // 2
         odd = int((size - len(ellipsis)) % 2)
-        return string[:(break_point + odd)] + ellipsis + string[-break_point:]
+        return string[: (break_point + odd)] + ellipsis + string[-break_point:]

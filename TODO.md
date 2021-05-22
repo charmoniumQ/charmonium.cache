@@ -24,10 +24,8 @@
   - Requires writes to be atomic
 - [x] Make remove orphans optional.
 - [x] Found in index but not in obj_store
-- [ ] Print log on {invalidation, eviction, orphan, miss, hit}
+- [x] Print log on {invalidation, eviction, orphan, miss, hit}
   - Handle long arg message
-  - Humanize timedeltas
-  - Print what part of key is invalidated
 - [ ] determ_hash Use xxHash
 - [ ] Improve determ_hash
   - Catch Pickle TypeError
@@ -48,6 +46,7 @@
   - Add commit()
   - sys.excepthook
 - [ ] Optionally repay stdout on cache hit
+- [ ] Print usage report at the end, with human timedeltas
 
 # Low priorities
 - [ ] Reset stats

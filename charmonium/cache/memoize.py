@@ -22,7 +22,7 @@ from typing import (
 import attr
 import bitmath
 
-from .determ_hash import determ_hash, hashable, HASH_BYTES
+from .determ_hash import HASH_BYTES, determ_hash, hashable
 from .index import Index, IndexKeyType
 from .obj_store import DirObjStore, ObjStore
 from .pickler import Pickler
@@ -34,9 +34,9 @@ from .util import (
     FuncReturn,
     Future,
     GetAttr,
+    ellipsize,
     identity,
     none_tuple,
-    ellipsize,
 )
 
 __version__ = "1.1.0"
@@ -66,12 +66,14 @@ def memoize(
 DEFAULT_LOCK_PATH = ".cache/.lock"
 DEFAULT_OBJ_STORE_PATH = ".cache"
 
+
 def key2str(key: Tuple[Any, ...]) -> str:
     system_key_rest = f" {key[0][1:]}" if len(key[0]) > 1 else ""
     system_key = f"v{key[0][0]}{system_key_rest}"
     function = f"{ellipsize(key[1], 20)} ver {determ_hash(key[2]):0{2*HASH_BYTES}x}"
     args = f"{determ_hash(key[3]):0{2*HASH_BYTES}x} ver {determ_hash(key[4]):0{2*HASH_BYTES}x}"
     return f"(system={system_key}, function={function}, args={args})"
+
 
 # pyright thinks attrs has ambiguous overload
 @attr.define(init=False)  # type: ignore
@@ -128,7 +130,6 @@ class MemoizedGroup:
         self.logger = logging.getLogger("charmonium.cache")
         self.logger.setLevel(logging.DEBUG)
         self._index_read()
-
 
     def __init__(
         self,
@@ -509,7 +510,11 @@ class Memoized(Generic[FuncParams, FuncReturn]):
 
         if would_hit:
             self.group.logger.getChild("hit").debug(
-                "Hit name=%r key=%s obj_key=0x%x args_kwargs=%r", self.name, key2str(key), obj_key, ellipsize(str(args) + " " + str(kwargs), 60)
+                "Hit name=%r key=%s obj_key=0x%x args_kwargs=%r",
+                self.name,
+                key2str(key),
+                obj_key,
+                ellipsize(str(args) + " " + str(kwargs), 60),
             )
 
             # Do the lookup
@@ -530,7 +535,11 @@ class Memoized(Generic[FuncParams, FuncReturn]):
                 self.group._replacement_policy.access(key, entry)
         else:
             self.group.logger.getChild("miss").debug(
-                "Miss name=%r key=%s obj_key=0x%x args_kwargs=%r", self.name, key2str(key), obj_key, ellipsize(str(args) + " " + str(kwargs), 60)
+                "Miss name=%r key=%s obj_key=0x%x args_kwargs=%r",
+                self.name,
+                key2str(key),
+                obj_key,
+                ellipsize(str(args) + " " + str(kwargs), 60),
             )
 
             # Do the recompute

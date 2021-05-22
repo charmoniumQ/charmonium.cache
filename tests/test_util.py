@@ -69,6 +69,7 @@ def test_constant() -> None:
     c: Callable[[int, float], int] = cast(Callable[[int, float], int], Constant(3))
     assert c(4, 5.6) == 3
 
+
 def test_ellipsize() -> None:
     assert ellipsize("abcdef", 5) == "a...f"
     assert ellipsize("abcdefg", 5) == "a...g"
