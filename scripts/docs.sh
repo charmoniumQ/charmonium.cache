@@ -5,7 +5,7 @@ set -e -x
 cd "$(dirname "${0}")/.."
 
 if [ -z "${POETRY_ACTIVE}" ]; then
-	nix-shell --run "${0}"
+	exec nix-shell --run "${0}"
 fi
 
 flag_quiet=$([ -n "${verbose}" ] && echo "-v" || echo "-q")

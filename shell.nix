@@ -23,7 +23,6 @@ pkgs.mkShell {
 
     export VIRTUAL_ENV=$(poetry env info --path)
     export POETRY_ACTIVE=1
-    path=$(basename $PWD)
     source "$VIRTUAL_ENV/bin/activate"
   '';
 }

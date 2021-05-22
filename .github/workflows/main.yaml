@@ -1,0 +1,15 @@
+on: [push, pull_request]
+jobs:
+  minimal:
+    runs-on: ubuntu-latest
+    steps:
+
+      - uses: actions/checkout@v2
+
+      - uses: cachix/install-nix-action@v13
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
+
+      - run: nix-shell shell.nix --run "poetry install"
+
+      - run: nix-shell shell.nix --run ./scripts/test.sh
