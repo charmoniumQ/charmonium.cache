@@ -5,18 +5,18 @@ from typing import Callable, cast
 import pytest
 
 from charmonium.cache.pathlike import PathLike, pathlike_from
-from charmonium.cache.util import Constant, Future, GetAttr, KeyGen, ellipsize
+from charmonium.cache.util import Constant, Future, GetAttr, ellipsize
 
 
-def test_key_gen() -> None:
-    n_samples = 100
-    key_gen = KeyGen()
-    assert len(set(itertools.islice(key_gen, n_samples))) == n_samples
-    assert key_gen.probability_of_collision(n_samples) < 1e-9
+# def test_key_gen() -> None:
+#     n_samples = 100
+#     key_gen = KeyGen()
+#     assert len(set(itertools.islice(key_gen, n_samples))) == n_samples
+#     assert key_gen.probability_of_collision(n_samples) < 1e-9
 
-    key_gen2 = KeyGen(tolerance=1e-2, key_bytes=1)  # type: ignore (pyright doesn't know attrs __init__)
-    with pytest.warns(UserWarning):
-        list(itertools.islice(key_gen2, n_samples))
+#     key_gen2 = KeyGen(tolerance=1e-2, key_bytes=1)  # type: ignore (pyright doesn't know attrs __init__)
+#     with pytest.warns(UserWarning):
+#         list(itertools.islice(key_gen2, n_samples))
 
 
 def test_pathlike() -> None:
@@ -53,16 +53,16 @@ def test_getattr() -> None:
             return 2123
 
     obj = Class()
-    assert GetAttr[int]()(obj, "attr1", 1, check_callable=False) == obj.attr1
-    assert GetAttr[int]()(obj, "attr2", 2, check_callable=False) == 2
+    assert GetAttr[int]()(obj, "attr1", 1) == obj.attr1
+    assert GetAttr[int]()(obj, "attr2", 2) == 2
 
     with pytest.raises(AttributeError):
-        GetAttr[int]()(obj, "attr2", check_callable=False)
+        GetAttr[int]()(obj, "attr2")
 
     assert GetAttr[Callable[[], int]]()(obj, "method1")() == obj.method1()
 
     with pytest.raises(TypeError):
-        GetAttr[Callable[[], int]]()(obj, "attr1")
+        GetAttr[Callable[[], int]]()(obj, "attr1", check_callable=True)
 
 
 def test_constant() -> None:

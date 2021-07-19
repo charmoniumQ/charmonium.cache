@@ -80,6 +80,8 @@ def key2str(key: Tuple[Any, ...]) -> str:
 class MemoizedGroup:
     """A MemoizedGroup holds the memoization for multiple functions."""
 
+    # pylint: disable=too-many-instance-attributes
+
     _index: Index[Any, Entry]
     _obj_store: ObjStore
     _replacement_policy: ReplacementPolicy
@@ -319,6 +321,7 @@ DEFAULT_MEMOIZED_GROUP = Future[MemoizedGroup].create(
 # pyright thinks attrs has ambiguous overload
 @attr.define(init=False)  # type: ignore
 class Memoized(Generic[FuncParams, FuncReturn]):
+    # pylint: disable=too-many-instance-attributes
     _func: Callable[FuncParams, FuncReturn]
 
     group: MemoizedGroup
@@ -431,7 +434,9 @@ class Memoized(Generic[FuncParams, FuncReturn]):
             self._pickler,
             # Group is a "friend class", so pylint disable
             self.group._obj_store,  # pylint: disable=protected-access
-            GetAttr[Callable[[], Any]]()(self._func, "__version__", lambda: None)(),
+            GetAttr[Callable[[], Any]]()(
+                self._func, "__version__", lambda: None, check_callable=True
+            )(),
         ) + none_tuple(self._extra_func_state(self._func))
 
     @staticmethod
@@ -445,16 +450,16 @@ class Memoized(Generic[FuncParams, FuncReturn]):
 
     def _args2key(self, *args: FuncParams.args, **kwargs: FuncParams.kwargs) -> Any:
         return {
-            key: GetAttr[Callable[[Any], Any]]()(type(val), "__cache_key__", identity)(
-                val
-            )
+            key: GetAttr[Callable[[Any], Any]]()(
+                type(val), "__cache_key__", identity, check_callable=True
+            )(val)
             for key, val in self._combine_args(*args, **kwargs).items()
         }
 
     def _args2ver(self, *args: FuncParams.args, **kwargs: FuncParams.kwargs) -> Any:
         return {
             key: GetAttr[Callable[[Any], Any]]()(
-                type(val), "__cache_ver__", Constant(())
+                type(val), "__cache_ver__", Constant(()), check_callable=True
             )(val)
             for key, val in self._combine_args(*args, **kwargs).items()
         }

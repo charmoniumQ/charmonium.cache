@@ -80,7 +80,7 @@ flag_check=$([ -n "${check}" ] && echo "--check")
 	capture \
 		sh -c "pylint ${flag_verbose} ${package_path} ${other_srcs} || poetry run pylint-exit -efail \${?} > /dev/null"
 
-capture poetry run pyright
+#capture poetry run pyright
 
 rm -rf .cache
 

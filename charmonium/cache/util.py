@@ -24,37 +24,37 @@ else:
 FuncReturn = TypeVar("FuncReturn")
 
 
-# pyright thinks attrs has ambiguous overload
-@attr.s  # type: ignore
-class KeyGen:
-    """Generates unique keys (not cryptographically secure)."""
+# # pyright thinks attrs has ambiguous overload
+# @attr.s  # type: ignore
+# class KeyGen:
+#     """Generates unique keys (not cryptographically secure)."""
 
-    key_bytes: int = attr.ib(default=8)
-    tolerance: float = attr.ib(default=1e-6)
-    counter: int = 0
-    key_space: int = 0
+#     key_bytes: int = attr.ib(default=8)
+#     tolerance: float = attr.ib(default=1e-6)
+#     counter: int = 0
+#     key_space: int = 0
 
-    def __attrs_post_init__(self) -> None:
-        self.key_space = 256 ** self.key_bytes
+#     def __attrs_post_init__(self) -> None:
+#         self.key_space = 256 ** self.key_bytes
 
-    def __iter__(self) -> KeyGen:
-        return self
+#     def __iter__(self) -> KeyGen:
+#         return self
 
-    def __next__(self) -> int:
-        """Generates a new key."""
-        self.counter += 1
-        if self.counter % 100 == 0:
-            prob = self.probability_of_collision(self.counter)
-            if prob > self.tolerance:
-                warnings.warn(
-                    f"Probability of key collision is {prob:0.7f}; Consider using more than {self.key_bytes} key bytes.",
-                    UserWarning,
-                )
-        return random.randint(0, self.key_space - 1)
+#     def __next__(self) -> int:
+#         """Generates a new key."""
+#         self.counter += 1
+#         if self.counter % 100 == 0:
+#             prob = self.probability_of_collision(self.counter)
+#             if prob > self.tolerance:
+#                 warnings.warn(
+#                     f"Probability of key collision is {prob:0.7f}; Consider using more than {self.key_bytes} key bytes.",
+#                     UserWarning,
+#                 )
+#         return random.randint(0, self.key_space - 1)
 
-    def probability_of_collision(self, keys: int) -> float:
-        """Use to assert the probability of collision is acceptable."""
-        return 1 - math.exp(-keys * (keys - 1) / (2 * self.key_space))
+#     def probability_of_collision(self, keys: int) -> float:
+#         """Use to assert the probability of collision is acceptable."""
+#         return 1 - math.exp(-keys * (keys - 1) / (2 * self.key_space))
 
 
 class Constant(Generic[FuncParams, FuncReturn]):
@@ -107,13 +107,13 @@ class GetAttr(Generic[_T]):
         obj: object,
         attr_name: str,
         default: Union[_T, object] = error,
-        check_callable: bool = True,
+        check_callable: bool = False,
     ) -> _T:
         if hasattr(obj, attr_name):
             attr_val = getattr(obj, attr_name)
             if check_callable and not hasattr(attr_val, "__call__"):
                 raise TypeError(
-                    f"GetAttr expected ({obj!r}).{attr_name} to be callable, but it is {type(attr_val)}. Add ``check_callable=False`` to ignore."
+                    f"GetAttr expected ({obj!r}).{attr_name} to be callable, but it is {type(attr_val)}."
                 )
             else:
                 return cast(_T, attr_val)
@@ -136,23 +136,23 @@ def none_tuple(obj: Any) -> tuple[Any, ...]:
         return ()
 
 
-class DontPickle(Generic[_T]):
-    def __init__(self, init: str) -> None:
-        self.__setstate__(init)
+# class DontPickle(Generic[_T]):
+#     def __init__(self, init: str) -> None:
+#         self.__setstate__(init)
 
-    def __getstate__(self) -> Any:
-        return self.init
+#     def __getstate__(self) -> Any:
+#         return self.init
 
-    def __setstate__(self, init: str) -> None:
-        self.init = init
-        self.obj = cast(_T, eval(self.init))
+#     def __setstate__(self, init: str) -> None:
+#         self.init = init
+#         self.obj = cast(_T, eval(self.init))
 
-    def __getattr__(self, attrib: str) -> Any:
-        return getattr(self.obj, attrib)
+#     def __getattr__(self, attrib: str) -> Any:
+#         return getattr(self.obj, attrib)
 
-    @staticmethod
-    def create(init: str) -> _T:
-        return cast(_T, DontPickle[_T](init))
+#     @staticmethod
+#     def create(init: str) -> _T:
+#         return cast(_T, DontPickle[_T](init))
 
 
 def with_attr(obj: _T, attr_name: str, attr_val: Any) -> _T:

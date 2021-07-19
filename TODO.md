@@ -26,8 +26,8 @@
 - [x] Found in index but not in obj_store
 - [x] Print log on {invalidation, eviction, orphan, miss, hit}
   - Handle long arg message
-- [ ] determ_hash Use xxHash
-- [ ] Improve determ_hash
+- [x] determ_hash Use xxHash
+- [x] Improve determ_hash
   - Catch Pickle TypeError
   - Support out-of-band (zero-copy) pickle-hashing
 - [ ] Make determ_hash work for more things
@@ -36,7 +36,7 @@
   - C extensions. hashed by the contents of the dynamic library.
   - methods
   - classes
-  - fastpath for numpy arrays
+  - [x] fastpath for numpy arrays
 
 # Minor release
 - [ ] Read-only memoization
