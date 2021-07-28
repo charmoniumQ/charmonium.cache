@@ -53,16 +53,16 @@ def test_getattr() -> None:
             return 2123
 
     obj = Class()
-    assert GetAttr[int]()(obj, "attr1", 1, check_callable=False) == obj.attr1
-    assert GetAttr[int]()(obj, "attr2", 2, check_callable=False) == 2
+    assert GetAttr[int]()(obj, "attr1", 1) == obj.attr1
+    assert GetAttr[int]()(obj, "attr2", 2) == 2
 
     with pytest.raises(AttributeError):
-        GetAttr[int]()(obj, "attr2", check_callable=False)
+        GetAttr[int]()(obj, "attr2")
 
     assert GetAttr[Callable[[], int]]()(obj, "method1")() == obj.method1()
 
     with pytest.raises(TypeError):
-        GetAttr[Callable[[], int]]()(obj, "attr1")
+        GetAttr[Callable[[], int]]()(obj, "attr1", check_callable=True)
 
 
 def test_constant() -> None:

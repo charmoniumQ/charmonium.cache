@@ -15,7 +15,7 @@ pkgs.mkShell {
     pkgs.python39
     pkgs.poetry
     pkgs.nodePackages.pyright
-    pkgs.python
+    pkgs.python39Packages.ipython
   ];
   shellHook = ''
     # create venv if it doesn't exist

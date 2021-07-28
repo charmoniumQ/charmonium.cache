@@ -107,13 +107,13 @@ class GetAttr(Generic[_T]):
         obj: object,
         attr_name: str,
         default: Union[_T, object] = error,
-        check_callable: bool = True,
+        check_callable: bool = False,
     ) -> _T:
         if hasattr(obj, attr_name):
             attr_val = getattr(obj, attr_name)
             if check_callable and not hasattr(attr_val, "__call__"):
                 raise TypeError(
-                    f"GetAttr expected ({obj!r}).{attr_name} to be callable, but it is {type(attr_val)}. Add ``check_callable=False`` to ignore."
+                    f"GetAttr expected ({obj!r}).{attr_name} to be callable, but it is {type(attr_val)}."
                 )
             else:
                 return cast(_T, attr_val)
