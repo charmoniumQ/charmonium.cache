@@ -1,4 +1,3 @@
-import itertools
 import tempfile
 from typing import Callable, cast
 
@@ -6,7 +5,6 @@ import pytest
 
 from charmonium.cache.pathlike import PathLike, pathlike_from
 from charmonium.cache.util import Constant, Future, GetAttr, ellipsize
-
 
 # def test_key_gen() -> None:
 #     n_samples = 100

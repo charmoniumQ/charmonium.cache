@@ -1,3 +1,5 @@
+# First release
+
 - [x] Implement helpers:
   - [x] FileContents helper
   - [x] TTL helper
@@ -10,15 +12,15 @@
 - [x] Fix `determ_hash(numpy.inte64(1234))`
 - [x] Test usage in parallel environments.
 - [x] Fix `time_cost` overreporting bug.
-- [x] Test that Memoized functions compose
-  - Write __determ_hash__ for memoized
+- [x] Test that Memoized functions compose.
+  - Write `__determ_hash__` for `Memoized`.
 
 # Bug fix release
 
 - [x] Test for repeated use of multiprocessing
-  - setstate clears version and reads cache
-- [x] Test for f(x), write, read, f.would_hit(x)
-  - Index.__setitem__ doesn't delete if last_level[last_key] = val
+  - `setstate` clears version and reads cache
+- [x] Test for `f(x)`, write, read, `f.would_hit(x)`.
+  - `Index.__setitem__` doesn't delete if `last_level[last_key] = val`.
 - [x] Content address object store or use hash(index keys)
   - This makes the object-key deterministic, so if two parallel workers compute the same object, only one gets stored.
   - Requires writes to be atomic
@@ -26,7 +28,7 @@
 - [x] Found in index but not in obj_store
 - [x] Print log on {invalidation, eviction, orphan, miss, hit}
   - Handle long arg message
-- [x] determ_hash Use xxHash
+- [x] `determ_hash`  should use `xxHash`.
 - [x] Improve determ_hash
   - Catch Pickle TypeError
   - Support out-of-band (zero-copy) pickle-hashing
@@ -37,26 +39,32 @@
   - methods
   - classes
   - [x] fastpath for numpy arrays
+- [ ] Shortcut for caching a decorator
 
 # Minor release
+
 - [ ] Read-only memoization
 - [ ] file-IO based pickle
-- [ ] Make fine_grain* apply to a Memoized level. All benefit from positive externalities.
-- [ ] Make resistant to errors
-  - Add commit()
-  - sys.excepthook
-- [ ] Optionally repay stdout on cache hit
-- [ ] Print usage report at the end, with human timedeltas
+- [ ] Make `fine_grain*` apply to a `Memoized` level. All benefit from positive externalities.
+- [ ] Make resistant to errors.
+  - Add `commit()`.
+  - Use`sys.excepthook`.
+- [ ] Optionally repay stdout on cache hit.
+- [ ] Print usage report at the end, with human timedeltas.
+- [ ] Use `poetry2nix`.
+- [ ] Replace `shell.nix` with `flake.nix`.
 
 # Low priorities
+
 - [ ] Reset stats
-- [ ] Implement GitHub actions
-  - Use code quality/anlaysis services (codacy, codeclimate, coverity, coveralls, sonarqube)
+- [x] Implement GitHub actions.
+  - [ ] Use code quality/anlaysis services (codacy, codeclimate, coverity, coveralls, sonarqube).
+  - [ ] Upload coverage in CI.
 - [ ] Add "button" images to README.
-  - GitHub Actions checks
-  - External code quality/analysis
-- [ ] Hashable prints log on error
-- [ ] Make optional per-call performance logging like ch_time_block.
+  - [ ] GitHub Actions checks
+  - [ ] External code quality/analysis
+- [ ] `hashable` prints log on error
+- [ ] Make optional per-call performance logging like `charmonium.time_block`.
 - [ ] Line-profile big program.
   - It's probably the de/serialization that hurts performance, but I'd like to check.
 - [ ] Make working example of caching in S3.

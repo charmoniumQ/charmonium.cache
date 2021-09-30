@@ -91,7 +91,7 @@ determ_hashables: Mapping[str, List[Hashable]] = {
     "obj with __determ_hash__": [WithDetermHash(3), WithDetermHash(4)],
     "frozenset": [frozenset({1, 2, 3}), frozenset({3, 4, 5})],
     "builtin_functions": [open, input],
-    "ellipses": [...]
+    "ellipses": [...],
 }
 
 non_hashables: Mapping[str, List[Any]] = {

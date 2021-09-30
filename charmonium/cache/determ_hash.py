@@ -4,9 +4,9 @@ import builtins
 import copy
 import dis
 import inspect
-from pathlib import Path
 import pickle
 import struct
+from pathlib import Path
 from types import (
     BuiltinFunctionType,
     BuiltinMethodType,
@@ -15,8 +15,8 @@ from types import (
     FunctionType,
     GetSetDescriptorType,
     MemberDescriptorType,
-    MethodType,
     MethodDescriptorType,
+    MethodType,
     MethodWrapperType,
     ModuleType,
     WrapperDescriptorType,
@@ -29,7 +29,6 @@ from typing import (
     FrozenSet,
     Hashable,
     List,
-    Optional,
     Mapping,
     Set,
     Tuple,
@@ -152,9 +151,11 @@ def _determ_hash(obj: Any, hasher: Hasher) -> None:
         raise TypeError(f"{obj} ({type(obj)}) is not determ_hashable")
 
 
-def hashable(obj: Any, verbose: bool = True
-             # DO NOT COMMIT: chnage verbose to False
-             ) -> Hashable:
+def hashable(
+    obj: Any,
+    verbose: bool = True
+    # DO NOT COMMIT: chnage verbose to False
+) -> Hashable:
     """An injective function that maps anything to a hashable object.
 
     When given a mutable type, hashable makes an immutable copy of the
@@ -202,7 +203,8 @@ def _hashable(obj: Any, tabu: set[int], level: int, verbose: bool) -> Hashable:
         print(level * " ", repr(obj), type(obj))
 
     if isinstance(
-        obj, (type(None), bytes, str, int, float, complex, BuiltinFunctionType, type(...))
+        obj,
+        (type(None), bytes, str, int, float, complex, BuiltinFunctionType, type(...)),
     ):
         return obj
     elif id(obj) in tabu:
@@ -239,7 +241,18 @@ def _hashable(obj: Any, tabu: set[int], level: int, verbose: bool) -> Hashable:
         # Fast path for numpy arrays
         data = GetAttr[memoryview]()(obj, "data")
         return data.tobytes()
-    elif isinstance(obj, (BuiltinMethodType, MethodWrapperType, WrapperDescriptorType, MethodDescriptorType, MemberDescriptorType, ClassMethodDescriptorType, GetSetDescriptorType)):
+    elif isinstance(
+        obj,
+        (
+            BuiltinMethodType,
+            MethodWrapperType,
+            WrapperDescriptorType,
+            MethodDescriptorType,
+            MemberDescriptorType,
+            ClassMethodDescriptorType,
+            GetSetDescriptorType,
+        ),
+    ):
         tabu = tabu | {id(cast(Any, obj))}
         level = level + 1
         return (
