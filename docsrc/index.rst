@@ -7,6 +7,7 @@
    features
    api_reference
    cli
+   history
    contributors_guide
    authors
    changelog

@@ -25,13 +25,14 @@
   - This makes the object-key deterministic, so if two parallel workers compute the same object, only one gets stored.
   - Requires writes to be atomic
 - [x] Make remove orphans optional.
-- [x] Found in index but not in obj_store
+- [x] Ensure validity when key is found in `index` but not in `obj_store`.
 - [x] Print log on {invalidation, eviction, orphan, miss, hit}
-  - Handle long arg message
+  - [ ] Handle long arg message
 - [x] `determ_hash`  should use `xxHash`.
 - [x] Improve determ_hash
-  - Catch Pickle TypeError
-  - Support out-of-band (zero-copy) pickle-hashing
+  - [ ] Catch Pickle TypeError
+  - [ ] Catch Pickle ImportError
+  - [ ] Support out-of-band (zero-copy) pickle-hashing
 - [ ] Make determ_hash work for more things
   - Module: hash by contents (like an object). Do I even need a special case here?
   - Objects: include the source-code of methods.
@@ -39,6 +40,7 @@
   - methods
   - classes
   - [x] fastpath for numpy arrays
+- [ ] Last resort, fall back on `__hash__`.
 - [ ] Shortcut for caching a decorator
 
 # Minor release
@@ -56,6 +58,9 @@
 
 # Low priorities
 
+- Regarding logs,
+  - [ ] Humanize timedeltas.
+  - [ ] Show which part of the key is invalidated
 - [ ] Reset stats
 - [x] Implement GitHub actions.
   - [ ] Use code quality/anlaysis services (codacy, codeclimate, coverity, coveralls, sonarqube).
@@ -71,3 +76,4 @@
 - [ ] Set up git-changelog.
 - [ ] Fix frozendict
 - [ ] Make it work for instance methods.
+- [ ] Make `charmonium._time_block` serializable
