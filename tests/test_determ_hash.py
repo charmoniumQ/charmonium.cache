@@ -142,8 +142,8 @@ def unique(it: Iterable[Hashable]) -> bool:
 
 
 def test_hashable_of_obj() -> None:
-    assert hashable(WithProperties(3) == {"x": 3, "_x": 3})
-    assert hashable(WithSlots(3) == {"x": 3})
+    assert hashable(WithProperties(3)) == frozenset({"_x": 3}.items())
+    assert hashable(WithSlots(3)) == frozenset({"x": 3}.items())
 
 
 @pytest.mark.parametrize("input_kind", non_hashables.keys())

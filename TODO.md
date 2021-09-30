@@ -27,24 +27,27 @@
 - [x] Make remove orphans optional.
 - [x] Ensure validity when key is found in `index` but not in `obj_store`.
 - [x] Print log on {invalidation, eviction, orphan, miss, hit}
-  - [ ] Handle long arg message
+  - [x] Handle long arg message
 - [x] `determ_hash`  should use `xxHash`.
 - [x] Improve determ_hash
-  - [ ] Catch Pickle TypeError
-  - [ ] Catch Pickle ImportError
-  - [ ] Support out-of-band (zero-copy) pickle-hashing
-- [ ] Make determ_hash work for more things
-  - Module: hash by contents (like an object). Do I even need a special case here?
-  - Objects: include the source-code of methods.
-  - C extensions. hashed by the contents of the dynamic library.
-  - methods
-  - classes
+  - [x] Catch Pickle TypeError
+  - [x] Catch Pickle ImportError
+- [x] Make `hashable` handle more types:
+  - [x] Module: hash by name.
+  - [x] Objects: include the source-code of methods.
+  - [x] C extensions. hashed by name, like module
+  - [x] Methods
   - [x] fastpath for numpy arrays
-- [ ] Last resort, fall back on `__hash__`.
-- [ ] Shortcut for caching a decorator
+
 
 # Minor release
 
+- [ ] Do I really need `memoize(..., temporary: bool = False)`?
+- [ ] Simplify `tests/test_memoize_parallel.py`.
+- [ ] Make `hashable` handle more types:
+  - [ ] Classes
+- [ ] Shortcut for caching a decorator
+- [ ] Support out-of-band (zero-copy) pickle-hashing in `determ_hash`.
 - [ ] Read-only memoization
 - [ ] file-IO based pickle
 - [ ] Make `fine_grain*` apply to a `Memoized` level. All benefit from positive externalities.

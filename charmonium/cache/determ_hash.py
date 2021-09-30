@@ -153,7 +153,7 @@ def _determ_hash(obj: Any, hasher: Hasher) -> None:
 
 def hashable(
     obj: Any,
-    verbose: bool = True
+    verbose: bool = False
     # DO NOT COMMIT: chnage verbose to False
 ) -> Hashable:
     """An injective function that maps anything to a hashable object.
@@ -356,7 +356,7 @@ def pickle_fallback(obj: Any, _tabu: set[int], _level: int, _verbose: bool) -> A
         )
     try:
         return pickle.dumps(obj, protocol=4)
-    except (pickle.PickleError, AttributeError, TypeError) as exc:
+    except (pickle.PickleError, AttributeError, TypeError, ImportError) as exc:
         raise TypeError("{type(obj)} is not able to be made into a hashable") from exc
 
 

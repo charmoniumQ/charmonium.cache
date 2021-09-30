@@ -156,6 +156,7 @@ class MemoizedGroup:
         :param fine_grain_persistence: De/serialize the index at every access. This is useful if you need to update the cache for multiple simultaneous processes, but it compromises performance in the single-process case.
         :param fine_grain_eviction: Maintain the cache's size through eviction at every access (rather than just the de/serialization points). This is useful if the caches size would not otherwise fit in memory, but it compromises performance if not needed.
         :param extra_system_state: A callable that returns "extra" system state. If the system state changes, the cache is dumped.
+        :param temporary: Whether the cache should be cleared at the end of the process; This is useful for tests.
 
         .. _`bitmath.Bitmath`: https://pypi.org/project/bitmath/
 
@@ -307,7 +308,7 @@ class MemoizedGroup:
             }
             for obj_key in self._obj_store:
                 if obj_key not in found_obj_keys:
-                    self.logger.getChild("remove_oprhans").debug(
+                    self.logger.getChild("remove_orphans").debug(
                         "Removing obj_key=0x%x", obj_key
                     )
                     del self._obj_store[obj_key]
