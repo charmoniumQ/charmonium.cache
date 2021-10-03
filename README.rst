@@ -108,10 +108,10 @@ results. Finally, it is a significant effor to rewrite shell scripts in make.
 
 ``memoize`` makes it easy to memoize steps in shell scripts, correctly. Just add
 ``memoize`` to the start of the line. If the command, its arguments,
- or its input files change, then ``command arg1 arg2 ...`` will be
- rerun. Otherwise, the output files (including stderr and stdout) will be
- produced from a prior run. ``memoize`` uses ptrace to automatically determine
- what inputs you depend on and what outputs you produce.
+or its input files change, then ``command arg1 arg2 ...`` will be
+rerun. Otherwise, the output files (including stderr and stdout) will be
+produced from a prior run. ``memoize`` uses ptrace to automatically determine
+what inputs you depend on and what outputs you produce.
 
 ::
 
