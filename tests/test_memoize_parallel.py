@@ -6,9 +6,9 @@ import multiprocessing
 import os
 import random
 import shutil
+import subprocess
 import tempfile
 import threading
-import time
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Iterable, Type, TypeVar
 
@@ -132,9 +132,9 @@ def test_dask_bag() -> None:
     recomputed = [int(log.read_text()) for log in tmp_root.iterdir()]
     assert len(recomputed) < overlap * n_procs
     assert set(recomputed) == unique_calls
+    subprocess.run(["sync", "--file-system", "."], check=True)
     calls_would_hit = [square.would_hit(x) for x in unique_calls]
-    time.sleep(0.2)
-    assert all(calls_would_hit), calls_would_hit
+    assert all(calls_would_hit)
 
 
 def test_dask_delayed() -> None:

@@ -2,16 +2,15 @@ from __future__ import annotations
 
 import itertools
 import json
+import shutil
 import subprocess
 import sys
 import tempfile
 import textwrap
-import time
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, cast
 
 import pytest
-
-from charmonium.cache.pathlike import PathLikeFrom, pathlike_from
 
 if TYPE_CHECKING:
     from typing import TypedDict
@@ -35,7 +34,7 @@ else:
 
 
 def run_script(
-    directory: PathLikeFrom,
+    directory: Path,
     name: str = "",
     source_var: int = 1,
     closure_var: int = 2,
@@ -44,7 +43,7 @@ def run_script(
     as_main: bool = False,
     inputs: list[int] = [2, 3, 2],
 ) -> ScriptResult:
-    script = pathlike_from(directory) / f"script_{name}.py"
+    script = directory / f"script_{name}.py"
     script.parent.mkdir(exist_ok=True)
 
     script.write_text(
@@ -65,6 +64,8 @@ def func(input):
 returns = []
 for input in {json.dumps(inputs)}:
     returns.append(func(input))
+
+other_var = {other_var}
 
 # import cloudpickle
 # import dill
@@ -128,15 +129,16 @@ vars_ = {
     itertools.product(["func_version"], vars_.keys(), [False],),
 )
 def test_code_change(serializer: str, change: str, as_main: bool) -> None:
-    with tempfile.TemporaryDirectory() as directory:
+    with tempfile.TemporaryDirectory() as directory_:
+        directory = Path(directory_)
+        pycache = directory / "__pycache__"
 
         result = run_script(directory=directory, as_main=as_main, **vars_)
         assert result["expected"] == result["returns"]
 
         # CPython use __pycache__ to cache the Python byte code for a given script
-        # It detects invalidations using modtime.
-        # Without this sleep, the modtimes are too close for CPython to detect invalidation.
-        time.sleep(0.01)
+        if pycache.exists():
+            shutil.rmtree(pycache)
 
         result2 = run_script(
             directory=directory, as_main=as_main, **{**vars_, change: 10}

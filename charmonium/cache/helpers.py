@@ -101,11 +101,11 @@ class TTLInterval:
     .. code:: python
 
         >>> import datetime, time
-        >>> interval = TTLInterval(datetime.timedelta(seconds=0.01))
+        >>> interval = TTLInterval(datetime.timedelta(seconds=0.02))
         >>> start = interval()
         >>> start == interval()
         True
-        >>> time.sleep(0.01)
+        >>> time.sleep(0.02)
         >>> start == interval()
         False
 

@@ -42,6 +42,7 @@
 
 # Minor release
 
+- [ ] Do `fsync` before/after load?
 - [ ] Do I really need `memoize(..., temporary: bool = False)`?
 - [ ] Simplify `tests/test_memoize_parallel.py`.
 - [ ] Make `hashable` handle more types:
