@@ -7,6 +7,7 @@
    features
    api_reference
    cli
+   how_it_works
    history
    contributors_guide
    authors
