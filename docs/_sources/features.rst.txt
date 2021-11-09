@@ -147,7 +147,7 @@ Other features of ``charmonium.cache``:
 
 - :ref:`One- or two-level caching <Other Behaviors>`: One-level caches embed the
   return-value in the index. Two-level caches have a layer of indirection, the
-  :ref:`object store <Cache Functionality>` in my case. This library supports the
+  :ref:`object store <Object Store>` in my case. This library supports the
   choice between either.
 
 - :ref:`Time-to-live (TTL) <Extra State>`: This library supports dropping values
@@ -157,7 +157,9 @@ Other features of ``charmonium.cache``:
   supports storing a hash of the keys or storing the contents of the
   keys.
 
-- Exported static typing (`PEP 561`_ and `PEP 612`_).
+- The whole codebase is staticall typed (including the decorator part `PEP
+  612`_) and these types are exported to clients with `PEP 561`_. Until `mypy`_
+  supports PEP 612, I recommend clients use `pyright`_.
 
 Limitations and Future Work
 ---------------------------

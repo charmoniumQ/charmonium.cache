@@ -1,44 +1,6 @@
 Tutorial
 ========
 
-Cache Functionality
--------------------
-
-The cache is organized into an **index** and an
-:py:class:`~charmonium.cache.ObjStore`. The index maps **keys** to
-**entries**. Each entry (usually) holds an **object key** that maps to an
-**object** in the object store. The object is the serialized return value of the
-function.
-
-The key is a tuple of **subkeys**. The index is hierarchical on each subkey (a
-dict of dict of dicts etc.). Each subkey is either a lookup or match
-subkey. During an insert, if a **lookup subkey** is not found in the index, the
-subkey is *inserted beside* the non-matching subkeys. If a **match subkey** is
-not found, the subkey *replaces* the old subkey.
-
-This replacing behavior saves space when revisiting prior versions is rare. A
-function's source-code is monotonic; there is little use in holding results form
-a prior source-code version. While a healthy replacement policy may have evicted
-the old version on its own, a match subkey *guarantees* it gets evicted.
-
-The key has five subkeys:
-
-1. The state of the system (match): this includes the package version
-
-2. The function name (lookup)
-
-3. The function version (match): this includes the source-code, closure-state,
-   and memoization configuration.
-   
-4. The arguments (lookup): this can be customized by ``__cache_key__()`` but
-   defaults to the object itself.
-
-5. The argument versions (match): this can be customized by ``__cache_ver__()``,
-   but defaults to a constant.
-
-Different functions share a backend index and function store, and we will see
-why in a moment.
-
 How to Use
 ----------
 
@@ -46,6 +8,10 @@ First you need to identify candidates for memoization.
 
 - They should be *mostly* `pure`_. The library is correct in the presence of
   global variables, if they change frequently, it will degrade performance.
+
+- File IO operations should be done through ``FileContents`` (see
+  below). Alternatively, do the File IO in a wrapper function around a pure
+  inner function.
 
 - Likewise, The function and those it depends on should be relatively stable.
 
@@ -61,9 +27,9 @@ Note that multiple functions are cached in the same backend store. This way, a
 good candidate for memoization can "steal space" from bad candidates, as long as
 the replacement policy is decent.
 
-Once you have your candidate, simply add :py:func:`~charmonium.cache.memoize` to the line above the
-function definition. Per-function customizations go inside the parens. For
-example,
+Once you have your candidate, simply add :py:func:`~charmonium.cache.memoize` to
+the line above the function definition. Per-function customizations go inside
+the parens. For example,
 
 .. code:: python
 
@@ -87,38 +53,13 @@ Group-wide customizations are applied after definition through
     >>> from charmonium.cache import MemoizedGroup
     >>> squared.group = MemoizedGroup(size="100KiB")
 
-Customizing Argument Keys
--------------------------
-
-Some arguments might need to define their own notion of equality for the
-purposes of memoization. These arguments should have a ``__cache_key__()``. It
-can return anything that can be made hashable with
-(:py:func:`~charmonium.cache.hashable`). As far as I know, every python object can
-be made hashable with hashable. If ``__cache_key__()`` is not found, the object
-itself is used as the key. This yields basic memoization.
-
-Some arguments represent "versioned resources," in the sense that old versions
-are not useful (rarely reused). In this case, ``__cache_key__()`` should return
-the name of the resource and ``__cache__ver__()`` should return the version. If
-``__cache_ver__()`` is not found, a constant is used. If the version changes,
-then the older version is replaced rather than appended to.
-
-If you can't modify the class, you can monkey-patch the object. See :py:func:`~with_attr`.
-
-.. code:: python
-
-    obj = with_attr(obj, "__cache_key__", lambda: ...)
-
 Capturing Filesystem Side-Effects
 ---------------------------------
 
 Sadly, not all code is pure; many times, legacy code has impure side effects on
 the filesystem. To make legacy code memoizable, the library has a
 :py:class:`~charmonium.cache.FileContents` helper. This class represents a
-filepath **and its contents**. ``fc.__cache_key__()`` returns the path while
-``fc.__cache_ver__()`` returns the contents. Furthemore, ``pickle.dumps(fc)``
-dumps a snapshot of the contents, while ``pickle.loads(fc_ser)`` restores those
-contents.
+filepath **and its contents**.
 
 Suppose we have the following impure function:
 
@@ -130,20 +71,31 @@ Suppose we have the following impure function:
         with open(src + "_copy", "wb") as dst_f:
             dst_f.write(result)
 
+    copy("test")
+
 We can convert this to a pure function by:
 
 .. code:: python
 
     @memoize()
-    def pure_copy(src: FileContents, dst: str) -> FileContents:
+    def pure_copy(src: FileContents) -> FileContents:
+        # FileContents acts like a string file-name
+        dst = src + "_copy"
         copy(src, dst)
         return dst
 
-This can be cached. If you give a ``src`` with the same path and same contents,
-then the output will be recalled instead of computed (``long_function`` need not
-be called).
+    copy(FileContents("test"))
 
-See :py:class:`~charmonium.cache.FileContents` for more details.
+- :py:class:`~charmonium.cache.FileContents` has a custom hash function that
+  includes a hash of its contents; if the ``src`` file changes, the hash
+  changes, and `pure_copy` is rerun.
+
+- :py:class:`~charmonium.cache.FileContents` has a custom de/serialization
+  includes the contents; when the memoization of ``pure_copy`` misses, it will
+  run the underlying ``copy`` and store the new contents of ``dst``. When
+  memoization of ``pure_copy`` hits, it will deserialize those contents and
+  write them into ``dst``, emulating the side-effect of ``copy``.
+
 
 Adapting Old Code
 -----------------
@@ -163,50 +115,29 @@ pure function.
 
 .. code:: python
 
-    # Signature does not change; compatibility maintained
+    # Old signature, new body
     def work(input1, input2):
+
         # Defer to FileContents
         real_input1 = FileContents(input1)
 
-        # Make a custom cache key
+        # Make a custom cache key (see `How It Works`)
         input2.__cache_key__ = lambda: ...
 
         # Turn global variables into parameters
         input3 = global_var
 
-        ret = _real_work(input1, input2, input3)
+        ret = _real_work(real_input1, input2, input3)
 
         # Output side-effects
         output.append(ret)
 
         return ret
 
+    # New signature, old body
     @memoize()
     def _real_work(input1, input2, global_var):
-        # old code, unchanged
         ...
-
-Detecting Changes in Functions
-------------------------------
-
-If any global variables (including other functions) referenced by the target
-change, the cache is invalidated. I use |inspect.getclosurevars|_ to read these.
-
-.. code:: python
-
-    >>> i = 42
-    >>> def bar(x):
-    ...     return x+1
-    >>> def foo():
-    ...     return bar(i)
-
-    >>> import inspect
-    >>> inspect.getclosurevars(foo)
-    ClosureVars(nonlocals={}, globals={'bar': <function bar at ...>, 'i': 42}, builtins={}, unbound=set())
-
-To assess if a function has changed, I compare the closure-variables and the
-compiled bytecode (e.g., ``foo.__code__.co_code``). See
-:py:func:`~charmonium.cache.determ_hash` for more details.
 
 Using in the Cloud
 ------------------
@@ -216,6 +147,8 @@ satisfy some invariants:
 
 - Use a pickler that will work between the platforms in question. Consider OS,
   Python version, and library versions.
+
+.. TODO: Do an example in S3
 
 - Use an :py:class:`~charmonium.cache.ObjStore` that is accessible between the
   machines in question. :py:class:`~charmonium.cache.DirObjStore` is accessible
@@ -267,15 +200,17 @@ satisfy some invariants:
 Using the CLI
 -------------
 
-There is a :doc:`cli` as well. It can memoize UNIX or other commands from the shell.
+There is a :doc:`cli` as well. It can memoize UNIX or other commands from the
+shell.
 
 Extra State
 -----------
 
 Sometimes, language-level closures are not enough to track state. For this, the
 user can supply ``memoize(..., extra_function_state=callable_obj)``. The return
-value of ``callable_obj`` is a part of the 3rd match subkey. When it changes,
-then the cache for that function is dropped.
+value of ``callable_obj``. When it changes, then the cache for that function is
+dropped. However, it is generally better to use ``__cache_key__`` and ``__cache_ver__``
+rather than ``extra_function_state`` (see :ref:`Customizing Argument Keys`).
 
 State can be added to the whole system by ``MemoizedGroup(...,
 extra_system_state=callable_obj)``. The return value of ``callable_obj`` is a
@@ -310,11 +245,8 @@ without an eviction.
 
 By default, the cache only stores a hash of the keys, which is faster and
 smaller. Set ``memoize(..., lossy_compression=False)`` to store the whole keys
-(useful for debugging).
-
-Unfortunately, Python's |hash|_ will return different values across different
-runs, so I use :py:func:`~charmonium.cache.determ_hash`.  If for some reason you
-*do* want to keep the whole object, set ``memoize(..., use_hash=False)``.
+(useful for debugging). Unfortunately, Python's |hash|_ will return different
+values across different runs, so I use :py:func:`~charmonium.cache.determ_hash`.
 
 Be aware of ``memoize(..., verbose=True|False)``. If verbose is enabled, the
 cache will emit a report at process-exit saying how much time was saved. This is
@@ -329,8 +261,6 @@ See :py:class:`~charmonium.cache.Memoized` and :py:class:`~charmonium.cache.Memo
 .. _`time-to-live (TTL)`: https://en.wikipedia.org/wiki/Time_to_live
 .. _`pure`: https://en.wikipedia.org/wiki/Pure_function
 .. _`Universal Pathlib`: https://github.com/Quansight/universal_pathlib
-.. |inspect.getclosurevars| replace:: ``inspect.getclosurevars``
-.. _`inspect.getclosurevars`: https://docs.python.org/3/library/inspect.html#inspect.getclosurevars
 .. |__getstate__| replace:: ``__getstate__``
 .. _`__getstate__`: https://docs.python.org/3/library/pickle.html#object.__getstate__
 .. |hash| replace:: ``hash``

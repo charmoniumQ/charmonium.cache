@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Tutorial &#8212; charmonium.cache 1.0.0 documentation</title>
+    <title>Tutorial &#8212; charmonium.cache 1.2.1 documentation</title>
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -34,42 +34,15 @@
             
   <div class="section" id="tutorial">
 <h1>Tutorial<a class="headerlink" href="#tutorial" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="cache-functionality">
-<h2>Cache Functionality<a class="headerlink" href="#cache-functionality" title="Permalink to this headline">¶</a></h2>
-<p>The cache is organized into an <strong>index</strong> and an
-<a class="reference internal" href="api_reference.html#charmonium.cache.ObjStore" title="charmonium.cache.ObjStore"><code class="xref py py-class docutils literal notranslate"><span class="pre">ObjStore</span></code></a>. The index maps <strong>keys</strong> to
-<strong>entries</strong>. Each entry (usually) holds an <strong>object key</strong> that maps to an
-<strong>object</strong> in the object store. The object is the serialized return value of the
-function.</p>
-<p>The key is a tuple of <strong>subkeys</strong>. The index is hierarchical on each subkey (a
-dict of dict of dicts etc.). Each subkey is either a lookup or match
-subkey. During an insert, if a <strong>lookup subkey</strong> is not found in the index, the
-subkey is <em>inserted beside</em> the non-matching subkeys. If a <strong>match subkey</strong> is
-not found, the subkey <em>replaces</em> the old subkey.</p>
-<p>This replacing behavior saves space when revisiting prior versions is rare. A
-function’s source-code is monotonic; there is little use in holding results form
-a prior source-code version. While a healthy replacement policy may have evicted
-the old version on its own, a match subkey <em>guarantees</em> it gets evicted.</p>
-<p>The key has five subkeys:</p>
-<ol class="arabic simple">
-<li><p>The state of the system (match): this includes the package version</p></li>
-<li><p>The function name (lookup)</p></li>
-<li><p>The function version (match): this includes the source-code, closure-state,
-and memoization configuration.</p></li>
-<li><p>The arguments (lookup): this can be customized by <code class="docutils literal notranslate"><span class="pre">__cache_key__()</span></code> but
-defaults to the object itself.</p></li>
-<li><p>The argument versions (match): this can be customized by <code class="docutils literal notranslate"><span class="pre">__cache_ver__()</span></code>,
-but defaults to a constant.</p></li>
-</ol>
-<p>Different functions share a backend index and function store, and we will see
-why in a moment.</p>
-</div>
 <div class="section" id="how-to-use">
 <h2>How to Use<a class="headerlink" href="#how-to-use" title="Permalink to this headline">¶</a></h2>
 <p>First you need to identify candidates for memoization.</p>
 <ul class="simple">
 <li><p>They should be <em>mostly</em> <a class="reference external" href="https://en.wikipedia.org/wiki/Pure_function">pure</a>. The library is correct in the presence of
 global variables, if they change frequently, it will degrade performance.</p></li>
+<li><p>File IO operations should be done through <code class="docutils literal notranslate"><span class="pre">FileContents</span></code> (see
+below). Alternatively, do the File IO in a wrapper function around a pure
+inner function.</p></li>
 <li><p>Likewise, The function and those it depends on should be relatively stable.</p></li>
 <li><p>The function should have a high rate of reused arguments.</p></li>
 <li><p>The returned value should have a low data storage size. You can customize the
@@ -80,9 +53,9 @@ work.</p></li>
 <p>Note that multiple functions are cached in the same backend store. This way, a
 good candidate for memoization can “steal space” from bad candidates, as long as
 the replacement policy is decent.</p>
-<p>Once you have your candidate, simply add <a class="reference internal" href="api_reference.html#charmonium.cache.memoize" title="charmonium.cache.memoize"><code class="xref py py-func docutils literal notranslate"><span class="pre">memoize()</span></code></a> to the line above the
-function definition. Per-function customizations go inside the parens. For
-example,</p>
+<p>Once you have your candidate, simply add <a class="reference internal" href="api_reference.html#charmonium.cache.memoize" title="charmonium.cache.memoize"><code class="xref py py-func docutils literal notranslate"><span class="pre">memoize()</span></code></a> to
+the line above the function definition. Per-function customizations go inside
+the parens. For example,</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">charmonium.cache</span> <span class="kn">import</span> <span class="n">memoize</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nd">@memoize</span><span class="p">()</span>
 <span class="gp">... </span><span class="k">def</span> <span class="nf">squared</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
@@ -103,52 +76,43 @@ example,</p>
 </pre></div>
 </div>
 </div>
-<div class="section" id="customizing-argument-keys">
-<h2>Customizing Argument Keys<a class="headerlink" href="#customizing-argument-keys" title="Permalink to this headline">¶</a></h2>
-<p>Some arguments might need to define their own notion of equality for the
-purposes of memoization. These arguments should have a <code class="docutils literal notranslate"><span class="pre">__cache_key__()</span></code>. It
-can return anything that can be made hashable with
-(<a class="reference internal" href="api_reference.html#charmonium.cache.hashable" title="charmonium.cache.hashable"><code class="xref py py-func docutils literal notranslate"><span class="pre">hashable()</span></code></a>). As far as I know, every python object can
-be made hashable with hashable. If <code class="docutils literal notranslate"><span class="pre">__cache_key__()</span></code> is not found, the object
-itself is used as the key. This yields basic memoization.</p>
-<p>Some arguments represent “versioned resources,” in the sense that old versions
-are not useful (rarely reused). In this case, <code class="docutils literal notranslate"><span class="pre">__cache_key__()</span></code> should return
-the name of the resource and <code class="docutils literal notranslate"><span class="pre">__cache__ver__()</span></code> should return the version. If
-<code class="docutils literal notranslate"><span class="pre">__cache_ver__()</span></code> is not found, a constant is used. If the version changes,
-then the older version is replaced rather than appended to.</p>
-<p>If you can’t modify the class, you can monkey-patch the object. See <code class="xref py py-func docutils literal notranslate"><span class="pre">with_attr()</span></code>.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">obj</span> <span class="o">=</span> <span class="n">with_attr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">&quot;__cache_key__&quot;</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="o">...</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
 <div class="section" id="capturing-filesystem-side-effects">
 <h2>Capturing Filesystem Side-Effects<a class="headerlink" href="#capturing-filesystem-side-effects" title="Permalink to this headline">¶</a></h2>
 <p>Sadly, not all code is pure; many times, legacy code has impure side effects on
 the filesystem. To make legacy code memoizable, the library has a
 <a class="reference internal" href="api_reference.html#charmonium.cache.FileContents" title="charmonium.cache.FileContents"><code class="xref py py-class docutils literal notranslate"><span class="pre">FileContents</span></code></a> helper. This class represents a
-filepath <strong>and its contents</strong>. <code class="docutils literal notranslate"><span class="pre">fc.__cache_key__()</span></code> returns the path while
-<code class="docutils literal notranslate"><span class="pre">fc.__cache_ver__()</span></code> returns the contents. Furthemore, <code class="docutils literal notranslate"><span class="pre">pickle.dumps(fc)</span></code>
-dumps a snapshot of the contents, while <code class="docutils literal notranslate"><span class="pre">pickle.loads(fc_ser)</span></code> restores those
-contents.</p>
+filepath <strong>and its contents</strong>.</p>
 <p>Suppose we have the following impure function:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="n">src</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">src_f</span><span class="p">:</span>
         <span class="n">result</span> <span class="o">=</span> <span class="n">long_function</span><span class="p">(</span><span class="n">src_f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">src</span> <span class="o">+</span> <span class="s2">&quot;_copy&quot;</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">dst_f</span><span class="p">:</span>
         <span class="n">dst_f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+
+<span class="n">copy</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>We can convert this to a pure function by:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@memoize</span><span class="p">()</span>
-<span class="k">def</span> <span class="nf">pure_copy</span><span class="p">(</span><span class="n">src</span><span class="p">:</span> <span class="n">FileContents</span><span class="p">,</span> <span class="n">dst</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FileContents</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">pure_copy</span><span class="p">(</span><span class="n">src</span><span class="p">:</span> <span class="n">FileContents</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FileContents</span><span class="p">:</span>
+    <span class="c1"># FileContents acts like a string file-name</span>
+    <span class="n">dst</span> <span class="o">=</span> <span class="n">src</span> <span class="o">+</span> <span class="s2">&quot;_copy&quot;</span>
     <span class="n">copy</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">dst</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">dst</span>
+
+<span class="n">copy</span><span class="p">(</span><span class="n">FileContents</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">))</span>
 </pre></div>
 </div>
-<p>This can be cached. If you give a <code class="docutils literal notranslate"><span class="pre">src</span></code> with the same path and same contents,
-then the output will be recalled instead of computed (<code class="docutils literal notranslate"><span class="pre">long_function</span></code> need not
-be called).</p>
-<p>See <a class="reference internal" href="api_reference.html#charmonium.cache.FileContents" title="charmonium.cache.FileContents"><code class="xref py py-class docutils literal notranslate"><span class="pre">FileContents</span></code></a> for more details.</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="api_reference.html#charmonium.cache.FileContents" title="charmonium.cache.FileContents"><code class="xref py py-class docutils literal notranslate"><span class="pre">FileContents</span></code></a> has a custom hash function that
+includes a hash of its contents; if the <code class="docutils literal notranslate"><span class="pre">src</span></code> file changes, the hash
+changes, and <cite>pure_copy</cite> is rerun.</p></li>
+<li><p><a class="reference internal" href="api_reference.html#charmonium.cache.FileContents" title="charmonium.cache.FileContents"><code class="xref py py-class docutils literal notranslate"><span class="pre">FileContents</span></code></a> has a custom de/serialization
+includes the contents; when the memoization of <code class="docutils literal notranslate"><span class="pre">pure_copy</span></code> misses, it will
+run the underlying <code class="docutils literal notranslate"><span class="pre">copy</span></code> and store the new contents of <code class="docutils literal notranslate"><span class="pre">dst</span></code>. When
+memoization of <code class="docutils literal notranslate"><span class="pre">pure_copy</span></code> hits, it will deserialize those contents and
+write them into <code class="docutils literal notranslate"><span class="pre">dst</span></code>, emulating the side-effect of <code class="docutils literal notranslate"><span class="pre">copy</span></code>.</p></li>
+</ul>
 </div>
 <div class="section" id="adapting-old-code">
 <h2>Adapting Old Code<a class="headerlink" href="#adapting-old-code" title="Permalink to this headline">¶</a></h2>
@@ -162,57 +126,41 @@ called <code class="docutils literal notranslate"><span class="pre">work</span><
 purified. This can be accomplished with minimal code change by creating a
 <strong>wrapper function</strong> that maintains the same signature, but sets up a call to a
 pure function.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Signature does not change; compatibility maintained</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Old signature, new body</span>
 <span class="k">def</span> <span class="nf">work</span><span class="p">(</span><span class="n">input1</span><span class="p">,</span> <span class="n">input2</span><span class="p">):</span>
+
     <span class="c1"># Defer to FileContents</span>
     <span class="n">real_input1</span> <span class="o">=</span> <span class="n">FileContents</span><span class="p">(</span><span class="n">input1</span><span class="p">)</span>
 
-    <span class="c1"># Make a custom cache key</span>
+    <span class="c1"># Make a custom cache key (see `How It Works`)</span>
     <span class="n">input2</span><span class="o">.</span><span class="n">__cache_key__</span> <span class="o">=</span> <span class="k">lambda</span><span class="p">:</span> <span class="o">...</span>
 
     <span class="c1"># Turn global variables into parameters</span>
     <span class="n">input3</span> <span class="o">=</span> <span class="n">global_var</span>
 
-    <span class="n">ret</span> <span class="o">=</span> <span class="n">_real_work</span><span class="p">(</span><span class="n">input1</span><span class="p">,</span> <span class="n">input2</span><span class="p">,</span> <span class="n">input3</span><span class="p">)</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">_real_work</span><span class="p">(</span><span class="n">real_input1</span><span class="p">,</span> <span class="n">input2</span><span class="p">,</span> <span class="n">input3</span><span class="p">)</span>
 
     <span class="c1"># Output side-effects</span>
     <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">ret</span>
 
+<span class="c1"># New signature, old body</span>
 <span class="nd">@memoize</span><span class="p">()</span>
 <span class="k">def</span> <span class="nf">_real_work</span><span class="p">(</span><span class="n">input1</span><span class="p">,</span> <span class="n">input2</span><span class="p">,</span> <span class="n">global_var</span><span class="p">):</span>
-    <span class="c1"># old code, unchanged</span>
     <span class="o">...</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="detecting-changes-in-functions">
-<h2>Detecting Changes in Functions<a class="headerlink" href="#detecting-changes-in-functions" title="Permalink to this headline">¶</a></h2>
-<p>If any global variables (including other functions) referenced by the target
-change, the cache is invalidated. I use <a class="reference external" href="https://docs.python.org/3/library/inspect.html#inspect.getclosurevars"><code class="docutils literal notranslate"><span class="pre">inspect.getclosurevars</span></code></a> to read these.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">i</span> <span class="o">=</span> <span class="mi">42</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">bar</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
-<span class="gp">... </span>    <span class="k">return</span> <span class="n">x</span><span class="o">+</span><span class="mi">1</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">foo</span><span class="p">():</span>
-<span class="gp">... </span>    <span class="k">return</span> <span class="n">bar</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
-
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">inspect</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">inspect</span><span class="o">.</span><span class="n">getclosurevars</span><span class="p">(</span><span class="n">foo</span><span class="p">)</span>
-<span class="go">ClosureVars(nonlocals={}, globals={&#39;bar&#39;: &lt;function bar at ...&gt;, &#39;i&#39;: 42}, builtins={}, unbound=set())</span>
-</pre></div>
-</div>
-<p>To assess if a function has changed, I compare the closure-variables and the
-compiled bytecode (e.g., <code class="docutils literal notranslate"><span class="pre">foo.__code__.co_code</span></code>). See
-<a class="reference internal" href="api_reference.html#charmonium.cache.determ_hash" title="charmonium.cache.determ_hash"><code class="xref py py-func docutils literal notranslate"><span class="pre">determ_hash()</span></code></a> for more details.</p>
 </div>
 <div class="section" id="using-in-the-cloud">
 <h2>Using in the Cloud<a class="headerlink" href="#using-in-the-cloud" title="Permalink to this headline">¶</a></h2>
 <p>The library can be used to reuse results <em>between</em> machines, but you must
 satisfy some invariants:</p>
-<ul>
+<ul class="simple">
 <li><p>Use a pickler that will work between the platforms in question. Consider OS,
 Python version, and library versions.</p></li>
+</ul>
+<ul>
 <li><p>Use an <a class="reference internal" href="api_reference.html#charmonium.cache.ObjStore" title="charmonium.cache.ObjStore"><code class="xref py py-class docutils literal notranslate"><span class="pre">ObjStore</span></code></a> that is accessible between the
 machines in question. <a class="reference internal" href="api_reference.html#charmonium.cache.DirObjStore" title="charmonium.cache.DirObjStore"><code class="xref py py-class docutils literal notranslate"><span class="pre">DirObjStore</span></code></a> is accessible
 between machines if you provide a <a class="reference internal" href="api_reference.html#charmonium.cache.PathLike" title="charmonium.cache.PathLike"><code class="xref py py-class docutils literal notranslate"><span class="pre">PathLike</span></code></a>
@@ -256,14 +204,16 @@ machine produced concurrently.</p>
 </div>
 <div class="section" id="using-the-cli">
 <h2>Using the CLI<a class="headerlink" href="#using-the-cli" title="Permalink to this headline">¶</a></h2>
-<p>There is a <a class="reference internal" href="cli.html"><span class="doc">CLI</span></a> as well. It can memoize UNIX or other commands from the shell.</p>
+<p>There is a <a class="reference internal" href="cli.html"><span class="doc">CLI</span></a> as well. It can memoize UNIX or other commands from the
+shell.</p>
 </div>
 <div class="section" id="extra-state">
 <h2>Extra State<a class="headerlink" href="#extra-state" title="Permalink to this headline">¶</a></h2>
 <p>Sometimes, language-level closures are not enough to track state. For this, the
 user can supply <code class="docutils literal notranslate"><span class="pre">memoize(...,</span> <span class="pre">extra_function_state=callable_obj)</span></code>. The return
-value of <code class="docutils literal notranslate"><span class="pre">callable_obj</span></code> is a part of the 3rd match subkey. When it changes,
-then the cache for that function is dropped.</p>
+value of <code class="docutils literal notranslate"><span class="pre">callable_obj</span></code>. When it changes, then the cache for that function is
+dropped. However, it is generally better to use <code class="docutils literal notranslate"><span class="pre">__cache_key__</span></code> and <code class="docutils literal notranslate"><span class="pre">__cache_ver__</span></code>
+rather than <code class="docutils literal notranslate"><span class="pre">extra_function_state</span></code> (see <a class="reference internal" href="how_it_works.html#customizing-argument-keys"><span class="std std-ref">Customizing Argument Keys</span></a>).</p>
 <p>State can be added to the whole system by <code class="docutils literal notranslate"><span class="pre">MemoizedGroup(...,</span>
 <span class="pre">extra_system_state=callable_obj)</span></code>. The return value of <code class="docutils literal notranslate"><span class="pre">callable_obj</span></code> is a
 part of the 1st match subkey. When it changes, the whole cache is dropped.</p>
@@ -292,10 +242,8 @@ serialization. To cull the cache after every store, set <code class="docutils li
 without an eviction.</p>
 <p>By default, the cache only stores a hash of the keys, which is faster and
 smaller. Set <code class="docutils literal notranslate"><span class="pre">memoize(...,</span> <span class="pre">lossy_compression=False)</span></code> to store the whole keys
-(useful for debugging).</p>
-<p>Unfortunately, Python’s <a class="reference external" href="https://docs.python.org/3/library/functions.html?highlight=hash#hash"><code class="docutils literal notranslate"><span class="pre">hash</span></code></a> will return different values across different
-runs, so I use <a class="reference internal" href="api_reference.html#charmonium.cache.determ_hash" title="charmonium.cache.determ_hash"><code class="xref py py-func docutils literal notranslate"><span class="pre">determ_hash()</span></code></a>.  If for some reason you
-<em>do</em> want to keep the whole object, set <code class="docutils literal notranslate"><span class="pre">memoize(...,</span> <span class="pre">use_hash=False)</span></code>.</p>
+(useful for debugging). Unfortunately, Python’s <a class="reference external" href="https://docs.python.org/3/library/functions.html?highlight=hash#hash"><code class="docutils literal notranslate"><span class="pre">hash</span></code></a> will return different
+values across different runs, so I use <a class="reference internal" href="api_reference.html#charmonium.cache.determ_hash" title="charmonium.cache.determ_hash"><code class="xref py py-func docutils literal notranslate"><span class="pre">determ_hash()</span></code></a>.</p>
 <p>Be aware of <code class="docutils literal notranslate"><span class="pre">memoize(...,</span> <span class="pre">verbose=True|False)</span></code>. If verbose is enabled, the
 cache will emit a report at process-exit saying how much time was saved. This is
 useful to determine if caching is “worth it.”</p>
@@ -328,6 +276,8 @@ customized by specifying <code class="docutils literal notranslate"><span class=
 <li class="toctree-l1"><a class="reference internal" href="features.html">Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api_reference.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cli.html">CLI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="how_it_works.html">How It Works</a></li>
+<li class="toctree-l1"><a class="reference internal" href="history.html">History</a></li>
 <li class="toctree-l1"><a class="reference internal" href="contributors_guide.html">Contributor’s Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="authors.html">Authors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>

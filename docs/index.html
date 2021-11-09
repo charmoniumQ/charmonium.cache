@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>charmonium.cache &#8212; charmonium.cache 1.0.0 documentation</title>
+    <title>charmonium.cache &#8212; charmonium.cache 1.2.1 documentation</title>
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -34,18 +34,19 @@
   <div class="section" id="charmonium-cache">
 <h1>charmonium.cache<a class="headerlink" href="#charmonium-cache" title="Permalink to this headline">¶</a></h1>
 <ul class="simple">
-<li><p><a class="reference external" href="https://pypi.org/project/charmonium.time-block/">PyPI</a></p></li>
+<li><p><a class="reference external" href="https://pypi.org/project/charmonium.cache/">PyPI</a></p></li>
 <li><p><a class="reference external" href="https://github.com/charmoniumQ/charmonium.cache">GitHub</a></p></li>
-<li><p><a class="reference external" href="https://charmoniumq.github.io/charmonium.cache/">docs</a></p></li>
+<li><p><a class="reference external" href="https://charmoniumq.github.io/charmonium.cache/">Docs</a></p></li>
 </ul>
 <p>Provides a decorator for caching a function. Whenever the function is called
 with the same arguments, the result is loaded from the cache instead of
-computed. If the arguments, source code, or enclosing environment have changed,
-the cache recomputes the data transparently (no need for manual invalidation).</p>
+computed. This cache is <strong>persistent across runs</strong>. If the arguments, source
+code, or enclosing environment have changed, the cache recomputes the data
+transparently (<strong>no need for manual invalidation</strong>).</p>
 <p>The use case is meant for iterative development, especially on scientific
 experiments. Many times a developer will tweak some of the code but not
-all. Often, reusing prior intermediate computations saves a significant amount
-of time every run.</p>
+all. Often, reusing intermediate results saves a significant amount of time
+every run.</p>
 <div class="section" id="quickstart">
 <h2>Quickstart<a class="headerlink" href="#quickstart" title="Permalink to this headline">¶</a></h2>
 <p>If you don’t have <code class="docutils literal notranslate"><span class="pre">pip</span></code> installed, see the <a class="reference external" href="https://pip.pypa.io/en/latest/installing/">pip install
@@ -58,6 +59,7 @@ guide</a>. Then run:</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="nd">@memoize</span><span class="p">()</span>
 <span class="gp">... </span><span class="k">def</span> <span class="nf">square</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
 <span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;recomputing&quot;</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="c1"># Imagine a more expensive computation here.</span>
 <span class="gp">... </span>    <span class="k">return</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">i</span>
 <span class="gp">...</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">square</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
@@ -80,73 +82,59 @@ one is unique because it is:</p>
 <li><p><strong>Correct with respect to source-code changes:</strong> The cache detects if you
 edit the source code or change a file which the program reads (provided they
 use this library’s right file abstraction). Users never need to manually
-invalidate the cache, so long as the functions are pure.</p>
+invalidate the cache, so long as the functions are pure (unlike
+<a class="reference external" href="https://joblib.readthedocs.io/en/latest/memory.html">joblib.Memory</a>, <a class="reference external" href="https://klepto.readthedocs.io/en/latest/">Klepto</a>).</p>
 <p>It is precise enough that it will ignore changes in unrelated functions in
 the file, but it will detect changes in relevant functions in other files. It
 even detects changes in global variables (as in the example above). See
-<a class="reference internal" href="tutorial.html#detecting-changes-in-functions"><span class="std std-ref">Detecting Changes in Functions</span></a> for details.</p>
+<a class="reference external" href="https://charmoniumq.github.io/charmonium.cache/tutorial.html#detecting-changes-in-functions">Detecting Changes in Functions</a> for details.</p>
 </li>
-<li><p><strong>Useful between runs and across machines:</strong> A cache can be shared on the
+<li><p><strong>Useful between runs and across machines:</strong> The cache can persist on the
+disk (unlike <a class="reference external" href="https://docs.python.org/3/library/functools.html#functools.lru_cache">functools.lru_cache</a>). Moreover, a cache can be shared on the
 network, so that if <em>any</em> machine has computed the function for the same
-source-source and arguments, this value can be reused by <em>any other</em> machine.</p></li>
+source-source and arguments, this value can be reused by <em>any other</em> machine,
+provided your datatype is de/serializable on those platforms.</p></li>
 <li><p><strong>Easy to adopt:</strong> Only requires adding one line (<a class="reference external" href="https://en.wikipedia.org/wiki/Python_syntax_and_semantics#Decorators">decorator</a>) to
 the function definition.</p></li>
 <li><p><strong>Bounded in size:</strong> The cache won’t take up too much space. This
 space is partitioned across all memoized functions according to the
 heuristic.</p></li>
-<li><p><strong>Supports smart heuristics:</strong> They can take into account time-to-recompute
-and storage-size in addition to recency, unlike naive <a class="reference external" href="https://en.wikipedia.org/wiki/Cache_replacement_policies#Least_recently_used_(LRU)">LRU</a>.</p></li>
+<li><p><strong>Supports smart heuristics:</strong> Motivated by academic literature, I use cache
+policies that can take into account time-to-recompute and storage-size in
+addition to recency, unlike <a class="reference external" href="https://en.wikipedia.org/wiki/Cache_replacement_policies#Least_recently_used_(LRU)">LRU</a>.</p></li>
 <li><p><strong>Overhead aware:</strong> The library measures the time saved versus overhead. It
 warns the user if the overhead of caching is not worth it.</p></li>
 </ol>
 </div>
 <div class="section" id="memoize-cli">
 <h2>Memoize CLI<a class="headerlink" href="#memoize-cli" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">memoize</span> <span class="o">--</span> <span class="n">command</span> <span class="n">arg1</span> <span class="n">arg2</span> <span class="o">...</span>
-</pre></div>
-</div>
-<dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">memoize</span></code> memoizes <code class="docutils literal notranslate"><span class="pre">command</span> <span class="pre">arg1</span> <span class="pre">arg2</span> <span class="pre">...</span></code>. If the command, its arguments,</dt><dd><p>or its input files change, then <code class="docutils literal notranslate"><span class="pre">command</span> <span class="pre">arg1</span> <span class="pre">arg2</span> <span class="pre">...</span></code> will be
+<p>Make is good for compiling code, but falls short for data science. To get
+correct results, you have to incorporate <em>every</em> variable your result depends on
+into a file or part of the filename. If you put it in a file, you only have one
+version cached at a time; if you put it in the filename, you have to squeeze the
+variable into a short string. In either case, stale results will accumulate
+unboundedly, until you run <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">clean</span></code> which also purges the fresh
+results. Finally, it is a significant effor to rewrite shell scripts in make.</p>
+<p><code class="docutils literal notranslate"><span class="pre">memoize</span></code> makes it easy to memoize steps in shell scripts, correctly. Just add
+<code class="docutils literal notranslate"><span class="pre">memoize</span></code> to the start of the line. If the command, its arguments,
+or its input files change, then <code class="docutils literal notranslate"><span class="pre">command</span> <span class="pre">arg1</span> <span class="pre">arg2</span> <span class="pre">...</span></code> will be
 rerun. Otherwise, the output files (including stderr and stdout) will be
-produced from a prior run.</p>
-</dd>
-</dl>
-<p>Make is good, but it has a hard time with dependencies that are not files. Many
-dependencies are not well-contained in files. For example, you may want
-recompute some command every time some status command returns a different
-value.</p>
-<p>To get correct results you would have to incorporate <em>every</em> key you depend on
-into the filename, which can be messy, so most people don’t do that. <code class="docutils literal notranslate"><span class="pre">memoize</span></code>
-is easier to use correctly, for example:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># `make status=$(status)` will not do the right thing.</span>
-<span class="n">make</span> <span class="n">var</span><span class="o">=</span><span class="mi">1</span>
-<span class="n">make</span> <span class="n">var</span><span class="o">=</span><span class="mi">2</span> <span class="c1"># usually, nothing recompiles here, contrary to user&#39;s intent</span>
-
-<span class="c1"># `memoize --key=$(status) -- command args` will do the right thing</span>
-<span class="n">memoize</span> <span class="o">--</span><span class="n">key</span><span class="o">=</span><span class="mi">1</span> <span class="o">--</span> <span class="n">command</span> <span class="n">args</span>
-<span class="n">memoize</span> <span class="o">--</span><span class="n">key</span><span class="o">=</span><span class="mi">2</span> <span class="o">--</span> <span class="n">command</span> <span class="n">args</span> <span class="c1"># key changed, command is recomptued.</span>
+produced from a prior run. <code class="docutils literal notranslate"><span class="pre">memoize</span></code> uses ptrace to automatically determine
+what inputs you depend on and what outputs you produce.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">memoize</span> <span class="n">command</span> <span class="n">arg1</span> <span class="n">arg2</span>
+<span class="c1"># or</span>
+<span class="n">memoize</span> <span class="o">--</span><span class="n">key</span><span class="o">=</span><span class="n">key</span> <span class="o">--</span> <span class="n">command</span> <span class="n">arg1</span> <span class="n">arg2</span>
 </pre></div>
 </div>
-<p><code class="docutils literal notranslate"><span class="pre">memoize</span></code> also makes it easy to memoize commands within existing shell scripts.</p>
-</div>
-<div class="section" id="code-quality">
-<h2>Code quality<a class="headerlink" href="#code-quality" title="Permalink to this headline">¶</a></h2>
-<ul class="simple">
-<li><p>The code base is strictly and statically typed with <a class="reference external" href="https://github.com/microsoft/pyright">pyright</a>. I export type
-annotations in accordance with <a class="reference external" href="https://www.python.org/dev/peps/pep-0561/">PEP 561</a>; clients will benefit from the type
-annotations in this library.</p></li>
-<li><p>I have unittests with &gt;95% coverage.</p></li>
-<li><p>I use pylint with few disabled warnings.</p></li>
-<li><p>All of the above methods are incorporated into per-commit continuous-testing
-and required for merging with the <code class="docutils literal notranslate"><span class="pre">main</span></code> branch; This way they won’t be
-easily forgotten.</p></li>
-</ul>
+<p>See <a class="reference external" href="https://charmoniumq.github.io/charmonium.cache/cli.html">CLI</a> for more details.</p>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="features.html">Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api_reference.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cli.html">CLI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="how_it_works.html">How It Works</a></li>
+<li class="toctree-l1"><a class="reference internal" href="history.html">History</a></li>
 <li class="toctree-l1"><a class="reference internal" href="contributors_guide.html">Contributor’s Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="authors.html">Authors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
@@ -183,6 +171,8 @@ easily forgotten.</p></li>
 <li class="toctree-l1"><a class="reference internal" href="features.html">Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api_reference.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cli.html">CLI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="how_it_works.html">How It Works</a></li>
+<li class="toctree-l1"><a class="reference internal" href="history.html">History</a></li>
 <li class="toctree-l1"><a class="reference internal" href="contributors_guide.html">Contributor’s Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="authors.html">Authors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>

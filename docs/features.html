@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Features &#8212; charmonium.cache 1.0.0 documentation</title>
+    <title>Features &#8212; charmonium.cache 1.2.1 documentation</title>
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -260,14 +260,16 @@ behavior to the human engineer for further remediation.</p></li>
 <ul class="simple">
 <li><p><a class="reference internal" href="tutorial.html#other-behaviors"><span class="std std-ref">One- or two-level caching</span></a>: One-level caches embed the
 return-value in the index. Two-level caches have a layer of indirection, the
-<a class="reference internal" href="tutorial.html#cache-functionality"><span class="std std-ref">object store</span></a> in my case. This library supports the
+<a class="reference internal" href="how_it_works.html#object-store"><span class="std std-ref">object store</span></a> in my case. This library supports the
 choice between either.</p></li>
 <li><p><a class="reference internal" href="tutorial.html#extra-state"><span class="std std-ref">Time-to-live (TTL)</span></a>: This library supports dropping values
 that are more stale than a certain time.</p></li>
 <li><p><a class="reference internal" href="tutorial.html#other-behaviors"><span class="std std-ref">Lossy or non-lossy key compression</span></a>: This cache
 supports storing a hash of the keys or storing the contents of the
 keys.</p></li>
-<li><p>Exported static typing (<a class="reference external" href="https://www.python.org/dev/peps/pep-0561/">PEP 561</a> and <a class="reference external" href="https://www.python.org/dev/peps/pep-0612/">PEP 612</a>).</p></li>
+<li><p>The whole codebase is staticall typed (including the decorator part <a class="reference external" href="https://www.python.org/dev/peps/pep-0612/">PEP
+612</a>) and these types are exported to clients with <a class="reference external" href="https://www.python.org/dev/peps/pep-0561/">PEP 561</a>. Until <a class="reference external" href="http://mypy-lang.org/">mypy</a>
+supports PEP 612, I recommend clients use <a class="reference external" href="https://github.com/microsoft/pyright">pyright</a>.</p></li>
 </ul>
 </div>
 <div class="section" id="limitations-and-future-work">
@@ -344,6 +346,8 @@ leverage Dask’s task DAG.</p>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api_reference.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cli.html">CLI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="how_it_works.html">How It Works</a></li>
+<li class="toctree-l1"><a class="reference internal" href="history.html">History</a></li>
 <li class="toctree-l1"><a class="reference internal" href="contributors_guide.html">Contributor’s Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="authors.html">Authors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>

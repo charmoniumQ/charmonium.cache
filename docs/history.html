@@ -1,0 +1,200 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>History &#8212; charmonium.cache 1.2.1 documentation</title>
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Contributor’s Guide" href="contributors_guide.html" />
+    <link rel="prev" title="How It Works" href="how_it_works.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="history">
+<h1>History<a class="headerlink" href="#history" title="Permalink to this headline">¶</a></h1>
+<p>While working on a data-intensive project, I wrote too much code like:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">do_task1</span><span class="p">():</span>
+    <span class="o">...</span>
+
+<span class="k">def</span> <span class="nf">get_cached_task1</span><span class="p">():</span>
+    <span class="o">...</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">get_cached_task1</span><span class="p">()</span>
+<span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">do_task1</span><span class="p">()</span>
+            <span class="c1"># store result somehow</span>
+</pre></div>
+</div>
+<p>Not only did this have lots of repetition, there came to be subtle bugs that
+would only happen to some inputs, because the data loaded from cache had
+slightly different properties (e.g. in-datastructure pointers) than the data
+computed on the fly.</p>
+<p>I wanted to unify the case where the results come from storage and abstract that
+in a decorator. The earliest form of what is now this project was born:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">cache</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+    <span class="n">cache_mem</span> <span class="o">=</span> <span class="n">read_from_disk</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">cached_f</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">args</span> <span class="ow">in</span> <span class="n">cache_mem</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">cache_mem</span><span class="p">[</span><span class="n">args</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+            <span class="n">cache_mem</span><span class="p">[</span><span class="n">args</span><span class="p">]</span> <span class="o">=</span> <span class="n">result</span>
+            <span class="n">store_to_disk</span><span class="p">(</span><span class="n">cache_mem</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">result</span>
+</pre></div>
+</div>
+<p>My project grew more sophisticated. I pulled <code class="docutils literal notranslate"><span class="pre">cache</span></code> out into its own class I
+statically typed everything (before <a class="reference external" href="https://www.python.org/dev/peps/pep-0612/">PEP612</a>/<code class="docutils literal notranslate"><span class="pre">ParamSpec</span></code> was a glimmer in Guido’s
+eye). Since I was getting more serious about software design, I decided the
+client should be able to use any storage backend, so long as it satisfied a
+dict-like interface. Then I wrote an backend for Google Cloud Storage so that I
+could use caching in my distributed system. This version still exists
+<a class="reference external" href="https://github.com/charmoniumQ/EDGAR-research/blob/master/edgar_code/cache.py">here</a>. It worked like:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nd">@Cache</span><span class="o">.</span><span class="n">decor</span><span class="p">(</span><span class="n">DirectoryStore</span><span class="p">(</span><span class="n">GSPath</span><span class="o">.</span><span class="n">from_url</span><span class="p">(</span><span class="s2">&quot;gs://blah/blah&quot;</span><span class="p">)))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">foo</span><span class="p">():</span>
+<span class="gp">... </span>    <span class="k">pass</span>
+</pre></div>
+</div>
+<p>It became so useful, that I decided to publish it as a PyPI package. This way I
+could use it in future projects more easily. This was the 0.x release.</p>
+<p>I didn’t touch this code for a year, but I was using it for the data analysis
+phase of my newest project, <a class="reference external" href="https://illixr.github.io/">ILLIXR</a>. This was the first real test of my
+software because it was the first time I know it had real users other than
+me. When my cowoerkers were hacking on the data analysis, they would often tweak
+a few lines rerun, and caching would unhelpfully provide a stale result, based
+on the old verison of the code. This became such a problem that my coworkers
+just deleted the cache every time they ran the code, making it worse than
+useless.</p>
+<p>It would be really nice if I could detect when the user changes their code and
+invalidate just that part of the cache. This is exactly what <a class="reference external" href="https://dl.acm.org/doi/abs/10.1145/2001420.2001455">IncPy</a> does, but
+<code class="docutils literal notranslate"><span class="pre">IncPy</span></code> is a dreaded <em>research project</em>. It hasn’t been maintained in years,
+only works for Python 2.6, and requires modifications to the interpreter. It
+would be really nice if I could somehow detect code changes at the
+<em>library-level</em> instead IncPy’s approach of hacking the interpreter.</p>
+<p>I started digging, and I realized that the facilities were already there in:
+<code class="docutils literal notranslate"><span class="pre">function.__code__</span></code> and <code class="docutils literal notranslate"><span class="pre">inspect.getclosurevars</span></code>! Then I knew I needed to
+write a new release. This release became 2.x. I became much more acquainted with
+Python development tools. I used better static typing (<a class="reference external" href="https://www.python.org/dev/peps/pep-0612/">PEP612</a>) and wrote hella
+unit tests.</p>
+<p>This caching tool can be boon to data scientists working in Python. A lot of
+people use this strategy of writing a data processing pipeline in stages, and
+then they find they need to tweak some of the stages.</p>
+<ul class="simple">
+<li><p>Some people manually load/store intermediate results, which is time-consuming
+and error-prone. How do you know you didn’t forget to invalidate something?</p></li>
+<li><p>People sometimes use Juypter Notebooks and keep the results around in RAM, but
+Jupyter Notebooks have their <a class="reference external" href="https://docs.google.com/presentation/d/1n2RlMdmv1p25Xy5thJUhkKGvjtV-dkAIsUXP-AL4ffI/edit#slide=id.g362da58057_0_1">detractors</a> and what if you need to restart the
+kernel for some reason?</p></li>
+</ul>
+<p>Using my caching strategy, you can have the comfort of your IDE and the
+appearance that you are rerunning the entire computation start-to-finish, but it
+takes just the amount of time to recompute what changed.</p>
+<p>Future work I have planned involves integrating more closely with existing
+workflow managers like <a class="reference external" href="https://dask.org/">dask</a> and <a class="reference external" href="https://parsl.readthedocs.io/">Parsl</a>. If I can plug into a workflow
+system people already use, I can lower the barrier to adoption.</p>
+<p>I want to do some of the tricks that IncPy does, such as detecting impure
+functions and automatically deciding which functions to cache. Then I want to do
+performance comparisons to quantify the benefit and overhead.</p>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">charmonium.cache</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="features.html">Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api_reference.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">CLI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="how_it_works.html">How It Works</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributors_guide.html">Contributor’s Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authors.html">Authors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="works_cited.html">Works Cited</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="how_it_works.html" title="previous chapter">How It Works</a></li>
+      <li>Next: <a href="contributors_guide.html" title="next chapter">Contributor’s Guide</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2021, Samuel Grayson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/history.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

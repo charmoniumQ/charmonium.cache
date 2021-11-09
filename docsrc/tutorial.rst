@@ -210,7 +210,7 @@ Sometimes, language-level closures are not enough to track state. For this, the
 user can supply ``memoize(..., extra_function_state=callable_obj)``. The return
 value of ``callable_obj``. When it changes, then the cache for that function is
 dropped. However, it is generally better to use ``__cache_key__`` and ``__cache_ver__``
-rather than ``extra_function_state`` (see :doc:`How It Works`).
+rather than ``extra_function_state`` (see :ref:`Customizing Argument Keys`).
 
 State can be added to the whole system by ``MemoizedGroup(...,
 extra_system_state=callable_obj)``. The return value of ``callable_obj`` is a
@@ -261,8 +261,6 @@ See :py:class:`~charmonium.cache.Memoized` and :py:class:`~charmonium.cache.Memo
 .. _`time-to-live (TTL)`: https://en.wikipedia.org/wiki/Time_to_live
 .. _`pure`: https://en.wikipedia.org/wiki/Pure_function
 .. _`Universal Pathlib`: https://github.com/Quansight/universal_pathlib
-.. |inspect.getclosurevars| replace:: ``inspect.getclosurevars``
-.. _`inspect.getclosurevars`: https://docs.python.org/3/library/inspect.html#inspect.getclosurevars
 .. |__getstate__| replace:: ``__getstate__``
 .. _`__getstate__`: https://docs.python.org/3/library/pickle.html#object.__getstate__
 .. |hash| replace:: ``hash``

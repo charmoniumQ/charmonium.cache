@@ -147,7 +147,7 @@ Other features of ``charmonium.cache``:
 
 - :ref:`One- or two-level caching <Other Behaviors>`: One-level caches embed the
   return-value in the index. Two-level caches have a layer of indirection, the
-  :ref:`object store <Cache Functionality>` in my case. This library supports the
+  :ref:`object store <Object Store>` in my case. This library supports the
   choice between either.
 
 - :ref:`Time-to-live (TTL) <Extra State>`: This library supports dropping values

@@ -38,7 +38,7 @@ extensions = [
     # "sphinx.ext.viewcode",
     # "sphinx.ext.napoleon",
     "sphinx.ext.intersphinx",
-    "sphinxcontrib.spelling",
+    # "sphinxcontrib.spelling",
 ]
 
 autodoc_typehints = "description"
