@@ -38,7 +38,7 @@
   - [x] C extensions. hashed by name, like module
   - [x] Methods
   - [x] fastpath for numpy arrays
-
+- [ ] Support closures which include `import x` and `from x import y`
 
 # Minor release
 
@@ -58,7 +58,10 @@
 - [ ] Optionally repay stdout on cache hit.
 - [ ] Print usage report at the end, with human timedeltas.
 - [ ] Use `poetry2nix`.
-- [ ] Replace `shell.nix` with `flake.nix`.
+- [x] Replace `shell.nix` with `flake.nix`.
+- [ ] Write about how memoization interacts with OOP.
+- [ ] Write about when memoization is unsound.
+- [ ] Record demo, update presentation, link presentation.
 
 # Low priorities
 
@@ -81,3 +84,7 @@
 - [ ] Fix frozendict
 - [ ] Make it work for instance methods.
 - [ ] Make `charmonium._time_block` serializable
+- [ ] Detect impurities, by testing closure vars for modification after running (like IncPy)
+- [ ] Detect impurities, by audithooks https://docs.python.org/3/library/audit_events.html
+- [ ] Detect impurities, by scanning for references to non-deterministic functions (time, random, sys)
+- [ ] Write about replacing notebooks.

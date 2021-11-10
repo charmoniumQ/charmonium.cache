@@ -35,6 +35,7 @@ class ObjStore(Protocol):
         ...
 
     def __iter__(self) -> Iterator[int]:
+        # pylint: disable=non-iterator-returned
         ...
 
     def clear(self) -> None:

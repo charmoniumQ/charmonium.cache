@@ -149,6 +149,7 @@ def test_hashable_of_obj() -> None:
 @pytest.mark.parametrize("input_kind", non_hashables.keys())
 def test_make_hashable(input_kind: str) -> None:
     inputs = non_hashables[input_kind]
+
     # hashable part is unique
     assert unique([hash(hashable(input)) for input in inputs])
 
