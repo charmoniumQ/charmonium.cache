@@ -6,6 +6,7 @@ import dis
 import inspect
 import pickle
 import struct
+import textwrap
 from pathlib import Path
 from types import (
     BuiltinFunctionType,
@@ -14,6 +15,7 @@ from types import (
     CodeType,
     FunctionType,
     GetSetDescriptorType,
+    MappingProxyType,
     MemberDescriptorType,
     MethodDescriptorType,
     MethodType,
@@ -64,7 +66,9 @@ class Hasher(Protocol):
 
 
 # pylint: disable=invalid-name
-def determ_hash(obj: Hashable, HasherType: Type[Hasher] = xxhash.xxh64) -> int:
+def determ_hash(
+    obj: Hashable, HasherType: Type[Hasher] = xxhash.xxh64, verbose: bool = False
+) -> int:
     """A deterministic hash protocol.
 
     Python's |hash|_ will return different values across different
@@ -91,20 +95,22 @@ def determ_hash(obj: Hashable, HasherType: Type[Hasher] = xxhash.xxh64) -> int:
 
     """
     hasher = HasherType()
-    _determ_hash(obj, hasher)
+    _determ_hash(obj, hasher, verbose, 0)
     return hasher.intdigest()
 
 
-def _determ_hash(obj: Any, hasher: Hasher) -> None:
-    # Naively, hash of empty output might map to 0.
-    # But empty is a popular input.
-    # If any two branches have 0 as a popular output, collisions ensue.
-    # Therefore, I try to make each branch section have a different ouptut for empty/zero/nil inputs.
-    # I do this by seeding each with the name of their type, hash("tuple") ^ hash(elem0) ^ hash(elem1) ^ ...
-    # This way, the empty tuple and empty frozenset map to different outputs.
+def _determ_hash(obj: Any, hasher: Hasher, HasherType: Type[Hasher], verbose: bool, level: int) -> None:
+    if verbose:
+        print(level * " ", textwrap.shorten(repr(obj), width=70), type(obj))
     if isinstance(obj, type(None)):
         hasher.update(b"none")
     elif isinstance(obj, bytes):
+        # Naively, hash of empty containers output might map to 0.
+        # But empty is a popular input.
+        # If any two branches have 0 as a popular output, collisions ensue.
+        # Therefore, I try to make each branch section have a different ouptut for empty/zero/nil inputs.
+        # I do this by seeding each with the name of their type, hash("tuple") ^ hash(elem0) ^ hash(elem1) ^ ...
+        # This way, the empty tuple and empty frozenset map to different outputs.
         hasher.update(b"bytes")
         hasher.update(obj)
     elif isinstance(obj, str):
@@ -124,20 +130,31 @@ def _determ_hash(obj: Any, hasher: Hasher) -> None:
         hasher.update(struct.pack("!d", obj))
     elif isinstance(obj, complex):
         hasher.update(b"complex")
-        _determ_hash(obj.imag, hasher)
-        _determ_hash(obj.real, hasher)
+        _determ_hash(obj.imag, hasher, HasherType, verbose, level + 1)
+        _determ_hash(obj.real, hasher, HasherType, verbose, level + 1)
     elif isinstance(obj, type(...)):
         hasher.update(b"...")
     elif isinstance(obj, tuple):
         hasher.update(b"tuple(")
         for elem in cast(Tuple[Hashable], obj):
-            _determ_hash(elem, hasher)
+            _determ_hash(elem, hasher, HasherType, verbose, level)
+        hasher.update(b")")
+    elif isinstance(obj, CodeType):
+        hasher.update(b"code(")
+        hasher.update(obj.co_code)
+        _determ_hash(obj.co_consts, hasher, HasherType, verbose, level + 1)
         hasher.update(b")")
     elif isinstance(obj, frozenset):
-        hasher.update(b"frozenset(")
+        # The order of objects in a frozenset does not matter.
+        # I would like to hash(sorted(obj)), but the elements of obj might not be comparable.
+        # And id(a) < id(b) is not a stable comparison.
+        # So I will _determ_hash each element to an integer, sort the integers, and hash that list.
+        elem_hashes = []
         for elem in cast(FrozenSet[Any], obj):
-            _determ_hash(elem, hasher)
-        hasher.update(b")")
+            elem_hasher = HasherType()
+            _determ_hash(elem, elem_hasher, HasherType, verbose, level + 1)
+            elem_hashes.append(elem_hasher.intdigest())
+        _determ_hash(tuple(sorted(elem_hashes)), hasher, HasherType, verbose, level + 1)
     elif isinstance(obj, BuiltinFunctionType):
         hasher.update(b"builtinfunctiontype")
         hasher.update(obj.__qualname__.encode())
@@ -146,16 +163,12 @@ def _determ_hash(obj: Any, hasher: Hasher) -> None:
     ):
         proxy = getattr(obj, "__determ_hash__")()
         hasher.update(b"__determ_hash__")
-        _determ_hash(proxy, hasher)
+        _determ_hash(proxy, hasher, HasherType, verbose, level)
     else:
         raise TypeError(f"{obj} ({type(obj)}) is not determ_hashable")
 
 
-def hashable(
-    obj: Any,
-    verbose: bool = False
-    # DO NOT COMMIT: chnage verbose to False
-) -> Hashable:
+def hashable(obj: Any, verbose: bool = False,) -> Hashable:
     """An injective function that maps anything to a hashable object.
 
     When given a mutable type, hashable makes an immutable copy of the
@@ -194,7 +207,6 @@ def _hashable(obj: Any, tabu: set[int], level: int, verbose: bool) -> Hashable:
     # pylint: disable=too-many-branches,too-many-return-statements
     # Make sure I remember to pass tabu and level
     # Make sure I update tabu when I call _determ_hash on a mutable object.
-    # I prepend the type if it is a container so that an empty tuple and empty list hash to different keys.
 
     if level > 50:
         raise ValueError("Maximum recursion")
@@ -223,10 +235,12 @@ def _hashable(obj: Any, tabu: set[int], level: int, verbose: bool) -> Hashable:
         return frozenset(
             _hashable(elem, tabu, level, verbose) for elem in cast(Set[Any], obj)
         )
-    elif isinstance(obj, dict):
+    elif isinstance(obj, (dict, MappingProxyType)):
         tabu = tabu | {id(cast(Any, obj))}
         level = level + 1
-        return frozenset(
+        # The elements of a dict remember their insertion order, as of Python 3.7.
+        # So I will hash this as an ordered collection.
+        return tuple(
             (key, _hashable(val, tabu, level, verbose))
             for key, val in cast(Dict[Any, Any], obj).items()
         )
@@ -304,12 +318,10 @@ def _hashable(obj: Any, tabu: set[int], level: int, verbose: bool) -> Hashable:
             if pred(obj):
                 return hashable_fn(obj, tabu, level, verbose)
         slots = getattr(type(obj), "__slots__", None)
-        print("slots", obj, type(obj), slots)
         dct = getattr(obj, "__dict__", None)
         ignore_attrs = {"__module__", "__dict__", "__weakref__", "__doc__"}
         if slots is not None:
             slots_val = {attr: getattr(obj, attr) for attr in slots}
-            print("slots", slots_val)
             return frozenset(
                 (attr, _hashable(getattr(obj, attr), tabu, level, verbose))
                 for attr, val in slots_val.items()

@@ -8,29 +8,19 @@ import sys
 import tempfile
 import textwrap
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, cast
+from typing import TypedDict, Any, Dict, List, cast
 
 import pytest
 
-if TYPE_CHECKING:
-    from typing import TypedDict
-
-else:
-    TypedDict = lambda a, b: b
-
-
-if TYPE_CHECKING:
-    ScriptResult = TypedDict(
-        "ScriptResult",
-        {
-            "returns": List[int],
-            "recomputed": List[int],
-            "serialized": Dict[str, bytes],
-            "expected": List[int],
-        },
-    )
-else:
-    ScriptResult = Any
+ScriptResult = TypedDict(
+    "ScriptResult",
+    {
+        "returns": List[int],
+        "recomputed": List[int],
+        "serialized": Dict[str, bytes],
+        "expected": List[int],
+    },
+)
 
 
 def run_script(

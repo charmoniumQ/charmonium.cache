@@ -38,18 +38,46 @@
   - [x] C extensions. hashed by name, like module
   - [x] Methods
   - [x] fastpath for numpy arrays
-- [ ] Support closures which include `import x` and `from x import y`
+
+# Research tasks
+
+- Fix hashing
+  - [ ] Bring hash into separate package.
+  - [ ] Test hashing sets with different orders. Assert tests fail.
+  - [ ] Test hashing dicts with different orders. Assert tests fail.
+  - [ ] Test hash for objects and classes more carefully.
+  - [ ] Don't include properties in hash.
+  - [ ] Support closures which include `import x` and `from x import y`
+- Performance evaluation
+  - [ ] Macrobenchmark on commit history of real repositories.
+  - [x] Microbenchmark
+    - per Memoized: n misses, n hits, size of objects, hashing, deserialization, serialization, object load, object store, function, total on hit, total on miss
+    - per MemoizedGroup: index load, index store, index size
+- [ ] Integrate with Parsl.
+- [ ] Documentation
+  - [ ] Explain how to use logging.
+  - [ ] Write about how memoization interacts with OOP.
+  - [ ] Write about when memoization is unsound.
+  - [ ] Record demo, update presentation, link presentation.
+- Detect impurities
+  - [ ] Compare global vars and fn arguments before and after running function.
+  - [ ] Listen for [audit events].
+  - [ ] Scan for references to non-deterministic functions (time, random, sys).
+- [ ] Apply automatically using [importhook].
+  - [ ] Write `maybe_memoize`.
+  - [ ] Global config.
+- [ ] Do writing-to-disk off the critical path, in a thread.
+
+[audit events]: https://docs.python.org/3/library/audit_events.html#audit-events
+[importhook]: https://brettlangdon.github.io/importhook/
 
 # Minor release
 
 - [ ] Do `fsync` before/after load?
-- [ ] Do I really need `memoize(..., temporary: bool = False)`?
+- [ ] Do I really need `memoize(..., temporary: bool = False)` in tests?
 - [ ] Simplify `tests/test_memoize_parallel.py`.
-- [ ] Make `hashable` handle more types:
-  - [ ] Classes
 - [ ] Shortcut for caching a decorator
 - [ ] Support out-of-band (zero-copy) pickle-hashing in `determ_hash`.
-- [ ] Read-only memoization
 - [ ] file-IO based pickle
 - [ ] Make `fine_grain*` apply to a `Memoized` level. All benefit from positive externalities.
 - [ ] Make resistant to errors.
@@ -59,9 +87,6 @@
 - [ ] Print usage report at the end, with human timedeltas.
 - [ ] Use `poetry2nix`.
 - [x] Replace `shell.nix` with `flake.nix`.
-- [ ] Write about how memoization interacts with OOP.
-- [ ] Write about when memoization is unsound.
-- [ ] Record demo, update presentation, link presentation.
 
 # Low priorities
 
@@ -76,15 +101,8 @@
   - [ ] GitHub Actions checks
   - [ ] External code quality/analysis
 - [ ] `hashable` prints log on error
-- [ ] Make optional per-call performance logging like `charmonium.time_block`.
-- [ ] Line-profile big program.
-  - It's probably the de/serialization that hurts performance, but I'd like to check.
 - [ ] Make working example of caching in S3.
 - [ ] Set up git-changelog.
-- [ ] Fix frozendict
 - [ ] Make it work for instance methods.
 - [ ] Make `charmonium._time_block` serializable
-- [ ] Detect impurities, by testing closure vars for modification after running (like IncPy)
-- [ ] Detect impurities, by audithooks https://docs.python.org/3/library/audit_events.html
-- [ ] Detect impurities, by scanning for references to non-deterministic functions (time, random, sys)
 - [ ] Write about replacing notebooks.
