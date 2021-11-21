@@ -4,10 +4,12 @@ import builtins
 import copy
 import dis
 import inspect
+import logging
 import pickle
 import struct
 import textwrap
 from pathlib import Path
+import threading
 from types import (
     BuiltinFunctionType,
     BuiltinMethodType,
@@ -53,6 +55,8 @@ HASH_BITS = 32
 HASH_BYTES = HASH_BITS // 8 + int(bool(HASH_BITS % 8))
 
 
+logger = logging.getLogger("charmonium.cache.determ_hash")
+
 class Hasher(Protocol):
     def __init__(self, initial_value: bytes = ...) -> None:
         # pylint: disable=super-init-not-called
@@ -67,7 +71,7 @@ class Hasher(Protocol):
 
 # pylint: disable=invalid-name
 def determ_hash(
-    obj: Hashable, HasherType: Type[Hasher] = xxhash.xxh64, verbose: bool = False
+    obj: Hashable, HasherType: Type[Hasher] = xxhash.xxh64
 ) -> int:
     """A deterministic hash protocol.
 
@@ -95,13 +99,15 @@ def determ_hash(
 
     """
     hasher = HasherType()
-    _determ_hash(obj, hasher, verbose, 0)
+    logger.debug("determ_hash begin")
+    _determ_hash(obj, hasher, HasherType, 0)
+    logger.debug("determ_hash end")
     return hasher.intdigest()
 
 
-def _determ_hash(obj: Any, hasher: Hasher, HasherType: Type[Hasher], verbose: bool, level: int) -> None:
-    if verbose:
-        print(level * " ", textwrap.shorten(repr(obj), width=70), type(obj))
+def _determ_hash(obj: Any, hasher: Hasher, HasherType: Type[Hasher], level: int) -> None:
+    if logger.isEnabledFor(logging.DEBUG):
+        logger.debug(level * " " + textwrap.shorten(repr(obj), width=70) + " " + repr(type(obj)))
     if isinstance(obj, type(None)):
         hasher.update(b"none")
     elif isinstance(obj, bytes):
@@ -130,19 +136,19 @@ def _determ_hash(obj: Any, hasher: Hasher, HasherType: Type[Hasher], verbose: bo
         hasher.update(struct.pack("!d", obj))
     elif isinstance(obj, complex):
         hasher.update(b"complex")
-        _determ_hash(obj.imag, hasher, HasherType, verbose, level + 1)
-        _determ_hash(obj.real, hasher, HasherType, verbose, level + 1)
+        _determ_hash(obj.imag, hasher, HasherType, level + 1)
+        _determ_hash(obj.real, hasher, HasherType, level + 1)
     elif isinstance(obj, type(...)):
         hasher.update(b"...")
     elif isinstance(obj, tuple):
         hasher.update(b"tuple(")
         for elem in cast(Tuple[Hashable], obj):
-            _determ_hash(elem, hasher, HasherType, verbose, level)
+            _determ_hash(elem, hasher, HasherType, level + 1)
         hasher.update(b")")
     elif isinstance(obj, CodeType):
         hasher.update(b"code(")
         hasher.update(obj.co_code)
-        _determ_hash(obj.co_consts, hasher, HasherType, verbose, level + 1)
+        _determ_hash(obj.co_consts, hasher, HasherType, level + 1)
         hasher.update(b")")
     elif isinstance(obj, frozenset):
         # The order of objects in a frozenset does not matter.
@@ -152,23 +158,26 @@ def _determ_hash(obj: Any, hasher: Hasher, HasherType: Type[Hasher], verbose: bo
         elem_hashes = []
         for elem in cast(FrozenSet[Any], obj):
             elem_hasher = HasherType()
-            _determ_hash(elem, elem_hasher, HasherType, verbose, level + 1)
+            _determ_hash(elem, elem_hasher, HasherType, level + 1)
             elem_hashes.append(elem_hasher.intdigest())
-        _determ_hash(tuple(sorted(elem_hashes)), hasher, HasherType, verbose, level + 1)
+        _determ_hash(tuple(sorted(elem_hashes)), hasher, HasherType, level + 1)
     elif isinstance(obj, BuiltinFunctionType):
         hasher.update(b"builtinfunctiontype")
         hasher.update(obj.__qualname__.encode())
     elif hasattr(obj, "__determ_hash__") and hasattr(
         getattr(obj, "__determ_hash__"), "__self__"
     ):
+        # TODO: deprecate. Replace with __hashable__
         proxy = getattr(obj, "__determ_hash__")()
         hasher.update(b"__determ_hash__")
-        _determ_hash(proxy, hasher, HasherType, verbose, level)
+        _determ_hash(proxy, hasher, HasherType, level + 1)
+    elif isinstance(obj, logging.Logger):
+        pass
     else:
         raise TypeError(f"{obj} ({type(obj)}) is not determ_hashable")
 
 
-def hashable(obj: Any, verbose: bool = False,) -> Hashable:
+def hashable(obj: Any) -> Hashable:
     """An injective function that maps anything to a hashable object.
 
     When given a mutable type, hashable makes an immutable copy of the
@@ -190,9 +199,9 @@ def hashable(obj: Any, verbose: bool = False,) -> Hashable:
     :py:func:`~charmonium.cache.register_hashable`.
 
     """
-    if verbose:
-        print(f"_hashable({obj}, set(), 0) =")
-    ret = _hashable(obj, set(), 0, verbose)
+    logging.debug(f"hashable begin")
+    ret = _hashable(obj, set(), 0)
+    logging.debug(f"hashable end")
     return ret
 
 
@@ -203,7 +212,7 @@ attr_blacklist = {
 }
 
 
-def _hashable(obj: Any, tabu: set[int], level: int, verbose: bool) -> Hashable:
+def _hashable(obj: Any, tabu: set[int], level: int) -> Hashable:
     # pylint: disable=too-many-branches,too-many-return-statements
     # Make sure I remember to pass tabu and level
     # Make sure I update tabu when I call _determ_hash on a mutable object.
@@ -211,8 +220,8 @@ def _hashable(obj: Any, tabu: set[int], level: int, verbose: bool) -> Hashable:
     if level > 50:
         raise ValueError("Maximum recursion")
 
-    if verbose:
-        print(level * " ", repr(obj), type(obj))
+    if logger.isEnabledFor(logging.DEBUG):
+        logger.debug(level*" " + repr(obj) + " " + repr(type(obj)))
 
     if isinstance(
         obj,
@@ -227,13 +236,13 @@ def _hashable(obj: Any, tabu: set[int], level: int, verbose: bool) -> Hashable:
         tabu = tabu | {id(cast(Any, obj))}
         level = level + 1
         return tuple(
-            _hashable(elem, tabu, level, verbose) for elem in cast(List[Any], obj)
+            _hashable(elem, tabu, level) for elem in cast(List[Any], obj)
         )
     elif isinstance(obj, (set, frozenset)):
         tabu = tabu | {id(cast(Any, obj))}
         level = level + 1
         return frozenset(
-            _hashable(elem, tabu, level, verbose) for elem in cast(Set[Any], obj)
+            _hashable(elem, tabu, level) for elem in cast(Set[Any], obj)
         )
     elif isinstance(obj, (dict, MappingProxyType)):
         tabu = tabu | {id(cast(Any, obj))}
@@ -241,7 +250,7 @@ def _hashable(obj: Any, tabu: set[int], level: int, verbose: bool) -> Hashable:
         # The elements of a dict remember their insertion order, as of Python 3.7.
         # So I will hash this as an ordered collection.
         return tuple(
-            (key, _hashable(val, tabu, level, verbose))
+            (key, _hashable(val, tabu, level))
             for key, val in cast(Dict[Any, Any], obj).items()
         )
     elif hasattr(obj, "__determ_hash__") and hasattr(
@@ -250,7 +259,7 @@ def _hashable(obj: Any, tabu: set[int], level: int, verbose: bool) -> Hashable:
         tabu = tabu | {id(cast(Any, obj))}
         level = level + 1
         proxy = getattr(obj, "__determ_hash__")()
-        return _hashable(proxy, tabu, level, verbose)
+        return _hashable(proxy, tabu, level)
     elif hasattr(obj, "data") and isinstance(getattr(obj, "data"), memoryview):
         # Fast path for numpy arrays
         data = GetAttr[memoryview]()(obj, "data")
@@ -271,16 +280,16 @@ def _hashable(obj: Any, tabu: set[int], level: int, verbose: bool) -> Hashable:
         level = level + 1
         return (
             obj.__qualname__,
-            _hashable(getattr(obj, "__self__", None), tabu, level, verbose),
+            _hashable(getattr(obj, "__self__", None), tabu, level),
         )
     elif isinstance(obj, FunctionType):
         tabu = tabu | {id(obj)}
         level = level + 1
         closure = getclosurevars(obj)
         return (
-            _hashable(obj.__code__, tabu, level, verbose),
-            _hashable(closure.nonlocals, tabu, level, verbose),
-            _hashable(closure.globals, tabu, level, verbose),
+            _hashable(obj.__code__, tabu, level),
+            _hashable(closure.nonlocals, tabu, level),
+            _hashable(closure.globals, tabu, level),
         )
     elif isinstance(obj, CodeType):
         return (
@@ -294,16 +303,16 @@ def _hashable(obj: Any, tabu: set[int], level: int, verbose: bool) -> Hashable:
         level = level + 1
         return (
             obj.__qualname__,
-            _hashable(obj.__self__, tabu, level, verbose),
-            _hashable(obj.__class__, tabu, level, verbose),
+            _hashable(obj.__self__, tabu, level),
+            _hashable(obj.__class__, tabu, level),
         )
     elif isinstance(obj, property):
         tabu = tabu | {id(obj)}
         level = level + 1
         return (
-            _hashable(obj.fget, tabu, level, verbose),
-            _hashable(obj.fset, tabu, level, verbose),
-            _hashable(obj.fdel, tabu, level, verbose),
+            _hashable(obj.fget, tabu, level),
+            _hashable(obj.fset, tabu, level),
+            _hashable(obj.fdel, tabu, level),
         )
     elif isinstance(obj, ModuleType):
         tabu = tabu | {id(obj)}
@@ -316,23 +325,27 @@ def _hashable(obj: Any, tabu: set[int], level: int, verbose: bool) -> Hashable:
         level = level + 1
         for pred, hashable_fn in HASHABLE_FNS:
             if pred(obj):
-                return hashable_fn(obj, tabu, level, verbose)
+                return hashable_fn(obj, tabu, level)
         slots = getattr(type(obj), "__slots__", None)
         dct = getattr(obj, "__dict__", None)
         ignore_attrs = {"__module__", "__dict__", "__weakref__", "__doc__"}
         if slots is not None:
             slots_val = {attr: getattr(obj, attr) for attr in slots}
             return frozenset(
-                (attr, _hashable(getattr(obj, attr), tabu, level, verbose))
+                (attr, _hashable(getattr(obj, attr), tabu, level))
                 for attr, val in slots_val.items()
                 if attr not in ignore_attrs and val is not getattr(object, attr, None)
             )
         elif dct is not None:
             return frozenset(
-                (attr, _hashable(val, tabu, level, verbose))
+                (attr, _hashable(val, tabu, level))
                 for attr, val in dct.items()
                 if attr not in ignore_attrs and val is not getattr(object, attr, None)
             )
+        elif obj.__class__.__qualname__ == "RLock":
+            # TODO: remove this.
+            # Test pymc3.model.Model
+            return None
         else:
             raise TypeError(f"{type(obj)} {obj} is not able to be made hashable")
 
@@ -361,7 +374,7 @@ def register_hashable(
     HASHABLE_FNS.append((pred, hashable_fn))
 
 
-def pickle_fallback(obj: Any, _tabu: set[int], _level: int, _verbose: bool) -> Any:
+def pickle_fallback(obj: Any, _tabu: set[int], _level: int) -> Any:
     if not isinstance(obj, (ModuleType, FunctionType)) and copy.deepcopy(obj) != obj:
         raise TypeError(
             "This type isn't equal to its deepcopy; it can't be made hashable"
@@ -372,12 +385,12 @@ def pickle_fallback(obj: Any, _tabu: set[int], _level: int, _verbose: bool) -> A
         raise TypeError("{type(obj)} is not able to be made into a hashable") from exc
 
 
-def attr_fallback(obj: Any, tabu: set[int], level: int, verbose: bool) -> Any:
+def attr_fallback(obj: Any, tabu: set[int], level: int) -> Any:
     tabu = tabu | {id(obj)}
     level = level + 1
     return frozenset(
         (
-            (attr_name, _hashable(getattr(obj, attr_name), tabu, level, verbose),)
+            (attr_name, _hashable(getattr(obj, attr_name), tabu, level),)
             for attr_name in dir(obj)
             if (
                 attr_name not in attr_blacklist

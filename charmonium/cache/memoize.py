@@ -70,21 +70,21 @@ DEFAULT_OBJ_STORE_PATH = ".cache"
 
 
 ops_logger = logging.getLogger("charmonium.cache.ops")
-# almost all operations are logged as DEBUG
+# all operations are logged as DEBUG
 perf_logger = logging.getLogger("charmonium.cache.perf")
-# all performnace data is logged as DEBUG
-size_logger = logging.getLogger("charmonium.cache.size")
-# all size data is logged as DEBUG
+# all perf data is logged as DEBUG
 
 @contextlib.contextmanager
 def perf_ctx(event: str, **kwargs: Any) -> None:
-    start = datetime.datetime.now()
+    if perf_logger.isEnabledFor(logging.DEBUG):
+        start = datetime.datetime.now()
     yield
-    perf_logger.debug(json.dumps({
-        "event": event,
-        "duration": (datetime.datetime.now() - start).total_seconds(),
-        **kwargs,
-    }))
+    if perf_logger.isEnabledFor(logging.DEBUG):
+        perf_logger.debug(json.dumps({
+            "event": event,
+            "duration": (datetime.datetime.now() - start).total_seconds(),
+            **kwargs,
+        }))
 
 # pyright thinks attrs has ambiguous overload
 @attr.define(init=False)  # type: ignore
@@ -212,16 +212,12 @@ class MemoizedGroup:
             else:
                 obj_key = None
             self._replacement_policy.invalidate(key, entry)
-        ops_logger.debug(json.dumps({
-            "event": "cascading_delete",
-            "key": key,
-            "obj_key": obj_key,
-        }))
-        size_logger.debug(json.dumps({
-            "event": "cascading_delete",
-            "key": key,
-            "obj_key": obj_key,
-        }))
+        if ops_logger.isEnabledFor(logging.DEBUG):
+            ops_logger.debug(json.dumps({
+                "event": "cascading_delete",
+                "key": key,
+                "obj_key": obj_key,
+            }))
 
     def _index_read(self) -> None:
         with self._memory_lock, self._index_lock.reader:
@@ -247,11 +243,12 @@ class MemoizedGroup:
                     self._replacement_policy.update(other_rp)
                     self.time_cost = other_tc
                     self.time_saved = other_ts
-        ops_logger.debug(json.dumps({
-            "event": "index_read",
-            "old_version": current_version,
-            "self._version": self._version,
-        }))
+        if ops_logger.isEnabledFor(logging.DEBUG):
+            ops_logger.debug(json.dumps({
+                "event": "index_read",
+                "old_version": current_version,
+                "self._version": self._version,
+            }))
 
     def _index_write(self) -> None:
         with perf_ctx("index_write"), self._memory_lock, self._index_lock.writer:
@@ -267,10 +264,11 @@ class MemoizedGroup:
                     self.time_saved,
                 )
             )
-        ops_logger.debug(json.dumps({
-            "event": "index_write",
-            "self._version": self._version,
-        }))
+        if ops_logger.isEnabledFor(logging.DEBUG):
+            ops_logger.debug(json.dumps({
+                "event": "index_write",
+                "self._version": self._version,
+            }))
 
     def _system_state(self) -> Any:
         """Functions are deterministic with (global state, function-specific state, args key, args version).
@@ -298,21 +296,17 @@ class MemoizedGroup:
                         obj_key in self._obj_store
                     ), "Replacement policy tried to evict something that wasn't there"
                     del self._obj_store[obj_key]
-                    size_logger.debug(json.dumps({
-                        "event": "evict",
-                        "key": key,
-                        "obj_key": obj_key,
-                    }))
                 else:
                     obj_key = None
                 total_size -= entry.data_size
-                ops_logger.debug(json.dumps({
-                    "event": "evict",
-                    "key": key,
-                    "obj_key": obj_key,
-                    "entry.data_size": entry.data_size.format("{value:.1f}{unit}"),
-                    "new_total_size": total_size - entry.data_size,
-                }))
+                if ops_logger.isEnabledFor(logging.DEBUG):
+                    ops_logger.debug(json.dumps({
+                        "event": "evict",
+                        "key": key,
+                        "obj_key": obj_key,
+                        "entry.data_size": entry.data_size.bytes,
+                        "new_total_size": (total_size - entry.data_size).bytes,
+                    }))
                 del self._index[key]
 
     def remove_orphans(self) -> None:
@@ -336,10 +330,11 @@ class MemoizedGroup:
             }
             for obj_key in self._obj_store:
                 if obj_key not in found_obj_keys:
-                    ops_logger.debug(json.dumps({
-                        "event": "remove_orphan",
-                        "obj_key": obj_key,
-                    }))
+                    if ops_logger.isEnabledFor(logging.DEBUG):
+                        ops_logger.debug(json.dumps({
+                            "event": "remove_orphan",
+                            "obj_key": obj_key,
+                        }))
                     del self._obj_store[obj_key]
 
 
@@ -512,15 +507,10 @@ class Memoized(Generic[FuncParams, FuncReturn]):
             data_size = bitmath.Byte(len(value_ser))
             # Group is a "friend class", hence pylint disable
 
-            self.group._obj_store[  # pylint: disable=protected-access
-                obj_key
-            ] = value_ser
-            size_logger.debug(json.dumps({
-                "event": "store",
-                "name": self.name,
-                "obj_key": obj_key,
-                "size": len(value_ser),
-            }))
+            with perf_ctx("obj_store", name=self.name):
+                self.group._obj_store[  # pylint: disable=protected-access
+                    obj_key
+                ] = value_ser
         else:
             stored_value = value
             data_size = bitmath.Byte(0)
@@ -529,18 +519,18 @@ class Memoized(Generic[FuncParams, FuncReturn]):
 
         # TODO: cache stdout?
 
-        perf_logger.debug(json.dumps({
-            "event": "serialize",
-            "name": self.name,
-            "duration": (stop - mid).total_seconds(),
-        }))
-        perf_logger.debug(json.dumps({
-            "event": "inner_function",
-            "name": self.name,
-            "duration": (mid - start).total_seconds(),
-        }))
+        if perf_logger.isEnabledFor(logging.DEBUG):
+            perf_logger.debug(json.dumps({
+                "event": "serialize",
+                "name": self.name,
+                "duration": (stop - mid).total_seconds(),
+            }))
+            perf_logger.debug(json.dumps({
+                "event": "inner_function",
+                "name": self.name,
+                "duration": (mid - start).total_seconds(),
+            }))
 
-        # Returning value in addition to Entry elides the redundant `loads(dumps(...))` when obj_store is True.
         return (
             # pyright doesn't know attrs __init__, hence type ignore
             Entry(  # type: ignore
@@ -551,6 +541,7 @@ class Memoized(Generic[FuncParams, FuncReturn]):
                 obj_store=self._use_obj_store,
             ),
             value,
+            # Returning value in addition to Entry elides the redundant `loads(dumps(...))` when obj_store is True.
         )
 
     def __call__(
@@ -560,20 +551,22 @@ class Memoized(Generic[FuncParams, FuncReturn]):
 
         would_hit, key, obj_key = self._would_hit(*args, **kwargs)
 
-        ops_logger.debug(json.dumps({
-            "event": "hit" if would_hit else "miss",
-            "self.name": self.name,
-            "key": key,
-            "obj_key": obj_key,
-            # "args_kwargs": ellipsize(str(args) + " " + str(kwargs), 60),
-        }))
+        if ops_logger.isEnabledFor(logging.DEBUG):
+            ops_logger.debug(json.dumps({
+                "event": "hit" if would_hit else "miss",
+                "self.name": self.name,
+                "key": key,
+                "obj_key": obj_key,
+                # "args_kwargs": ellipsize(str(args) + " " + str(kwargs), 60),
+            }))
 
         if would_hit:
 
             # Do the lookup
             with self.group._memory_lock:
                 entry = self.group._index[key]
-                value_ser = self.group._obj_store[obj_key] if entry.obj_store else None
+                with perf_ctx("obj_load", name=self.name):
+                    value_ser = self.group._obj_store[obj_key] if entry.obj_store else None
 
             # Deserialize
             if entry.obj_store:
@@ -623,12 +616,13 @@ class Memoized(Generic[FuncParams, FuncReturn]):
             tc = self.group.time_cost[self.name]
             ts = self.group.time_saved[self.name]
 
-        perf_logger.debug(json.dumps({
-            "event": "outer_function",
-            "name": self.name,
-            "hit": would_hit,
-            "duration": (call_stop - call_start).total_seconds()
-        }))
+        if perf_logger.isEnabledFor(logging.DEBUG):
+            perf_logger.debug(json.dumps({
+                "event": "outer_function",
+                "name": self.name,
+                "hit": would_hit,
+                "duration": (call_stop - call_start).total_seconds()
+            }))
         if ts < tc and tc.total_seconds() > 5:
             warnings.warn(
                 f"Caching {self._func} cost {tc.total_seconds():.1f}s but only saved {ts.total_seconds():.1f}s",

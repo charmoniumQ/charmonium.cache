@@ -48,6 +48,9 @@
   - [ ] Test hash for objects and classes more carefully.
   - [ ] Don't include properties in hash.
   - [ ] Support closures which include `import x` and `from x import y`
+  - [ ] Use user-customizable multidispatch.
+  - [ ] Make it work with `tqdm`.
+- [ ] Show which part of the key is invalidated
 - Performance evaluation
   - [ ] Macrobenchmark on commit history of real repositories.
   - [x] Microbenchmark
@@ -73,6 +76,7 @@
 
 # Minor release
 
+- [ ] Improve the UX for setting MemoizedGroup options.
 - [ ] Do `fsync` before/after load?
 - [ ] Do I really need `memoize(..., temporary: bool = False)` in tests?
 - [ ] Simplify `tests/test_memoize_parallel.py`.
@@ -92,7 +96,6 @@
 
 - Regarding logs,
   - [ ] Humanize timedeltas.
-  - [ ] Show which part of the key is invalidated
 - [ ] Reset stats
 - [x] Implement GitHub actions.
   - [ ] Use code quality/anlaysis services (codacy, codeclimate, coverity, coveralls, sonarqube).
