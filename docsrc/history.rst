@@ -49,8 +49,8 @@ could use caching in my distributed system. This version still exists
 
 .. code:: python
 
-    >>> @Cache.decor(DirectoryStore(GSPath.from_url("gs://blah/blah")))
-    >>> def foo():
+    >>> @Cache.decor(DirectoryStore(GSPath.from_url("gs://blah/blah"))) # doctest: +SKIP
+    ... def foo():
     ...     pass
 
 .. _`PEP612`: https://www.python.org/dev/peps/pep-0612/

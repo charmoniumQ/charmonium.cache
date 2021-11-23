@@ -19,15 +19,15 @@ class FileContents:
     - When FileContents is un/pickled, the contents of path get
       restored/snapshotted.
 
-    - When FileContents uses a hash of the path and contents as the
-      ``determ_hash``.
-
     - When FileContents is used as an argument, the path is the key
       and the contents are the version.
 
     FileContents is |os.PathLike|_, so you can
     ``open(FileContents("file"), "rb")``. You won't even know its not
     a string.
+
+    Since this changes the un/pickle protocol, this class might cause
+    unexpected results when used with `fine_grain_persistence`.
 
     .. |os.PathLike| replace:: ``os.PathLike``
     .. _`os.PathLike`: https://docs.python.org/3/library/os.html#os.PathLike
@@ -65,9 +65,6 @@ class FileContents:
     def __cache_ver__(self) -> Any:
         """Returns the contents of the file"""
         return self.comparison(self.path)
-
-    def __determ_hash__(self) -> Any:
-        return self.__getstate__()
 
     def __getstate__(self) -> Any:
         """Captures the path and its contents"""

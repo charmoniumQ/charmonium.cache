@@ -8,7 +8,7 @@ import sys
 import tempfile
 import textwrap
 from pathlib import Path
-from typing import TypedDict, Any, Dict, List, cast
+from typing import Dict, List, TypedDict, cast
 
 import pytest
 
@@ -40,7 +40,9 @@ def run_script(
         f"""
 import base64
 import json
-from charmonium.cache import memoize, hashable, determ_hash
+from charmonium.cache import memoize
+from charmonium.freeze import freeze
+from charmonium.determ_hash import determ_hash
 
 def closure_func():
     return {closure_func_source_var}
@@ -64,7 +66,7 @@ import pickle
 serializers = dict(
     # dill=dill.dumps,
     # cloudpickle=cloudpickle.dumps,
-    func_version=lambda fn: pickle.dumps(determ_hash(hashable(fn))),
+    func_version=lambda fn: pickle.dumps(determ_hash(freeze(fn))),
 )
 
 print(json.dumps(dict(

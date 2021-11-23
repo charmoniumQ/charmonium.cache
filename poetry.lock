@@ -186,6 +186,25 @@ python-versions = "*"
 pycparser = "*"
 
 [[package]]
+name = "charmonium.determ-hash"
+version = "0.2.0"
+description = ""
+category = "main"
+optional = false
+python-versions = ">=3.7,<4.0"
+
+[package.dependencies]
+xxhash = ">=2.0.2,<3.0.0"
+
+[[package]]
+name = "charmonium.freeze"
+version = "0.2.0"
+description = ""
+category = "main"
+optional = false
+python-versions = ">=3.7,<3.11"
+
+[[package]]
 name = "charset-normalizer"
 version = "2.0.7"
 description = "The Real First Universal Charset Detector. Open, modern and actively maintained alternative to Chardet."
@@ -268,7 +287,7 @@ test = ["pytest (>=6.2.0)", "pytest-cov", "pytest-subtests", "pytest-xdist", "pr
 
 [[package]]
 name = "dask"
-version = "2021.10.0"
+version = "2021.11.2"
 description = "Parallel PyData with Task Scheduling"
 category = "dev"
 optional = false
@@ -284,10 +303,10 @@ toolz = ">=0.8.2"
 
 [package.extras]
 array = ["numpy (>=1.18)"]
-complete = ["bokeh (>=1.0.0,!=2.0.0)", "distributed (==2021.10.0)", "jinja2", "numpy (>=1.18)", "pandas (>=1.0)"]
+complete = ["bokeh (>=1.0.0,!=2.0.0)", "distributed (==2021.11.2)", "jinja2", "numpy (>=1.18)", "pandas (>=1.0)"]
 dataframe = ["numpy (>=1.18)", "pandas (>=1.0)"]
 diagnostics = ["bokeh (>=1.0.0,!=2.0.0)", "jinja2"]
-distributed = ["distributed (==2021.10.0)"]
+distributed = ["distributed (==2021.11.2)"]
 test = ["pytest", "pytest-rerunfailures", "pytest-xdist", "pre-commit"]
 
 [[package]]
@@ -837,7 +856,7 @@ typing-extensions = {version = ">=3.10.0", markers = "python_version < \"3.10\""
 name = "pylint-exit"
 version = "1.2.0"
 description = "Exit code handler for pylint command line utility."
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -1380,7 +1399,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.7,<3.10"
-content-hash = "4168a9b9748f1f5e4a3d1f6a43ad1a7a2a880d1bb9edc1ab65cbf2c5244981a2"
+content-hash = "362ccb56312f159effab2084979bb831b5d750b1d557777f9b81229517599354"
 
 [metadata.files]
 alabaster = [
@@ -1497,6 +1516,14 @@ cffi = [
     {file = "cffi-1.15.0-cp39-cp39-win_amd64.whl", hash = "sha256:3773c4d81e6e818df2efbc7dd77325ca0dcb688116050fb2b3011218eda36139"},
     {file = "cffi-1.15.0.tar.gz", hash = "sha256:920f0d66a896c2d99f0adbb391f990a84091179542c205fa53ce5787aff87954"},
 ]
+"charmonium.determ-hash" = [
+    {file = "charmonium.determ_hash-0.2.0-py3-none-any.whl", hash = "sha256:c1aa529257b398e6a4ab12b68a4b109d6612c5aeaf780ae680e60a17398ee8e1"},
+    {file = "charmonium.determ_hash-0.2.0.tar.gz", hash = "sha256:afccaf196e41edccc77cd7c9c93e28ce3d0859f95459267befc1d4971f4a8ee4"},
+]
+"charmonium.freeze" = [
+    {file = "charmonium.freeze-0.2.0-py3-none-any.whl", hash = "sha256:b91e01df97ea34e863b40fac83f06616b532f4ba2d74cb6b733167d3eb4afdf9"},
+    {file = "charmonium.freeze-0.2.0.tar.gz", hash = "sha256:ad4923e99c51def1bacb6c5b5faf67f8b2273f0fb5a7407d11dce74359aa14ee"},
+]
 charset-normalizer = [
     {file = "charset-normalizer-2.0.7.tar.gz", hash = "sha256:e019de665e2bcf9c2b64e2e5aa025fa991da8720daa3c1138cadd2fd1856aed0"},
     {file = "charset_normalizer-2.0.7-py3-none-any.whl", hash = "sha256:f7af805c321bfa1ce6714c51f254e0d5bb5e5834039bc17db7ebe3a4cec9492b"},
@@ -1595,8 +1622,8 @@ cryptography = [
     {file = "cryptography-35.0.0.tar.gz", hash = "sha256:9933f28f70d0517686bd7de36166dda42094eac49415459d9bdf5e7df3e0086d"},
 ]
 dask = [
-    {file = "dask-2021.10.0-py3-none-any.whl", hash = "sha256:b678d802ea8126c0168a1b429182b7dc01ade8ad84cfd62b804c52c4c29b6fc3"},
-    {file = "dask-2021.10.0.tar.gz", hash = "sha256:a98b2e44acaad369bb21f79fc92f756532acfe62c3aeba3982006b7339d0d2e3"},
+    {file = "dask-2021.11.2-py3-none-any.whl", hash = "sha256:2b0ad7beba8950add4fdc7c5cb94fa9444915ddb00c711d5743e2c4bb0a95ef5"},
+    {file = "dask-2021.11.2.tar.gz", hash = "sha256:e12bfe272928d62fa99623d98d0e0b0c045b33a47509ef31a22175aa5fd10917"},
 ]
 decorator = [
     {file = "decorator-5.1.0-py3-none-any.whl", hash = "sha256:7b12e7c3c6ab203a29e157335e9122cb03de9ab7264b137594103fd4a683b374"},

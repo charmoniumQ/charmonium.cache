@@ -59,7 +59,7 @@ class DirObjStore(ObjStore):
     def __determ_hash__(self) -> Any:
         return (str(self.path), self._key_bytes)
 
-    def __init__(self, path: PathLikeFrom, key_bytes: int = 8) -> None:
+    def __init__(self, path: PathLikeFrom, key_bytes: int = 16) -> None:
         """
         :param path: a 'PathLike' object which will be the directory of the object store.
         :param key_bytes: the number of bytes to use as keys
