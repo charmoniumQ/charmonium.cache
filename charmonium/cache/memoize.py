@@ -461,9 +461,6 @@ class Memoized(Generic[FuncParams, FuncReturn]):
         """
         return (
             self._func,
-            self._pickler,
-            # Group is a "friend class", so pylint disable
-            self.group._obj_store,  # pylint: disable=protected-access
             GetAttr[Callable[[], Any]]()(
                 self._func, "__version__", lambda: None, check_callable=True
             )(),
@@ -498,7 +495,7 @@ class Memoized(Generic[FuncParams, FuncReturn]):
         return f"memoized {self.name}"
 
     def _recompute(
-        self, obj_key: int, *args: FuncParams.args, **kwargs: FuncParams.kwargs
+        self, call_id: int, obj_key: int, *args: FuncParams.args, **kwargs: FuncParams.kwargs
     ) -> tuple[Entry, FuncReturn]:
 
         start = datetime.datetime.now()
@@ -512,7 +509,7 @@ class Memoized(Generic[FuncParams, FuncReturn]):
             data_size = bitmath.Byte(len(value_ser))
             # Group is a "friend class", hence pylint disable
 
-            with perf_ctx("obj_store", name=self.name):
+            with perf_ctx("obj_store", call_id=call_id):
                 self.group._obj_store[  # pylint: disable=protected-access
                     obj_key
                 ] = value_ser
@@ -529,7 +526,7 @@ class Memoized(Generic[FuncParams, FuncReturn]):
                 json.dumps(
                     {
                         "event": "serialize",
-                        "name": self.name,
+                        "call_id": call_id,
                         "duration": (stop - mid).total_seconds(),
                     }
                 )
@@ -538,7 +535,7 @@ class Memoized(Generic[FuncParams, FuncReturn]):
                 json.dumps(
                     {
                         "event": "inner_function",
-                        "name": self.name,
+                        "call_id": call_id,
                         "duration": (mid - start).total_seconds(),
                     }
                 )
@@ -565,14 +562,17 @@ class Memoized(Generic[FuncParams, FuncReturn]):
     ) -> FuncReturn:
         call_start = datetime.datetime.now()
 
-        would_hit, key, obj_key = self._would_hit(*args, **kwargs)
+        call_id = random.randint(2**64)
+
+        would_hit, key, obj_key = self._would_hit(call_id, *args, **kwargs)
 
         if ops_logger.isEnabledFor(logging.DEBUG):
             ops_logger.debug(
                 json.dumps(
                     {
                         "event": "hit" if would_hit else "miss",
-                        "self.name": self.name,
+                        "call_id": call_id,
+                        "name": self.name,
                         "key": key,
                         "obj_key": obj_key,
                         # "args_kwargs": ellipsize(str(args) + " " + str(kwargs), 60),
@@ -585,7 +585,7 @@ class Memoized(Generic[FuncParams, FuncReturn]):
             # Do the lookup
             with self.group._memory_lock:
                 entry = self.group._index[key]
-                with perf_ctx("obj_load", name=self.name):
+                with perf_ctx("obj_load", call_id=call_id):
                     value_ser = (
                         self.group._obj_store[obj_key] if entry.obj_store else None
                     )
@@ -593,7 +593,7 @@ class Memoized(Generic[FuncParams, FuncReturn]):
             # Deserialize
             if entry.obj_store:
                 assert value_ser is not None
-                with perf_ctx("deserialize", name=self.name):
+                with perf_ctx("deserialize", call_id=call_id):
                     value = cast(FuncReturn, self._pickler.loads(value_ser))
             else:
                 value = cast(FuncReturn, entry.value)
@@ -643,7 +643,7 @@ class Memoized(Generic[FuncParams, FuncReturn]):
                 json.dumps(
                     {
                         "event": "outer_function",
-                        "name": self.name,
+                        "call_id": call_id,
                         "hit": would_hit,
                         "duration": (call_stop - call_start).total_seconds(),
                     }
@@ -663,15 +663,15 @@ class Memoized(Generic[FuncParams, FuncReturn]):
         else:
             return obj
 
-    def would_hit(self, *args: FuncParams.args, **kwargs: FuncParams.kwargs) -> bool:
-        return self._would_hit(*args, **kwargs)[0]
+    def would_hit(self, call_id: int, *args: FuncParams.args, **kwargs: FuncParams.kwargs) -> bool:
+        return self._would_hit(call_id, *args, **kwargs)[0]
 
     def _would_hit(
-        self, *args: FuncParams.args, **kwargs: FuncParams.kwargs
+        self, call_id: int, *args: FuncParams.args, **kwargs: FuncParams.kwargs
     ) -> Tuple[bool, Tuple[Any, ...], int]:
         # pylint: disable=protected-access
 
-        with perf_ctx("hash", name=self.name):
+        with perf_ctx("hash", call_id=call_id):
             # Note that the system state and name or so small already, it isn't worth hashing them.
             # They are also used by other Memoized functions in the same MemoizedGroup.
             # We will only hash the potentially large key items that are used exclusively by this Memoized function.
