@@ -35,7 +35,7 @@ fasteners = "^0.16"
 attrs = "^20.3.0"
 xxhash = "^2.0.2"
 "charmonium.determ-hash" = "^0.2.0"
-"charmonium.freeze" = "^0.2.0"
+"charmonium.freeze" = ">=0.1.1"
 
 [tool.poetry.dev-dependencies]
 isort = "^4.3.21"
