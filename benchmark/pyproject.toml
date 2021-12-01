@@ -1,0 +1,70 @@
+[tool.poetry]
+name = "test_cache"
+version = "0.1.0"
+description = ""
+authors = ["Samuel Grayson <grayson5@illinois.edu>"]
+license = "NCSA"
+readme = "README.rst"
+
+[tool.poetry.dependencies]
+python = ">=3.8,<3.10"
+# make sure to keep the Python versions here consistent with those tested by Tox (tool.tox.legacy_tox_ini.tox.envlist).
+typer = "^0.4.0"
+"charmonium.async-subprocess" = "^0.1.7"
+tqdm = "^4.62.3"
+pandas = "^1.3.4"
+"charmonium.cache" = {path = "../charmonium.cache"}
+
+[tool.poetry.dev-dependencies]
+mypy = "^0.910"
+pytest = "^6.2.5"
+pylint = "^2.11.1"
+typer = "^0.4.0"
+autoimport = "^0.7.5"
+isort = "^5.10.0"
+black = "^21.10b0"
+pytest-cov = "^3.0.0"
+tox = "^3.24.4"
+radon = "^5.1.0"
+coverage = "^6.1.1"
+ipython = "^7.29.0"
+termcolor = "^1.1.0"
+twine = "^3.5.0"
+"charmonium.async-subprocess" = "^0.1.7"
+typing-extensions = "^3.10.0"
+pytest-parallel = "^0.1.1"
+toml = "^0.10.2"
+Sphinx = "^4.2.0"
+sphinx-autodoc-typehints = "^1.12.0"
+sphinxcontrib-spelling = "^7.2.1"
+proselint = "^0.13.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.isort]
+profile = "black"
+
+# [tool.pylint]
+# Too long for inclusion here
+# see pylintrc
+
+# [tool.mypy]
+# Too long for inclusion here
+# see mypy.ini
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+envlist = py{37,38,39}
+# Make sure to install the Python versions listed here in the Nix flake.
+isolated_build = True
+
+[testenv]
+whitelist_externals = poetry
+skip_install = true
+commands =
+    poetry install
+    poetry run pytest --quiet
+"""

@@ -1,0 +1,5 @@
+__pycache__
+.dmypy.json
+.coverage*
+.cache
+.r-mount
