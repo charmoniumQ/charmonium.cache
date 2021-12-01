@@ -563,7 +563,7 @@ class Memoized(Generic[FuncParams, FuncReturn]):
     ) -> FuncReturn:
         call_start = datetime.datetime.now()
 
-        call_id = random.randint(2**64)
+        call_id = random.randint(1, 2**64-1)
 
         would_hit, key, obj_key = self._would_hit(call_id, *args, **kwargs)
 
@@ -606,7 +606,7 @@ class Memoized(Generic[FuncParams, FuncReturn]):
         else:
 
             # Do the recompute
-            entry, value = self._recompute(obj_key, *args, **kwargs)
+            entry, value = self._recompute(call_id, obj_key, *args, **kwargs)
 
             # Do the store
             with self.group._memory_lock:
