@@ -42,30 +42,34 @@
 # Research tasks
 
 - Fix hashing
-  - [ ] Bring hash into separate package.
-  - [ ] Test hashing sets with different orders. Assert tests fail.
-  - [ ] Test hashing dicts with different orders. Assert tests fail.
+  - [x] Bring hash into separate package.
+  - [x] Test hashing sets with different orders. Assert tests fail.
+  - [x] Test hashing dicts with different orders. Assert tests fail.
   - [ ] Test hash for objects and classes more carefully.
-  - [ ] Don't include properties in hash.
+  - [x] Don't include properties in hash.
   - [ ] Support closures which include `import x` and `from x import y`
-  - [ ] Use user-customizable multidispatch.
-  - [ ] Make it work with `tqdm`.
-- [ ] Show which part of the key is invalidated
+  - [x] Use user-customizable multidispatch.
+  - [x] Make it work with `tqdm`.
+- [x] Show which part of the key is invalidated
 - Performance evaluation
-  - [ ] Macrobenchmark on commit history of real repositories.
+  - [x] Macrobenchmark on commit history of real repositories.
   - [x] Microbenchmark
     - per Memoized: n misses, n hits, size of objects, hashing, deserialization, serialization, object load, object store, function, total on hit, total on miss
     - per MemoizedGroup: index load, index store, index size
 - [ ] Integrate with Parsl.
 - [ ] Documentation
-  - [ ] Explain how to use logging.
+  - [ ] Explain how to use logging (ops, perf, freeze).
   - [ ] Write about how memoization interacts with OOP.
   - [ ] Write about when memoization is unsound.
   - [ ] Record demo, update presentation, link presentation.
+- [ ] Pull callgraph out into a library.
 - Detect impurities
   - [ ] Compare global vars and fn arguments before and after running function.
   - [ ] Listen for [audit events].
-  - [ ] Scan for references to non-deterministic functions (time, random, sys).
+  - [ ] Scan for references to non-deterministic functions (time, random, sys, os, path).
+- [ ] Convert Jupyter Notebooks into scripts.
+- [ ] Memoize the hash of pure functions.
+- [ ] Make all packages in `site_packages` be assumed constant.
 - [ ] Apply automatically using [importhook].
   - [ ] Write `maybe_memoize`.
   - [ ] Global config.
@@ -76,6 +80,7 @@
 
 # Minor release
 
+- [ ] Encapsulate global config `freeze` into object.
 - [ ] Improve the UX for setting MemoizedGroup options.
 - [ ] Do `fsync` before/after load?
 - [ ] Do I really need `memoize(..., temporary: bool = False)` in tests?

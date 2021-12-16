@@ -49,22 +49,30 @@ BYTE_ORDER: str = "big"
 
 
 def memoize(
+    *,
+    disable: Union[str, bool] = None,
     **kwargs: Any,
 ) -> Callable[[Callable[FuncParams, FuncReturn]], Memoized[FuncParams, FuncReturn]]:
     """See :py:class:`charmonium.cache.Memoized`."""
 
-    def actual_memoize(
-        func: Callable[FuncParams, FuncReturn]
-    ) -> Memoized[FuncParams, FuncReturn]:
-        # pyright doesn't know attrs __init__, hence type ignore
-        return Memoized[FuncParams, FuncReturn](func, **kwargs)  # type: ignore
+    real_disable = disable if isinstance(disable, bool) else \
+        bool(os.environ.get("CHARMONIUM_CACHE_DISABLE", ""))
 
-    # I believe pyright suffers from this fixed mypy bug: https://github.com/python/mypy/issues/1323
-    # Therefore, I have to circumvent the type system.
-    # However, somehow `cast` isn't sufficient.
-    # Therefore, I need type ignore. I don't like it any more than you.
-    # return cast(Memoized[FuncParams, FuncReturn], actual_memoize)
-    return actual_memoize  # type: ignore
+    if real_disable:
+        return lambda x: x
+    else:
+        def actual_memoize(
+                func: Callable[FuncParams, FuncReturn]
+        ) -> Memoized[FuncParams, FuncReturn]:
+            # pyright doesn't know attrs __init__, hence type ignore
+            return Memoized[FuncParams, FuncReturn](func, **kwargs)  # type: ignore
+
+        # I believe pyright suffers from this fixed mypy bug: https://github.com/python/mypy/issues/1323
+        # Therefore, I have to circumvent the type system.
+        # However, somehow `cast` isn't sufficient.
+        # Therefore, I need type ignore. I don't like it any more than you.
+        # return cast(Memoized[FuncParams, FuncReturn], actual_memoize)
+        return actual_memoize  # type: ignore
 
 
 DEFAULT_LOCK_PATH = ".cache/.lock"
