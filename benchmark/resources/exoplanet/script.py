@@ -1,30 +1,31 @@
+import exoplanet
+import sys
+import base64
 import matplotlib.pyplot as plt
 import arviz as az
+import functools
 import pymc3 as pm
 import numpy as np
 import os
+import io
 from pathlib import Path
 import tempfile
 import logging
 
 if os.environ.get("CHARMONIUM_CACHE", "") == "enable":
+    from charmonium.cache import memoize
     perf_logger = logging.getLogger("charmonium.cache.perf")
     perf_logger.setLevel(logging.DEBUG)
-    perf_logger.addHandler(logging.FileHandler(os.environ["CHARMONIUM_CACHE_PERF_LOG"]))
+    perf_logger.addHandler(logging.FileHandler(os.environ["PERF_LOG"]))
     perf_logger.propagate = False
-    # hash_logger = logging.getLogger("charmonium.cache.determ_hash")
-    # hash_logger.setLevel(logging.DEBUG)
-    # hash_logger.addHandler(logging.FileHandler("/tmp/hash.log"))
-    # hash_logger.propagate = False
-    from charmonium.cache import memoize
 else:
     from charmonium.freeze import freeze
     from charmonium.determ_hash import determ_hash
     import json
     import datetime
-    logger = logging.getLoger("function_calls")
+    logger = logging.getLogger("function_calls")
     logger.setLevel(logging.DEBUG)
-    logger.addHandler(logging.FileHandler(os.environ["FUNCTION_CALLS"]))
+    logger.addHandler(logging.FileHandler(os.environ["PERF_LOG"]))
     logger.propagate = False
     def record_function_decorator(inner_function):
         def outer_function(*args, **kwargs):
@@ -38,13 +39,14 @@ else:
                 "name": inner_function.__qualname__,
                 "args": args_hash,
                 "ret": ret_hash,
-                "outer_function": (start - stop).total_seconds(),
-                "hash": (mid - stop).total_seconds(),
-                "inner_function": (start - mid).total_seconds(),
+                "outer_function": (stop - start).total_seconds(),
+                "hash": (stop - mid).total_seconds(),
+                "inner_function": (mid - start).total_seconds(),
+                "memoize": False,
             }))
             return ret
         return outer_function
-    memoize = lambda: record_function_decorator
+    memoize = lambda *args, **kwargs: record_function_decorator
 
 @memoize()
 def get_data():
@@ -68,7 +70,8 @@ def parse_data(r_text):
     )
     t, rv, rv_err = data.T
     t -= np.mean(t)
-    return t, rv, rv_err
+    phase = np.linspace(0, 1, 500)
+    return t, rv, rv_err, phase
 
 @memoize()
 def plot_data(t, rv, rv_err):
@@ -94,8 +97,7 @@ def plot_data(t, rv, rv_err):
     plt.xlabel("phase")
     return plt.gcf(), lit_period
 
-@memoize()
-def get_model(t, rv, rv_err, lit_period):
+def get_model(t, rv, rv_err, lit_period, phase):
     import pymc3_ext as pmx
     import aesara_theano_fallback.tensor as tt
     import exoplanet as xo
@@ -146,18 +148,17 @@ def get_model(t, rv, rv_err, lit_period):
         pm.Normal("obs", mu=rvmodel, sd=rv_err, observed=rv)
 
         # Compute the phased RV signal
-        phase = np.linspace(0, 1, 500)
         M_pred = 2 * np.pi * phase - (phi + w)
         f_pred = xo.orbits.get_true_anomaly(M_pred, e + tt.zeros_like(M_pred))
         rvphase = pm.Deterministic(
             "rvphase", K * (cosw * (tt.cos(f_pred) + e) - sinw * tt.sin(f_pred))
         )
-        return model, phase
+        return model
 
 @memoize()
-def get_map_params(model):
+def get_map_params(model_fn):
     import pymc3_ext as pmx
-    with model:
+    with model_fn():
         map_params = pmx.optimize()
     return map_params
 
@@ -185,12 +186,12 @@ def plot_params(t, rv, rv_err, phase, map_params):
     return fig
 
 @memoize()
-def run_model(model, map_params):
+def run_model(model_fn, map_params):
     import pymc3_ext as pmx
-    with model:
+    with model_fn():
         trace = pmx.sample(
-            draws=1000,
-            tune=1000,
+            draws=300,
+            tune=300,
             start=map_params,
             chains=2,
             cores=2,
@@ -242,30 +243,38 @@ def plot_sample(t, rv, rv_err, phase, map_params, trace):
 
 
 def main2():
-    with tempfile.TemporaryDirectory() as tmp_:
-        tmp = Path(tmp_)
+    print(0.5)
+    output = io.BytesIO()
 
-        r_text = get_data()
-        t, rv, rv_err = parse_data(r_text)
-        fig, lit_data = plot_data(t, rv, rv_err)
-        fig.savefig(tmp / "main2-data.png")
-        plt.close(fig)
+    print(1)
+    r_text = get_data()
+    print(1.1)
+    t, rv, rv_err, phase = parse_data(r_text)
+    print(1.2)
+    fig, lit_data = plot_data(t, rv, rv_err)
+    fig.savefig(output, format="png")
 
-        model, phase = get_model(t, rv, rv_err, lit_data)
-        map_params = get_map_params(model)
+    print(2)
 
-        fig = plot_params(t, rv, rv_err, phase, map_params)
-        fig.savefig(tmp / "main2-params.png")
-        plt.close(fig)
+    model_fn = functools.partial(get_model, t, rv, rv_err, lit_data, phase)
+    map_params = get_map_params(model_fn)
 
-        trace = run_model(model, map_params)
+    print(3)
 
-        fig = summarize_model(trace)
-        fig.savefig(tmp / "main2-model.png")
-        plt.close(fig)
+    plot_params(t, rv, rv_err, phase, map_params).savefig(output, format="png")
 
-        fig = plot_sample(t, rv, rv_err, phase, map_params, trace)
-        fig.savefig(tmp / "main2-sample.png")
-        plt.close(fig)
+    print(3.1)
+
+    trace = run_model(model_fn, map_params)
+
+    print(4)
+
+    summarize_model(trace).savefig(output, format="png")
+
+    print(5)
+
+    plot_sample(t, rv, rv_err, phase, map_params, trace).savefig(output, format="png")
+
+    sys.stdout.buffer.write(base64.b64encode(output.getvalue()))
 
 main2()

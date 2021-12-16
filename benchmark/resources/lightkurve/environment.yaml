@@ -1,0 +1,5 @@
+name: lightkurve
+channels:
+  - defaults
+prefix: /home/sam/.conda/envs/lightkurve
+

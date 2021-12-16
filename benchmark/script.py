@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import datetime
 import multiprocessing
+import os
 import shlex
 import shutil
 import subprocess
@@ -49,6 +50,8 @@ def coroutine_to_function(
 
 if TYPE_CHECKING:
     CompletedProc = subprocess.CompletedProcess[str]
+else:
+    CompletedProc = None
 
 
 def default_checker(proc: CompletedProc) -> bool:
@@ -241,9 +244,7 @@ async def all_tests_inner() -> None:
         docs_inner(),
     )
     subprocess.run(
-        ["tox", "--parallel", "auto"],
-        env={**os.environ, "PY_COLORS": "1"},
-        check=True
+        ["tox", "--parallel", "auto"], env={**os.environ, "PY_COLORS": "1"}, check=True
     )
 
 

@@ -1,15 +1,14 @@
 import asyncio
-import typer
+
 import pandas as pd  # type: ignore
-from pathlib import Path
-from dataclasses import asdict
-from .test_cache import test_cache
+import typer
 
-
-ROOT = Path(__file__).parent.parent
+from .data import data
+from .run_experiment import run_experiment
+from .write_summary import write_summary
 
 
 def main() -> None:
-    repo_results = asyncio.run(test_cache())
+    write_summary(run_experiment(data))
 
 typer.run(main)
