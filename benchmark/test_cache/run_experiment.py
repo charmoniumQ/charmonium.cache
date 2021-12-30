@@ -212,13 +212,20 @@ def run_once(
 def get_commit_result(commit: str, repo: Repo, environment: Environment, action: Action) -> CommitResult:
     diff, date = repo.checkout(commit)
 
+    print("env.comit_setup(repo)")
+    environment.commit_setup(repo)
+    print("action.comit_setup(repo, environment)")
     action.commit_setup(repo, environment)
 
+    print("run unmodified")
     orig = run_once(repo, environment, action, False)
 
     if orig.success:
+        print("run memoized")
         memo = run_once(repo, environment, action, True)
+        print("run memoized")
         memo2 = run_once(repo, environment, action, True)
+        print("done")
     else:
         memo = ExecutionProfile.create_empty()
         memo2 = ExecutionProfile.create_empty()
@@ -283,6 +290,7 @@ def run_experiment(
                 for repo_env_action in tqdm(repo_env_actions, total=len(repo_env_actions), desc="Repo setup")
             ]
         )
+
 
     asyncio.run(setup_all(repo_env_actions))
 

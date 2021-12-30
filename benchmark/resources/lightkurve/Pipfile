@@ -1,0 +1,12 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+lightkurve = {path = "/home/sam/box/charmonium.cache/benchmark/.cache/repos/lightkurve"}
+
+[dev-packages]
+
+[requires]
+python_version = "3.9"

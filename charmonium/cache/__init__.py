@@ -21,7 +21,7 @@ from .rw_lock import (
 )
 from .util import Future as Future, with_attr as with_attr
 
-import logger
+import logging
 perf_logger_file = os.environ.get("CHARMONIUM_CACHE_PERF_LOG")
 if perf_logger_file:
     perf_logger = logging.getLogger("charmonium.cache.perf")

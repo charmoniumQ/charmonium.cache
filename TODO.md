@@ -57,6 +57,7 @@
     - per Memoized: n misses, n hits, size of objects, hashing, deserialization, serialization, object load, object store, function, total on hit, total on miss
     - per MemoizedGroup: index load, index store, index size
 - [ ] Integrate with Parsl.
+  - [ ] Resp to comment [parsl comment]
 - [ ] Documentation
   - [ ] Explain how to use logging (ops, perf, freeze).
   - [ ] Write about how memoization interacts with OOP.
@@ -77,6 +78,10 @@
 
 [audit events]: https://docs.python.org/3/library/audit_events.html#audit-events
 [importhook]: https://brettlangdon.github.io/importhook/
+[parsl comment]: https://github.com/Parsl/parsl/issues/1591#issuecomment-954863242
+
+# IPython caching
+- [ ] https://stackoverflow.com/questions/31255894/how-to-cache-in-ipython-notebook
 
 # Minor release
 

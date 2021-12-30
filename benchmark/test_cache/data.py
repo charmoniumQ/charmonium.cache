@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import List, Callable, Tuple
 
-from .environment import Environment, CondaEnvironment
+from .environment import Environment, PipenvEnvironment
 from .repo import Repo, GitRepo
 from .action import Action, IpynbAction
 
@@ -29,9 +29,9 @@ data: List[Tuple[Repo, Environment, Action]] = [
                 "9ec3d41fe8f7d54ab320ed1cbf7d78baa5ac41ec",
             ],
         ),
-        CondaEnvironment(
+        PipenvEnvironment(
             name="lightkurve",
-            environment=RESOURCE_PATH / "lightkurve/environment.yaml",
+            pipfile=RESOURCE_PATH / "lightkurve/pipfile.toml",
         ),
         IpynbAction([
             Path(f"docs/source/tutorials/3-science-examples/{name}")
