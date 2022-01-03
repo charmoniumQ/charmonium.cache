@@ -34,7 +34,7 @@ bitmath = "^1.3.3"
 fasteners = "^0.16"
 attrs = "^20.3.0"
 "charmonium.determ-hash" = "^0.2.0"
-"charmonium.freeze" = "^0.5.0"
+"charmonium.freeze" = "^0.5.1"
 #{git = "https://github.com/charmoniumQ/charmonium.freeze", rev = "main"}
 
 [tool.poetry.dev-dependencies]

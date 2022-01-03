@@ -7,6 +7,7 @@ import json
 import logging
 import random
 import pickle
+import os
 import sys
 import threading
 import warnings
@@ -84,6 +85,11 @@ ops_logger = logging.getLogger("charmonium.cache.ops")
 perf_logger = logging.getLogger("charmonium.cache.perf")
 # all perf data is logged as DEBUG
 
+perf_logger_file = os.environ.get("CHARMONIUM_CACHE_PERF_LOG")
+if perf_logger_file:
+    perf_logger.setLevel(logging.DEBUG)
+    perf_logger.addHandler(logging.FileHandler(perf_logger_file))
+    perf_logger.propagate = False
 
 @contextlib.contextmanager
 def perf_ctx(event: str, **kwargs: Any) -> None:

@@ -21,14 +21,6 @@ from .rw_lock import (
 )
 from .util import Future as Future, with_attr as with_attr
 
-import logging
-perf_logger_file = os.environ.get("CHARMONIUM_CACHE_PERF_LOG")
-if perf_logger_file:
-    perf_logger = logging.getLogger("charmonium.cache.perf")
-    perf_logger.setLevel(logging.DEBUG)
-    perf_logger.addHandler(logging.FileHandler(perf_logger_file))
-    perf_logger.propagate = False
-
 __author__ = "Samuel Grayson"
 __email__ = "sam+dev@samgrayson.me"
 __license__ = "MPL-2.0"
