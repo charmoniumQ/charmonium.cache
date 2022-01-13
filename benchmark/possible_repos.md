@@ -41,6 +41,9 @@
   - Not enough specific historical variation
 - https://docs.lightkurve.org/
   - Not enough specific historical variation
+- https://github.com/Parsl/arctic_dem
+- https://github.com/Parsl/lsst-pipelines
+- https://github.com/Parsl/Parsl-Workflows
 - https://github.com/uiuc-iml/TRINA
   - Testing/intelligent_ui/trainer.py
   - Stuck at `ModuleNotFoundError: No module named 'trina.utils.render_robot_mask'`.

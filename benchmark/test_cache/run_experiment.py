@@ -185,7 +185,7 @@ def run_once(
     if log_dir.exists():
         shutil.rmtree(log_dir)
     log_dir.mkdir(parents=True)
-    perf_log = log_dir / ("memoized_perf.log" if memoize else "unmemoized_perf.log")
+    perf_log = log_dir / "perf.log"
     start = datetime.datetime.now()
     stdout, success = action.run(
         repo=repo,
@@ -196,9 +196,12 @@ def run_once(
         },
     )
     stop = datetime.datetime.now()
-    calls, kwargs = (
-        parse_memoized_log if memoize else parse_unmemoized_log
-    )(perf_log)
+    if memoize:
+        calls, kwargs = parse_memoized_log(perf_log)
+    else:
+        # no profiling informatoin
+        calls = []
+        kwargs = {}
     return ExecutionProfile(
         func_calls=calls,
         success=success,
@@ -210,25 +213,30 @@ def run_once(
 
 @memoize(group=group)
 def get_commit_result(commit: str, repo: Repo, environment: Environment, action: Action) -> CommitResult:
+    print(f"repo.checkout({commit!r})")
     diff, date = repo.checkout(commit)
 
-    print("env.comit_setup(repo)")
-    environment.commit_setup(repo)
+    # print("environment.install(repo.dir)")
+    # asyncio.run(environment.install(repo, [repo.dir]))
     print("action.comit_setup(repo, environment)")
     action.commit_setup(repo, environment)
 
-    print("run unmodified")
-    orig = run_once(repo, environment, action, False)
+    print("run memoized")
+    memo = run_once(repo, environment, action, True)
 
-    if orig.success:
-        print("run memoized")
-        memo = run_once(repo, environment, action, True)
-        print("run memoized")
+    if memo.success:
+        print("run memoized again")
         memo2 = run_once(repo, environment, action, True)
-        print("done")
     else:
-        memo = ExecutionProfile.create_empty()
         memo2 = ExecutionProfile.create_empty()
+
+    if memo2.success:
+        print("run unmodified")
+        orig = run_once(repo, environment, action, False)
+    else:
+        orig = ExecutionProfile.create_empty()
+
+    print("done")
 
     return CommitResult(
         diff=diff,
@@ -279,18 +287,19 @@ def run_experiment(
             shutil.rmtree(cache_dir)
         print(f"Setting up env {repo.name}")
         await env.setup(repo)
+        # print(f"Installing charmonium.cache")
+        # await env.install(repo, ["https://github.com/charmoniumQ/charmonium.cache/archive/main.zip"])
         print(f"Setting up action {repo.name}")
         await action.setup(repo, env)
         print(f"Ready for {repo.name}")
 
-    async def setup_all(repo_env_actions: List[Tuple[Repo, Environmnet, Action]]):
+    async def setup_all(repo_env_actions: List[Tuple[Repo, Environment, Action]]) -> None:
         await asyncio.gather(
             *[
                 setup(repo_env_action)
                 for repo_env_action in tqdm(repo_env_actions, total=len(repo_env_actions), desc="Repo setup")
             ]
         )
-
 
     asyncio.run(setup_all(repo_env_actions))
 

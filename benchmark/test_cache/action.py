@@ -2,6 +2,11 @@ import ast
 from typing import Protocol, List, Mapping, Optional, Tuple, Iterable
 from pathlib import Path
 import json
+import shlex
+import sys
+
+from charmonium.async_subprocess import run as async_run
+
 from .repo import Repo
 from .environment import Environment
 from .add_memoization import add_memoization
@@ -69,12 +74,63 @@ class IpynbAction(Action):
         stdout = b""
         success = 0
         for notebook in self.notebooks:
-            this_stdout, this_success = environment.run(
+            proc = environment.run(
                 ["python", str(repo.dir / notebook.with_suffix(".py"))],
                 cwd=(repo.dir / notebook).parent,
             )
-            stdout += this_stdout
-            success |= this_success
+            stdout += proc.stdout
+            success |= proc.returncode
+            if success != 0:
+                break
+        return stdout, success == 0
+
+class CommandAction(Action):
+    def __init__(
+            self,
+            setup_cmds: List[List[str]] = [],
+            commit_setup_cmds: List[List[str]] = [],
+            run_cmds: List[List[str]] = [],
+    ) -> None:
+        self.setup_cmds = setup_cmds
+        self.commit_setup_cmds = commit_setup_cmds
+        self.run_cmds = run_cmds
+
+    async def setup(self, repo: Repo, environment: Environment) -> None:
+        for cmd in self.setup_cmds:
+            proc = environment.run(
+                cmd,
+                cwd=repo.dir,
+            )
+            if not proc.returncode == 0:
+                raise RuntimeError(f"Child process `{shlex.join(cmd)}` failed\n{proc.stderr.decode()}\n{proc.stdout.decode()}")
+
+    def commit_setup(self, repo: Repo, environment: Environment) -> None:
+        for cmd in self.commit_setup_cmds:
+            proc = environment.run(
+                cmd,
+                cwd=repo.dir,
+            )
+            if not proc.returncode == 0:
+                raise RuntimeError(f"Child process `{shlex.join(cmd)}` failed\n{proc.stderr.decode()}\n{proc.stdout.decode()}")
+
+    def run(
+            self,
+            repo: Repo,
+            environment: Environment,
+            env_override: Optional[Mapping[str, str]] = None,
+    ) -> Tuple[bytes, bool]:
+        stdout = b""
+        success = 0
+        for cmd in self.run_cmds:
+            proc = environment.run(
+                cmd,
+                cwd=repo.dir,
+            )
+            if proc.stderr:
+                raise RuntimeError(f"Child process `{shlex.join(cmd)}` failed\n{proc.stderr.decode()}\n{proc.stdout.decode()}")
+                sys.stderr.buffer.write(proc.stderr)
+            stdout += proc.stdout
+            success |= proc.returncode
             if success != 0:
                 break
         return stdout, success == 0

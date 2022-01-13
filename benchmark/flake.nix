@@ -43,16 +43,16 @@
             pkgs.poetry
             # pkgs.micromamba
             pkgs.conda
-            # (pkgs.poetry2nix.mkPoetryEnv {
-            #   projectDir = ./.;
-            #   # default Python for shell
-            #   python = default-python;
-            #   overrides = poetry2nix-crypto-override;
-            # })
+            pkgs.libxml2
+            pkgs.libxslt
+            pkgs.postgresql
+            (pkgs.poetry2nix.mkPoetryEnv {
+              projectDir = ./.;
+              # default Python for shell
+              python = default-python;
+              overrides = poetry2nix-crypto-override;
+            })
           ];
-          shellHook = ''
-            export LD_LIBRARY_PATH=${pkgs.stdenv.cc.cc.lib}/lib
-          '';
         };
         devShell = self.packages.${system}.${name-shell};
         defaultPackage = self.packages.${system}.${name};
