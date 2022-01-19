@@ -1,8 +1,10 @@
-import subprocess
 from abc import ABC
 import asyncio
-from pathlib import Path
 import datetime
+from pathlib import Path
+import shlex
+import subprocess
+import sys
 from typing import List, Optional, Protocol, Tuple, cast
 
 from charmonium.async_subprocess import run as async_run
@@ -17,42 +19,58 @@ class Repo(ABC):
             self,
             name: str,
             dir: Path,
-            patch: Optional[Path] = None,
+            display_url: str,
+            patch: Optional[str] = None,
+            patch_cmds: List[List[str]] = [],
     ) -> None:
         self.name = name
         self.dir = dir
+        self.display_url = display_url
         self.patch = patch
+        self.patch_cmds = patch_cmds
 
     async def _setup(self) -> None:
         raise NotImplementedError()
 
-    async def apply_patch(self) -> None:
+    def apply_patch(self) -> None:
+        for patch_cmd in self.patch_cmds:
+            proc = subprocess.run(
+                patch_cmd,
+                cwd=self.dir,
+                capture_output=True,
+            )
+            sys.stderr.buffer.write(proc.stderr)
+            if proc.returncode != 0:
+                sys.stdout.buffer.write(proc.stdout)
+                raise RuntimeError(f"'{shlex.join(patch_cmd)}' returned {proc.returncode}")
         if self.patch is not None:
-            await async_run(
-                [
+            cmd = [
                     "patch",
                     "--quiet",
                     "--strip=1",
                     f"--directory={self.dir!s}",
-                    f"--input={self.patch!s}",
-                ],
-                check=True,
+                    f"--input=/dev/stdin",
+                ]
+            proc = subprocess.run(
+                cmd,
+                input=self.patch.encode(),
                 capture_output=True,
             )
+            sys.stderr.buffer.write(proc.stderr)
+            if proc.returncode != 0:
+                sys.stdout.buffer.write(proc.stdout)
+                raise RuntimeError(f"'{shlex.join(cmd)}' returned {proc.returncode}")
 
     async def setup(self) -> None:
         await self._setup()
-        await self.apply_patch()
-
-    def get_commits(self) -> List[str]:
-        raise NotImplementedError()
+        self.apply_patch()
 
     def _checkout(self, commit: str) -> Tuple[str, datetime.datetime]:
         raise NotImplementedError()
 
     def checkout(self, commit: str) -> Tuple[str, datetime.datetime]:
         ret = self._checkout(commit)
-        asyncio.run(self.apply_patch())
+        self.apply_patch()
         return ret
 
     dir: Path
@@ -64,17 +82,20 @@ class GitRepo(Repo):
         *,
         name: str,
         url: str,
-        patch: Optional[Path] = None,
-        start_commit: Optional[str] = None,
-        stop_commit: Optional[str] = None,
-        all_commits: Optional[List[str]] = None,
+        display_url: str,
+        patch: Optional[str] = None,
+        patch_cmds: List[List[str]] = [],
+        initial_commit: Optional[str] = None,
     ) -> None:
-        super().__init__(name=name, dir=CACHE_PATH / name, patch=patch)
+        super().__init__(
+            name=name,
+            dir=CACHE_PATH / name,
+            display_url=display_url,
+            patch=patch,
+            patch_cmds=patch_cmds,
+        )
         self.url = url
-        self.start_commit = start_commit
-        self.stop_commit = stop_commit
-        self.all_commits = all_commits
-        self.commits: Optional[List[str]] = None
+        self.initial_commit = initial_commit
 
     async def _setup(self) -> None:
         self.dir.mkdir(exist_ok=True, parents=True)
@@ -87,38 +108,12 @@ class GitRepo(Repo):
                 check=True,
             )
             await async_run(["git", "clean", "-fdx", "."], cwd=self.dir, check=True)
-        proc = await async_run(
-            ["git", "symbolic-ref", "refs/remotes/origin/HEAD"],
-            cwd=self.dir,
-            check=True,
-            capture_output=True,
-            text=True,
-        )
-        branch = cast(str, proc.stdout).strip().split("/")[-1]
-        await async_run(["git", "checkout", branch], cwd=self.dir, check=True)
-        if self.all_commits is None:
-            proc = subprocess.run(
-                [
-                    "git",
-                    "log",
-                    "--pretty=format:%H",
-                    self.stop_commit if self.stop_commit else "HEAD",
-                    *(["^" + self.start_commit] if self.start_commit else []),
-                ],
+        if self.initial_commit:
+            await async_run(
+                ["git", "checkout", self.initial_commit],
                 cwd=self.dir,
                 check=True,
-                capture_output=True,
-                text=True,
             )
-            self.commits = proc.stdout.split("\n")[::-1]
-        else:
-            assert self.start_commit is None and self.stop_commit is None
-            self.commits = self.all_commits
-        await async_run(["git", "checkout", self.commits[0]], cwd=self.dir, check=True)
-
-    def get_commits(self) -> List[str]:
-        assert self.commits is not None
-        return self.commits
 
     def _checkout(self, commit: str) -> Tuple[str, datetime.datetime]:
         subprocess.run(

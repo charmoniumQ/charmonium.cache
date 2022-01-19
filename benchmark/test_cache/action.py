@@ -78,6 +78,7 @@ class IpynbAction(Action):
                 ["python", str(repo.dir / notebook.with_suffix(".py"))],
                 cwd=(repo.dir / notebook).parent,
             )
+            sys.stderr.buffer.write(proc.stderr)
             stdout += proc.stdout
             success |= proc.returncode
             if success != 0:
@@ -101,8 +102,7 @@ class CommandAction(Action):
                 cmd,
                 cwd=repo.dir,
             )
-            if not proc.returncode == 0:
-                raise RuntimeError(f"Child process `{shlex.join(cmd)}` failed\n{proc.stderr.decode()}\n{proc.stdout.decode()}")
+            sys.stderr.buffer.write(proc.stderr)
 
     def commit_setup(self, repo: Repo, environment: Environment) -> None:
         for cmd in self.commit_setup_cmds:
@@ -110,8 +110,7 @@ class CommandAction(Action):
                 cmd,
                 cwd=repo.dir,
             )
-            if not proc.returncode == 0:
-                raise RuntimeError(f"Child process `{shlex.join(cmd)}` failed\n{proc.stderr.decode()}\n{proc.stdout.decode()}")
+            sys.stderr.buffer.write(proc.stderr)
 
     def run(
             self,
@@ -125,11 +124,10 @@ class CommandAction(Action):
             proc = environment.run(
                 cmd,
                 cwd=repo.dir,
+                env_override=env_override,
             )
-            if proc.stderr:
-                raise RuntimeError(f"Child process `{shlex.join(cmd)}` failed\n{proc.stderr.decode()}\n{proc.stdout.decode()}")
-                sys.stderr.buffer.write(proc.stderr)
-            stdout += proc.stdout
+            sys.stderr.buffer.write(proc.stderr)
+            stdout += proc.stderr + proc.stdout
             success |= proc.returncode
             if success != 0:
                 break

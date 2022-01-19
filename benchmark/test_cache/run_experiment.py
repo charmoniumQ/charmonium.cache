@@ -28,6 +28,10 @@ hash_logger.setLevel(logging.DEBUG)
 hash_logger.addHandler(logging.FileHandler("freeze.log"))
 hash_logger.propagate = False
 
+ops_logger = logging.getLogger("charmonium.cache.ops")
+ops_logger.setLevel(logging.DEBUG)
+ops_logger.addHandler(logging.FileHandler("ops.log"))
+ops_logger.propagate = False
 
 @dataclass
 class FuncCallProfile:
@@ -83,7 +87,7 @@ class FuncCallProfile:
 class ExecutionProfile:
     func_calls: List[FuncCallProfile]
     total_time: float
-    stdout: int
+    output: bytes
     success: bool
     index_read: float = 0
     index_write: float = 0
@@ -98,7 +102,7 @@ class ExecutionProfile:
         return Class(
             func_calls=[],
             total_time=0,
-            stdout=0,
+            output=b"",
             success=False,
             empty=True,
         )
@@ -196,7 +200,7 @@ def run_once(
         },
     )
     stop = datetime.datetime.now()
-    if memoize:
+    if perf_log.exists():
         calls, kwargs = parse_memoized_log(perf_log)
     else:
         # no profiling informatoin
@@ -206,8 +210,8 @@ def run_once(
         func_calls=calls,
         success=success,
         total_time=(stop - start).total_seconds(),
-        stdout=globals()["determ_hash"](stdout),
-        **kwargs
+        output=stdout,
+        **kwargs,
     )
 
 
@@ -228,6 +232,7 @@ def get_commit_result(commit: str, repo: Repo, environment: Environment, action:
         print("run memoized again")
         memo2 = run_once(repo, environment, action, True)
     else:
+        print("Memoized failure")
         memo2 = ExecutionProfile.create_empty()
 
     if memo2.success:
@@ -244,7 +249,7 @@ def get_commit_result(commit: str, repo: Repo, environment: Environment, action:
         commit=commit,
         orig=orig,
         memo=memo,
-        memo2=memo,
+        memo2=memo2,
     )
 
 
@@ -260,8 +265,8 @@ def get_repo_result(
         repo: Repo,
         environment: Environment,
         action: Action,
+        commits: List[str],
 ) -> RepoResult:
-    commits = repo.get_commits()
     return RepoResult(
         repo=repo,
         environment=environment,
@@ -275,11 +280,10 @@ def get_repo_result(
 
 @memoize(group=group)
 def run_experiment(
-        repo_env_actions: List[Tuple[Repo, Environment, Action]],
+        repo_env_actions: List[Tuple[Repo, Environment, Action, List[str]]],
 ) -> List[RepoResult]:
 
-    async def setup(repo_env_action: Tuple[Repo, Environment, Action]) -> None:
-        repo, env, action = repo_env_action
+    async def setup(repo: Repo, env: Environment, action: Action) -> None:
         print(f"Setting up repo {repo.name}")
         await repo.setup()
         cache_dir = repo.dir / ".cache"
@@ -287,23 +291,25 @@ def run_experiment(
             shutil.rmtree(cache_dir)
         print(f"Setting up env {repo.name}")
         await env.setup(repo)
-        # print(f"Installing charmonium.cache")
-        # await env.install(repo, ["https://github.com/charmoniumQ/charmonium.cache/archive/main.zip"])
+        await env.install(repo, [
+            str(repo.dir),
+            "https://github.com/charmoniumQ/charmonium.cache/archive/main.zip"
+        ])
         print(f"Setting up action {repo.name}")
         await action.setup(repo, env)
         print(f"Ready for {repo.name}")
 
-    async def setup_all(repo_env_actions: List[Tuple[Repo, Environment, Action]]) -> None:
+    async def setup_all(repo_env_actions: List[Tuple[Repo, Environment, Action, List[str]]]) -> None:
         await asyncio.gather(
             *[
-                setup(repo_env_action)
-                for repo_env_action in tqdm(repo_env_actions, total=len(repo_env_actions), desc="Repo setup")
+                setup(repo, env, action)
+                for repo, env, action, _ in tqdm(repo_env_actions, total=len(repo_env_actions), desc="Repo setup")
             ]
         )
 
     asyncio.run(setup_all(repo_env_actions))
 
     return [
-        get_repo_result(repo, env, action)
-        for repo, env, action in tqdm(repo_env_actions, total=len(repo_env_actions), desc="Repo setup")
+        get_repo_result(repo, env, action, commits)
+        for repo, env, action, commits in tqdm(repo_env_actions, total=len(repo_env_actions), desc="Repo setup")
     ]

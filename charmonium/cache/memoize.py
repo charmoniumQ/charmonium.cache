@@ -577,7 +577,7 @@ class Memoized(Generic[FuncParams, FuncReturn]):
     ) -> FuncReturn:
         call_start = datetime.datetime.now()
 
-        call_id = random.randint(1, 2**64-1)
+        call_id = random.randint(0, 2**64-1)
 
         would_hit, key, obj_key = self._would_hit(call_id, *args, **kwargs)
 
@@ -657,6 +657,7 @@ class Memoized(Generic[FuncParams, FuncReturn]):
             perf_logger.debug(
                 json.dumps(
                     {
+                        "name": self.name,
                         "event": "outer_function",
                         "call_id": call_id,
                         "hit": would_hit,

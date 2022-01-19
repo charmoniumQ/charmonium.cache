@@ -1,11 +1,12 @@
 from html import escape as escape
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from . import html
 
 
 def html_table(
-    elems: List[List[html.TagLike]], headers: Optional[List[html.TagLike]] = None
+    elems: List[List[html.TagLike]],
+    headers: Optional[List[html.TagLike]] = None
 ) -> html.Tag:
     if headers is not None:
         thead = [html.thead()(html.tr()(*[html.td()(header) for header in headers]))]

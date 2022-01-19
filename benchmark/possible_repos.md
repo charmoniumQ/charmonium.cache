@@ -52,7 +52,6 @@
 - https://github.com/charmoniumQ/bollywood-data-analysis
   - Attempts caching
 - https://github.com/ILLIXR/illixr-analysis
-  - Object bug
 
 - Luke Olsen
 - Andreas Kloeckner

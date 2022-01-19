@@ -68,8 +68,10 @@
   - [ ] Compare global vars and fn arguments before and after running function.
   - [ ] Listen for [audit events].
   - [ ] Scan for references to non-deterministic functions (time, random, sys, os, path).
-- [ ] Convert Jupyter Notebooks into scripts.
-- [ ] Memoize the hash of pure functions.
+- [x] Convert Jupyter Notebooks into scripts.
+- [ ] Memoize the hash of immutable data. This might not work, because immutable data can still contain pointers to mutable data, e.g.: in `a = ([])`, `a` is immutable, but `a[0]` is not.
+- [ ] Change hash to a member
+- [ ] The outputs of a cached function can be hashed by their progenesis.
 - [ ] Make all packages in `site_packages` be assumed constant.
 - [ ] Apply automatically using [importhook].
   - [ ] Write `maybe_memoize`.

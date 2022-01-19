@@ -1,0 +1,18 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+astropy = ">=4.0.0"
+matplotlib = ">=1.5.3"
+numpy = "*"
+pandas = ">=1.0.5"
+scipy = "*"
+tqdm = "*"
+pysyd = {path = "/home/sam/box/charmonium.cache/benchmark/.cache/repos/pySYD"}
+
+[dev-packages]
+
+[requires]
+python_version = "3.9"

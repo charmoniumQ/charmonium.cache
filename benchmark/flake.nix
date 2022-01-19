@@ -45,6 +45,7 @@
             pkgs.conda
             pkgs.libxml2
             pkgs.libxslt
+            pkgs.zlib
             pkgs.postgresql
             (pkgs.poetry2nix.mkPoetryEnv {
               projectDir = ./.;
