@@ -10,6 +10,6 @@ jobs:
         with:
           nix_path: nixpkgs=channel:nixos-unstable
 
-      - run: nix-shell shell.nix --run "poetry install"
+      - run: nix develop --run "poetry install"
 
-      - run: nix-shell shell.nix --run ./scripts/test.sh
+      - run: nix develop --run ./scripts/test.sh
