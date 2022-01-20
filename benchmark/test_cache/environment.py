@@ -1,12 +1,9 @@
-import asyncio
 import os
 import re
 import subprocess
 from pathlib import Path
 import shlex
 from typing import Mapping, Optional, Protocol, Tuple, List, Union, cast, NoReturn
-
-from charmonium.async_subprocess import run as async_run
 
 from .repo import Repo
 
@@ -28,9 +25,9 @@ def relative_to(dest: Path, source: Path) -> Path:
         return ret
 
 class Environment(Protocol):
-    async def setup(self, repo: Repo) -> None: ...
+    def setup(self, repo: Repo) -> None: ...
 
-    async def install(self, repo: Repo, package_list: List[Union[str, Path]]) -> None: ...
+    def install(self, repo: Repo, package_list: List[Union[str, Path]]) -> None: ...
 
     def run(
         self,
@@ -55,13 +52,13 @@ class CondaEnvironment(Environment):
         self.relative_to_repo = relative_to_repo
 
     @staticmethod
-    async def _conda(
+    def _conda(
             *cmd: str,
             cwd: Path = Path(),
             env_override: Optional[Mapping[str, str]] = None,
             check: bool = True,
     ) -> subprocess.CompletedProcess[bytes]:
-        proc = await async_run(
+        proc = subprocess.run(
             [
                 "conda-shell",
                 "-c",
@@ -76,18 +73,18 @@ class CondaEnvironment(Environment):
             text=False,
             capture_output=True,
         )
-        return cast(subprocess.CompletedProcess[bytes], proc)
+        return proc
 
-    async def setup(self, repo: Repo) -> None:
+    def setup(self, repo: Repo) -> None:
         if self.relative_to_repo:
             self.environment = repo.dir / self.environment
-        out = (await self._conda("conda", "env", "export", "--name", self.name)).stdout
+        out = (self._conda("conda", "env", "export", "--name", self.name)).stdout
         if out != self.environment.read_bytes():
-            await self._conda("conda", "env", "remove", "--name", self.name)
-            await self._conda("conda", "env", "create", "--name", self.name, "--file", str(self.environment))
+            self._conda("conda", "env", "remove", "--name", self.name)
+            self._conda("conda", "env", "create", "--name", self.name, "--file", str(self.environment))
 
-    async def install(self, repo: Repo, packages: List[Union[str, Path]]) -> None:
-        await self._conda("conda", "run", "--name", self.name, "pip", "install", *map(str, packages))
+    def install(self, repo: Repo, packages: List[Union[str, Path]]) -> None:
+        self._conda("conda", "run", "--name", self.name, "pip", "install", *map(str, packages))
 
     def run(
         self,
@@ -95,7 +92,7 @@ class CondaEnvironment(Environment):
         cwd: Path,
         env_override: Optional[Mapping[str, str]] = None,
     ) -> subprocess.CompletedProcess[bytes]:
-        proc = asyncio.run(self._conda(
+        proc = self._conda(
             "conda",
             "run",
             "--name",
@@ -104,7 +101,7 @@ class CondaEnvironment(Environment):
             cwd=cwd,
             env_override=env_override,
             check=False,
-        ))
+        )
         return proc
 
 class PipenvEnvironment(Environment):
@@ -118,8 +115,8 @@ class PipenvEnvironment(Environment):
         self.name = name
         self.pipfile = pipfile
 
-    async def setup(self, repo: Repo) -> None:
-        await async_run(
+    def setup(self, repo: Repo) -> None:
+        subprocess.run(
             ["pipenv", "run", "true"],
             env={
                 "PIPENV_PIPFILE": str(self.pipfile.parent),
@@ -128,8 +125,8 @@ class PipenvEnvironment(Environment):
             check=True,
         )
 
-    async def install(self, repo: Repo, packages: List[Union[str, Path]]) -> None:
-        await async_run(
+    def install(self, repo: Repo, packages: List[Union[str, Path]]) -> None:
+        subprocess.run(
             ["pipenv", "install", *map(str, packages)],
             env={
                 "PIPENV_PIPFILE": str(self.pipfile.parent),
@@ -164,7 +161,7 @@ class PoetryEnvironment(Environment):
         self.pyproject = pyproject
         self.in_repo = in_repo
 
-    async def _poetry(
+    def _poetry(
             self,
             *cmd: str,
             check: bool = True,
@@ -188,22 +185,22 @@ class PoetryEnvironment(Environment):
         #     for location in env["PATH"].split(":")
         #     if "/nix/store" not in location
         # )
-        proc = await async_run(
+        proc = subprocess.run(
             ["poetry", *cmd],
             cwd=self.pyproject.parent,
             capture_output=True,
             check=check,
             env=env,
         )
-        return cast(subprocess.CompletedProcess[bytes], proc)
+        return proc
 
-    async def setup(self, repo: Repo) -> None:
+    def setup(self, repo: Repo) -> None:
         if self.in_repo:
             self.pyproject = repo.dir / self.pyproject
-        await self._poetry("update", "--no-dev", "--lock")
-        await self._poetry("install", "--no-dev")
+        self._poetry("update", "--no-dev", "--lock")
+        self._poetry("install", "--no-dev")
 
-    async def install(self, repo: Repo, packages: List[Union[str, Path]]) -> None:
+    def install(self, repo: Repo, packages: List[Union[str, Path]]) -> None:
         real_packages = [
             str(relative_to(package, self.pyproject.parent))
             if isinstance(package, Path) else
@@ -212,7 +209,7 @@ class PoetryEnvironment(Environment):
             raise_(TypeError())
             for package in packages
         ]
-        await self._poetry("add", *real_packages)
+        self._poetry("add", *real_packages)
 
     def run(
         self,
@@ -220,7 +217,7 @@ class PoetryEnvironment(Environment):
         cwd: Path,
         env_override: Optional[Mapping[str, str]] = None,
     ) -> subprocess.CompletedProcess[bytes]:
-        proc = asyncio.run(self._poetry(
+        proc = self._poetry(
             "run",
             "env",
             f"--chdir={cwd!s}",
@@ -230,7 +227,7 @@ class PoetryEnvironment(Environment):
             shlex.join(command),
             check=False,
             env_override=env_override,
-        ))
+        )
         return proc
 
 class NixEnvironment(Environment):
@@ -244,12 +241,12 @@ class NixEnvironment(Environment):
         self.name = name
         self.flake = flake
 
-    async def setup(self, repo: Repo) -> None:
-        await async_run(
+    def setup(self, repo: Repo) -> None:
+        subprocess.run(
             ["nix", "develop", "--command", "true", "--file", str(self.flake)],
         )
 
-    async def install(self, repo: Repo, packages: List[Union[str, Path]]) -> None:
+    def install(self, repo: Repo, packages: List[Union[str, Path]]) -> None:
         raise NotImplementedError()
 
     def run(

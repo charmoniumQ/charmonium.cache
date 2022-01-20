@@ -11,44 +11,9 @@ import io
 from pathlib import Path
 import tempfile
 import logging
+import charmonium.cache
 
-if os.environ.get("CHARMONIUM_CACHE", "") == "enable":
-    from charmonium.cache import memoize
-    perf_logger = logging.getLogger("charmonium.cache.perf")
-    perf_logger.setLevel(logging.DEBUG)
-    perf_logger.addHandler(logging.FileHandler(os.environ["PERF_LOG"]))
-    perf_logger.propagate = False
-else:
-    from charmonium.freeze import freeze
-    from charmonium.determ_hash import determ_hash
-    import json
-    import datetime
-    logger = logging.getLogger("function_calls")
-    logger.setLevel(logging.DEBUG)
-    logger.addHandler(logging.FileHandler(os.environ["PERF_LOG"]))
-    logger.propagate = False
-    def record_function_decorator(inner_function):
-        def outer_function(*args, **kwargs):
-            start = datetime.datetime.now()
-            ret = inner_function(*args, **kwargs)
-            mid = datetime.datetime.now()
-            args_hash = determ_hash(freeze((args, kwargs)))
-            ret_hash = determ_hash(freeze(ret))
-            stop = datetime.datetime.now()
-            logger.debug(json.dumps({
-                "name": inner_function.__qualname__,
-                "args": args_hash,
-                "ret": ret_hash,
-                "outer_function": (stop - start).total_seconds(),
-                "hash": (stop - mid).total_seconds(),
-                "inner_function": (mid - start).total_seconds(),
-                "memoize": False,
-            }))
-            return ret
-        return outer_function
-    memoize = lambda *args, **kwargs: record_function_decorator
-
-@memoize()
+@charmonium.cache.memoize()
 def get_data():
     import requests
     # Download the dataset from the Exoplanet Archive:
@@ -58,7 +23,7 @@ def get_data():
         r.raise_for_status()
     return r.text
 
-@memoize()
+@charmonium.cache.memoize()
 def parse_data(r_text):
     data = np.array(
         [
@@ -73,7 +38,7 @@ def parse_data(r_text):
     phase = np.linspace(0, 1, 500)
     return t, rv, rv_err, phase
 
-@memoize()
+@charmonium.cache.memoize()
 def plot_data(t, rv, rv_err):
     # Plot the observations "folded" on the published period:
     # Butler et al. (2006) https://arxiv.org/abs/astro-ph/0607493
@@ -155,14 +120,14 @@ def get_model(t, rv, rv_err, lit_period, phase):
         )
         return model
 
-@memoize()
+@charmonium.cache.memoize()
 def get_map_params(model_fn):
     import pymc3_ext as pmx
     with model_fn():
         map_params = pmx.optimize()
     return map_params
 
-@memoize()
+@charmonium.cache.memoize()
 def plot_params(t, rv, rv_err, phase, map_params):
     fig, axes = plt.subplots(2, 1, figsize=(8, 8))
 
@@ -185,7 +150,7 @@ def plot_params(t, rv, rv_err, phase, map_params):
     plt.tight_layout()
     return fig
 
-@memoize()
+@charmonium.cache.memoize()
 def run_model(model_fn, map_params):
     import pymc3_ext as pmx
     with model_fn():
@@ -200,7 +165,7 @@ def run_model(model_fn, map_params):
         )
     return trace
 
-@memoize()
+@charmonium.cache.memoize()
 def summarize_model(trace):
     az.summary(
         trace,
@@ -210,7 +175,7 @@ def summarize_model(trace):
     corner.corner(trace, var_names=["K", "P", "e", "w"])
     return plt.gcf()
 
-@memoize()
+@charmonium.cache.memoize()
 def plot_sample(t, rv, rv_err, phase, map_params, trace):
     fig, axes = plt.subplots(2, 1, figsize=(8, 8))
 
@@ -243,38 +208,17 @@ def plot_sample(t, rv, rv_err, phase, map_params, trace):
 
 
 def main2():
-    print(0.5)
     output = io.BytesIO()
-
-    print(1)
     r_text = get_data()
-    print(1.1)
     t, rv, rv_err, phase = parse_data(r_text)
-    print(1.2)
     fig, lit_data = plot_data(t, rv, rv_err)
     fig.savefig(output, format="png")
-
-    print(2)
-
     model_fn = functools.partial(get_model, t, rv, rv_err, lit_data, phase)
     map_params = get_map_params(model_fn)
-
-    print(3)
-
     plot_params(t, rv, rv_err, phase, map_params).savefig(output, format="png")
-
-    print(3.1)
-
     trace = run_model(model_fn, map_params)
-
-    print(4)
-
     summarize_model(trace).savefig(output, format="png")
-
-    print(5)
-
     plot_sample(t, rv, rv_err, phase, map_params, trace).savefig(output, format="png")
-
-    sys.stdout.buffer.write(base64.b64encode(output.getvalue()))
+    # sys.stdout.buffer.write(base64.b64encode(output.getvalue()))
 
 main2()

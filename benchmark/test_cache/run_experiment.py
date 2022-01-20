@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import asyncio
 import collections
 import datetime
 import json
@@ -283,31 +282,21 @@ def run_experiment(
         repo_env_actions: List[Tuple[Repo, Environment, Action, List[str]]],
 ) -> List[RepoResult]:
 
-    async def setup(repo: Repo, env: Environment, action: Action) -> None:
+    for repo, env, action, _ in tqdm(repo_env_actions, total=len(repo_env_actions), desc="Repo setup"):
         print(f"Setting up repo {repo.name}")
-        await repo.setup()
+        repo.setup()
         cache_dir = repo.dir / ".cache"
         if cache_dir.exists():
             shutil.rmtree(cache_dir)
         print(f"Setting up env {repo.name}")
-        await env.setup(repo)
-        await env.install(repo, [
+        env.setup(repo)
+        env.install(repo, [
             str(repo.dir),
             "https://github.com/charmoniumQ/charmonium.cache/archive/main.zip"
         ])
         print(f"Setting up action {repo.name}")
-        await action.setup(repo, env)
+        action.setup(repo, env)
         print(f"Ready for {repo.name}")
-
-    async def setup_all(repo_env_actions: List[Tuple[Repo, Environment, Action, List[str]]]) -> None:
-        await asyncio.gather(
-            *[
-                setup(repo, env, action)
-                for repo, env, action, _ in tqdm(repo_env_actions, total=len(repo_env_actions), desc="Repo setup")
-            ]
-        )
-
-    asyncio.run(setup_all(repo_env_actions))
 
     return [
         get_repo_result(repo, env, action, commits)

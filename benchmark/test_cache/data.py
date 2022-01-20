@@ -1,3 +1,4 @@
+import asyncio
 from pathlib import Path
 import shlex
 from typing import List, Callable, Tuple
@@ -9,13 +10,45 @@ from .action import Action, IpynbAction, CommandAction
 ROOT = Path(__file__).parent.parent
 RESOURCE_PATH = ROOT / "resources"
 
+
+exoplanet_repo = GitRepo(
+    name="exoplanet",
+    initial_commit="48bf5d8da8696d03ddbbb7612b91fe9c7632f390",
+    url="https://github.com/exoplanet-dev/exoplanet.git",
+    display_url="https://github.com/exoplanet-dev/exoplanet/commit/{commit}",
+)
+exoplanet_repo.setup()
+
 data: List[Tuple[Repo, Environment, Action, List[str]]] = [
+    (
+        exoplanet_repo,
+        CondaEnvironment(
+            name="exoplanet",
+            environment=RESOURCE_PATH / "exoplanet/environment.yaml",
+        ),
+        CommandAction(
+            run_cmds=[
+                [
+                    "python", str(RESOURCE_PATH / "exoplanet/script.py")
+                ],
+            ],
+        ),
+        exoplanet_repo.interesting_commits(Path("src/exoplanet"), 15)[:3],
+    ),
+]
+
+pysyd_data: List[Tuple[Repo, Environment, Action, List[str]]] = [
     (
         GitRepo(
             name="pySYD",
             url="https://github.com/ashleychontos/pySYD.git",
             initial_commit="8dbed3c40113b77fcf82f0f0bde382f7f081a3f0",
             display_url="https://github.com/ashleychontos/pySYD/commit/{commit}",
+            patch_cmds=[
+                ["sed", "-i", "s/functions.delta_nu/utils.delta_nu/g", "pysd/target.py"],
+                ["sed", "-i", r"s/^\(.*\)\(def run_syd\)/\1@charmonium.cache.memoize()\n\1\2/g", "pysd/target.py"],
+                ["sed", "-i", r"s/\(class Target\)/import charmonium.cache\n\1/g", "pysd/target.py"]
+            ]
         ),
         PipenvEnvironment(
             name="pySYD",
@@ -23,11 +56,12 @@ data: List[Tuple[Repo, Environment, Action, List[str]]] = [
         ),
         CommandAction(
             run_cmds=[
-                ["python3", "-m", "bollywood_data_science.main", "0", "50"],
+                [
+                    "env", "-C", "build", "pysyd", "run", "--star", "1435467"
+                ],
             ],
         ),
-        [
-        ],
+        [],
     )
 ]
 
@@ -161,7 +195,7 @@ old_data: List[Tuple[Repo, Environment, List[str], List[str]]] = [
             name="exoplanet",
             environment=RESOURCE_PATH / "exoplanet/environment.yaml",
         ),
-        ["python", str(RESOURCE_PATH / "exoplanet/scripyt.py")],
+        ["python", str(RESOURCE_PATH / "exoplanet/script.py")],
         [
             "a61076b173a32fc90f286176dc5f194395854e02",
             "9f7681301790276416c10f8139adb1b24f7a7d04",

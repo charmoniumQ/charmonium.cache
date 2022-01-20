@@ -34,13 +34,14 @@
 - https://github.com/GijsMulders/epos
   - Use tutorials
 - https://pysyd.readthedocs.io/en/latest/
-  - Use tutorials or tests
+  - Many of the important funcitons are impure.
 - https://github.com/exoplanet-dev/case-studies
   - Uses PyMC3
 - https://github.com/MNGuenther/allesfitter
   - Not enough specific historical variation
 - https://docs.lightkurve.org/
   - Not enough specific historical variation
+  - Uses PyMC3
 - https://github.com/Parsl/arctic_dem
 - https://github.com/Parsl/lsst-pipelines
 - https://github.com/Parsl/Parsl-Workflows

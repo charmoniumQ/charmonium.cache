@@ -93,7 +93,8 @@ def summarize_commit_result(repo: Repo, result: CommitResult) -> List[html.TagLi
     return [
         disp_date(result.date),
         html.a(href=repo.display_url.format(commit=result.commit))(result.commit),
-        collapsed("Show", highlighted_code("diff", result.diff)),
+        "",
+        # collapsed("Show", highlighted_code("diff", result.diff)),
         color_cell(disp_sec(result.memo.total_time), color=prof_color(result.memo)),
         collapsed("Details", summarize_execution(result.memo)),
         color_cell(disp_sec(result.memo2.total_time), color=prof_color(result.memo2)),

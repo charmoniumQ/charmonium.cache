@@ -5,8 +5,6 @@ import json
 import shlex
 import sys
 
-from charmonium.async_subprocess import run as async_run
-
 from .repo import Repo
 from .environment import Environment
 from .add_memoization import add_memoization
@@ -30,7 +28,7 @@ def read_text(path: Path) -> str:
     return path.read_text()
 
 class Action(Protocol):
-    async def setup(self, repo: Repo, environment: Environment) -> None: ...
+    def setup(self, repo: Repo, environment: Environment) -> None: ...
     def commit_setup(self, repo: Repo, environment: Environment) -> None: ...
     def run(
             self,
@@ -43,7 +41,7 @@ class IpynbAction(Action):
     def __init__(self, notebooks: List[Path]) -> None:
         self.notebooks = notebooks
 
-    async def setup(self, repo: Repo, _: Environment) -> None:
+    def setup(self, repo: Repo, _: Environment) -> None:
         pass
 
     def commit_setup(self, repo: Repo, _: Environment) -> None:
@@ -96,7 +94,7 @@ class CommandAction(Action):
         self.commit_setup_cmds = commit_setup_cmds
         self.run_cmds = run_cmds
 
-    async def setup(self, repo: Repo, environment: Environment) -> None:
+    def setup(self, repo: Repo, environment: Environment) -> None:
         for cmd in self.setup_cmds:
             proc = environment.run(
                 cmd,

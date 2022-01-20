@@ -1,13 +1,11 @@
 from abc import ABC
-import asyncio
 import datetime
 from pathlib import Path
+import re
 import shlex
 import subprocess
 import sys
 from typing import List, Optional, Protocol, Tuple, cast
-
-from charmonium.async_subprocess import run as async_run
 
 ROOT = Path(__file__).parent.parent
 
@@ -29,7 +27,7 @@ class Repo(ABC):
         self.patch = patch
         self.patch_cmds = patch_cmds
 
-    async def _setup(self) -> None:
+    def _setup(self) -> None:
         raise NotImplementedError()
 
     def apply_patch(self) -> None:
@@ -61,8 +59,8 @@ class Repo(ABC):
                 sys.stdout.buffer.write(proc.stdout)
                 raise RuntimeError(f"'{shlex.join(cmd)}' returned {proc.returncode}")
 
-    async def setup(self) -> None:
-        await self._setup()
+    def setup(self) -> None:
+        self._setup()
         self.apply_patch()
 
     def _checkout(self, commit: str) -> Tuple[str, datetime.datetime]:
@@ -97,23 +95,55 @@ class GitRepo(Repo):
         self.url = url
         self.initial_commit = initial_commit
 
-    async def _setup(self) -> None:
+    def _setup(self) -> None:
         self.dir.mkdir(exist_ok=True, parents=True)
         if not list(self.dir.iterdir()):
-            await async_run(["git", "clone", "--recursive", self.url, "."], cwd=self.dir, check=True)
+            subprocess.run(["git", "clone", "--recursive", self.url, "."], cwd=self.dir, check=True, capture_output=True)
         else:
-            await async_run(
+            subprocess.run(
                 ["git", "restore", "--", "."],
                 cwd=self.dir,
                 check=True,
+                capture_output=True,
             )
-            await async_run(["git", "clean", "-fdx", "."], cwd=self.dir, check=True)
+            subprocess.run(["git", "clean", "-fdx", "."], cwd=self.dir, check=True, capture_output=True)
         if self.initial_commit:
-            await async_run(
+            subprocess.run(
                 ["git", "checkout", self.initial_commit],
                 cwd=self.dir,
                 check=True,
+                capture_output=True,
             )
+
+    def interesting_commits(self, path: Path, min_diff: int) -> List[str]:
+        """
+for commit in $(git log --pretty=%h .); do
+    total=0
+    total+=$(git show --numstat --pretty='' $commit | cut --fields=1 | tr -d - | python -c "import sys; print(sum([int(line.strip()) for line in sys.stdin if line.strip()]))")
+    total+=$(git show --numstat --pretty='' $commit | cut --fields=2 | tr -d - | python -c "import sys; print(sum([int(line.strip()) for line in sys.stdin if line.strip()]))")
+    echo $total $commit
+done | sort --numeric-sort > log
+        """
+        commits = subprocess.run(
+            ["git", "log", "--pretty=%h", str(path)],
+            cwd=self.dir,
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout.strip().split("\n")
+        def filter_pred(commit: str) -> bool:
+            total_changed = 0
+            for line in subprocess.run(
+                ["git", "show", "--numstat", "--pretty=", commit],
+                cwd=self.dir,
+                check=True,
+                capture_output=True,
+                text=True,
+            ).stdout.strip().split("\n"):
+                if m := re.match("(\\d+)\t(\\d+)\t", line):
+                    total_changed += int(m.group(1)) + int(m.group(2))
+            return total_changed >= min_diff
+        return list(filter(filter_pred, commits))
 
     def _checkout(self, commit: str) -> Tuple[str, datetime.datetime]:
         subprocess.run(
