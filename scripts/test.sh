@@ -85,7 +85,7 @@ flag_check=$([ -n "${check}" ] && echo "--check")
 rm -rf .cache
 
 capture \
-	pytest --cov=charmonium/cache --cov-report=term-missing --quiet
+	pytest --cov=charmonium/cache --cov-report=term-missing --quiet tests/ charmonium/
 
 rm -rf .cache
 
