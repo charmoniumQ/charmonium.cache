@@ -77,6 +77,7 @@
   - [ ] Write `maybe_memoize`.
   - [ ] Global config.
 - [ ] Do writing-to-disk off the critical path, in a thread.
+- [ ] Create a better API for group configuration.
 
 [audit events]: https://docs.python.org/3/library/audit_events.html#audit-events
 [importhook]: https://brettlangdon.github.io/importhook/

@@ -3,13 +3,33 @@ from pathlib import Path
 import shlex
 from typing import List, Callable, Tuple
 
-from .environment import Environment, PipenvEnvironment, PoetryEnvironment, CondaEnvironment
+from .environment import Environment, PipenvEnvironment, PoetryEnvironment, CondaEnvironment, InheritedEnvironment
 from .repo import Repo, GitRepo
 from .action import Action, IpynbAction, CommandAction
 
 ROOT = Path(__file__).parent.parent
 RESOURCE_PATH = ROOT / "resources"
 
+paparazzi_repo = GitRepo(
+    name="paparazzi",
+    initial_commit="853da0ec70469c2063cbf4d083390e7a037038ab",
+    url="git@github.com:rodluger/paparazzi.git",
+    display_url="https://github.com/rodluger/paparazzi/commit/{commit}",
+)
+
+paparazzi_data: List[Tuple[Repo, Environment, List[str], List[str]]] = [
+    (
+        paparazzi_repo,
+        InheritedEnvironment(),
+        ["make"],
+        [
+            "ebb00007df84ac16f5e0d638fa1a9b0f11a7a881",
+            "7d3f550f7718c34b9d22b9b04d48ab75327560e5",
+            "89224b6b6c38813260d1eff86bc7c37e72f5deb9",
+            "4feab3df95f181dc9614578a7296c0bc4fccf446",
+        ]
+    )
+]
 
 exoplanet_repo = GitRepo(
     name="exoplanet",
@@ -17,23 +37,19 @@ exoplanet_repo = GitRepo(
     url="https://github.com/exoplanet-dev/exoplanet.git",
     display_url="https://github.com/exoplanet-dev/exoplanet/commit/{commit}",
 )
-exoplanet_repo.setup()
+# exoplanet_repo.setup()
 
-data: List[Tuple[Repo, Environment, Action, List[str]]] = [
+data: List[Tuple[Repo, Environment, List[str], List[str]]] = [
     (
         exoplanet_repo,
         CondaEnvironment(
             name="exoplanet",
             environment=RESOURCE_PATH / "exoplanet/environment.yaml",
         ),
-        CommandAction(
-            run_cmds=[
-                [
-                    "python", str(RESOURCE_PATH / "exoplanet/script.py")
-                ],
-            ],
-        ),
-        exoplanet_repo.interesting_commits(Path("src/exoplanet"), 15)[:3],
+        [
+            "python", str(RESOURCE_PATH / "exoplanet/script_theano.py")
+        ],
+        exoplanet_repo.interesting_commits(Path("src/exoplanet"), 100)[:1],
     ),
 ]
 

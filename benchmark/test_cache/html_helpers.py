@@ -1,5 +1,4 @@
-from html import escape as escape
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Mapping
 
 from . import html
 
@@ -37,11 +36,22 @@ def highlighted_head(languages: List[str]) -> List[html.Tag]:
         html.script()("hljs.highlightAll();")
     ]
 
+def css_string(declarations: Mapping[str, str]) -> str:
+    return ";".join([
+        f"{property}: {value}"
+        for property, value in declarations.items()
+    ])
 
-def highlighted_code(lang: str, code: str) -> html.Tag:
+def highlighted_code(lang: str, code: str, width: int = 60) -> html.Tag:
     # see https://highlightjs.org/usage/
-    return html.pre()(html.code(**{"class": f"language-{lang}"})(escape(code)))
-
+    return html.pre()(html.code(**{
+        "class": f"language-{lang}",
+        "style": css_string({
+            "width": f"{width}ch",
+            "height": "20vw",
+            "resize": "both",
+        }),
+    })(code))
 
 def collapsed(summary: html.TagLike, *details: html.TagLike) -> html.Tag:
     return html.details()(

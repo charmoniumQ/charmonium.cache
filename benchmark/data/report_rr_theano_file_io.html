@@ -1,0 +1,1265 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><title>Benchmark of charmonium.cache</title><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/styles/default.min.css"><script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/highlight.min.js"></script><script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.3.1/build/languages/yaml.min.js"></script><script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.3.1/build/languages/python.min.js"></script><script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.3.1/build/languages/diff.min.js"></script><script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.3.1/build/languages/ini.min.js"></script><script>hljs.highlightAll();</script><style>
+table, th, td {
+  border: 1px solid black;
+  border-collapse: collapse;
+}
+                    </style></head><body><div><div><h1>Repo exoplanet</h1><table><tbody><tr><td>Name</td><td>exoplanet</td></tr><tr><td>Path</td><td>/home/sam/box/charmonium.cache/benchmark/.cache/repos/exoplanet</td></tr><tr><td><code>environment.yaml</code></td><td><details><summary>show</summary><pre><code class="language-yaml" style="width: 60ch;height: 20vw;resize: both">name: exoplanet
+channels:
+  - defaults
+dependencies:
+  - _libgcc_mutex=0.1=main
+  - arviz=0.11.2=pyhd3eb1b0_0
+  - blas=1.0=mkl
+  - bottleneck=1.3.2=py39hdd57654_1
+  - brotli=1.0.9=he6710b0_2
+  - brotlipy=0.7.0=py39h27cfd23_1003
+  - c-ares=1.17.1=h27cfd23_0
+  - ca-certificates=2021.10.26=h06a4308_2
+  - cachetools=4.2.2=pyhd3eb1b0_0
+  - certifi=2021.10.8=py39h06a4308_0
+  - cffi=1.14.6=py39h400218f_0
+  - cftime=1.5.0=py39h6323ea4_0
+  - charset-normalizer=2.0.4=pyhd3eb1b0_0
+  - cryptography=35.0.0=py39hd23ed53_0
+  - curl=7.78.0=h1ccaba5_0
+  - cycler=0.10.0=py39h06a4308_0
+  - dbus=1.13.18=hb2f20db_0
+  - dill=0.3.4=pyhd3eb1b0_0
+  - expat=2.4.1=h2531618_2
+  - fastprogress=1.0.0=pyhb85f177_0
+  - filelock=3.3.1=pyhd3eb1b0_1
+  - fontconfig=2.13.1=h6c09931_0
+  - fonttools=4.25.0=pyhd3eb1b0_0
+  - freetype=2.11.0=h70c0345_0
+  - giflib=5.2.1=h7b6447c_0
+  - glib=2.69.1=h5202010_0
+  - gst-plugins-base=1.14.0=h8213a91_2
+  - gstreamer=1.14.0=h28cd5cc_2
+  - hdf4=4.2.13=h3ca952b_2
+  - hdf5=1.10.6=hb1b8bf9_0
+  - icu=58.2=he6710b0_3
+  - idna=3.2=pyhd3eb1b0_0
+  - intel-openmp=2020.2=254
+  - jpeg=9d=h7f8727e_0
+  - kiwisolver=1.3.1=py39h2531618_0
+  - krb5=1.19.2=hac12032_0
+  - lcms2=2.12=h3be6417_0
+  - ld_impl_linux-64=2.35.1=h7274673_9
+  - libcurl=7.78.0=h0b77cf5_0
+  - libedit=3.1.20210910=h7f8727e_0
+  - libev=4.33=h7f8727e_1
+  - libffi=3.3=he6710b0_2
+  - libgcc-ng=9.1.0=hdf63c60_0
+  - libgfortran-ng=7.3.0=hdf63c60_0
+  - libnetcdf=4.6.1=h2053bdc_4
+  - libnghttp2=1.46.0=hce63b2e_0
+  - libopenblas=0.3.13=h4367d64_0
+  - libpng=1.6.37=hbc83047_0
+  - libssh2=1.9.0=h1ba5d50_1
+  - libstdcxx-ng=9.1.0=hdf63c60_0
+  - libtiff=4.2.0=h85742a9_0
+  - libuuid=1.0.3=h7f8727e_2
+  - libwebp=1.2.0=h89dd481_0
+  - libwebp-base=1.2.0=h27cfd23_0
+  - libxcb=1.14=h7b6447c_0
+  - libxml2=2.9.10=hb55368b_3
+  - lz4-c=1.9.3=h295c915_1
+  - matplotlib=3.4.3=py39h06a4308_0
+  - matplotlib-base=3.4.3=py39hbbc1b5f_0
+  - mkl=2020.2=256
+  - mkl-service=2.3.0=py39he8ac12f_0
+  - mkl_fft=1.3.0=py39h54f3939_0
+  - mkl_random=1.0.2=py39h63df603_0
+  - munkres=1.1.4=py_0
+  - ncurses=6.3=h7f8727e_2
+  - netcdf4=1.5.7=py39h0a24e14_0
+  - numexpr=2.7.3=py39hb2eb853_0
+  - numpy=1.19.2=py39h89c1606_0
+  - numpy-base=1.19.2=py39h2ae0177_0
+  - olefile=0.46=pyhd3eb1b0_0
+  - openssl=1.1.1l=h7f8727e_0
+  - packaging=21.0=pyhd3eb1b0_0
+  - pandas=1.3.4=py39h8c16a72_0
+  - patsy=0.5.2=py39h06a4308_0
+  - pcre=8.45=h295c915_0
+  - pillow=8.4.0=py39h5aabda8_0
+  - pip=21.2.4=py39h06a4308_0
+  - pycparser=2.21=pyhd3eb1b0_0
+  - pymc3=3.11.4=py39hb070fc8_0
+  - pyopenssl=21.0.0=pyhd3eb1b0_1
+  - pyparsing=3.0.4=pyhd3eb1b0_0
+  - pyqt=5.9.2=py39h2531618_6
+  - pysocks=1.7.1=py39h06a4308_0
+  - python=3.9.7=h12debd9_1
+  - python-dateutil=2.8.2=pyhd3eb1b0_0
+  - pytz=2021.3=pyhd3eb1b0_0
+  - qt=5.9.7=h5867ecd_1
+  - readline=8.1=h27cfd23_0
+  - requests=2.26.0=pyhd3eb1b0_0
+  - scipy=1.6.2=py39h91f5cce_0
+  - semver=2.13.0=pyhd3eb1b0_0
+  - setuptools=58.0.4=py39h06a4308_0
+  - sip=4.19.13=py39h2531618_0
+  - six=1.16.0=pyhd3eb1b0_0
+  - sqlite=3.36.0=hc218d9a_0
+  - theano-pymc=1.1.2=py39h51133e4_0
+  - tk=8.6.11=h1ccaba5_0
+  - tornado=6.1=py39h27cfd23_0
+  - typing-extensions=3.10.0.2=hd3eb1b0_0
+  - typing_extensions=3.10.0.2=pyh06a4308_0
+  - tzdata=2021e=hda174b7_0
+  - urllib3=1.26.7=pyhd3eb1b0_0
+  - wheel=0.37.0=pyhd3eb1b0_1
+  - xarray=0.19.0=pyhd3eb1b0_1
+  - xz=5.2.5=h7b6447c_0
+  - zlib=1.2.11=h7b6447c_3
+  - zstd=1.4.9=haebb681_0
+  - pip:
+    - aesara-theano-fallback==0.0.4
+    - astropy==4.3.1
+    - attrs==20.3.0
+    - bitmath==1.3.3.1
+    - charmonium-time-block==0.2.1
+    - corner==2.2.1
+    - fasteners==0.16.3
+    - psutil==5.8.0
+    - pyerfa==2.0.0.1
+    - pymc3-ext==0.1.1
+    - xxhash==2.0.2
+prefix: /home/sam/.conda/envs/exoplanet
+
+</code></pre></details></td></tr><tr><td>Command</td><td><code>python /home/sam/box/charmonium.cache/benchmark/resources/exoplanet/script_theano.py</code></td></tr><tr><td>Results</td><td><table><thead><tr><td>Commit date</td><td>Commit hash</td><td>Commit diff</td><td><span>Unmodified time</span></td><td><span>Unmodified (2nd run) time</span></td><td><span><code>rr record</code> time</span></td><td><span><code>rr replay</code> time</span></td><td>Original is deterministic</td><td><span><code>rr</code> is deterministic</span></td><td>Results</td></tr></thead><tbody><tr><td><span>2021-06-08</span></td><td><a href="https://github.com/exoplanet-dev/exoplanet/commit/787ad30">787ad30</a></td><td><details><summary>Diff +79/-278</summary><pre><code class="language-diff" style="width: 60ch;height: 20vw;resize: both">diff --git a/.github/workflows/tests.yml b/.github/workflows/tests.yml
+index 6efc97d..4df1db4 100644
+--- a/.github/workflows/tests.yml
++++ b/.github/workflows/tests.yml
+@@ -17,11 +17,11 @@ jobs:
+     strategy:
+       fail-fast: false
+       matrix:
+-        python-version: ["3.9", "3.10"]
+-        pymc-version: ["3.11", "dev"]
++        python-version: ["3.9"]
++        pymc-version: ["3.9", "3.10", "3.11", "dev"]
+         include:
+-          - python-version: "3.10"
+-            pymc-version: "beta"
++          - python-version: "3.8"
++            pymc-version: "3.11"
+ 
+     steps:
+       - name: Checkout
+@@ -112,7 +112,7 @@ jobs:
+   upload_pypi:
+     needs: [tests, lint, build]
+     runs-on: ubuntu-latest
+-    if: startsWith(github.ref, 'refs/tags/')
++    if: github.event_name == 'release' &amp;&amp; github.event.action == 'published'
+     steps:
+       - uses: actions/download-artifact@v2
+         with:
+diff --git a/.pre-commit-config.yaml b/.pre-commit-config.yaml
+index b582728..be30539 100644
+--- a/.pre-commit-config.yaml
++++ b/.pre-commit-config.yaml
+@@ -1,6 +1,6 @@
+ repos:
+ - repo: https://github.com/pre-commit/pre-commit-hooks
+-  rev: v4.1.0
++  rev: v4.0.1
+   hooks:
+   - id: trailing-whitespace
+     exclude: src/exoplanet/theano_ops/lib/vendor
+@@ -14,7 +14,7 @@ repos:
+     exclude: docs/tutorials
+ 
+ - repo: https://github.com/PyCQA/isort
+-  rev: "5.10.1"
++  rev: "5.8.0"
+   hooks:
+   - id: isort
+     args: []
+@@ -22,17 +22,17 @@ repos:
+     exclude: docs/tutorials
+ 
+ - repo: https://github.com/psf/black
+-  rev: "21.12b0"
++  rev: "21.5b2"
+   hooks:
+   - id: black
+ 
+ - repo: https://github.com/dfm/black_nbconvert
+-  rev: v0.3.0
++  rev: v0.2.0
+   hooks:
+   - id: black_nbconvert
+ 
+ - repo: https://github.com/mwouts/jupytext
+-  rev: v1.13.6
++  rev: v1.11.2
+   hooks:
+   - id: jupytext
+     files: |
+diff --git a/CITATION.cff b/CITATION.cff
+deleted file mode 100644
+index 872f8e4..0000000
+--- a/CITATION.cff
++++ /dev/null
+@@ -1,55 +0,0 @@
+-cff-version: 1.1.0
+-message: "If you use this software, please cite it as below."
+-authors:
+-  - family-names: Foreman-Mackey
+-    given-names: Daniel
+-    orcid: https://orcid.org/0000-0002-9328-5652
+-  - family-names: Luger
+-    given-names: Rodrigo
+-    orcid: https://orcid.org/0000-0002-0296-3826
+-  - family-names: Agol
+-    given-names: Eric
+-    orcid: https://orcid.org/0000-0002-0802-9145
+-  - family-names: Barclay
+-    given-names: Thomas
+-    orcid: https://orcid.org/0000-0001-7139-2724
+-  - family-names: Bouma
+-    given-names: Luke G.
+-    orcid: https://orcid.org/0000-0002-0514-5538
+-  - family-names: Brandt
+-    given-names: Timothy D.
+-    orcid: https://orcid.org/0000-0003-2630-8073
+-  - family-names: Czekala
+-    given-names: Ian
+-    orcid: https://orcid.org/0000-0002-1483-8811
+-  - family-names: David
+-    given-names: Trevor J.
+-    orcid: https://orcid.org/0000-0001-6534-6246
+-  - family-names: Dong
+-    given-names: Jiayin
+-    orcid: https://orcid.org/0000-0002-3610-6953
+-  - family-names: Gilbert
+-    given-names: Emily A.
+-    orcid: https://orcid.org/0000-0002-0388-8004
+-  - family-names: Gordon
+-    given-names: Tyler A.
+-    orcid: https://orcid.org/0000-0001-5253-1987
+-  - family-names: Hedges
+-    given-names: Christina
+-    orcid: https://orcid.org/0000-0002-3385-8391
+-  - family-names: Hey
+-    given-names: Daniel R.
+-    orcid: https://orcid.org/0000-0003-3244-5357
+-  - family-names: Morris
+-    given-names: Brett M.
+-    orcid: https://orcid.org/0000-0003-2528-3409
+-  - family-names: Price-Whelan
+-    given-names: Adrian M.
+-    orcid: https://orcid.org/0000-0003-0872-7098
+-  - family-names: Savel
+-    given-names: Arjun B.
+-    orcid: https://orcid.org/0000-0002-2454-768X
+-title: "exoplanet: Gradient-based probabilistic inference for exoplanet data &amp; other astronomical time series"
+-version: "0.5.1"
+-doi: "10.5281/zenodo.1998447"
+-date-released: 2021-06-21
+diff --git a/HISTORY.rst b/HISTORY.rst
+index f118d44..01aa9e0 100644
+--- a/HISTORY.rst
++++ b/HISTORY.rst
+@@ -1,30 +1,23 @@
+-0.5.1 (2021-06-21)
+-++++++++++++++++++
+-
+-- Adds support for testing using tox (`#197 &lt;https://github.com/exoplanet-dev/exoplanet/pull/197&gt;`_)
+-- Updates documentation, tutorials, and case studies for JOSS review (`#186 &lt;https://github.com/exoplanet-dev/exoplanet/pull/186&gt;`_ and `#200 &lt;https://github.com/exoplanet-dev/exoplanet/pull/200&gt;`_)
+-
+-
+ 0.5.0 (2021-05-04)
+ ++++++++++++++++++
+ 
+-- Adds high-level, pure-Theano/Aesara implementation of ``RegularGridInterpolator`` to replace compiled version (`#167 &lt;https://github.com/exoplanet-dev/exoplanet/pull/167&gt;`_)
+-- Moves compiled Ops to `exoplanet-core &lt;https://github.com/exoplanet-dev/exoplanet-core&gt;`_ making exoplanet a pure-Python package (`#171 &lt;https://github.com/exoplanet-dev/exoplanet/pull/171&gt;`_)
+-- Moves `ReboundOp` and `ReboundOrbit` to `rebound-pymc3 &lt;https://github.com/exoplanet-dev/rebound-pymc3&gt;`_ (`#166 &lt;https://github.com/exoplanet-dev/exoplanet/pull/166&gt;`_)
+-- Removes deprecated submodules (``gp``, ``optimize``, and ``sampling``) and base distributions (e.g. ``xo.Angle``) (`#165 &lt;https://github.com/exoplanet-dev/exoplanet/pull/165&gt;`_)
++- Adds high-level, pure-Theano/Aesara implementation of ``RegularGridInterpolator`` to replace compiled version `#167 &lt;https://github.com/exoplanet-dev/exoplanet/pull/167&gt;`_
++- Moves compiled Ops to `exoplanet-core &lt;https://github.com/exoplanet-dev/exoplanet-core&gt;`_ making exoplanet a pure-Python package `#171 &lt;https://github.com/exoplanet-dev/exoplanet/pull/171&gt;`_
++- Moves `ReboundOp` and `ReboundOrbit` to `rebound-pymc3 &lt;https://github.com/exoplanet-dev/rebound-pymc3&gt;`_ `#166 &lt;https://github.com/exoplanet-dev/exoplanet/pull/166&gt;`_
++- Removes deprecated submodules (``gp``, ``optimize``, and ``sampling``) and base distributions (e.g. ``xo.Angle``) `#165 &lt;https://github.com/exoplanet-dev/exoplanet/pull/165&gt;`_
+ 
+ 
+ 0.4.5 (2021-03-15)
+ ++++++++++++++++++
+ 
+-- Adds support for recent versions of PyMC3 built on Aesara (`#150 &lt;https://github.com/exoplanet-dev/exoplanet/pull/150&gt;`_)
+-- Fixes bug in `SimpleTransitOrbit` contact point calculation (`#148 &lt;https://github.com/exoplanet-dev/exoplanet/pull/148&gt;`_)
++- Adds support for recent versions of PyMC3 built on Aesara `#150 &lt;https://github.com/exoplanet-dev/exoplanet/pull/150&gt;`_
++- Fixes bug in `SimpleTransitOrbit` contact point calculation `#148 &lt;https://github.com/exoplanet-dev/exoplanet/pull/148&gt;`_
+ 
+ 
+ 0.4.4 (2021-01-04)
+ ++++++++++++++++++
+ 
+-- Adds support for relativistic orbits using REBOUNDx (`#98 &lt;https://github.com/exoplanet-dev/exoplanet/pull/98&gt;`_)
++- Adds support for relativistic orbits using REBOUNDx `#98 &lt;https://github.com/exoplanet-dev/exoplanet/pull/98&gt;`_
+ 
+ 
+ 0.4.3 (2020-12-08)
+@@ -42,7 +35,7 @@
+ 0.4.1 (2020-11-15)
+ ++++++++++++++++++
+ 
+-- Fixes pickling error when sampling in parallel (`#120 &lt;https://github.com/exoplanet-dev/exoplanet/pull/120&gt;`_)
++- Fixes pickling error when sampling in parallel `#120 &lt;https://github.com/exoplanet-dev/exoplanet/pull/120&gt;`_
+ 
+ 
+ 0.4.0 (2020-10-05)
+diff --git a/README.md b/README.md
+index 3fc39a4..8a7ef95 100644
+--- a/README.md
++++ b/README.md
+@@ -1,9 +1,12 @@
+ &lt;p align="center"&gt;
+-  &lt;img width="240" src="https://raw.githubusercontent.com/exoplanet-dev/exoplanet/main/docs/_static/logo.png"&gt;
++  &lt;img width="50" src="https://raw.githubusercontent.com/exoplanet-dev/exoplanet/main/docs/_static/logo.png"&gt;
+   &lt;br&gt;&lt;br&gt;
+   &lt;a href="https://github.com/exoplanet-dev/exoplanet/actions/workflows/tests.yml"&gt;
+     &lt;img src="https://github.com/exoplanet-dev/exoplanet/actions/workflows/tests.yml/badge.svg" alt="Tests"&gt;
+   &lt;/a&gt;
++  &lt;a href="https://github.com/exoplanet-dev/exoplanet/actions/workflows/tutorials.yml"&gt;
++    &lt;img src="https://github.com/exoplanet-dev/exoplanet/actions/workflows/tutorials.yml/badge.svg" alt="Tutorials"&gt;
++  &lt;/a&gt;
+   &lt;a href="https://docs.exoplanet.codes"&gt;
+     &lt;img src="https://readthedocs.org/projects/exoplanet/badge/?version=latest" alt="Docs"&gt;
+   &lt;/a&gt;
+diff --git a/binder/requirements.txt b/binder/requirements.txt
+deleted file mode 100644
+index 4f9aeb8..0000000
+--- a/binder/requirements.txt
++++ /dev/null
+@@ -1,8 +0,0 @@
+-jupyterlab&gt;=3.0
+-jupytext
+-matplotlib
+-corner
+-lightkurve
+-pymc3-ext&gt;=0.1.0
+-emcee
+-.
+diff --git a/binder/runtime.txt b/binder/runtime.txt
+deleted file mode 100644
+index 8fdd907..0000000
+--- a/binder/runtime.txt
++++ /dev/null
+@@ -1 +0,0 @@
+-python-3.9
+diff --git a/docs/conf.py b/docs/conf.py
+index 40eb376..1c03296 100644
+--- a/docs/conf.py
++++ b/docs/conf.py
+@@ -50,7 +50,7 @@ html_theme_options = {
+     "repository_branch": "main",
+     "launch_buttons": {
+         "binderhub_url": "https://mybinder.org",
+-        "notebook_interface": "classic",
++        "notebook_interface": "jupyterlab",
+     },
+     "use_edit_page_button": True,
+     "use_issues_button": True,
+diff --git a/docs/environment.yml b/docs/environment.yml
+index 5d44449..f7f3501 100644
+--- a/docs/environment.yml
++++ b/docs/environment.yml
+@@ -10,4 +10,3 @@ dependencies:
+   - pip
+   - pip:
+       - ..[docs]
+-      - "sphinx-book-theme @ git+https://github.com/dfm/sphinx-book-theme.git@fix-outdir"
+diff --git a/docs/index.rst b/docs/index.rst
+index a472382..e33244a 100644
+--- a/docs/index.rst
++++ b/docs/index.rst
+@@ -63,7 +63,6 @@ Contents
+    user/install
+    tutorials/citation.md
+    user/theano
+-   user/multiprocessing
+    user/api
+    user/dev
+    changes.rst
+@@ -91,4 +90,4 @@ The source code is made available under the terms of the MIT license.
+ 
+ If you make use of this code, please cite this package and its dependencies. You
+ can find more information about how and what to cite in the `citation
+-&lt;tutorials/citation.md&gt;`_ documentation.
++&lt;tutorials/citation.ipynb&gt;`_ documentation.
+diff --git a/docs/tutorials/about.md b/docs/tutorials/about.md
+index 05c4fad..d793144 100644
+--- a/docs/tutorials/about.md
++++ b/docs/tutorials/about.md
+@@ -4,7 +4,7 @@ jupytext:
+     extension: .md
+     format_name: myst
+     format_version: 0.13
+-    jupytext_version: 1.13.6
++    jupytext_version: 1.11.2
+ kernelspec:
+   display_name: Python 3
+   language: python
+diff --git a/docs/tutorials/autodiff.md b/docs/tutorials/autodiff.md
+index b09f7e3..e76a831 100644
+--- a/docs/tutorials/autodiff.md
++++ b/docs/tutorials/autodiff.md
+@@ -4,7 +4,7 @@ jupytext:
+     extension: .md
+     format_name: myst
+     format_version: 0.13
+-    jupytext_version: 1.13.6
++    jupytext_version: 1.11.2
+ kernelspec:
+   display_name: Python 3
+   language: python
+diff --git a/docs/tutorials/citation.md b/docs/tutorials/citation.md
+index 353173d..eeec862 100644
+--- a/docs/tutorials/citation.md
++++ b/docs/tutorials/citation.md
+@@ -4,7 +4,7 @@ jupytext:
+     extension: .md
+     format_name: myst
+     format_version: 0.13
+-    jupytext_version: 1.13.6
++    jupytext_version: 1.11.2
+ kernelspec:
+   display_name: Python 3
+   language: python
+diff --git a/docs/tutorials/data-and-models.md b/docs/tutorials/data-and-models.md
+index 0c04084..306f212 100644
+--- a/docs/tutorials/data-and-models.md
++++ b/docs/tutorials/data-and-models.md
+@@ -4,7 +4,7 @@ jupytext:
+     extension: .md
+     format_name: myst
+     format_version: 0.13
+-    jupytext_version: 1.13.6
++    jupytext_version: 1.11.2
+ kernelspec:
+   display_name: Python 3
+   language: python
+@@ -104,7 +104,7 @@ In the following sections, we will go through some of the specific ways that you
+ 
+ ## Orbital conventions
+ 
+-These orbits are specified with respect to a single central body (generally the most massive body) and then a system of non-interacting bodies orbiting the central.
++These orbits are specified specified with respect to a single central body (generally the most massive body) and then a system of non-interacting bodies orbiting the central.
+ This is a good parameterization for exoplanetary systems and binary stars, but it is sometimes not sufficient for systems with multiple massive bodies where the interactions will be important to the dynamics.
+ 
+ We follow a set of internally consistent orbital conventions that also attempts to respect as many of the established conventions of the stellar and exoplanetary fields as possible.
+diff --git a/docs/tutorials/intro-to-pymc3.md b/docs/tutorials/intro-to-pymc3.md
+index 1f01df1..09ce399 100644
+--- a/docs/tutorials/intro-to-pymc3.md
++++ b/docs/tutorials/intro-to-pymc3.md
+@@ -5,7 +5,7 @@ jupytext:
+     extension: .md
+     format_name: myst
+     format_version: 0.13
+-    jupytext_version: 1.13.6
++    jupytext_version: 1.11.2
+ kernelspec:
+   display_name: Python 3
+   language: python
+diff --git a/docs/tutorials/light-delay.md b/docs/tutorials/light-delay.md
+index d727862..0f18081 100644
+--- a/docs/tutorials/light-delay.md
++++ b/docs/tutorials/light-delay.md
+@@ -4,7 +4,7 @@ jupytext:
+     extension: .md
+     format_name: myst
+     format_version: 0.13
+-    jupytext_version: 1.13.6
++    jupytext_version: 1.11.2
+ kernelspec:
+   display_name: Python 3
+   language: python
+diff --git a/docs/tutorials/reparameterization.md b/docs/tutorials/reparameterization.md
+index 2223604..081abb7 100644
+--- a/docs/tutorials/reparameterization.md
++++ b/docs/tutorials/reparameterization.md
+@@ -4,7 +4,7 @@ jupytext:
+     extension: .md
+     format_name: myst
+     format_version: 0.13
+-    jupytext_version: 1.13.6
++    jupytext_version: 1.11.2
+ kernelspec:
+   display_name: Python 3
+   language: python
+diff --git a/docs/user/multiprocessing.rst b/docs/user/multiprocessing.rst
+deleted file mode 100644
+index 78dadd4..0000000
+--- a/docs/user/multiprocessing.rst
++++ /dev/null
+@@ -1,25 +0,0 @@
+-.. _multiprocessing:
+-
+-Multiprocessing
+-===============
+-
+-By default, when you sample with ``PyMC3``, it will try to run chains in
+-parallel using Python's `multiprocessing` module. This is pretty much always
+-what you want, but it can also cause some headaches (mostly on macOS or Windows)
+-for the large and computationally expensive models tackled by ``exoplanet``. In
+-particular, you might sometimes get hit by the "dreaded broken pipe" error where
+-your sampler crashes for no obvious reason or (worse!) you might find you
+-sampler hanging indefinitely before it even starts running. The official
+-``PyMC3`` solution is to use the ``mp_ctx="forkserver"`` option when calling
+-``pm.sample`` on macOS or Windows. Unfortunately, this (for reasons that I don't
+-totally understand) will often cause a huge performance hit that can increase
+-your runtime by orders of magnitude.
+-
+-Throughout these documentation pages and for the Case Studies, we have tried to
+-design the example models such that you shouldn't run into issues with
+-multiprocessing but, if you do, please `open an issue on GitHub
+-&lt;https://github.com/exoplanet-dev/exoplanet/issues&gt;`_. For your own projects, if
+-you run into multiprocessing issues, you can try adjusting the ``mp_ctx`` and
+-``pickle_backend`` parameters (see the `PyMC3 docs
+-&lt;https://docs.pymc.io/api/inference.html#pymc3.sampling.sample&gt;`_), or as a last
+-resort, set ``cores=1`` to get serial sampling.
+diff --git a/joss/figures/figure.png b/joss/figures/figure.png
+deleted file mode 100644
+index 14b4995..0000000
+Binary files a/joss/figures/figure.png and /dev/null differ
+diff --git a/joss/metadata.yaml b/joss/metadata.yaml
+index b947625..a185339 100644
+--- a/joss/metadata.yaml
++++ b/joss/metadata.yaml
+@@ -1,21 +1,20 @@
+ variables:
+-  archive_doi: "https://doi.org/10.5281/zenodo.5006965"
+-  formatted_doi: "10.21105/joss.03285"
++  archive_doi: "TBD"
++  formatted_doi: "TBD"
+   repository: "https://github.com/exoplanet-dev/exoplanet"
+-  doi_batch_id: "0dedac9c1d1144b256106ae0297c1495"
+-  editor_url: "https://arfon.org"
+-  review_issue_url: "https://github.com/openjournals/joss-reviews/issues/3285"
+-  paper_url: "https://joss.theoj.org/papers/10.21105/joss.03285"
++  doi_batch_id: "N/A"
++  editor_url: "https://example.com"
++  review_issue_url: "N/A"
++  paper_url: "NO PAPER URL"
+ 
+ metadata:
+   logo_path: "figures/joss-logo.png"
+-  citation_author: "Foreman-Mackey et al."
+-  issue: "6"
+-  page: "3285"
+-  volume: "62"
+-  editor_name: "Arfon Smith"
+-  published: "22 June 2021"
++  citation_author: "Foreman-Mackey"
++  issue: "TBD"
++  page: "TBD"
++  volume: "TBD"
++  editor_name: "Pending Editor"
++  published: "N/A"
+   reviewers:
+-    - "grburgess"
+-    - "benjaminpope"
+-  submitted: "04 May 2021"
++    - "Pending Reviewers"
++  submitted: "N/A"
+diff --git a/joss/paper.bib b/joss/paper.bib
+index 1040071..bd4616b 100644
+--- a/joss/paper.bib
++++ b/joss/paper.bib
+@@ -687,77 +687,3 @@
+   version = {0.2.5},
+   year    = {2018}
+ }
+-
+-@article{parviainen15b,
+-  author        = {{Parviainen}, H. and {Aigrain}, S.},
+-  title         = {{LDTK: Limb Darkening Toolkit}},
+-  journal       = {Monthly Notices of the Royal Astronomical Society},
+-  keywords      = {gravitational lensing: micro, methods: numerical, techniques: interferometric, planets and satellites: general, binaries: eclipsing, Astrophysics - Earth and Planetary Astrophysics, Astrophysics - Instrumentation and Methods for Astrophysics, Astrophysics - Solar and Stellar Astrophysics},
+-  year          = 2015,
+-  month         = nov,
+-  volume        = {453},
+-  number        = {4},
+-  pages         = {3821-3826},
+-  doi           = {10.1093/mnras/stv1857},
+-  archiveprefix = {arXiv},
+-  eprint        = {1508.02634},
+-  primaryclass  = {astro-ph.EP},
+-  adsurl        = {https://ui.adsabs.harvard.edu/abs/2015MNRAS.453.3821P},
+-  adsnote       = {Provided by the SAO/NASA Astrophysics Data System}
+-}
+-
+-@article{irwin11,
+-  author        = {{Irwin}, Jonathan M. and {Quinn}, Samuel N. and {Berta}, Zachory K. and {Latham}, David W. and {Torres}, Guillermo and {Burke}, Christopher J. and {Charbonneau}, David and {Dittmann}, Jason and {Esquerdo}, Gilbert A. and {Stefanik}, Robert P. and {Oksanen}, Arto and {Buchhave}, Lars A. and {Nutzman}, Philip and {Berlind}, Perry and {Calkins}, Michael L. and {Falco}, Emilio E.},
+-  title         = {{LSPM J1112+7626: Detection of a 41 Day M-dwarf Eclipsing Binary from the MEarth Transit Survey}},
+-  journal       = {The Astrophysical Journal},
+-  keywords      = {binaries: eclipsing, stars: low-mass, Astrophysics - Solar and Stellar Astrophysics},
+-  year          = 2011,
+-  month         = dec,
+-  volume        = {742},
+-  number        = {2},
+-  eid           = {123},
+-  pages         = {123},
+-  doi           = {10.1088/0004-637X/742/2/123},
+-  archiveprefix = {arXiv},
+-  eprint        = {1109.2055},
+-  primaryclass  = {astro-ph.SR},
+-  adsurl        = {https://ui.adsabs.harvard.edu/abs/2011ApJ...742..123I},
+-  adsnote       = {Provided by the SAO/NASA Astrophysics Data System}
+-}
+-
+-@article{southworth04,
+-  author        = {{Southworth}, J. and {Maxted}, P.~F.~L. and {Smalley}, B.},
+-  title         = {{Eclipsing binaries in open clusters - II. V453 Cyg in NGC 6871}},
+-  journal       = {Monthly Notices of the Royal Astronomical Society},
+-  keywords      = {binaries: eclipsing, binaries: spectroscopic, stars: early-type, stars: fundamental parameters, stars: individual: V453 Cyg, open clusters and associations: individual: NGC 6871, Astrophysics},
+-  year          = 2004,
+-  month         = jul,
+-  volume        = {351},
+-  number        = {4},
+-  pages         = {1277-1289},
+-  doi           = {10.1111/j.1365-2966.2004.07871.x},
+-  archiveprefix = {arXiv},
+-  eprint        = {astro-ph/0403572},
+-  primaryclass  = {astro-ph},
+-  adsurl        = {https://ui.adsabs.harvard.edu/abs/2004MNRAS.351.1277S},
+-  adsnote       = {Provided by the SAO/NASA Astrophysics Data System}
+-}
+-
+-@article{conroy20,
+-  author        = {{Conroy}, Kyle E. and {Kochoska}, Angela and {Hey}, Daniel and {Pablo}, Herbert and {Hambleton}, Kelly M. and {Jones}, David and {Giammarco}, Joseph and {Abdul-Masih}, Michael and {Pr{\v{s}}a}, Andrej},
+-  title         = {{Physics of Eclipsing Binaries. V. General Framework for Solving the Inverse Problem}},
+-  journal       = {The Astrophysical Journal Supplement Series},
+-  keywords      = {Eclipsing binary stars, 444, Astrophysics - Solar and Stellar Astrophysics, Astrophysics - Earth and Planetary Astrophysics, Astrophysics - Instrumentation and Methods for Astrophysics},
+-  year          = 2020,
+-  month         = oct,
+-  volume        = {250},
+-  number        = {2},
+-  eid           = {34},
+-  pages         = {34},
+-  doi           = {10.3847/1538-4365/abb4e2},
+-  archiveprefix = {arXiv},
+-  eprint        = {2006.16951},
+-  primaryclass  = {astro-ph.SR},
+-  adsurl        = {https://ui.adsabs.harvard.edu/abs/2020ApJS..250...34C},
+-  adsnote       = {Provided by the SAO/NASA Astrophysics Data System}
+-}
+diff --git a/joss/paper.md b/joss/paper.md
+index 12b8f59..0975fb1 100644
+--- a/joss/paper.md
++++ b/joss/paper.md
+@@ -97,7 +97,7 @@ bibliography: paper.bib
+ 
+ `exoplanet` is a toolkit for probabilistic modeling of astronomical time series
+ data, with a focus on observations of exoplanets, using `PyMC3` [@pymc3].
+-`PyMC3` is a flexible and high-performance model-building language and inference
++`PyMC3` is a flexible and high-performance model building language and inference
+ engine that scales well to problems with a large number of parameters.
+ `exoplanet` extends `PyMC3`’s modeling language to support many of the custom
+ functions and probability distributions required when fitting exoplanet datasets
+@@ -105,8 +105,8 @@ or other astronomical time series.
+ 
+ While it has been used for other applications, such as the study of stellar
+ variability [e.g., @gillen20; @medina20], the primary purpose of `exoplanet` is
+-the characterization of exoplanets [e.g., @gilbert20; @plavchan20] or multiple-star
+-systems [e.g., @czekala21] using time-series photometry, astrometry, and/or
++the characterization of exoplanets [e.g., @gilbert20; @plavchan20] or multiple
++star systems [e.g., @czekala21] using time series photometry, astrometry, and/or
+ radial velocity. In particular, the typical use case would be to use one or more
+ of these datasets to place constraints on the physical and orbital parameters of
+ the system, such as planet mass or orbital period, while simultaneously taking
+@@ -114,7 +114,7 @@ into account the effects of stellar variability.
+ 
+ # Statement of need
+ 
+-Time-domain astronomy is a priority of the observational astronomical community,
++Time domain astronomy is a priority of the observational astronomical community,
+ with huge survey datasets currently available and more forthcoming. Within this
+ research domain, there is significant investment into the discovery and
+ characterization of exoplanets, planets orbiting stars other than our Sun. These
+@@ -141,14 +141,14 @@ related.
+   of many special functions required for exoplanet data analysis. These include
+   the spherical geometry for computing orbits, some exoplanet-specific
+   distributions for eccentricity [@kipping13b; @vaneylen19] and limb darkening
+-  [@kipping13], and exposure-time integrated limb-darkened transit light curves.
++  [@kipping13], and exposure-time integrated limb darkened transit light curves.
+ - `exoplanet-core`[^exoplanet-core] provides efficient, well-tested, and
+   differentiable implementations of all of the exoplanet-specific operations
+   that must be compiled for performance. These include an efficient solver for
+   Kepler's equation [based on the algorithm proposed by @raposo17] and limb
+   darkened transit light curves [@agol20]. Besides the implementation for
+-  `PyMC3`, `exoplanet-core` includes implementations in `numpy` [@numpy] and
+-  `jax` [@jax].
++  `PyMC3` and `Theano`, `exoplanet-core` includes implementations in `numpy`
++  [@numpy] and `jax` [@jax].
+ - `celerite2`[^celerite2], is an updated implementation of the _celerite_
+   algorithm[^celerite] [@foremanmackey17; @foremanmackey18] for scalable
+   Gaussian Process regression for time series data. Like `exoplanet-core`,
+@@ -157,8 +157,8 @@ related.
+ - `pymc3-ext`[^pymc3-ext], includes a set of helper functions to make `PyMC3`
+   more amenable to the typical astronomical data analysis workflow. For example,
+   it provides a tuning schedule for `PyMC3`'s sampler [based on the method used
+-  by the `Stan` project and described by @carpenter17] that provides better
+-  performance on models with correlated parameters.
++  by the `Stan` project @carpenter17] that provides better performance on models
++  with correlated parameters.
+ - `rebound-pymc3`[^rebound-pymc3] provides an interface between _REBOUND_
+   [@rein12], _REBOUNDx_ [@tamayo20], and `PyMC3` to enable inference with full
+   N-body orbit integration.
+@@ -181,17 +181,7 @@ detailed example use cases for `exoplanet` and the other libraries described
+ here. Like the tutorials on the documentation page, these case studies are
+ automatically executed using GitHub Actions, but at lower cadence (once a week
+ and when a new release of the `exoplanet` library is made) since the runtime is
+-much longer. \autoref{fig:figure} shows the results of two example case studies
+-demonstrating some of the potential use cases of the `exoplanet` software
+-ecosystem.
+-
+-![Some examples of datasets fit using `exoplanet`. The full analyses behind
+-these examples are available on the "Case Studies" page as Jupyter notebooks.
+-(left) A fit to the light curves of a transiting exoplanet observed by two
+-different space-based photometric surveys: Kepler and TESS. (right) The phase-folded
+-radial velocity time series for an exoplanet observed from different
+-observatories with different instruments, fit simultaneously using `exoplanet`.
+-\label{fig:figure}](figures/figure.png)
++much longer.
+ 
+ # Similar tools
+ 
+@@ -204,35 +194,32 @@ context.
+ Some of the most popular tools in this space include (and note that this is far
+ from a comprehensive list!) `EXOFAST` [@eastman13; @eastman19], `radvel`
+ [@fulton18], `juliet` [@espinoza19], `exostriker` [@trifonov19], `PYANETI`
+-[@barragan19], `allesfitter` [@guenther20], and `orbitize` [@blunt20]. Similar
+-tools also exist for modeling observations of eclipsing binary systems,
+-including `JKTEBOP` [@southworth04], `eb` [@irwin11], and `PHOEBE` [@conroy20].
+-These packages all focus on providing a high-level interface for designing
+-models and then executing a fit. In contrast, `exoplanet` is designed to be lower
+-level and more conceptually similar to tools like `batman` [@kreidberg15],
+-`PyTransit` [@parviainen15], `ldtk` [@parviainen15b], `ellc` [@maxted16],
+-`starry` [@luger19], or `Limbdark.jl` [@agol20], which provide the building
+-blocks for evaluating the models required for inference with exoplanet datasets.
+-In fact, several of the higher-level packages listed above include these
+-lower-level libraries as dependencies, and our hope is that `exoplanet` could
+-provide the backend for future high-level libraries.
++[@barragan19], `allesfitter` [@guenther20], and `orbitize` [@blunt20]. These
++packages all focus on providing a high-level interface for designing models and
++then executing a fit. `exoplanet`, however, is designed to be lower level and
++more conceptually similar to tools like `batman` [@kreidberg15], `PyTransit`
++[@parviainen15], `ellc` [@maxted16], `starry` [@luger19], or `Limbdark.jl`
++[@agol20], which provide the building blocks for evaluating the models required
++for inference with exoplanet datasets. In fact, several of the higher-level
++packages listed above include these lower-level libraries as dependencies, and
++our hope is that `exoplanet` could provide the backend for future high-level
++libraries.
+ 
+ As emphasized in the title of this paper, the main selling point of `exoplanet`
+ when compared to other tools in this space is that it supports differentiation
+ of all components of the model and is designed to integrate seamlessly with the
+-`aesara` [@aesara] automatic differentiation framework used by `PyMC3`. It is
+-worth noting that `aesara` was previously known as `Theano` [@theano], so these
+-names are sometimes used interchangeably in the `PyMC3` or `exoplanet`
+-documentation[^theano-aesara]. This allows the use of modern inference
+-algorithms such as No U-Turn Sampling [@hoffman14] or Automatic Differentiation
+-Variational Inference [@kucukelbir17]. These algorithms can have some
+-computational and conceptual advantages over inference methods that do not use
+-gradients, especially for high-dimensional models. The computation of gradients
++`aesara` [@aesara; formerly known as `Theano`, @theano] automatic
++differentiation framework used by `PyMC3`. This allows the use of modern
++inference algorithms such as No U-Turn Sampling [@hoffman14] or Automatic
++Differentiation Variational Inference [@kucukelbir17]. These algorithms can have
++some computational and conceptual advantages over inference methods that do not
++use gradients, especially for high-dimensional models. The computation of gradients
+ is also useful for model optimization; this is necessary when, say, searching
+ for new exoplanets, mapping out degeneracies or multiple modes of a posterior,
+-or estimating uncertainties from a Hessian. Care has been taken to provide
+-gradients which are numerically stable, and more accurate and faster to evaluate
+-than finite-difference gradients.
++or estimating uncertainties from a Hessian. Care has been taken to provide gradients
++which are numerically stable, and more accurate and faster to evaluate than
++finite-difference gradients which can be subject to significant numerical errors
++and require 2N computations of a model with N free parameters.
+ 
+ # Acknowledgements
+ 
+@@ -256,4 +243,3 @@ Besides the software cited above, `exoplanet` is also built on top of `ArviZ`
+ [^celerite]: [https://celerite.readthedocs.io](https://celerite.readthedocs.io)
+ [^pymc3-ext]: [https://github.com/exoplanet-dev/pymc3-ext](https://github.com/exoplanet-dev/pymc3-ext)
+ [^rebound-pymc3]: [https://github.com/exoplanet-dev/rebound-pymc3](https://github.com/exoplanet-dev/rebound-pymc3)
+-[^theano-aesara]: More information about this distinction is available at [https://docs.exoplanet.codes/en/stable/user/theano/](https://docs.exoplanet.codes/en/stable/user/theano/)
+diff --git a/setup.py b/setup.py
+index c1956f7..ffe074d 100644
+--- a/setup.py
++++ b/setup.py
+@@ -36,9 +36,12 @@ EXTRA_REQUIRE = {
+         "pytest",
+         "coverage[toml]",
+         "pytest-env",
++        "batman-package",
+     ],
+     "docs": [
+-        "sphinx-book-theme",
++        "sphinx-book-theme"
++        " @ git+https://github.com/executablebooks/sphinx-book-theme.git"
++        "@cf5338cd20f155f1976a7b9ba351a86917a12983",
+         "myst-nb",
+         "matplotlib",
+         "corner",
+diff --git a/src/exoplanet/citations.py b/src/exoplanet/citations.py
+index 95f41fd..2c7e828 100644
+--- a/src/exoplanet/citations.py
++++ b/src/exoplanet/citations.py
+@@ -50,8 +50,7 @@ def get_citations_for_model(model=None, width=79):
+ 
+     txt = (
+         r"This research made use of \textsf{{exoplanet}} "
+-        r"\citep{{exoplanet:joss, exoplanet:zenodo}} and its dependencies "
+-        r"\citep{{{0}}}."
++        r"\citep{{exoplanet}} and its dependencies \citep{{{0}}}."
+     )
+     txt = txt.format(", ".join(sorted(cite)))
+     txt = textwrap.wrap(txt, width=width)
+@@ -61,36 +60,15 @@ def get_citations_for_model(model=None, width=79):
+ 
+ CITATIONS = {
+     "exoplanet": (
+-        ("exoplanet:joss", "exoplanet:zenodo"),
++        ("exoplanet",),
+         r"""
+-@article{exoplanet:joss,
+-       author = {{Foreman-Mackey}, Daniel and {Luger}, Rodrigo and {Agol}, Eric
+-                and {Barclay}, Thomas and {Bouma}, Luke G. and {Brandt},
+-                Timothy D. and {Czekala}, Ian and {David}, Trevor J. and
+-                {Dong}, Jiayin and {Gilbert}, Emily A. and {Gordon}, Tyler A.
+-                and {Hedges}, Christina and {Hey}, Daniel R. and {Morris},
+-                Brett M. and {Price-Whelan}, Adrian M. and {Savel}, Arjun B.},
+-        title = "{exoplanet: Gradient-based probabilistic inference for
+-                  exoplanet data \&amp; other astronomical time series}",
+-      journal = {arXiv e-prints},
+-         year = 2021,
+-        month = may,
+-          eid = {arXiv:2105.01994},
+-        pages = {arXiv:2105.01994},
+-archivePrefix = {arXiv},
+-       eprint = {2105.01994},
+- primaryClass = {astro-ph.IM},
+-       adsurl = {https://ui.adsabs.harvard.edu/abs/2021arXiv210501994F},
+-      adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+-}
+-
+-@misc{exoplanet:zenodo,
++@misc{exoplanet,
+   author = {Daniel Foreman-Mackey and Arjun Savel and Rodrigo Luger  and
+             Eric Agol and Ian Czekala and Adrian Price-Whelan and
+-            Christina Hedges and Emily Gilbert and Luke Bouma
+-            and Timothy D. Brandt and Tom Barclay},
+-   title = {exoplanet-dev/exoplanet v0.5.1},
+-   month = jun,
++            Christina Hedges and Emily Gilbert and Luke Bouma and Tom Barclay
++            and Timothy D. Brandt},
++   title = {exoplanet-dev/exoplanet v0.5.0},
++   month = may,
+     year = 2021,
+      doi = {10.5281/zenodo.1998447},
+      url = {https://doi.org/10.5281/zenodo.1998447}
+@@ -355,9 +333,9 @@ publisher={PeerJ Inc.}
+         r"""
+ @ARTICLE{rebound,
+        author = {{Rein}, H. and {Liu}, S. -F.},
+-        title = "{REBOUND: an open-source multi-purpose N-body code for
+-                 collisional dynamics}",
++        title = "{REBOUND: an open-source multi-purpose N-body code for collisional dynamics}",
+       journal = {\aap},
++     keywords = {methods: numerical, planets and satellites: rings, protoplanetary disks, Astrophysics - Earth and Planetary Astrophysics, Astrophysics - Instrumentation and Methods for Astrophysics, Mathematics - Dynamical Systems, Physics - Computational Physics},
+          year = 2012,
+         month = jan,
+        volume = {537},
+@@ -377,10 +355,9 @@ archivePrefix = {arXiv},
+         r"""
+ @ARTICLE{reboundias15,
+        author = {{Rein}, Hanno and {Spiegel}, David S.},
+-        title = "{IAS15: a fast, adaptive, high-order integrator for
+-                  gravitational dynamics, accurate to machine precision over a
+-                  billion orbits}",
++        title = "{IAS15: a fast, adaptive, high-order integrator for gravitational dynamics, accurate to machine precision over a billion orbits}",
+       journal = {\mnras},
++     keywords = {gravitation, methods: numerical, planets and satellites: dynamical evolution and stability, Astrophysics - Earth and Planetary Astrophysics, Astrophysics - Instrumentation and Methods for Astrophysics, Astrophysics - Solar and Stellar Astrophysics, Mathematics - Numerical Analysis},
+          year = 2015,
+         month = jan,
+        volume = {446},
+@@ -420,16 +397,14 @@ author = {{Van Eylen}, Vincent and {Albrecht}, Simon and {Huang}, Xu and
+         ("exoplanet:reboundx",),
+         r"""
+ @article{tamayo2020reboundx,
+-   title  = {REBOUNDx: a library for adding conservative and dissipative forces
+-             to otherwise symplectic N-body integrations},
+-  author  = {Tamayo, Daniel and Rein, Hanno and Shi, Pengshuai and Hernandez,
+-             David M},
+- journal  = {Monthly Notices of the Royal Astronomical Society},
+-  volume  = {491},
+-  number  = {2},
+-   pages  = {2885--2901},
+-    year  = {2020},
+-publisher = {Oxford University Press}
++  title={REBOUNDx: a library for adding conservative and dissipative forces to otherwise symplectic N-body integrations},
++  author={Tamayo, Daniel and Rein, Hanno and Shi, Pengshuai and Hernandez, David M},
++  journal={Monthly Notices of the Royal Astronomical Society},
++  volume={491},
++  number={2},
++  pages={2885--2901},
++  year={2020},
++  publisher={Oxford University Press}
+ }
+ """,
+     ),
+diff --git a/src/exoplanet/interp.py b/src/exoplanet/interp.py
+index 778d0ab..209a3be 100644
+--- a/src/exoplanet/interp.py
++++ b/src/exoplanet/interp.py
+@@ -5,12 +5,11 @@ __all__ = ["regular_grid_interp", "RegularGridInterpolator"]
+ import itertools
+ 
+ import aesara_theano_fallback.tensor as tt
+-import numpy as np
+ 
+ from .utils import as_tensor_variable
+ 
+ 
+-def regular_grid_interp(points, values, coords, *, fill_value=None):
++def regular_grid_interp(points, values, coords):
+     """Perform a linear interpolation in N-dimensions w a regular grid
+ 
+     The data must be defined on a filled regular grid, but the spacing may be
+@@ -39,11 +38,9 @@ def regular_grid_interp(points, values, coords, *, fill_value=None):
+     # Find where the points should be inserted
+     indices = []
+     norm_distances = []
+-    out_of_bounds = tt.zeros(coords.shape[:-1], dtype=bool)
+     for n, grid in enumerate(points):
+         x = coords[..., n]
+         i = tt.extra_ops.searchsorted(grid, x) - 1
+-        out_of_bounds |= (i &lt; 0) | (i &gt;= grid.shape[0] - 1)
+         i = tt.clip(i, 0, grid.shape[0] - 2)
+         indices.append(i)
+         norm_distances.append((x - grid[i]) / (grid[i + 1] - grid[i]))
+@@ -54,10 +51,6 @@ def regular_grid_interp(points, values, coords, *, fill_value=None):
+         for ei, i, yi in zip(edge_indices, indices, norm_distances):
+             weight *= tt.where(tt.eq(ei, i), 1 - yi, yi)
+         result += values[edge_indices] * weight
+-
+-    if fill_value is not None:
+-        result = tt.switch(out_of_bounds, fill_value, result)
+-
+     return result
+ 
+ 
+@@ -75,11 +68,10 @@ class RegularGridInterpolator:
+             ``(m1, ... mn, ..., nout)``.
+     """
+ 
+-    def __init__(self, points, values, fill_value=None, **kwargs):
++    def __init__(self, points, values, **kwargs):
+         self.ndim = len(points)
+         self.points = points
+         self.values = values
+-        self.fill_value = fill_value
+ 
+     def evaluate(self, t):
+         """Interpolate the data
+@@ -89,6 +81,4 @@ class RegularGridInterpolator:
+                 should be evaluated. This must have the shape
+                 ``(ntest, ndim)``.
+         """
+-        return regular_grid_interp(
+-            self.points, self.values, t, fill_value=self.fill_value
+-        )
++        return regular_grid_interp(self.points, self.values, t)
+diff --git a/src/exoplanet/light_curves/interpolated.py b/src/exoplanet/light_curves/interpolated.py
+index f79f537..1680446 100644
+--- a/src/exoplanet/light_curves/interpolated.py
++++ b/src/exoplanet/light_curves/interpolated.py
+@@ -7,19 +7,6 @@ import numpy as np
+ 
+ 
+ def interp(n, x, xmin, xmax, dx, func):
+-    """One-dimensional regularly spaced cubic interpolation
+-
+-    Args:
+-        n (int): The axis of the output that should be interpolated
+-        x (tensor): The x coordinates where the model should be evaluated
+-        xmin (scalar): The first coordinate in the grid
+-        xmax (scalar): The last coordinate in the grid
+-        dx (scalar): The grid spacing
+-        func (callable): The function that should be interpolated
+-
+-    Returns:
+-        y: The function ``func`` interpolated to the coordinates ``x``
+-    """
+     xp = tt.arange(xmin - dx, xmax + 2.5 * dx, dx)
+     yp = func(xp)
+ 
+@@ -39,14 +26,6 @@ def interp(n, x, xmin, xmax, dx, func):
+ 
+ 
+ class InterpolatedLightCurve:
+-    """This light curve object is an EXPERIMENTAL and UNTESTED interface for
+-    pre-computing transit light curves on a grid and then interpolating this
+-    model onto the observed datapoints. This can improve the computational
+-    cost of a light curve model, especially when the dataset is large or the
+-    planet is short period. WARNING: You should only use this at your own risk
+-    if you know what you're doing!
+-    """
+-
+     def __init__(
+         self, base_light_curve, num_phase, num_planets=None, **kwargs
+     ):
+diff --git a/src/exoplanet/light_curves/limb_dark.py b/src/exoplanet/light_curves/limb_dark.py
+index 984cb19..1337fcf 100644
+--- a/src/exoplanet/light_curves/limb_dark.py
++++ b/src/exoplanet/light_curves/limb_dark.py
+@@ -128,9 +128,7 @@ class LimbDarkLightCurve:
+                 ``r_star``. This should have a shape that is consistent with
+                 the coordinates returned by ``orbit``. In general, this means
+                 that it should probably be a scalar or a vector with one entry
+-                for each body in ``orbit``. Note that this is a different
+-                quantity than the planet-to-star radius ratio; do not confuse
+-                the two!
++                for each body in ``orbit``.
+             t (tensor): The times where the light curve should be evaluated.
+             texp (Optional[tensor]): The exposure time of each observation.
+                 This can be a scalar or a tensor with the same shape as ``t``.
+@@ -163,8 +161,6 @@ class LimbDarkLightCurve:
+         r = tt.reshape(r, (r.size,))
+         t = as_tensor_variable(t)
+ 
+-        # If use_in_transit, we should only evaluate the model at times where
+-        # at least one planet is transiting
+         if use_in_transit:
+             transit_model = tt.shape_padleft(
+                 tt.zeros_like(r), t.ndim
+@@ -172,7 +168,6 @@ class LimbDarkLightCurve:
+             inds = orbit.in_transit(t, r=r, texp=texp, light_delay=light_delay)
+             t = t[inds]
+ 
+-        # Handle exposure time integration
+         if texp is None:
+             tgrid = t
+             rgrid = tt.shape_padleft(r, tgrid.ndim) + tt.shape_padright(
+@@ -213,8 +208,6 @@ class LimbDarkLightCurve:
+                 tt.zeros_like(tgrid), 1
+             )
+ 
+-        # Evalute the coordinates of the transiting body in the plane of the
+-        # sky
+         coords = orbit.get_relative_position(tgrid, light_delay=light_delay)
+         b = tt.sqrt(coords[0] ** 2 + coords[1] ** 2)
+         b = tt.reshape(b, rgrid.shape)
+diff --git a/src/exoplanet/orbits/dur_to_ecc.py b/src/exoplanet/orbits/dur_to_ecc.py
+index cd463a4..310c78b 100644
+--- a/src/exoplanet/orbits/dur_to_ecc.py
++++ b/src/exoplanet/orbits/dur_to_ecc.py
+@@ -1,11 +1,5 @@
+ # -*- coding: utf-8 -*-
+ 
+-"""This module has an EXPERIMENTAL and UNTESTED implementation of analytic
+-marginalizion over eccentricity as a function of transit duration (since the
+-mapping is not 1-to-1). The implementation as written probably DOES NOT WORK,
+-but I've (DFM) left it here for my own future reference. Feel free to ping me
+-if you're interested in what's going on here!"""
+-
+ __all__ = ["duration_to_eccentricity"]
+ 
+ from itertools import product
+diff --git a/src/exoplanet/orbits/keplerian.py b/src/exoplanet/orbits/keplerian.py
+index 4ec2aa0..3be5d65 100644
+--- a/src/exoplanet/orbits/keplerian.py
++++ b/src/exoplanet/orbits/keplerian.py
+@@ -16,8 +16,8 @@ from astropy import units as u
+ from exoplanet_core.pymc import ops
+ 
+ from ..citations import add_citations_to_model
+-from ..units import has_unit, to_unit, with_unit
+-from ..utils import as_tensor_variable, deprecation_warning
++from ..units import has_unit, to_unit
++from ..utils import as_tensor_variable
+ from .constants import G_grav, au_per_R_sun, c_light, gcc_per_sun
+ 
+ 
+@@ -90,21 +90,11 @@ class KeplerianOrbit:
+         rho_star=None,
+         ror=None,
+         model=None,
++        contact_points_kwargs=None,
+         **kwargs
+     ):
+         add_citations_to_model(self.__citations__, model=model)
+ 
+-        if "m_planet_units" in kwargs:
+-            deprecation_warning(
+-                "'m_planet_units' is deprecated; Use `with_unit` instead"
+-            )
+-            m_planet = with_unit(m_planet, kwargs.pop("m_planet_units"))
+-        if "rho_star_units" in kwargs:
+-            deprecation_warning(
+-                "'rho_star_units' is deprecated; Use `with_unit` instead"
+-            )
+-            rho_star = with_unit(rho_star, kwargs.pop("rho_star_units"))
+-
+         self.jacobians = defaultdict(lambda: defaultdict(None))
+ 
+         daordtau = None
+@@ -233,10 +223,10 @@ class KeplerianOrbit:
+             self.cos_incl = tt.cos(self.incl)
+             self.b = self.cos_incl / self.dcosidb
+         elif duration is not None:
+-            # This assertion should never be hit because of the first
+-            # conditional in this method, but let's keep it here anyways
+-            assert self.ecc is not None
+-
++            if self.ecc is None:
++                raise ValueError(
++                    "fitting with duration only works for eccentric orbits"
++                )
+             self.duration = as_tensor_variable(to_unit(duration, u.day))
+             c = tt.sin(np.pi * self.duration * incl_factor / self.period)
+             c2 = c * c
+diff --git a/tests/interp_test.py b/tests/interp_test.py
+index 19a2f14..88e8287 100644
+--- a/tests/interp_test.py
++++ b/tests/interp_test.py
+@@ -25,19 +25,3 @@ def test_basic():
+     op = RegularGridInterpolator((x, y, z), data)
+     f = np.squeeze(op.evaluate(pts).eval())
+     assert np.allclose(f, f0)
+-
+-
+-def test_fill_value():
+-    def f(x, y, z):
+-        return 2 * x ** 3 + 3 * y ** 2 - z
+-
+-    x = np.linspace(1, 4, 11)
+-    y = np.linspace(4, 7, 22)
+-    z = np.linspace(7, 9, 33)
+-
+-    data = f(*np.meshgrid(x, y, z, indexing="ij", sparse=True))
+-    pts = np.array([[0.1, 6.2, 8.3], [3.3, 5.2, 10.1]])
+-
+-    op = RegularGridInterpolator((x, y, z), data, fill_value=np.nan)
+-    f = op.evaluate(pts).eval()
+-    assert np.all(np.isnan(f))
+diff --git a/tests/light_curves_test.py b/tests/light_curves_test.py
+index 4302220..03dce38 100644
+--- a/tests/light_curves_test.py
++++ b/tests/light_curves_test.py
+@@ -170,7 +170,6 @@ def test_contact_bug():
+ 
+ 
+ def test_small_star():
+-    pytest.importorskip("batman.transitmodel")
+     from batman.transitmodel import TransitModel, TransitParams
+ 
+     u_star = [0.2, 0.1]
+diff --git a/tests/orbits/keplerian_test.py b/tests/orbits/keplerian_test.py
+index f4a9082..1be9aa3 100644
+--- a/tests/orbits/keplerian_test.py
++++ b/tests/orbits/keplerian_test.py
+@@ -17,7 +17,7 @@ from exoplanet.units import with_unit
+ 
+ 
+ def test_sky_coords():
+-    _rsky = pytest.importorskip("batman._rsky")
++    from batman import _rsky
+ 
+     t = np.linspace(-100, 100, 1000)
+ 
+@@ -314,7 +314,7 @@ def test_in_transit_circ():
+ 
+ 
+ def test_small_star():
+-    _rsky = pytest.importorskip("batman._rsky")
++    from batman import _rsky
+ 
+     m_star = 0.151
+     r_star = 0.189
+diff --git a/tests/units_test.py b/tests/units_test.py
+deleted file mode 100644
+index 874b8ff..0000000
+--- a/tests/units_test.py
++++ /dev/null
+@@ -1,37 +0,0 @@
+-# -*- coding: utf-8 -*-
+-
+-import astropy.units as u
+-import numpy as np
+-
+-from exoplanet import units
+-from exoplanet.orbits import KeplerianOrbit
+-
+-
+-def test_mass_units():
+-    P_earth = 365.256
+-    Tper_earth = 2454115.5208333
+-    inclination_earth = np.radians(45.0)
+-
+-    orbit1 = KeplerianOrbit(
+-        period=P_earth,
+-        t_periastron=Tper_earth,
+-        incl=inclination_earth,
+-        m_planet=units.with_unit(1.0, u.M_earth),
+-    )
+-    orbit2 = KeplerianOrbit(
+-        period=P_earth,
+-        t_periastron=Tper_earth,
+-        incl=inclination_earth,
+-        m_planet=1.0,
+-        m_planet_units=u.M_earth,
+-    )
+-
+-    t = np.linspace(Tper_earth, Tper_earth + 1000, 1000)
+-    rv1 = orbit1.get_radial_velocity(t).eval()
+-    rv_diff = np.max(rv1) - np.min(rv1)
+-    assert rv_diff &lt; 1.0, "with_unit"
+-
+-    rv2 = orbit2.get_radial_velocity(t).eval()
+-    rv_diff = np.max(rv2) - np.min(rv2)
+-    assert rv_diff &lt; 1.0, "m_planet_units"
+-    np.testing.assert_allclose(rv2, rv1)
+diff --git a/tox.ini b/tox.ini
+index 0bb3547..38f785b 100644
+--- a/tox.ini
++++ b/tox.ini
+@@ -1,23 +1,26 @@
+ [tox]
+-envlist = py{38,39,310}-pymc{311,dev},lint,docs
++envlist = py{38,39}-pymc{39,310,311,dev},lint,docs
+ 
+ [gh-actions]
+ python =
+     3.8: py38
+     3.9: py39
+-    3.10: py310
+ 
+ [gh-actions:env]
+ PYMC_VERSION =
++    3.9: pymc39
++    3.10: pymc310
+     3.11: pymc311
+     dev: pymcdev
+ 
+ [testenv]
+ passenv = GITHUB_*
+ deps =
+-    numpy&lt;1.22
++    pymc{39,310}: arviz&lt;0.11
++    pymc39: pymc3~=3.9.0
++    pymc310: pymc3~=3.10.0
+     pymc311: pymc3~=3.11.0
+-    pymcdev: https://github.com/pymc-devs/pymc/archive/v3.zip
++    pymcdev: https://github.com/pymc-devs/pymc3/archive/v3.zip
+ extras = test
+ commands =
+     pip freeze
+</code></pre></details></td><td><span>6.2s</span></td><td><span>6.2s</span></td><td><span>1232.6s</span></td><td><span>325.5s</span></td><td><span style="background-color: green; display: block;">deterministic</span></td><td><span style="background-color: green; display: block;">deterministic</span></td><td><details><summary>Details</summary><table><thead><tr><td></td><td>Unmodified</td><td>Unmodified (2nd run)</td><td><code>rr record</code></td><td><code>rr replay</code></td></tr></thead><tbody><tr><td>Status</td><td><span style="background-color: green; display: block;">Success</span></td><td><span style="background-color: green; display: block;">Success</span></td><td><span style="background-color: green; display: block;">Success</span></td><td><span style="background-color: green; display: block;">Success</span></td></tr><tr><td>Output</td><td><details><summary><code>110162</code></summary><pre><code></code></pre></details></td><td><details><summary><code>110162</code></summary><pre><code></code></pre></details></td><td><details><summary><code>110162</code></summary><pre><code></code></pre></details></td><td><details><summary><code>110162</code></summary><pre><code></code></pre></details></td></tr><tr><td>Time (s)</td><td><span>6.2s</span></td><td><span>6.2s</span></td><td><span>1232.6s</span></td><td><span>325.5s</span></td></tr><tr><td>Overhead (s)</td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr><tr><td>Function calls</td><td><details><summary>Show</summary><table><thead><tr><td>name</td><td>hash(args)</td><td>hash(ret)</td><td>hit</td><td>outer</td><td>inner</td><td>hash time</td><td>rest of overhead</td></tr></thead><tbody></tbody></table></details></td><td><details><summary>Show</summary><table><thead><tr><td>name</td><td>hash(args)</td><td>hash(ret)</td><td>hit</td><td>outer</td><td>inner</td><td>hash time</td><td>rest of overhead</td></tr></thead><tbody></tbody></table></details></td><td><details><summary>Show</summary><table><thead><tr><td>name</td><td>hash(args)</td><td>hash(ret)</td><td>hit</td><td>outer</td><td>inner</td><td>hash time</td><td>rest of overhead</td></tr></thead><tbody></tbody></table></details></td><td><details><summary>Show</summary><table><thead><tr><td>name</td><td>hash(args)</td><td>hash(ret)</td><td>hit</td><td>outer</td><td>inner</td><td>hash time</td><td>rest of overhead</td></tr></thead><tbody></tbody></table></details></td></tr></tbody></table></details></td></tr></tbody></table></td></tr></tbody></table></div></div></body></html>

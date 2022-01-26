@@ -1,6 +1,9 @@
-from pathlib import Path
-from typing import List, Tuple, Union
 import datetime
+from pathlib import Path
+import re
+import shlex
+from typing import List, Tuple, Union, Mapping
+
 from charmonium.determ_hash import determ_hash
 
 from . import html
@@ -58,49 +61,88 @@ def summarize_func_calls(func_calls: List[FuncCallProfile]) -> html.Tag:
 def summarize_execution(prof: ExecutionProfile) -> html.Tag:
     return html_table(
         [
-            ["process overhead (s)", disp_sec(prof.process_overhead)],
-            ["status", ("empty profile" if prof.empty else ("success" if prof.success else "error"))],
-            ["hash(stdout + stderr)", disp_hash(determ_hash(prof.output))],
-            ["stdout + stderr", collapsed("Show", html.pre()(html.code()(prof.output.decode())))],
-            ["Function calls", collapsed("Show", summarize_func_calls(prof.func_calls))],
+
         ]
     )
 
+executions: Mapping[str, html.TagLike] = {
+    "orig": "Unmodified",
+    "orig2": "Unmodified (2nd run)",
+    "rr_record": html.code()("rr record"),
+    "rr_replay": html.code()("rr replay"),
+}
 
 commit_result_headers: List[html.TagLike] = [
     "Commit date",
     "Commit hash",
     "Commit diff",
-    "Memoized time",
-    "",
-    "Memoized time (2)",
-    "",
-    "Original time",
-    "",
+    *[
+        html.span()(execution, " time")
+        for execution in executions.values()
+    ],
+    # "Memoized output matches original",
+    "Original is deterministic",
+    html.span()(html.code()("rr"), " is deterministic"),
+    "Results",
 ]
 
 def summarize_commit_result(repo: Repo, result: CommitResult) -> List[html.TagLike]:
-    def prof_color(prof: ExecutionProfile) -> str:
-        if prof.empty:
-            return "yellow"
-        elif prof.success:
-            return "green"
-        else:
-            return "red"
     def color_cell(elem: html.TagLike, color: str) -> html.Tag:
         return html.span(style=f"background-color: {color}; display: block;")(elem)
+    def prof_status(prof: ExecutionProfile) -> html.TagLike:
+        if prof.empty:
+            return color_cell("Empty profile", "yellow")
+        elif prof.success:
+            return color_cell("Success", "green")
+        else:
+            return color_cell("Error", "red")
     date_str = result.date.astimezone(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+    adds = len(list(re.finditer(r"^[+] ", result.diff, flags=re.MULTILINE)))
+    subs = len(list(re.finditer(r"^[-] ", result.diff, flags=re.MULTILINE)))
+
+    inner_table = html_table(
+        [
+            ["Status", *[
+                prof_status(prof)
+                for prof in result.executions.values()
+            ]],
+            ["Output", *[
+                collapsed(
+                    disp_hash(determ_hash(prof.output)),
+                    html.pre()(html.code()(prof.output.decode())),
+                ) for prof in result.executions.values()
+            ]],
+            ["Time (s)", *[
+                disp_sec(prof.total_time)
+                for prof in result.executions.values()
+            ]],
+            ["Overhead (s)", *[
+                disp_sec(prof.process_overhead)
+                for prof in result.executions.values()
+            ]],
+            ["Function calls", *[
+                collapsed("Show", summarize_func_calls(prof.func_calls))
+                for prof in result.executions.values()
+            ]],
+        ],
+        ["", *[
+            executions[label]
+            for label in result.executions.keys()
+        ]],
+    )
+    orig_deterministic = result.executions["orig2"].output == result.executions["orig"].output
+    rr_deterministic = result.executions["rr_record"].output == result.executions["rr_replay"].output
     return [
         disp_date(result.date),
         html.a(href=repo.display_url.format(commit=result.commit))(result.commit),
-        "",
-        # collapsed("Show", highlighted_code("diff", result.diff)),
-        color_cell(disp_sec(result.memo.total_time), color=prof_color(result.memo)),
-        collapsed("Details", summarize_execution(result.memo)),
-        color_cell(disp_sec(result.memo2.total_time), color=prof_color(result.memo2)),
-        collapsed("Details", summarize_execution(result.memo2)),
-        color_cell(disp_sec(result.orig.total_time), color=prof_color(result.orig)),
-        collapsed("Details", summarize_execution(result.orig)),
+        collapsed(f"Diff +{adds}/-{subs}", highlighted_code("diff", result.diff)),
+        *[
+            disp_sec(result.executions[execution].total_time)
+            for execution in executions
+        ],
+        color_cell("deterministic", "green") if orig_deterministic else color_cell("non-deterministic", "red"),
+        color_cell("deterministic", "green") if rr_deterministic else color_cell("non-deterministic", "red"),
+        collapsed("Details", inner_table),
     ]
 
 
@@ -127,10 +169,14 @@ def summarize_repo_result(
                 ["Name", repo_result.repo.name],
                 ["Path", str(repo_result.repo.dir)],
                 *summarize_environment(repo_result.environment),
-                ["Results", collapsed("show", html_table([
-                    summarize_commit_result(repo_result.repo, commit_result)
-                    for commit_result in repo_result.commit_results
-                ], commit_result_headers))],
+                ["Command", html.code()(shlex.join(repo_result.cmd))],
+                ["Results", html_table(
+                    [
+                        summarize_commit_result(repo_result.repo, commit_result)
+                        for commit_result in repo_result.commit_results
+                    ],
+                    commit_result_headers,
+                )],
             ]
         ),
     )

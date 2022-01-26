@@ -24,7 +24,6 @@ calls: list[int] = []
         ({"extra_func_state": lambda func: 3}, {}),  # type: ignore
         ({}, {"size": 1000},),
         ({}, {"size": "10KiB"},),
-        ({}, {"size": "10KiB"},),
         ({}, {"pickler": pickle}),
         ({}, {"fine_grain_persistence": True}),
         ({}, {"fine_grain_eviction": True}),

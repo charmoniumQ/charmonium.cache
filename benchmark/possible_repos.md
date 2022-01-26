@@ -1,3 +1,4 @@
+
 - https://gitlab.ethz.ch/leitner_lab/xquest_xprophet/-/tree/master
   - Perl
 - https://github.com/Kortemme-Lab/flex_ddG_tutorial
@@ -23,6 +24,7 @@
   - https://github.com/donnemartin/data-science-ipython-notebooks/blob/master/kaggle/titanic.ipynb
     - Python 2
 
+
 - https://nbviewer.org/github/maayanlab/Zika-RNAseq-Pipeline/blob/master/Zika.ipynb
   - Has too many bang commands
 - https://github.com/microsoft/torchgeo
@@ -45,6 +47,7 @@
 - https://github.com/Parsl/arctic_dem
 - https://github.com/Parsl/lsst-pipelines
 - https://github.com/Parsl/Parsl-Workflows
+- https://showyourwork.readthedocs.io/en/v0.2.2/projects/
 - https://github.com/uiuc-iml/TRINA
   - Testing/intelligent_ui/trainer.py
   - Stuck at `ModuleNotFoundError: No module named 'trina.utils.render_robot_mask'`.

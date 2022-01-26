@@ -1,6 +1,6 @@
 import exoplanet
 import sys
-import base64
+import binascii
 import matplotlib.pyplot as plt
 import arviz as az
 import functools
@@ -12,8 +12,23 @@ from pathlib import Path
 import tempfile
 import logging
 import charmonium.cache
+import bitmath
 
-@charmonium.cache.memoize()
+# handler = logging.StreamHandler(sys.stdout)
+handler = logging.FileHandler("/home/sam/Downloads/script.log")
+handler.setLevel(logging.DEBUG)
+formatter = logging.Formatter("%(asctime)s %(name)s: %(message)s")
+handler.setFormatter(formatter)
+ops_logger = logging.getLogger("charmonium.cache.ops")
+ops_logger.setLevel(logging.DEBUG)
+ops_logger.addHandler(handler)
+ops_logger.propagate = False
+
+group = charmonium.cache.MemoizedGroup(
+    size="1GiB",
+)
+
+@charmonium.cache.memoize(group=group)
 def get_data():
     import requests
     # Download the dataset from the Exoplanet Archive:
@@ -23,7 +38,7 @@ def get_data():
         r.raise_for_status()
     return r.text
 
-@charmonium.cache.memoize()
+@charmonium.cache.memoize(group=group)
 def parse_data(r_text):
     data = np.array(
         [
@@ -38,7 +53,7 @@ def parse_data(r_text):
     phase = np.linspace(0, 1, 500)
     return t, rv, rv_err, phase
 
-@charmonium.cache.memoize()
+@charmonium.cache.memoize(group=group)
 def plot_data(t, rv, rv_err):
     # Plot the observations "folded" on the published period:
     # Butler et al. (2006) https://arxiv.org/abs/astro-ph/0607493
@@ -120,14 +135,14 @@ def get_model(t, rv, rv_err, lit_period, phase):
         )
         return model
 
-@charmonium.cache.memoize()
+@charmonium.cache.memoize(group=group)
 def get_map_params(model_fn):
     import pymc3_ext as pmx
     with model_fn():
         map_params = pmx.optimize()
     return map_params
 
-@charmonium.cache.memoize()
+@charmonium.cache.memoize(group=group)
 def plot_params(t, rv, rv_err, phase, map_params):
     fig, axes = plt.subplots(2, 1, figsize=(8, 8))
 
@@ -150,7 +165,7 @@ def plot_params(t, rv, rv_err, phase, map_params):
     plt.tight_layout()
     return fig
 
-@charmonium.cache.memoize()
+@charmonium.cache.memoize(group=group)
 def run_model(model_fn, map_params):
     import pymc3_ext as pmx
     with model_fn():
@@ -165,7 +180,7 @@ def run_model(model_fn, map_params):
         )
     return trace
 
-@charmonium.cache.memoize()
+@charmonium.cache.memoize(group=group)
 def summarize_model(trace):
     az.summary(
         trace,
@@ -175,7 +190,7 @@ def summarize_model(trace):
     corner.corner(trace, var_names=["K", "P", "e", "w"])
     return plt.gcf()
 
-@charmonium.cache.memoize()
+@charmonium.cache.memoize(group=group)
 def plot_sample(t, rv, rv_err, phase, map_params, trace):
     fig, axes = plt.subplots(2, 1, figsize=(8, 8))
 
@@ -213,12 +228,21 @@ def main2():
     t, rv, rv_err, phase = parse_data(r_text)
     fig, lit_data = plot_data(t, rv, rv_err)
     fig.savefig(output, format="png")
+    print("Image 1 = ", binascii.crc32(output.getvalue()))
+
+    output = io.BytesIO()
     model_fn = functools.partial(get_model, t, rv, rv_err, lit_data, phase)
     map_params = get_map_params(model_fn)
     plot_params(t, rv, rv_err, phase, map_params).savefig(output, format="png")
+    print("Image 2 = ", binascii.crc32(output.getvalue()))
+
+    output = io.BytesIO()
     trace = run_model(model_fn, map_params)
     summarize_model(trace).savefig(output, format="png")
+    print("Image 3 = ", binascii.crc32(output.getvalue()))
+
+    output = io.BytesIO()
     plot_sample(t, rv, rv_err, phase, map_params, trace).savefig(output, format="png")
-    # sys.stdout.buffer.write(base64.b64encode(output.getvalue()))
+    print("Image 4 = ", binascii.crc32(output.getvalue()))
 
 main2()

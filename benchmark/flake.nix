@@ -47,6 +47,7 @@
             pkgs.libxslt
             pkgs.zlib
             pkgs.postgresql
+            pkgs.rr
             (pkgs.poetry2nix.mkPoetryEnv {
               projectDir = ./.;
               # default Python for shell

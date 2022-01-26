@@ -260,5 +260,33 @@ class NixEnvironment(Environment):
             cwd=cwd,
             check=False,
             capture_output=True,
+            env={
+                **os.environ,
+                **(env_override if env_override else {}),
+            },
         )
         return proc
+
+class InheritedEnvironment(Environment):
+    def setup(self, repo: Repo) -> None:
+        pass
+
+    def install(self, repo: Repo, packages: List[Union[str, Path]]) -> None:
+        raise NotImplementedError()
+
+    def run(
+        self,
+        command: List[str],
+        cwd: Path,
+        env_override: Optional[Mapping[str, str]] = None,
+    ) -> subprocess.CompletedProcess[bytes]:
+        return subprocess.run(
+            command,
+            cwd=cwd,
+            check=False,
+            capture_output=True,
+            env={
+                **os.environ,
+                **(env_override if env_override else {}),
+            },
+        )

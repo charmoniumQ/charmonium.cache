@@ -5,9 +5,9 @@ import contextlib
 import datetime
 import json
 import logging
-import random
-import pickle
 import os
+import pickle
+import random
 import sys
 import threading
 import warnings
@@ -50,20 +50,22 @@ BYTE_ORDER: str = "big"
 
 
 def memoize(
-    *,
-    disable: Union[str, bool] = None,
-    **kwargs: Any,
+    *, disable: Union[str, bool] = None, **kwargs: Any,
 ) -> Callable[[Callable[FuncParams, FuncReturn]], Memoized[FuncParams, FuncReturn]]:
     """See :py:class:`charmonium.cache.Memoized`."""
 
-    real_disable = disable if isinstance(disable, bool) else \
-        bool(os.environ.get("CHARMONIUM_CACHE_DISABLE", ""))
+    real_disable = (
+        disable
+        if isinstance(disable, bool)
+        else bool(os.environ.get("CHARMONIUM_CACHE_DISABLE", ""))
+    )
 
     if real_disable:
         return lambda x: x
     else:
+
         def actual_memoize(
-                func: Callable[FuncParams, FuncReturn]
+            func: Callable[FuncParams, FuncReturn]
         ) -> Memoized[FuncParams, FuncReturn]:
             # pyright doesn't know attrs __init__, hence type ignore
             return Memoized[FuncParams, FuncReturn](func, **kwargs)  # type: ignore
@@ -90,6 +92,7 @@ if perf_logger_file:
     perf_logger.setLevel(logging.DEBUG)
     perf_logger.addHandler(logging.FileHandler(perf_logger_file))
     perf_logger.propagate = False
+
 
 @contextlib.contextmanager
 def perf_ctx(event: str, **kwargs: Any) -> None:
@@ -510,7 +513,11 @@ class Memoized(Generic[FuncParams, FuncReturn]):
         return f"memoized {self.name}"
 
     def _recompute(
-        self, call_id: int, obj_key: int, *args: FuncParams.args, **kwargs: FuncParams.kwargs
+        self,
+        call_id: int,
+        obj_key: int,
+        *args: FuncParams.args,
+        **kwargs: FuncParams.kwargs,
     ) -> tuple[Entry, FuncReturn]:
 
         start = datetime.datetime.now()
@@ -577,7 +584,7 @@ class Memoized(Generic[FuncParams, FuncReturn]):
     ) -> FuncReturn:
         call_start = datetime.datetime.now()
 
-        call_id = random.randint(0, 2**64-1)
+        call_id = random.randint(0, 2 ** 64 - 1)
 
         would_hit, key, obj_key = self._would_hit(call_id, *args, **kwargs)
 
@@ -679,7 +686,9 @@ class Memoized(Generic[FuncParams, FuncReturn]):
         else:
             return obj
 
-    def would_hit(self, call_id: int, *args: FuncParams.args, **kwargs: FuncParams.kwargs) -> bool:
+    def would_hit(
+        self, call_id: int, *args: FuncParams.args, **kwargs: FuncParams.kwargs
+    ) -> bool:
         return self._would_hit(call_id, *args, **kwargs)[0]
 
     def _would_hit(

@@ -89,10 +89,12 @@ class CommandAction(Action):
             setup_cmds: List[List[str]] = [],
             commit_setup_cmds: List[List[str]] = [],
             run_cmds: List[List[str]] = [],
+            extra: Optional[object] = None,
     ) -> None:
         self.setup_cmds = setup_cmds
         self.commit_setup_cmds = commit_setup_cmds
         self.run_cmds = run_cmds
+        self.extra = extra
 
     def setup(self, repo: Repo, environment: Environment) -> None:
         for cmd in self.setup_cmds:
@@ -125,7 +127,7 @@ class CommandAction(Action):
                 env_override=env_override,
             )
             sys.stderr.buffer.write(proc.stderr)
-            stdout += proc.stderr + proc.stdout
+            stdout += proc.stdout
             success |= proc.returncode
             if success != 0:
                 break
