@@ -41,13 +41,15 @@
             default-python
             pkgs.git
             pkgs.poetry
-            # pkgs.micromamba
+            pkgs.micromamba
             pkgs.conda
             pkgs.libxml2
             pkgs.libxslt
             pkgs.zlib
             pkgs.postgresql
             pkgs.rr
+            pkgs.snakemake
+            pkgs.tectonic
             (pkgs.poetry2nix.mkPoetryEnv {
               projectDir = ./.;
               # default Python for shell

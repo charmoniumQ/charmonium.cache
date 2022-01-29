@@ -1,34 +1,56 @@
 import asyncio
+import functools
+import os
 from pathlib import Path
 import shlex
+import subprocess
 from typing import List, Callable, Tuple
+import warnings
 
 from .environment import Environment, PipenvEnvironment, PoetryEnvironment, CondaEnvironment, InheritedEnvironment
 from .repo import Repo, GitRepo
 from .action import Action, IpynbAction, CommandAction
+from .annotate_funcs import annotate_funcs_in_file
 
 ROOT = Path(__file__).parent.parent
 RESOURCE_PATH = ROOT / "resources"
 
-paparazzi_repo = GitRepo(
-    name="paparazzi",
-    initial_commit="853da0ec70469c2063cbf4d083390e7a037038ab",
-    url="git@github.com:rodluger/paparazzi.git",
-    display_url="https://github.com/rodluger/paparazzi/commit/{commit}",
+def annotate_funcs_in_repo(repo: Repo, source_dir: Path = Path()) -> None:
+    for source in (repo.dir / source_dir).glob("**/*.py"):
+        try:
+            annotate_funcs_in_file(source)
+        except Exception:
+            warnings.warn(f"Could not annotate {source}")
+
+v1298tau_tess_repo = GitRepo(
+    name="v1298tau_tess",
+    initial_commit="b3b9f5e3e47822320b618cbd55246ddf792b124d",
+    url="git@github.com:afeinstein20/v1298tau_tess.git",
+    display_url="https://github.com/afeinstein20/v1298tau_tess/commit/{commit}",
+    patch_func=functools.partial(annotate_funcs_in_repo, source_dir=Path("src")),
+    # setup=paparazzi_setup,
 )
 
-paparazzi_data: List[Tuple[Repo, Environment, List[str], List[str]]] = [
+data: List[Tuple[Repo, Environment, List[str], List[str]]] = [
     (
-        paparazzi_repo,
-        InheritedEnvironment(),
-        ["make"],
+        v1298tau_tess_repo,
+        CondaEnvironment(
+            name="v1298tau_tess",
+            environment=Path("environment.yml"),
+            relative_to_repo=True,
+        ),
+        ["sh", "-c", "snakemake --cores=1 ms.pdf &> log && sha256sum ms.pdf > output"],
         [
-            "ebb00007df84ac16f5e0d638fa1a9b0f11a7a881",
-            "7d3f550f7718c34b9d22b9b04d48ab75327560e5",
-            "89224b6b6c38813260d1eff86bc7c37e72f5deb9",
-            "4feab3df95f181dc9614578a7296c0bc4fccf446",
-        ]
-    )
+            "b3b9f5e3e47822320b618cbd55246ddf792b124d",
+            "9e709d469b710f40ae50b24f9c6f48c639d5791d",
+            "dcbeb4cc54849482352a94560ec5144bb5bb8e3b",
+            "f764bd1bbd8dadf332c2e6663c74ee3b01b152c8",
+            "f8307e978e08da42626890bd3d244e97a9db5baf",
+            # "35be468da1dda413e4bd2fc8a4dbcc7f35de77b4",
+            # "96d1e2cecd75f1d57ec06244a34605bf078493fb",
+            # "fa9afe001279072345270f7a8be5ecd6e8f69757",
+        ],
+    ),
 ]
 
 exoplanet_repo = GitRepo(
@@ -39,7 +61,7 @@ exoplanet_repo = GitRepo(
 )
 # exoplanet_repo.setup()
 
-data: List[Tuple[Repo, Environment, List[str], List[str]]] = [
+exoplanet_data: List[Tuple[Repo, Environment, List[str], List[str]]] = [
     (
         exoplanet_repo,
         CondaEnvironment(
@@ -60,11 +82,11 @@ pysyd_data: List[Tuple[Repo, Environment, Action, List[str]]] = [
             url="https://github.com/ashleychontos/pySYD.git",
             initial_commit="8dbed3c40113b77fcf82f0f0bde382f7f081a3f0",
             display_url="https://github.com/ashleychontos/pySYD/commit/{commit}",
-            patch_cmds=[
-                ["sed", "-i", "s/functions.delta_nu/utils.delta_nu/g", "pysd/target.py"],
-                ["sed", "-i", r"s/^\(.*\)\(def run_syd\)/\1@charmonium.cache.memoize()\n\1\2/g", "pysd/target.py"],
-                ["sed", "-i", r"s/\(class Target\)/import charmonium.cache\n\1/g", "pysd/target.py"]
-            ]
+            # patch_cmds=[
+            #     ["sed", "-i", "s/functions.delta_nu/utils.delta_nu/g", "pysd/target.py"],
+            #     ["sed", "-i", r"s/^\(.*\)\(def run_syd\)/\1@charmonium.cache.memoize()\n\1\2/g", "pysd/target.py"],
+            #     ["sed", "-i", r"s/\(class Target\)/import charmonium.cache\n\1/g", "pysd/target.py"]
+            # ],
         ),
         PipenvEnvironment(
             name="pySYD",
@@ -85,26 +107,26 @@ bollywood_data: List[Tuple[Repo, Environment, Action, List[str]]] = [
     (
         GitRepo(
             name="bollywood-data-science",
-            patch_cmds=[
-                ["sed", "-i", 's/^python =.*$/python = ">=3.7.1,<3.11"/g', "pyproject.toml"],
-                ["sed", "-i", 's/^rdflib =.*$/rdflib = "^6.1.1"/g', "pyproject.toml"],
-                ["sed", "-i", 's/^imdbpy =.*$/IMDbPY = "^2021.4.18"/g', "pyproject.toml"],
-                ["sed", "-i", r's/^charmonium.cache =.*$/"charmonium.cache" = {url = "https:\/\/github.com\/charmoniumQ\/charmonium.cache\/archive\/main.zip"}/g', "pyproject.toml"],
-                ["sed", "-i", '/name="cache_sparql_graph/d', "bollywood_data_science/sparql_graph.py"],
-                ["sed", "-i", '/verbose=True/d', "bollywood_data_science/sparql_graph.py"],
-                ["sed", "-i", '/),/d', "bollywood_data_science/sparql_graph.py"],
-                ["sed", "-i", '/ch_cache.DirectoryStore/d', "bollywood_data_science/sparql_graph.py"],
-                ["sed", "-i", '/ch_time_block.decor/d', "bollywood_data_science/sparql_graph.py"],
-                ["sed", "-i", r's/ch_cache.decor(/ch_cache.memoize(/g', "bollywood_data_science/sparql_graph.py"],
-                ["sh", "-c",
-                 shlex.join(["[", "-f", "bollywood_data_science/imdb_graph.py", "]"]) \
-                 + " && " + \
-                 shlex.join(["sed", "-i", r's/ch_cache.decor([^(]*([^)]*)[^)]*)/ch_cache.memoize()/g', "bollywood_data_science/imdb_graph.py"])
-                 + " || " + \
-                 "true"
-                 ],
-                # ["patch", "--quiet", "bollywood_data_science/sparql_graph.py"]
-            ],
+            # patch_cmds=[
+            #     ["sed", "-i", 's/^python =.*$/python = ">=3.7.1,<3.11"/g', "pyproject.toml"],
+            #     ["sed", "-i", 's/^rdflib =.*$/rdflib = "^6.1.1"/g', "pyproject.toml"],
+            #     ["sed", "-i", 's/^imdbpy =.*$/IMDbPY = "^2021.4.18"/g', "pyproject.toml"],
+            #     ["sed", "-i", r's/^charmonium.cache =.*$/"charmonium.cache" = {url = "https:\/\/github.com\/charmoniumQ\/charmonium.cache\/archive\/main.zip"}/g', "pyproject.toml"],
+            #     ["sed", "-i", '/name="cache_sparql_graph/d', "bollywood_data_science/sparql_graph.py"],
+            #     ["sed", "-i", '/verbose=True/d', "bollywood_data_science/sparql_graph.py"],
+            #     ["sed", "-i", '/),/d', "bollywood_data_science/sparql_graph.py"],
+            #     ["sed", "-i", '/ch_cache.DirectoryStore/d', "bollywood_data_science/sparql_graph.py"],
+            #     ["sed", "-i", '/ch_time_block.decor/d', "bollywood_data_science/sparql_graph.py"],
+            #     ["sed", "-i", r's/ch_cache.decor(/ch_cache.memoize(/g', "bollywood_data_science/sparql_graph.py"],
+            #     ["sh", "-c",
+            #      shlex.join(["[", "-f", "bollywood_data_science/imdb_graph.py", "]"]) \
+            #      + " && " + \
+            #      shlex.join(["sed", "-i", r's/ch_cache.decor([^(]*([^)]*)[^)]*)/ch_cache.memoize()/g', "bollywood_data_science/imdb_graph.py"])
+            #      + " || " + \
+            #      "true"
+            #      ],
+            #     # ["patch", "--quiet", "bollywood_data_science/sparql_graph.py"]
+            # ],
             url="https://github.com/charmoniumQ/bollywood-data-science.git",
             initial_commit="72c24046c73211ca52cebb52f3111a39bafce6ad",
             display_url="https://github.com/charmoniumQ/bollywood-data-science/commit/{commit}",

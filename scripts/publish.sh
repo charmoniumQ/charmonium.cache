@@ -4,7 +4,8 @@ set -e -x
 cd "$(dirname "${0}")/.."
 
 if [ -z "${POETRY_ACTIVE}" ]; then
-	exec nix-shell --run "${0}"
+	echo "Run with Nix"
+	exit 1
 fi
 
 if [ "${1}" != "major" -a "${1}" != "minor" -a "${1}" != "patch" ]; then

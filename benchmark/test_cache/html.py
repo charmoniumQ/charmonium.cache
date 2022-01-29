@@ -75,6 +75,7 @@ h1 = functools.partial(TagBuilder, "h1")
 h2 = functools.partial(TagBuilder, "h2")
 h3 = functools.partial(TagBuilder, "h3")
 style = functools.partial(TagBuilder, "style")
+br = functools.partial(TagBuilder, "br")
 a = functools.partial(TagBuilder, "a")
 
 assert (

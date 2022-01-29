@@ -91,7 +91,8 @@ class FuncCallProfile:
 class ExecutionProfile:
     func_calls: List[FuncCallProfile]
     total_time: float
-    output: bytes
+    output: str
+    log: str
     success: bool
     index_read: float = 0
     index_write: float = 0
@@ -106,7 +107,8 @@ class ExecutionProfile:
         return Class(
             func_calls=[],
             total_time=0,
-            output=b"",
+            output="",
+            log="",
             success=False,
             empty=True,
         )
@@ -130,7 +132,7 @@ class ExecutionProfile:
 
 @dataclass
 class CommitResult:
-    diff: str
+    diff: bytes
     date: datetime.datetime
     commit: str
     executions: Mapping[str, ExecutionProfile]
@@ -209,11 +211,20 @@ def run_once(
         # no profiling informatoin
         calls = []
         kwargs = {}
+
+    log_path = repo.dir / "log"
+    log = log_path.read_text() if log_path.exists() else ""
+    log += proc.stderr.decode() + proc.stdout.decode()
+
+    output_path = repo.dir / "output"
+    output = output_path.read_text() if output_path.exists() else ""
+
     return ExecutionProfile(
         func_calls=calls,
         success=proc.returncode == 0,
         total_time=(stop - start).total_seconds(),
-        output=proc.stdout,
+        log=log,
+        output=output,
         **kwargs,
     )
 
@@ -226,18 +237,8 @@ def get_commit_result(commit: str, repo: Repo, environment: Environment, cmd: Li
     print("run unmodified")
     orig = run_once(repo, environment, cmd, False)
 
-    print("run unmodified again")
-    orig2 = run_once(repo, environment, cmd, False)
-
-    with tempfile.TemporaryDirectory() as dirp_:
-        dirp = Path(dirp_)
-        print("run rr record")
-        rr_record = run_once(repo, environment, ["rr", "record", f"--output-trace-dir={dirp/'trace'}", *cmd], False)
-
-        print("run rr replay")
-        rr_replay = run_once(repo, environment, ["rr", "replay", "--autopilot", str(dirp/'trace')], False)
-
-    print("done")
+    print("run memoized")
+    memo = run_once(repo, environment, cmd, True)
 
     return CommitResult(
         diff=diff,
@@ -245,9 +246,7 @@ def get_commit_result(commit: str, repo: Repo, environment: Environment, cmd: Li
         commit=commit,
         executions=dict(
             orig=orig,
-            orig2=orig2,
-            rr_record=rr_record,
-            rr_replay=rr_replay,
+            memo=memo,
         ),
     )
 
@@ -276,6 +275,44 @@ def get_repo_result(
         ],
     )
 
+@memoize(group=group)
+def get_repo_result_combined(
+        repo: Repo,
+        environment: Environment,
+        cmd: List[str],
+        commits: List[str],
+) -> RepoResult:
+    diff_date_orig = []
+    repo.clean()
+    for commit in tqdm(commits, total=len(commits), desc="Umodified commit"):
+        print(f"repo.checkout({commit!r})")
+        diff, date = repo.checkout(commit)
+
+        print("run unmodified")
+        orig = run_once(repo, environment, cmd, False)
+        diff_date_orig.append((diff, date, orig))
+
+    memoized = []
+    repo.clean()
+    for commit in tqdm(commits, total=len(commits), desc="Memoized commit"):
+        print(f"repo.checkout({commit!r})")
+        print("run memoized")
+        memo = run_once(repo, environment, cmd, True)
+        memoized.append(memo)
+
+    return RepoResult(
+        repo=repo,
+        environment=environment,
+        cmd=cmd,
+        commit_results=[
+            CommitResult(diff, date, commit, executions=dict(
+                orig=orig,
+                memo=memo,
+            ))
+            for (diff, date, orig), memo in zip(diff_date_orig, memoized)
+        ],
+    )
+
 
 @memoize(group=group)
 def run_experiment(
@@ -291,12 +328,12 @@ def run_experiment(
         print(f"Setting up env {repo.name}")
         env.setup(repo)
         env.install(repo, [
-            str(repo.dir),
+            # str(repo.dir),
             "https://github.com/charmoniumQ/charmonium.cache/archive/main.zip"
         ])
         print(f"Ready for {repo.name}")
 
     return [
-        get_repo_result(repo, env, cmd, commits)
+        get_repo_result_combined(repo, env, cmd, commits)
         for repo, env, cmd, commits in tqdm(repo_env_cmds, total=len(repo_env_cmds), desc="Repo setup")
     ]

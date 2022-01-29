@@ -67,22 +67,18 @@ def summarize_execution(prof: ExecutionProfile) -> html.Tag:
 
 executions: Mapping[str, html.TagLike] = {
     "orig": "Unmodified",
-    "orig2": "Unmodified (2nd run)",
-    "rr_record": html.code()("rr record"),
-    "rr_replay": html.code()("rr replay"),
+    "memo": "Memoized",
 }
 
 commit_result_headers: List[html.TagLike] = [
     "Commit date",
     "Commit hash",
-    "Commit diff",
+    # "Commit diff",
     *[
         html.span()(execution, " time")
         for execution in executions.values()
     ],
-    # "Memoized output matches original",
-    "Original is deterministic",
-    html.span()(html.code()("rr"), " is deterministic"),
+    html.span()("Memoized output", html.br()(), "matches original"),
     "Results",
 ]
 
@@ -97,8 +93,8 @@ def summarize_commit_result(repo: Repo, result: CommitResult) -> List[html.TagLi
         else:
             return color_cell("Error", "red")
     date_str = result.date.astimezone(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
-    adds = len(list(re.finditer(r"^[+] ", result.diff, flags=re.MULTILINE)))
-    subs = len(list(re.finditer(r"^[-] ", result.diff, flags=re.MULTILINE)))
+    # adds = len(list(re.finditer(r"^[+] ", result.diff, flags=re.MULTILINE)))
+    # subs = len(list(re.finditer(r"^[-] ", result.diff, flags=re.MULTILINE)))
 
     inner_table = html_table(
         [
@@ -107,10 +103,12 @@ def summarize_commit_result(repo: Repo, result: CommitResult) -> List[html.TagLi
                 for prof in result.executions.values()
             ]],
             ["Output", *[
-                collapsed(
-                    disp_hash(determ_hash(prof.output)),
-                    html.pre()(html.code()(prof.output.decode())),
-                ) for prof in result.executions.values()
+                highlighted_code("plaintext", prof.output)
+                for prof in result.executions.values()
+            ]],
+            ["Log", *[
+                highlighted_code("plaintext", prof.log)
+                for prof in result.executions.values()
             ]],
             ["Time (s)", *[
                 disp_sec(prof.total_time)
@@ -130,18 +128,16 @@ def summarize_commit_result(repo: Repo, result: CommitResult) -> List[html.TagLi
             for label in result.executions.keys()
         ]],
     )
-    orig_deterministic = result.executions["orig2"].output == result.executions["orig"].output
-    rr_deterministic = result.executions["rr_record"].output == result.executions["rr_replay"].output
+    match = result.executions["memo"].output == result.executions["orig"].output
     return [
         disp_date(result.date),
-        html.a(href=repo.display_url.format(commit=result.commit))(result.commit),
-        collapsed(f"Diff +{adds}/-{subs}", highlighted_code("diff", result.diff)),
+        html.a(href=repo.display_url.format(commit=result.commit))(result.commit[:6]),
+        # collapsed(f"Diff +{adds}/-{subs}", highlighted_code("diff", result.diff)),
         *[
             disp_sec(result.executions[execution].total_time)
             for execution in executions
         ],
-        color_cell("deterministic", "green") if orig_deterministic else color_cell("non-deterministic", "red"),
-        color_cell("deterministic", "green") if rr_deterministic else color_cell("non-deterministic", "red"),
+        color_cell("match", "green") if match else color_cell("no match", "red"),
         collapsed("Details", inner_table),
     ]
 
@@ -196,7 +192,7 @@ def write_summary(repo_results: List[RepoResult]) -> None:
                 html.head()(
                     html.meta(charset="utf-8")(),
                     html.title()("Benchmark of charmonium.cache"),
-                    *highlighted_head(["yaml", "python", "diff", "ini"]),
+                    *highlighted_head(["yaml", "python", "diff", "ini", "plaintext"]),
                     html.style()("""
 table, th, td {
   border: 1px solid black;

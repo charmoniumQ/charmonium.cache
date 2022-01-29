@@ -47,8 +47,8 @@ def highlighted_code(lang: str, code: str, width: int = 60) -> html.Tag:
     return html.pre()(html.code(**{
         "class": f"language-{lang}",
         "style": css_string({
-            "width": f"{width}ch",
-            "height": "20vw",
+            "max-width": f"{width}ch",
+            "max-height": "20vw",
             "resize": "both",
         }),
     })(code))

@@ -1,3 +1,4 @@
+from __future__ import annotations
 from abc import ABC
 import datetime
 from pathlib import Path
@@ -5,7 +6,7 @@ import re
 import shlex
 import subprocess
 import sys
-from typing import List, Optional, Protocol, Tuple, cast
+from typing import List, Optional, Protocol, Tuple, Callable, cast
 
 ROOT = Path(__file__).parent.parent
 
@@ -20,27 +21,28 @@ class Repo(ABC):
             display_url: str,
             patch: Optional[str] = None,
             patch_cmds: List[List[str]] = [],
+            setup_func: Optional[Callable[[Repo], None]] = None,
+            patch_func: Optional[Callable[[Repo], None]] = None,
     ) -> None:
         self.name = name
         self.dir = dir
         self.display_url = display_url
         self.patch = patch
         self.patch_cmds = patch_cmds
+        self.setup_func = setup_func
+        self.patch_func = patch_func
+
+    def clean(self) -> None:
+        self._clean()
+        self.apply_patch()
+
+    def _clean(self) -> None:
+        raise NotImplementedError()
 
     def _setup(self) -> None:
         raise NotImplementedError()
 
     def apply_patch(self) -> None:
-        for patch_cmd in self.patch_cmds:
-            proc = subprocess.run(
-                patch_cmd,
-                cwd=self.dir,
-                capture_output=True,
-            )
-            sys.stderr.buffer.write(proc.stderr)
-            if proc.returncode != 0:
-                sys.stdout.buffer.write(proc.stdout)
-                raise RuntimeError(f"'{shlex.join(patch_cmd)}' returned {proc.returncode}")
         if self.patch is not None:
             cmd = [
                     "patch",
@@ -58,15 +60,19 @@ class Repo(ABC):
             if proc.returncode != 0:
                 sys.stdout.buffer.write(proc.stdout)
                 raise RuntimeError(f"'{shlex.join(cmd)}' returned {proc.returncode}")
+        if self.patch_func:
+            self.patch_func(self)
 
     def setup(self) -> None:
         self._setup()
         self.apply_patch()
+        if self.setup_func:
+            self.setup_func(self)
 
-    def _checkout(self, commit: str) -> Tuple[str, datetime.datetime]:
+    def _checkout(self, commit: str) -> Tuple[bytes, datetime.datetime]:
         raise NotImplementedError()
 
-    def checkout(self, commit: str) -> Tuple[str, datetime.datetime]:
+    def checkout(self, commit: str) -> Tuple[bytes, datetime.datetime]:
         ret = self._checkout(commit)
         self.apply_patch()
         return ret
@@ -82,15 +88,17 @@ class GitRepo(Repo):
         url: str,
         display_url: str,
         patch: Optional[str] = None,
-        patch_cmds: List[List[str]] = [],
         initial_commit: Optional[str] = None,
+        setup_func: Optional[Callable[[Repo], None]] = None,
+        patch_func: Optional[Callable[[Repo], None]] = None,
     ) -> None:
         super().__init__(
             name=name,
             dir=CACHE_PATH / name,
             display_url=display_url,
             patch=patch,
-            patch_cmds=patch_cmds,
+            setup_func=setup_func,
+            patch_func=patch_func,
         )
         self.url = url
         self.initial_commit = initial_commit
@@ -114,6 +122,13 @@ class GitRepo(Repo):
                 check=True,
                 capture_output=True,
             )
+
+    def _clean(self) -> None:
+        subprocess.run(
+            ["git", "clean", "--force", "-d", "-x", "."],
+            cwd=self.dir,
+            check=True,
+        )
 
     def interesting_commits(self, path: Path, min_diff: int) -> List[str]:
         """
@@ -145,9 +160,14 @@ done | sort --numeric-sort > log
             return total_changed >= min_diff
         return list(filter(filter_pred, commits))
 
-    def _checkout(self, commit: str) -> Tuple[str, datetime.datetime]:
+    def _checkout(self, commit: str) -> Tuple[bytes, datetime.datetime]:
         subprocess.run(
             ["git", "restore", "--", "."],
+            cwd=self.dir,
+            check=True,
+        )
+        subprocess.run(
+            ["git", "submodule", "update", "--recursive"],
             cwd=self.dir,
             check=True,
         )
@@ -162,7 +182,6 @@ done | sort --numeric-sort > log
             ["git", "diff", f"{old_commit}..{commit}"],
             cwd=self.dir,
             check=True,
-            text=True,
             capture_output=True,
         ).stdout
         date_str = subprocess.run(

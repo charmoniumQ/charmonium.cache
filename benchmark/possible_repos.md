@@ -63,16 +63,6 @@
 - https://github.com/inducer/sumpy
 - https://ceesd.illinois.edu/directory/
 
-- I should be able to run a few setup commands and then run the code ("works out of the box"). Minimal configuration, dependencies pinned.
+  - Minimal configuration, dependencies pinned, on laptop.
 
-- There should be multiple Python functions that take a long time (>1s). The repository can be a polyglot as long as multiple time-intensive stages are eventually wrapped by Python functions. Those functions or functions transitively called by those should change frequently during the project's history.
-
-- The code should not attempt to cache intermediate results (that's what I want to do).
-
-- There should be a commit history of iterative development (>20 commits). There should be a stable CLI entrypoint throughout that history.
-
-
-- Lightcurve problems
-- Astopy problems
-
-- How to isolate?
+Do you have a slow data processing pipeline in Python? I'm trying to speed up iterative development by caching intermediate functions, and I'd like to analyze your code (and hopefully improve it) as a case study. https://forms.gle/2dhsGvbbBbthRFbi7
