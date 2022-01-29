@@ -44,7 +44,7 @@ from .util import (
     none_tuple,
 )
 
-__version__ = "1.2.1"
+__version__ = "1.2.3"
 
 BYTE_ORDER: str = "big"
 
