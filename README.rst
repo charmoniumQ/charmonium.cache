@@ -117,16 +117,13 @@ what inputs you depend on and what outputs you produce.
 
    memoize command arg1 arg2
    # or
-   memoize --key=key -- command arg1 arg2
+   memoize --key=$(date +%Y-%m-%d) -- command arg1 arg2
 
 See `CLI`_ for more details.
 
-.. _`PEP 561`: https://www.python.org/dev/peps/pep-0561/
 .. _`LRU`: https://en.wikipedia.org/wiki/Cache_replacement_policies#Least_recently_used_(LRU)
-.. _`closure`: https://en.wikipedia.org/wiki/Closure_(computer_programming)
 .. _`decorator`: https://en.wikipedia.org/wiki/Python_syntax_and_semantics#Decorators
 .. _`pip install guide`: https://pip.pypa.io/en/latest/installing/
-.. _`pyright`: https://github.com/microsoft/pyright
 .. _`PyPI`: https://pypi.org/project/charmonium.cache/
 .. _`GitHub`: https://github.com/charmoniumQ/charmonium.cache
 .. _`docs`: https://charmoniumq.github.io/charmonium.cache/
