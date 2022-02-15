@@ -26,6 +26,7 @@ if [ -n "$(git status --porcelain)" ]; then
 fi
 
 poetry run bump2version "${part}"
+rm -rf dist
 poetry build
 twine check dist/*
 

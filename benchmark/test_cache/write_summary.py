@@ -129,6 +129,7 @@ def summarize_commit_result(repo: Repo, result: CommitResult) -> List[html.TagLi
         ]],
     )
     match = result.executions["memo"].output == result.executions["orig"].output
+    success = result.executions["memo"].success and result.executions["orig"].success
     return [
         disp_date(result.date),
         html.a(href=repo.display_url.format(commit=result.commit))(result.commit[:6]),
@@ -137,7 +138,7 @@ def summarize_commit_result(repo: Repo, result: CommitResult) -> List[html.TagLi
             disp_sec(result.executions[execution].total_time)
             for execution in executions
         ],
-        color_cell("match", "green") if match else color_cell("no match", "red"),
+        color_cell("match", "green") if match and success else (color_cell("failure", "red") if not success else color_cell("no match", "yellow")),
         collapsed("Details", inner_table),
     ]
 
@@ -163,6 +164,7 @@ def summarize_repo_result(
         html_table(
             [
                 ["Name", repo_result.repo.name],
+                ["Time", datetime.datetime.now().isoformat()],
                 ["Path", str(repo_result.repo.dir)],
                 *summarize_environment(repo_result.environment),
                 ["Command", html.code()(shlex.join(repo_result.cmd))],

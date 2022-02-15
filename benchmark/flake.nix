@@ -41,8 +41,10 @@
             default-python
             pkgs.git
             pkgs.poetry
-            pkgs.micromamba
-            pkgs.conda
+            # Affected by https://github.com/NixOS/nixpkgs/issues/157860
+            # Install by hand (not by Nix)
+            # pkgs.micromamba
+            # pkgs.conda
             pkgs.libxml2
             pkgs.libxslt
             pkgs.zlib

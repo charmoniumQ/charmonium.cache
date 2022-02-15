@@ -22,7 +22,6 @@ ROOT = Path(__file__).parent.parent
 
 
 group = MemoizedGroup(
-    obj_store=DirObjStore(ROOT / ".cache/functions"),
     size="4GiB",
     fine_grain_persistence=True,
 )
@@ -194,17 +193,16 @@ def run_once(
         shutil.rmtree(log_dir)
     log_dir.mkdir(parents=True)
     perf_log = log_dir / "perf.log"
-    start = datetime.datetime.now()
     proc = environment.run(
         cmd,
         cwd=repo.dir,
         env_override={
             "CHARMONIUM_CACHE_DISABLE": "" if memoize else "1",
             "CHARMONIUM_CACHE_PERF_LOG": str(perf_log),
-        }
+        },
     )
     sys.stderr.buffer.write(proc.stderr)
-    stop = datetime.datetime.now()
+    # times = psutil.Process().cpu_times(proc.pid)
     if perf_log.exists():
         calls, kwargs = parse_memoized_log(perf_log)
     else:
@@ -222,7 +220,7 @@ def run_once(
     return ExecutionProfile(
         func_calls=calls,
         success=proc.returncode == 0,
-        total_time=(stop - start).total_seconds(),
+        total_time=proc.time,
         log=log,
         output=output,
         **kwargs,
@@ -309,7 +307,7 @@ def get_repo_result_combined(
                 orig=orig,
                 memo=memo,
             ))
-            for (diff, date, orig), memo in zip(diff_date_orig, memoized)
+            for commit, (diff, date, orig), memo in zip(commits, diff_date_orig, memoized)
         ],
     )
 
@@ -318,7 +316,6 @@ def get_repo_result_combined(
 def run_experiment(
         repo_env_cmds: List[Tuple[Repo, Environment, List[str], List[str]]],
 ) -> List[RepoResult]:
-
     for repo, env, cmd, _ in tqdm(repo_env_cmds, total=len(repo_env_cmds), desc="Repo setup"):
         print(f"Setting up repo {repo.name}")
         repo.setup()
@@ -327,9 +324,11 @@ def run_experiment(
             shutil.rmtree(cache_dir)
         print(f"Setting up env {repo.name}")
         env.setup(repo)
+        print("Installing charmonium.cache")
         env.install(repo, [
-            # str(repo.dir),
-            "https://github.com/charmoniumQ/charmonium.cache/archive/main.zip"
+            # str(Path().resolve().parent),
+            "--editable",
+            str(repo.dir),
         ])
         print(f"Ready for {repo.name}")
 

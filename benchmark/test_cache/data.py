@@ -3,7 +3,9 @@ import functools
 import os
 from pathlib import Path
 import shlex
+import shutil
 import subprocess
+import sys
 from typing import List, Callable, Tuple
 import warnings
 
@@ -15,12 +17,58 @@ from .annotate_funcs import annotate_funcs_in_file
 ROOT = Path(__file__).parent.parent
 RESOURCE_PATH = ROOT / "resources"
 
+def prepend_source(path: Path, text: str) -> None:
+    source = path.read_text()
+    first_line, nl, rest = source.partition("\n")
+    # This protects the case where the source file begins `from __future__ import x`
+    path.write_text(first_line + nl + text + nl + rest)
+
+def pudl_patch(repo: Repo) -> None:
+    print("Patching pudl")
+    if "API_KEY_EIA" not in os.environ:
+        raise RuntimeError("Please place API_KEY_EIA in os.environ")
+    shutil.copy(RESOURCE_PATH / "pudl/read_excel.py", repo.dir / "src/pudl")
+    prepend_source(repo.dir / "src/pudl/extract/excel.py"  , "from .. import read_excel")
+    prepend_source(repo.dir / "src/pudl/glue/ferc1_eia.py" , "from .. import read_excel")
+    prepend_source(repo.dir / "src/pudl/transform/ferc1.py", "from .. import read_excel")
+    subprocess.run(["sed", "-i", 's/pkg_resources.get_distribution("catalystcoop.pudl").version/"foobar"/g', repo.dir / "src/pudl/__init__.py"], check=True)
+
 def annotate_funcs_in_repo(repo: Repo, source_dir: Path = Path()) -> None:
     for source in (repo.dir / source_dir).glob("**/*.py"):
         try:
             annotate_funcs_in_file(source)
         except Exception:
             warnings.warn(f"Could not annotate {source}")
+
+data: List[Tuple[Repo, Environment, List[str], List[str]]] = [
+    (
+        GitRepo(
+            name="pudl",
+            initial_commit="40d176313e60dfa9d2481f63842ed23f08f1ad5f",
+            url="git@github.com:catalyst-cooperative/pudl.git",
+            display_url="https://github.com/catalyst-cooperative/pudl/commit/{commit}",
+            patch_func=pudl_patch,
+        ),
+        PipenvEnvironment(
+            name="pudl",
+            pipfile=RESOURCE_PATH / "pudl/Pipfile",
+        ),
+        # CondaEnvironment(
+        #     name="pudl",
+        #     environment=Path("devtools/environment.yml"),
+        #     relative_to_repo=True,
+        # ),
+        [
+            "python", "-m", "pudl.cli", str(RESOURCE_PATH / "pudl/settings/etl_fast.yml"), "--clobber",
+        ],
+        [
+            "40d176313e60dfa9d2481f63842ed23f08f1ad5f",
+            "eccddc9892f56904ef7159cb7156caa961c08fd5",
+            "ca8c434d9dac4694e77623e85aa906d33fa26e36",
+            "62d08068785cc1b4edaf2228be65be5105621223",
+        ],
+    ),
+]
 
 v1298tau_tess_repo = GitRepo(
     name="v1298tau_tess",
@@ -31,7 +79,7 @@ v1298tau_tess_repo = GitRepo(
     # setup=paparazzi_setup,
 )
 
-data: List[Tuple[Repo, Environment, List[str], List[str]]] = [
+showyourwork_data: List[Tuple[Repo, Environment, List[str], List[str]]] = [
     (
         v1298tau_tess_repo,
         CondaEnvironment(
@@ -43,9 +91,9 @@ data: List[Tuple[Repo, Environment, List[str], List[str]]] = [
         [
             "b3b9f5e3e47822320b618cbd55246ddf792b124d",
             "9e709d469b710f40ae50b24f9c6f48c639d5791d",
-            "dcbeb4cc54849482352a94560ec5144bb5bb8e3b",
-            "f764bd1bbd8dadf332c2e6663c74ee3b01b152c8",
-            "f8307e978e08da42626890bd3d244e97a9db5baf",
+            # "dcbeb4cc54849482352a94560ec5144bb5bb8e3b",
+            # "f764bd1bbd8dadf332c2e6663c74ee3b01b152c8",
+            # "f8307e978e08da42626890bd3d244e97a9db5baf",
             # "35be468da1dda413e4bd2fc8a4dbcc7f35de77b4",
             # "96d1e2cecd75f1d57ec06244a34605bf078493fb",
             # "fa9afe001279072345270f7a8be5ecd6e8f69757",
@@ -71,7 +119,8 @@ exoplanet_data: List[Tuple[Repo, Environment, List[str], List[str]]] = [
         [
             "python", str(RESOURCE_PATH / "exoplanet/script_theano.py")
         ],
-        exoplanet_repo.interesting_commits(Path("src/exoplanet"), 100)[:1],
+        [],
+        # exoplanet_repo.interesting_commits(Path("src/exoplanet"), 100)[:1],
     ),
 ]
 
@@ -196,7 +245,7 @@ ipynb_to_py_data: List[Tuple[Repo, Environment, Action, List[str]]] = [
         ),
         PipenvEnvironment(
             name="lightkurve",
-            pipfile=RESOURCE_PATH / "lightkurve/pipfile.toml",
+            pipfile=RESOURCE_PATH / "lightkurve/Pipfile",
         ),
         IpynbAction([
             Path(f"docs/source/tutorials/3-science-examples/{name}")

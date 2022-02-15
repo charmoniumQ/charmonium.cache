@@ -1,9 +1,14 @@
+from __future__ import annotations
+from dataclasses import dataclass
 import os
 import re
 import subprocess
 from pathlib import Path
 import shlex
-from typing import Mapping, Optional, Protocol, Tuple, List, Union, cast, NoReturn
+import sys
+from typing import Mapping, Optional, Protocol, Tuple, List, Union, cast, NoReturn, TypeVar, Generic
+
+import psutil  # type: ignroe
 
 from .repo import Repo
 
@@ -24,6 +29,54 @@ def relative_to(dest: Path, source: Path) -> Path:
         assert (source / ret).resolve() == dest
         return ret
 
+def subprocess_run(
+        cmd: List[str],
+        cwd: Optional[Path] = None,
+        env_override: Optional[Mapping[str, str]] = None,
+        check: bool = True,
+) -> CompletedProcess:
+    start = psutil.Process().cpu_times()
+    proc = subprocess.Popen(
+        cmd,
+        cwd=cwd,
+        env={
+            **os.environ,
+            **(env_override if env_override else {}),
+        },
+        stderr=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stdin=subprocess.DEVNULL,
+    )
+    pid = proc.pid
+    stdout, stderr = proc.communicate()
+    stop = psutil.Process().cpu_times()
+    if check and proc.returncode != 0:
+        sys.stderr.buffer.write(stderr)
+        sys.stdout.buffer.write(stdout)
+        print(proc.returncode, cmd)
+        raise subprocess.CalledProcessError(proc.returncode, cmd)
+    return CompletedProcess(
+        cmd,
+        proc.returncode,
+        stdout,
+        stderr,
+        stop.children_user - start.children_user,
+        stop.children_system - start.children_system,
+    )
+
+@dataclass
+class CompletedProcess:
+    cmd: List[str]
+    returncode: int
+    stdout: bytes
+    stderr: bytes
+    user_time: float
+    system_time: float
+
+    @property
+    def time(self) -> float:
+        return self.user_time + self.system_time
+
 class Environment(Protocol):
     def setup(self, repo: Repo) -> None: ...
 
@@ -34,7 +87,7 @@ class Environment(Protocol):
         command: List[str],
         cwd: Path,
         env_override: Optional[Mapping[str, str]] = None,
-    ) -> subprocess.CompletedProcess[bytes]:
+    ) -> CompletedProcess:
         ...
 
 
@@ -46,6 +99,14 @@ class CondaEnvironment(Environment):
             environment: Path,
             relative_to_repo: bool = False,
     ) -> None:
+        proc = subprocess.run(
+            ["mamba"],
+            capture_output=True,
+        )
+        if proc.returncode != 0:
+            sys.stdout.buffer.write(proc.stdout)
+            sys.stderr.buffer.write(proc.stderr)
+            raise RuntimeError("Please install mamba and add it to your path.")
         super().__init__()
         self.name = name
         self.environment = environment
@@ -57,44 +118,53 @@ class CondaEnvironment(Environment):
             cwd: Path = Path(),
             env_override: Optional[Mapping[str, str]] = None,
             check: bool = True,
-    ) -> subprocess.CompletedProcess[bytes]:
-        proc = subprocess.run(
+    ) -> CompletedProcess:
+        proc = subprocess_run(
             [
-                "conda-shell",
-                "-c",
-                shlex.join(cmd),
+                # "conda-shell",
+                # "-c",
+                # shlex.join(["conda", *cmd]),
+                "mamba",
+                *cmd,
             ],
-            env={
-                **os.environ,
+            env_override={
+                "PYTHONPATH": "",
                 **(env_override if env_override else {}),
             },
             cwd=cwd,
             check=check,
-            text=False,
-            capture_output=True,
         )
         return proc
 
     def setup(self, repo: Repo) -> None:
         if self.relative_to_repo:
             self.environment = repo.dir / self.environment
-        out = (self._conda("conda", "env", "export", "--name", self.name)).stdout
-        if out != self.environment.read_bytes():
-            self._conda("conda", "env", "remove", "--name", self.name)
-            self._conda("conda", "env", "create", "--name", self.name, "--file", str(self.environment))
+        # out = (self._conda("env", "export", "--name", self.name)).stdout
+        # if out != self.environment.read_bytes():
+        #     self._conda("env", "remove", "--name", self.name)
+        #     self._conda("env", "create", "--name", self.name, "--file", str(self.environment))
 
     def install(self, repo: Repo, packages: List[Union[str, Path]]) -> None:
-        self._conda("conda", "run", "--name", self.name, "pip", "install", *map(str, packages))
+        self._conda(
+            "run",
+            "--no-capture-output",
+            "--name",
+            self.name,
+            "pip",
+            "install",
+            "--user",
+            *map(str, packages),
+        )
 
     def run(
         self,
         command: List[str],
         cwd: Path,
         env_override: Optional[Mapping[str, str]] = None,
-    ) -> subprocess.CompletedProcess[bytes]:
+    ) -> CompletedProcess:
         proc = self._conda(
-            "conda",
             "run",
+            "--no-capture-output",
             "--name",
             self.name,
             *command,
@@ -115,44 +185,36 @@ class PipenvEnvironment(Environment):
         self.name = name
         self.pipfile = pipfile
 
-    def setup(self, repo: Repo) -> None:
-        subprocess.run(
-            ["pipenv", "run", "true"],
-            env={
-                "PIPENV_PIPFILE": str(self.pipfile.parent),
-                **os.environ,
+    def _pipenv(
+            self,
+            *cmd: str,
+            cwd: Path = Path(),
+            env_override: Optional[Mapping[str, str]] = None,
+            check: bool = True,
+    ) -> CompletedProcess:
+        return subprocess_run(
+            ["pipenv", *cmd],
+            cwd=cwd,
+            env_override={
+                "PIPENV_PIPFILE": str(self.pipfile),
+                "PYTHONPATH": "",
+                **(env_override if env_override else {}),
             },
-            check=True,
         )
 
+    def setup(self, repo: Repo) -> None:
+        self._pipenv("run", "true")
+
     def install(self, repo: Repo, packages: List[Union[str, Path]]) -> None:
-        subprocess.run(
-            ["pipenv", "install", *map(str, packages)],
-            env={
-                "PIPENV_PIPFILE": str(self.pipfile.parent),
-                **os.environ,
-            },
-            check=True,
-        )
+        self._pipenv("install", *map(str, packages))
 
     def run(
         self,
         command: List[str],
         cwd: Path,
         env_override: Optional[Mapping[str, str]] = None,
-    ) -> subprocess.CompletedProcess[bytes]:
-        proc = subprocess.run(
-            ["pipenv", "run", *command],
-            cwd=cwd,
-            check=False,
-            capture_output=True,
-            env={
-                "PIPENV_PIPFILE": str(self.pipfile.parent),
-                **os.environ,
-                **(env_override if env_override is not None else {}),
-            },
-        )
-        return proc
+    ) -> CompletedProcess:
+        return self._pipenv("run", *command, cwd=cwd, check=False, env_override=env_override)
 
 class PoetryEnvironment(Environment):
     def __init__(self, *, name: str, pyproject: Path, in_repo: bool) -> None:
@@ -166,33 +228,19 @@ class PoetryEnvironment(Environment):
             *cmd: str,
             check: bool = True,
             env_override: Optional[Mapping[str, str]] = None,
-    ) -> subprocess.CompletedProcess[bytes]:
-        env = {
-            key: val
-            for key, val in os.environ.items()
-            if key not in {"VIRTUAL_ENV", "PLAT", "PYTHONNOUSERSITE"}
-        }
-        if env_override:
-            env.update(env_override)
-        Path("python_poetry.env").write_text(
-            "\n".join(
-                f"{key}={shlex.quote(val)}"
-                for key, val in sorted(env.items())
-            )
-        )
-        # env["PATH"] = ":".join(
-        #     location
-        #     for location in env["PATH"].split(":")
-        #     if "/nix/store" not in location
-        # )
-        proc = subprocess.run(
+    ) -> CompletedProcess:
+        return subprocess_run(
             ["poetry", *cmd],
             cwd=self.pyproject.parent,
-            capture_output=True,
+            env_override={
+                **(env_override if env_override is not None else {}),
+                "VIRTUAL_ENV": "",
+                "PLAT": "",
+                "PYTHONNOUSERSITE": "",
+                "PYTHONPATH": "",
+            },
             check=check,
-            env=env,
         )
-        return proc
 
     def setup(self, repo: Repo) -> None:
         if self.in_repo:
@@ -216,9 +264,11 @@ class PoetryEnvironment(Environment):
         command: List[str],
         cwd: Path,
         env_override: Optional[Mapping[str, str]] = None,
-    ) -> subprocess.CompletedProcess[bytes]:
-        proc = self._poetry(
+    ) -> CompletedProcess:
+        return self._poetry(
             "run",
+            # The cwd has to be the directory containing pyproject.toml
+            # Instead, we will use `env --chdir {dir} cmd` to switch dirs.
             "env",
             f"--chdir={cwd!s}",
             "sh",
@@ -228,7 +278,6 @@ class PoetryEnvironment(Environment):
             check=False,
             env_override=env_override,
         )
-        return proc
 
 class NixEnvironment(Environment):
     def __init__(
@@ -241,10 +290,22 @@ class NixEnvironment(Environment):
         self.name = name
         self.flake = flake
 
-    def setup(self, repo: Repo) -> None:
-        subprocess.run(
-            ["nix", "develop", "--command", "true", "--file", str(self.flake)],
+    def _run_in_nix(
+            self,
+            *cmd: str,
+            cwd: Optional[Path] = None,
+            check: bool = True,
+            env_override: Optional[Mapping[str, str]] = None,
+    ) -> CompletedProcess:
+        return subprocess_run(
+            ["nix", "develop", "--file", str(self.flake), "--command", *cmd],
+            check=check,
+            env_override=env_override,
+            cwd=cwd,
         )
+
+    def setup(self, repo: Repo) -> None:
+        self._run_in_nix("true")
 
     def install(self, repo: Repo, packages: List[Union[str, Path]]) -> None:
         raise NotImplementedError()
@@ -254,18 +315,13 @@ class NixEnvironment(Environment):
         command: List[str],
         cwd: Path,
         env_override: Optional[Mapping[str, str]] = None,
-    ) -> subprocess.CompletedProcess[bytes]:
-        proc = subprocess.run(
-            ["nix", "develop", "--command", "true", "--file", str(self.flake)],
+    ) -> CompletedProcess:
+        return self._run_in_nix(
+            *command,
             cwd=cwd,
             check=False,
-            capture_output=True,
-            env={
-                **os.environ,
-                **(env_override if env_override else {}),
-            },
+            env_override=env_override,
         )
-        return proc
 
 class InheritedEnvironment(Environment):
     def setup(self, repo: Repo) -> None:
@@ -279,14 +335,10 @@ class InheritedEnvironment(Environment):
         command: List[str],
         cwd: Path,
         env_override: Optional[Mapping[str, str]] = None,
-    ) -> subprocess.CompletedProcess[bytes]:
-        return subprocess.run(
+    ) -> CompletedProcess:
+        return subprocess_run(
             command,
             cwd=cwd,
             check=False,
-            capture_output=True,
-            env={
-                **os.environ,
-                **(env_override if env_override else {}),
-            },
+            env_override=env_override,
         )

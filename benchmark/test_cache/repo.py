@@ -10,7 +10,7 @@ from typing import List, Optional, Protocol, Tuple, Callable, cast
 
 ROOT = Path(__file__).parent.parent
 
-CACHE_PATH = ROOT / ".cache/repos"
+CACHE_PATH = ROOT / ".repos"
 
 
 class Repo(ABC):
@@ -114,7 +114,6 @@ class GitRepo(Repo):
                 check=True,
                 capture_output=True,
             )
-            subprocess.run(["git", "clean", "-fdx", "."], cwd=self.dir, check=True, capture_output=True)
         if self.initial_commit:
             subprocess.run(
                 ["git", "checkout", self.initial_commit],
@@ -128,6 +127,7 @@ class GitRepo(Repo):
             ["git", "clean", "--force", "-d", "-x", "."],
             cwd=self.dir,
             check=True,
+            capture_output=True,
         )
 
     def interesting_commits(self, path: Path, min_diff: int) -> List[str]:
