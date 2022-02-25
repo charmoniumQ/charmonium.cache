@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "charmonium.cache"
-version = "1.2.4"
+version = "1.2.5"
 description = "Provides a decorator for caching a function and an equivalent command-line util."
 authors = ["Samuel Grayson <sam+dev@samgrayson.me>"]
 license = "MPL-2.0"
