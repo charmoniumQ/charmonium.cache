@@ -79,7 +79,6 @@
 - [ ] Do writing-to-disk off the critical path, in a thread.
 - [ ] Create a better API for group configuration.
 - [ ] Make it easier to add a freeze method for a type.
-- [ ] Add helper for matplotlib.
 - [ ] Use environment variable to specify cache location.
 
 [audit events]: https://docs.python.org/3/library/audit_events.html#audit-events
@@ -123,5 +122,6 @@
 - [ ] Make working example of caching in S3.
 - [ ] Set up git-changelog.
 - [ ] Make it work for instance methods.
-- [ ] Make `charmonium._time_block` serializable
+- [x] Make `charmonium._time_block` serializable
 - [ ] Write about replacing notebooks.
+- [ ] Add helper for matplotlib.

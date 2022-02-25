@@ -367,7 +367,7 @@ DEFAULT_MEMOIZED_GROUP = Future[MemoizedGroup].create(
 
 
 # pyright thinks attrs has ambiguous overload
-@attr.define(init=False)  # type: ignore
+@attr.define(init=False, slots=False)  # type: ignore
 class Memoized(Generic[FuncParams, FuncReturn]):
     # pylint: disable=too-many-instance-attributes
     _func: Callable[FuncParams, FuncReturn]
@@ -416,6 +416,7 @@ class Memoized(Generic[FuncParams, FuncReturn]):
             if name is not None
             else f"{self._func.__module__}.{self._func.__qualname__}"
         )
+        self.__qualname__ = self._func.__qualname__
         self.group = group
         self._use_obj_store = use_obj_store
         self._use_metadata_size = use_metadata_size
