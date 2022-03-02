@@ -19,45 +19,12 @@ else:
 FuncReturn = TypeVar("FuncReturn")
 
 
-# # pyright thinks attrs has ambiguous overload
-# @attr.s  # type: ignore
-# class KeyGen:
-#     """Generates unique keys (not cryptographically secure)."""
-
-#     key_bytes: int = attr.ib(default=8)
-#     tolerance: float = attr.ib(default=1e-6)
-#     counter: int = 0
-#     key_space: int = 0
-
-#     def __attrs_post_init__(self) -> None:
-#         self.key_space = 256 ** self.key_bytes
-
-#     def __iter__(self) -> KeyGen:
-#         return self
-
-#     def __next__(self) -> int:
-#         """Generates a new key."""
-#         self.counter += 1
-#         if self.counter % 100 == 0:
-#             prob = self.probability_of_collision(self.counter)
-#             if prob > self.tolerance:
-#                 warnings.warn(
-#                     f"Probability of key collision is {prob:0.7f}; Consider using more than {self.key_bytes} key bytes.",
-#                     UserWarning,
-#                 )
-#         return random.randint(0, self.key_space - 1)
-
-#     def probability_of_collision(self, keys: int) -> float:
-#         """Use to assert the probability of collision is acceptable."""
-#         return 1 - math.exp(-keys * (keys - 1) / (2 * self.key_space))
-
-
 class Constant(Generic[FuncParams, FuncReturn]):
     def __init__(self, val: FuncReturn):
         self.val = val
 
     def __repr__(self) -> str:
-        return f"lambda *args,  **kwargs: {self.val}"
+        return f"Constant({self.val!r})"
 
     def __call__(
         self, *args: FuncParams.args, **kwargs: FuncParams.kwargs
