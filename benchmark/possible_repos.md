@@ -1,3 +1,12 @@
+https://github.com/abisee/pointer-generator
+https://github.com/TellinaTool/nl2bash
+https://github.com/afshinrahimi/geomdn
+https://github.com/magnumresearchgroup/Magnum-NLC2CMD
+https://github.com/thunlp/Few-NERD
+https://ucinlp.github.io/autoprompt/
+https://github.com/raspberryice/gen-arg
+https://github.com/aiqm/torchani
+
 These are the repos I am considering as case-studies, ordered from least likely to most likely.
 
 - https://gitlab.ethz.ch/leitner_lab/xquest_xprophet/-/tree/master

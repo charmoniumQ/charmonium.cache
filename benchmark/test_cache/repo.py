@@ -7,6 +7,7 @@ import shlex
 import subprocess
 import sys
 from typing import List, Optional, Protocol, Tuple, Callable, cast
+from .util import BenchmarkError
 
 ROOT = Path(__file__).parent.parent
 
@@ -17,6 +18,7 @@ class Repo(ABC):
     def __init__(
             self,
             name: str,
+            url: str,
             dir: Path,
             display_url: str,
             patch: Optional[str] = None,
@@ -25,6 +27,7 @@ class Repo(ABC):
             patch_func: Optional[Callable[[Repo], None]] = None,
     ) -> None:
         self.name = name
+        self.url = url
         self.dir = dir
         self.display_url = display_url
         self.patch = patch
@@ -69,13 +72,15 @@ class Repo(ABC):
         if self.setup_func:
             self.setup_func(self)
 
-    def _checkout(self, commit: str) -> Tuple[bytes, datetime.datetime]:
+    def _checkout(self, commit: str) -> None:
         raise NotImplementedError()
 
-    def checkout(self, commit: str) -> Tuple[bytes, datetime.datetime]:
-        ret = self._checkout(commit)
+    def checkout(self, commit: str) -> None:
+        self._checkout(commit)
         self.apply_patch()
-        return ret
+
+    def info(slef, commit: str) -> Tuple[bytes, datetime.datetime]:
+        raise NotImplementedError
 
     dir: Path
     name: str
@@ -88,35 +93,43 @@ class GitRepo(Repo):
         url: str,
         display_url: str,
         patch: Optional[str] = None,
-        initial_commit: Optional[str] = None,
         setup_func: Optional[Callable[[Repo], None]] = None,
         patch_func: Optional[Callable[[Repo], None]] = None,
     ) -> None:
         super().__init__(
             name=name,
+            url=url,
             dir=CACHE_PATH / name,
             display_url=display_url,
             patch=patch,
             setup_func=setup_func,
             patch_func=patch_func,
         )
-        self.url = url
-        self.initial_commit = initial_commit
+
+    def __str__(self) -> str:
+        return f"Repo({self.name!r}, {self.url!r}, ...)"
 
     def _setup(self) -> None:
         self.dir.mkdir(exist_ok=True, parents=True)
         if not list(self.dir.iterdir()):
             subprocess.run(["git", "clone", "--recursive", self.url, "."], cwd=self.dir, check=True, capture_output=True)
         else:
+            ref = subprocess.run(
+                ["git", "symbolic-ref", "refs/remotes/origin/HEAD"],
+                cwd=self.dir,
+                check=True,
+                capture_output=True,
+                text=True,
+            ).stdout.strip()
+            branch = ref.split("/")[-1]
             subprocess.run(
                 ["git", "restore", "--", "."],
                 cwd=self.dir,
                 check=True,
                 capture_output=True,
             )
-        if self.initial_commit:
             subprocess.run(
-                ["git", "checkout", self.initial_commit],
+                ["git", "checkout", branch],
                 cwd=self.dir,
                 check=True,
                 capture_output=True,
@@ -160,7 +173,7 @@ done | sort --numeric-sort > log
             return total_changed >= min_diff
         return list(filter(filter_pred, commits))
 
-    def _checkout(self, commit: str) -> Tuple[bytes, datetime.datetime]:
+    def _checkout(self, commit: str) -> None:
         subprocess.run(
             ["git", "restore", "--", "."],
             cwd=self.dir,
@@ -178,12 +191,11 @@ done | sort --numeric-sort > log
             capture_output=True,
             text=True,
         ).stdout.strip()
-        diff = subprocess.run(
-            ["git", "diff", f"{old_commit}..{commit}"],
-            cwd=self.dir,
-            check=True,
-            capture_output=True,
-        ).stdout
+        subprocess.run(
+            ["git", "checkout", commit], cwd=self.dir, check=True, capture_output=True
+        )
+
+    def info(self, commit: str) -> Tuple[bytes, datetime.datetime]:
         date_str = subprocess.run(
             ["git", "show", "--no-patch", "--format=%ci", commit],
             cwd=self.dir,
@@ -192,7 +204,70 @@ done | sort --numeric-sort > log
             capture_output=True,
         ).stdout.strip()
         date = datetime.datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S  %z")
-        subprocess.run(
-            ["git", "checkout", commit], cwd=self.dir, check=True, capture_output=True
-        )
+        diff = subprocess.run(
+            ["git", "show", "--format=", commit],
+            cwd=self.dir,
+            check=True,
+            capture_output=True,
+        ).stdout
         return diff, date
+
+github_pattern = re.compile("https://github.com/[a-zA-Z0-9-.]+/(?P<name>[a-zA-Z0-9-.]+)")
+class GitHubRepo(GitRepo):
+    def __init__(
+            self,
+            url: str
+    ) -> None:
+        parsed_url = github_pattern.match(url)
+        if not parsed_url or parsed_url.group("name").endswith(".git"):
+            raise BenchmarkError(f"{url!r} is does not match {github_pattern!r} or ends with '.git'.")
+        super().__init__(
+            name=parsed_url.group("name"),
+            url=url,
+            display_url=f"{url}/commit/{{commit}}",
+            patch=None,
+            setup_func=None,
+            patch_func=None,
+        )
+
+class CommitChooser(Protocol):
+    def choose(self, repo: Repo) -> List[str]: ...
+
+class RecentCommitChooser(CommitChooser):
+    def __init__(self, seed: str, n: int = 2) -> None:
+        self.seed = seed
+        self.n = n
+
+    def choose(self, repo: Repo) -> List[str]:
+        if isinstance(repo, GitRepo):
+            subprocess.run(
+                ["git", "checkout", self.seed],
+                cwd=repo.dir,
+                capture_output=True,
+                check=True,
+            )
+            n = self.n
+            cmd = ["git", "log", "--pretty=format:%H", "HEAD", f"^HEAD~{n - 1}"]
+            while True:
+                commits_proc = subprocess.run(
+                    cmd,
+                    cwd=repo.dir,
+                    text=True,
+                    capture_output=True,
+                    check=False,
+                )
+                if commits_proc.returncode != 0:
+                    if "fatal: bad revision" in commits_proc.stderr:
+                        n -= 1
+                    else:
+                        raise subprocess.CalledProcessError(
+                            returncode=commits_proc.returncode,
+                            cmd=cmd,
+                            output=commits_proc.stdout + commits_proc.stderr,
+                        )
+                else:
+                    break
+            commits = commits_proc.stdout.strip().split()[::-1]
+            return [*commits, self.seed]
+        else:
+            raise BenchmarkError(f"{self.__class__.__name__} doesn't know how to deal with {type(repo).__name__} as in {repo}.")

@@ -1,14 +1,15 @@
 import asyncio
 
-import pandas as pd  # type: ignore
 import typer
 
-from .data import data
+from .data2 import get_data
 from .run_experiment import run_experiment
 from .write_summary import write_summary
 
 
 def main() -> None:
-    write_summary(run_experiment(data))
+    data = get_data()
+    results = run_experiment(data)
+    write_summary(results)
 
 typer.run(main)

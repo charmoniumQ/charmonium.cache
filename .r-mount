@@ -1,0 +1,2 @@
+upcrc5:grayson5/charmonium.cache
+--verbose --exclude=benchmark/.repos --exclude=benchmark/.mypy_cache --exclude=benchmark/.tox --exclude=benchmark/.cache --exclude=benchmark/test_cache/__pycache__/ --exclude=.tox --exclude=.cache --exclude=charmonium/cache/__pycache__/ --exclude=tests/__pycache__/

@@ -4,27 +4,35 @@ import collections
 from dataclasses import dataclass
 import datetime
 import json
+import itertools
 import logging
-import shutil
+import subprocess
 from pathlib import Path
+import pickle
+import shlex
+import shutil
+import subprocess
 import sys
 import tempfile
-from typing import Any, Dict, List, Mapping, Tuple, Type
+from typing import Any, Dict, List, Mapping, Tuple, Type, Optional, Sequence, cast
+import warnings
 
-from charmonium.cache import DirObjStore, MemoizedGroup, memoize
+import charmonium.time_block as ch_time_block
+#from charmonium.cache import MemoizedGroup, memoize
 from charmonium.determ_hash import determ_hash
 from tqdm import tqdm  # type: ignore
 
-from .environment import Environment
-from .repo import Repo
+from .environment import Environment, EnvironmentChooser
+from .repo import Repo, CommitChooser
+from .util import merge
 
 ROOT = Path(__file__).parent.parent
 
 
-group = MemoizedGroup(
-    size="4GiB",
-    fine_grain_persistence=True,
-)
+# group = MemoizedGroup(
+#     size="4GiB",
+#     fine_grain_persistence=True,
+# )
 
 # hash_logger = logging.getLogger("charmonium.freeze")
 # hash_logger.setLevel(logging.DEBUG)
@@ -88,8 +96,9 @@ class FuncCallProfile:
 
 @dataclass
 class ExecutionProfile:
-    func_calls: List[FuncCallProfile]
-    total_time: float
+    func_calls: Sequence[FuncCallProfile]
+    cpu_time: float
+    wall_time: float
     output: str
     log: str
     success: bool
@@ -105,7 +114,8 @@ class ExecutionProfile:
     def create_empty(Class: Type[ExecutionProfile]) -> ExecutionProfile:
         return Class(
             func_calls=[],
-            total_time=0,
+            cpu_time=0,
+            wall_time=0,
             output="",
             log="",
             success=False,
@@ -128,16 +138,7 @@ class ExecutionProfile:
             ]
         )
 
-
-@dataclass
-class CommitResult:
-    diff: bytes
-    date: datetime.datetime
-    commit: str
-    executions: Mapping[str, ExecutionProfile]
-
-
-def parse_unmemoized_log(log_path: Path) -> Tuple[List[FuncCallProfile], Mapping[str, Any]]:
+def parse_unmemoized_log(log_path: Path) -> Tuple[Sequence[FuncCallProfile], Mapping[str, Any]]:
     lst = []
     with (log_path).open() as log:
         for line in log:
@@ -156,13 +157,13 @@ def parse_unmemoized_log(log_path: Path) -> Tuple[List[FuncCallProfile], Mapping
     return lst, {}
 
 
-def parse_memoized_log(log_path: Path) -> Tuple[List[FuncCallProfile], Mapping[str, Any]]:
+def parse_memoized_log(log_path: Path) -> Tuple[Sequence[FuncCallProfile], Mapping[str, Any]]:
     calls: Mapping[int, FuncCallProfile] = collections.defaultdict(
         FuncCallProfile.empty
     )
     process_kwargs: Dict[str, float] = collections.defaultdict(lambda: 0)
     with log_path.open() as perf_log:
-        for line in perf_log:
+        for line_no, line in enumerate(perf_log):
             record = json.loads(line)
             if "call_id" in record:
                 if "name" in record:
@@ -176,17 +177,17 @@ def parse_memoized_log(log_path: Path) -> Tuple[List[FuncCallProfile], Mapping[s
             elif "duration" in record and "event" in record:
                 process_kwargs[record["event"]] += record["duration"]
             else:
-                print(f"Unknown record {record}")
+                warnings.warn(f"Unknown record {record} on line {line_no} of {perf_log}.")
     return list(calls.values()), process_kwargs
 
 
 log_dir = Path("/tmp/log")
 
-
+@ch_time_block.decor(print_start=False)
 def run_once(
         repo: Repo,
         environment: Environment,
-        cmd: List[str],
+        cmd: Sequence[str],
         memoize: bool
 ) -> ExecutionProfile:
     if log_dir.exists():
@@ -220,119 +221,154 @@ def run_once(
     return ExecutionProfile(
         func_calls=calls,
         success=proc.returncode == 0,
-        total_time=proc.time,
+        wall_time=proc.wall_time,
+        cpu_time=proc.cpu_time,
         log=log,
         output=output,
         **kwargs,
     )
 
+@dataclass
+class CommitResult:
+    diff: bytes
+    date: datetime.datetime
+    commit: str
+    executions: Mapping[str, ExecutionProfile]
 
-@memoize(group=group)
-def get_commit_result(commit: str, repo: Repo, environment: Environment, cmd: List[str]) -> CommitResult:
-    print(f"repo.checkout({commit!r})")
-    diff, date = repo.checkout(commit)
+    @staticmethod
+    def from_commit(repo: Repo, commit: str, executions: Mapping[str, ExecutionProfile]) -> CommitResult:
+        diff, date = repo.info(commit)
+        return CommitResult(diff, date, commit, executions)
 
-    print("run unmodified")
-    orig = run_once(repo, environment, cmd, False)
+def run_many(
+        repo: Repo,
+        environment: Environment,
+        commits: Sequence[str],
+        command: Sequence[str],
+        memoize: bool,
+        short_circuit: bool,
+) -> Sequence[ExecutionProfile]:
+    repo.clean()
 
-    print("run memoized")
-    memo = run_once(repo, environment, cmd, True)
+    if memoize:
+        cache_dir = repo.dir / ".cache"
+        if cache_dir.exists():
+            shutil.rmtree(cache_dir)
+        conftest = repo.dir / "conftest.py"
+        conftest.touch(exist_ok=True)
+        conftest.write_text("\n\n".join([
+            conftest.read_text(),
+            Path("that_conftest.py").read_text(),
+        ]))
 
-    return CommitResult(
-        diff=diff,
-        date=date,
-        commit=commit,
-        executions=dict(
-            orig=orig,
-            memo=memo,
-        ),
-    )
+    executions = []
+    for commit in commits:
+        execution = run_once(repo, environment, command, memoize)
+        executions.append(execution)
+        if short_circuit and not execution.success:
+            break
 
+    return executions
+
+manual_cache = Path(".manual_cache")
+def get_repo_result(
+        repo: Repo,
+        commit_chooser: CommitChooser,
+        environment_chooser: EnvironmentChooser,
+        command: Sequence[str],
+) -> RepoResult:
+    manual_cache.mkdir(exist_ok=True)
+    cache_dest = manual_cache / f"{repo.name}.pkl"
+    if cache_dest.exists():
+        return cast(RepoResult, pickle.loads(cache_dest.read_bytes()))
+    else:
+        ret = get_repo_result2(repo, commit_chooser, environment_chooser, command)
+        cache_dest.write_bytes(pickle.dumps(ret))
+        return ret
+
+@ch_time_block.decor(print_start=False)
+def get_repo_result2(
+        repo: Repo,
+        commit_chooser: CommitChooser,
+        environment_chooser: EnvironmentChooser,
+        command: Sequence[str],
+) -> RepoResult:
+    print(repo.name)
+    with ch_time_block.ctx("repo.setup()", print_start=False):
+        repo.setup()
+    environment = environment_chooser.choose(repo)
+    if environment is None:
+        warning = f"{environment_chooser!s} could not choose an environment."
+        warnings.warn(warning)
+        return RepoResult(
+            repo=repo,
+            environment=environment,
+            command=command,
+            commit_results=[],
+            warnings=[warning],
+        )
+    else:
+        try:
+            with ch_time_block.ctx("environment.setup()", print_start=False):
+                environment.setup()
+                packages = ["https://github.com/charmoniumQ/charmonium.cache/tarball/main"]
+                proc = environment.run(
+                    ["python", "-c", "import pytest"],
+                    cwd=None,
+                )
+                if proc.returncode != 0:
+                    packages.append("pytest")
+                environment.install(packages)
+        except subprocess.CalledProcessError as e:
+            warning = "\n".join([
+                f"{environment!s} could not setup {repo!s}.",
+                "$ " + shlex.join(e.cmd),
+                str(e.stdout),
+                str(e.stderr),
+            ])
+            warnings.warn(warning)
+            return RepoResult(
+                repo=repo,
+                environment=None,
+                command=command,
+                commit_results=[],
+                warnings=[warning],
+            )
+        else:
+            commits = commit_chooser.choose(repo)
+
+            orig_executions = run_many(repo, environment, commits, command, memoize=False, short_circuit=False)
+            #working_commits = commits[:len(orig_executions)]
+            memo_executions = run_many(repo, environment, commits, command, memoize=True, short_circuit=False)
+
+            commit_results = [
+                CommitResult.from_commit(repo, commit, {
+                    "orig": orig_execution,
+                    "memo": memo_execution,
+                })
+                for commit, orig_execution, memo_execution in zip(commits, orig_executions, memo_executions)
+            ]
+
+            return RepoResult(
+                repo=repo,
+                environment=environment,
+                command=command,
+                commit_results=commit_results,
+                warnings=[],
+            )
 
 @dataclass
 class RepoResult:
     repo: Repo
-    cmd: List[str]
-    environment: Environment
-    commit_results: List[CommitResult]
+    command: Sequence[str]
+    environment: Optional[Environment]
+    commit_results: Sequence[CommitResult]
+    warnings: Sequence[str]
 
-@memoize(group=group)
-def get_repo_result(
-        repo: Repo,
-        environment: Environment,
-        cmd: List[str],
-        commits: List[str],
-) -> RepoResult:
-    return RepoResult(
-        repo=repo,
-        environment=environment,
-        cmd=cmd,
-        commit_results=[
-            get_commit_result(commit, repo, environment, cmd)
-            for commit in tqdm(commits, total=len(commits), desc="Testing commit")
-        ],
-    )
-
-@memoize(group=group)
-def get_repo_result_combined(
-        repo: Repo,
-        environment: Environment,
-        cmd: List[str],
-        commits: List[str],
-) -> RepoResult:
-    diff_date_orig = []
-    repo.clean()
-    for commit in tqdm(commits, total=len(commits), desc="Umodified commit"):
-        print(f"repo.checkout({commit!r})")
-        diff, date = repo.checkout(commit)
-
-        print("run unmodified")
-        orig = run_once(repo, environment, cmd, False)
-        diff_date_orig.append((diff, date, orig))
-
-    memoized = []
-    repo.clean()
-    for commit in tqdm(commits, total=len(commits), desc="Memoized commit"):
-        print(f"repo.checkout({commit!r})")
-        print("run memoized")
-        memo = run_once(repo, environment, cmd, True)
-        memoized.append(memo)
-
-    return RepoResult(
-        repo=repo,
-        environment=environment,
-        cmd=cmd,
-        commit_results=[
-            CommitResult(diff, date, commit, executions=dict(
-                orig=orig,
-                memo=memo,
-            ))
-            for commit, (diff, date, orig), memo in zip(commits, diff_date_orig, memoized)
-        ],
-    )
-
-
-@memoize(group=group)
 def run_experiment(
-        repo_env_cmds: List[Tuple[Repo, Environment, List[str], List[str]]],
-) -> List[RepoResult]:
-    for repo, env, cmd, _ in tqdm(repo_env_cmds, total=len(repo_env_cmds), desc="Repo setup"):
-        print(f"Setting up repo {repo.name}")
-        repo.setup()
-        cache_dir = repo.dir / ".cache"
-        if cache_dir.exists():
-            shutil.rmtree(cache_dir)
-        print(f"Setting up env {repo.name}")
-        env.setup(repo)
-        print("Installing charmonium.cache")
-        env.install(repo, [
-            # str(Path().resolve().parent),
-            "--editable",
-            str(repo.dir),
-        ])
-        print(f"Ready for {repo.name}")
-
+        repos: Sequence[Tuple[Repo, CommitChooser, EnvironmentChooser, Sequence[str]]],
+) -> Sequence[RepoResult]:
     return [
-        get_repo_result_combined(repo, env, cmd, commits)
-        for repo, env, cmd, commits in tqdm(repo_env_cmds, total=len(repo_env_cmds), desc="Repo setup")
+        get_repo_result(*repo_info)
+        for repo_info in tqdm(repos, total=len(repos), desc="Repos")
     ]

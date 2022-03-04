@@ -1,0 +1,1457 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><title>Benchmark of charmonium.cache</title><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/styles/default.min.css"><script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/highlight.min.js"></script><script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.3.1/build/languages/yaml.min.js"></script><script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.3.1/build/languages/python.min.js"></script><script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.3.1/build/languages/diff.min.js"></script><script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.3.1/build/languages/ini.min.js"></script><script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.3.1/build/languages/plaintext.min.js"></script><script>hljs.highlightAll();</script><style>
+table, th, td {
+  border: 1px solid black;
+  border-collapse: collapse;
+}
+                    </style></head><body><div><div><h1>Repo pudl</h1><table><tbody><tr><td>Name</td><td>pudl</td></tr><tr><td>Time</td><td>2022-02-10T15:18:13.708243</td></tr><tr><td>Path</td><td>/home/sam/box/charmonium.cache/benchmark/.repos/pudl</td></tr><tr><td>Command</td><td><code>python -m pudl.cli /home/sam/box/charmonium.cache/benchmark/resources/pudl/settings/etl_fast.yml --clobber</code></td></tr><tr><td>Results</td><td><table><thead><tr><td>Commit date</td><td>Commit hash</td><td><span>Unmodified time</span></td><td><span>Memoized time</span></td><td><span>Memoized output<br>matches original</span></td><td>Results</td></tr></thead><tbody><tr><td><span>2021-12-21</span></td><td><a href="https://github.com/catalyst-cooperative/pudl/commit/40d176313e60dfa9d2481f63842ed23f08f1ad5f">40d176</a></td><td><span>452.6s</span></td><td><span>416.4s</span></td><td><span style="background-color: green; display: block;">match</span></td><td><details><summary>Details</summary><table><thead><tr><td></td><td>Unmodified</td><td>Memoized</td></tr></thead><tbody><tr><td>Status</td><td><span style="background-color: green; display: block;">Success</span></td><td><span style="background-color: green; display: block;">Success</span></td></tr><tr><td>Output</td><td><pre><code class="language-plaintext" style="max-width: 60ch;max-height: 20vw;resize: both"></code></pre></td><td><pre><code class="language-plaintext" style="max-width: 60ch;max-height: 20vw;resize: both"></code></pre></td></tr><tr><td>Log</td><td><pre><code class="language-plaintext" style="max-width: 60ch;max-height: 20vw;resize: both">/home/sam/.local/share/virtualenvs/pudl-gKD-Mnhe/lib/python3.9/site-packages/geopandas/_compat.py:111: UserWarning: The Shapely GEOS version (3.9.1-CAPI-1.14.2) is incompatible with the GEOS version PyGEOS was compiled with (3.10.1-CAPI-1.16.0). Conversions between both will be slow.
+  warnings.warn(
+Monkeypatching `pandas.read_excel` v2
+/nix/store/i6vabb4div9iy6lsl642d86k1q8riasn-python3-3.9.9/lib/python3.9/runpy.py:127: RuntimeWarning: 'pudl.cli' found in sys.modules after import of package 'pudl', but prior to execution of 'pudl.cli'; this may result in unpredictable behaviour
+  warn(RuntimeWarning(msg))
+2022-02-10 14:24:35 [    INFO] pudl.extract.ferc1:880 Converting extracted FERC Form 1 table fuel_ferc1 into a pandas DataFrame.
+2022-02-10 14:24:35 [    INFO] pudl.extract.ferc1:880 Converting extracted FERC Form 1 table plant_in_service_ferc1 into a pandas DataFrame.
+2022-02-10 14:24:35 [    INFO] pudl.extract.ferc1:880 Converting extracted FERC Form 1 table plants_hydro_ferc1 into a pandas DataFrame.
+2022-02-10 14:24:35 [    INFO] pudl.extract.ferc1:880 Converting extracted FERC Form 1 table plants_pumped_storage_ferc1 into a pandas DataFrame.
+2022-02-10 14:24:35 [    INFO] pudl.extract.ferc1:880 Converting extracted FERC Form 1 table plants_small_ferc1 into a pandas DataFrame.
+2022-02-10 14:24:35 [    INFO] pudl.extract.ferc1:880 Converting extracted FERC Form 1 table plants_steam_ferc1 into a pandas DataFrame.
+2022-02-10 14:24:35 [    INFO] pudl.extract.ferc1:880 Converting extracted FERC Form 1 table purchased_power_ferc1 into a pandas DataFrame.
+2022-02-10 14:24:36 [    INFO] pudl.transform.ferc1:1578 Transforming raw FERC Form 1 dataframe for loading into fuel_ferc1
+2022-02-10 14:24:36 [    INFO] pudl.transform.ferc1:1578 Transforming raw FERC Form 1 dataframe for loading into plants_steam_ferc1
+2022-02-10 14:24:36 [    INFO] pudl.transform.ferc1:798 Identifying distinct large FERC plants for ID assignment.
+/home/sam/.local/share/virtualenvs/pudl-gKD-Mnhe/lib/python3.9/site-packages/sklearn/utils/validation.py:1688: FutureWarning: Feature names only support names that are all strings. Got feature names with dtypes: ['quoted_name', 'str']. An error will be raised in 1.2.
+  warnings.warn(
+2022-02-10 14:24:43 [    INFO] pudl.transform.ferc1:833 Successfully associated 908 of 910 (99.78%) FERC Form 1 plant records with multi-year plant entities.
+2022-02-10 14:24:43 [    INFO] pudl.transform.ferc1:845 Assigning IDs to multi-year FERC plant entities.
+2022-02-10 14:24:43 [    INFO] pudl.transform.ferc1:862 Identified 0 orphaned FERC plant records. Adding orphans to list of plant entities.
+2022-02-10 14:24:44 [    INFO] pudl.transform.ferc1:885 Successfully Identified 908 multi-year plant entities.
+2022-02-10 14:24:44 [   ERROR] pudl.transform.ferc1:956 Found report_year=2020 2 times in plant_id_ferc1=569
+2022-02-10 14:24:44 [   ERROR] pudl.transform.ferc1:956 Found report_year=2020 2 times in plant_id_ferc1=570
+2022-02-10 14:24:44 [    INFO] pudl.transform.ferc1:1578 Transforming raw FERC Form 1 dataframe for loading into plants_small_ferc1
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;_io.FileIO name='/home/sam/box/charmonium.cache/benchmark/.repos/pudl/src/pudl/package_data/ferc1/small_plants_2004-2016.xlsx' mode='rb' closefd=True&gt;, *(), **{})
+/home/sam/.local/share/virtualenvs/pudl-gKD-Mnhe/lib/python3.9/site-packages/openpyxl/worksheet/_reader.py:312: UserWarning: Unknown extension is not supported and will be removed
+  warn(msg)
+2022-02-10 14:24:47 [    INFO] pudl.transform.ferc1:1578 Transforming raw FERC Form 1 dataframe for loading into plants_hydro_ferc1
+2022-02-10 14:24:47 [    INFO] pudl.transform.ferc1:1578 Transforming raw FERC Form 1 dataframe for loading into plants_pumped_storage_ferc1
+2022-02-10 14:24:47 [    INFO] pudl.transform.ferc1:1578 Transforming raw FERC Form 1 dataframe for loading into plant_in_service_ferc1
+2022-02-10 14:24:47 [    INFO] pudl.transform.ferc1:506 0.0000% of unpacked records were duplicates, and discarded.
+2022-02-10 14:24:47 [    INFO] pudl.transform.ferc1:548 Col: begin_yr_bal, Cat: starting_balance
+2022-02-10 14:24:47 [    INFO] pudl.transform.ferc1:548 Col: addition, Cat: additions
+2022-02-10 14:24:47 [    INFO] pudl.transform.ferc1:548 Col: retirements, Cat: retirements
+2022-02-10 14:24:47 [    INFO] pudl.transform.ferc1:548 Col: adjustments, Cat: adjustments
+2022-02-10 14:24:47 [    INFO] pudl.transform.ferc1:548 Col: transfers, Cat: transfers
+2022-02-10 14:24:47 [    INFO] pudl.transform.ferc1:548 Col: yr_end_bal, Cat: ending_balance
+2022-02-10 14:24:47 [    INFO] pudl.transform.ferc1:1578 Transforming raw FERC Form 1 dataframe for loading into purchased_power_ferc1
+2022-02-10 14:24:47 [    INFO] pudl.extract.excel:206 Extracting eia923 spreadsheet data.
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f79cfe0d700&gt;, *(), **{'sheet_name': 5, 'skiprows': 5, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f79cfe0d700&gt;, *(), **{'sheet_name': 7, 'skiprows': 4, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f79cfe0d700&gt;, *(), **{'sheet_name': 0, 'skiprows': 5, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f79cfe0d700&gt;, *(), **{'sheet_name': 6, 'skiprows': 5, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f79cfe0d700&gt;, *(), **{'sheet_name': 3, 'skiprows': 5, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+2022-02-10 14:25:39 [    INFO] pudl.extract.excel:206 Extracting eia860 spreadsheet data.
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f79cfd3e730&gt;, *(), **{'sheet_name': 0, 'skiprows': 1, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+2022-02-10 14:25:40 [ WARNING] pudl.extract.excel:249 Extra columns found in page boiler_generator_assn: {'plant_name', 'steam_plant_type', 'utility_name'}
+2022-02-10 14:25:40 [ WARNING] pudl.extract.excel:254 Columns found missing from page generator: {'report_year'}
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f79cfd5e4c0&gt;, *(), **{'sheet_name': 0, 'skiprows': 1, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f79cfd5e4c0&gt;, *(), **{'sheet_name': 1, 'skiprows': 1, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f79cfd5e4c0&gt;, *(), **{'sheet_name': 2, 'skiprows': 1, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f79cfe5c910&gt;, *(), **{'sheet_name': 0, 'skiprows': 1, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f79cfe5cd00&gt;, *(), **{'sheet_name': 0, 'skiprows': 1, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+2022-02-10 14:26:32 [ WARNING] pudl.extract.excel:249 Extra columns found in page plant: {'ferc_exempt_wholesale_generator_docket_number'}
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f79cfcff490&gt;, *(), **{'sheet_name': 0, 'skiprows': 1, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+2022-02-10 14:26:34 [    INFO] pudl.extract.excel:206 Extracting eia860m spreadsheet data.
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f79cf6c6d90&gt;, *(), **{'sheet_name': 0, 'skiprows': 2, 'skipfooter': 2, 'dtype': {'Plant ID': Int64Dtype()}})
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f79cf6c6d90&gt;, *(), **{'sheet_name': 1, 'skiprows': 2, 'skipfooter': 2, 'dtype': {'Plant ID': Int64Dtype()}})
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f79cf6c6d90&gt;, *(), **{'sheet_name': 2, 'skiprows': 2, 'skipfooter': 2, 'dtype': {'Plant ID': Int64Dtype()}})
+2022-02-10 14:27:01 [    INFO] pudl.transform.eia860:620 Transforming raw EIA 860 DataFrames for ownership_eia860 concatenated across all years.
+/home/sam/box/charmonium.cache/benchmark/.repos/pudl/src/pudl/transform/eia860.py:84: PerformanceWarning: indexing past lexsort depth may impact performance.
+  own_df.set_index(["plant_id_eia", "generator_id"])
+2022-02-10 14:27:03 [    INFO] pudl.transform.eia860:620 Transforming raw EIA 860 DataFrames for generators_eia860 concatenated across all years.
+2022-02-10 14:27:20 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_code_1
+2022-02-10 14:27:20 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_code_2
+2022-02-10 14:27:20 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_code_3
+2022-02-10 14:27:20 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_code_4
+2022-02-10 14:27:20 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_code_5
+2022-02-10 14:27:20 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_code_6
+2022-02-10 14:27:20 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_1_transport_1
+2022-02-10 14:27:20 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_1_transport_2
+2022-02-10 14:27:20 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_1_transport_3
+2022-02-10 14:27:20 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_2_transport_1
+2022-02-10 14:27:20 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_2_transport_2
+2022-02-10 14:27:20 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_2_transport_3
+2022-02-10 14:27:20 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.planned_new_prime_mover_code
+2022-02-10 14:27:20 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.planned_energy_source_code_1
+2022-02-10 14:27:20 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.startup_source_code_1
+2022-02-10 14:27:20 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.startup_source_code_2
+2022-02-10 14:27:21 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.startup_source_code_3
+2022-02-10 14:27:21 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.startup_source_code_4
+2022-02-10 14:27:21 [    INFO] pudl.transform.eia860:620 Transforming raw EIA 860 DataFrames for plants_eia860 concatenated across all years.
+2022-02-10 14:27:22 [    INFO] pudl.transform.eia860:620 Transforming raw EIA 860 DataFrames for boiler_generator_assn_eia860 concatenated across all years.
+2022-02-10 14:27:22 [    INFO] pudl.transform.eia860:620 Transforming raw EIA 860 DataFrames for utilities_eia860 concatenated across all years.
+2022-02-10 14:27:22 [    INFO] pudl.transform.eia923:1162 Transforming raw EIA 923 DataFrames for generation_fuel_eia923 concatenated across all years.
+2022-02-10 14:27:30 [    INFO] pudl.metadata.classes:1439 Recoding generation_fuel_eia923.energy_source_code
+2022-02-10 14:27:30 [    INFO] pudl.metadata.classes:1439 Recoding generation_fuel_eia923.fuel_type_code_aer
+2022-02-10 14:27:30 [    INFO] pudl.metadata.classes:1439 Recoding generation_fuel_eia923.prime_mover_code
+2022-02-10 14:27:32 [    INFO] pudl.transform.eia923:1162 Transforming raw EIA 923 DataFrames for boiler_fuel_eia923 concatenated across all years.
+2022-02-10 14:27:34 [    INFO] pudl.metadata.classes:1439 Recoding boiler_fuel_eia923.energy_source_code
+2022-02-10 14:27:34 [    INFO] pudl.transform.eia923:1162 Transforming raw EIA 923 DataFrames for generation_eia923 concatenated across all years.
+2022-02-10 14:27:35 [    INFO] pudl.transform.eia923:1162 Transforming raw EIA 923 DataFrames for coalmine_eia923 concatenated across all years.
+2022-02-10 14:27:36 [    INFO] pudl.transform.eia923:1162 Transforming raw EIA 923 DataFrames for fuel_receipts_costs_eia923 concatenated across all years.
+2022-02-10 14:27:38 [    INFO] pudl.metadata.classes:1439 Recoding fuel_receipts_costs_eia923.contract_type_code
+2022-02-10 14:27:38 [    INFO] pudl.metadata.classes:1439 Recoding fuel_receipts_costs_eia923.energy_source_code
+2022-02-10 14:27:38 [    INFO] pudl.metadata.classes:1439 Recoding fuel_receipts_costs_eia923.primary_transportation_mode_code
+2022-02-10 14:27:38 [    INFO] pudl.metadata.classes:1439 Recoding fuel_receipts_costs_eia923.secondary_transportation_mode_code
+2022-02-10 14:27:44 [    INFO] pudl.transform.eia:1080 Harvesting IDs &amp; consistently static attributes for EIA plants
+2022-02-10 14:27:59 [    INFO] pudl.transform.eia:609 Average consistency of static plants values is 99.97%
+2022-02-10 14:30:26 [    INFO] pudl.transform.eia:1080 Harvesting IDs &amp; consistently static attributes for EIA generators
+2022-02-10 14:31:08 [    INFO] pudl.transform.eia:609 Average consistency of static generators values is 100.00%
+2022-02-10 14:31:08 [    INFO] pudl.transform.eia:1080 Harvesting IDs &amp; consistently static attributes for EIA utilities
+2022-02-10 14:31:13 [    INFO] pudl.transform.eia:609 Average consistency of static utilities values is 100.00%
+2022-02-10 14:31:13 [    INFO] pudl.transform.eia:1080 Harvesting IDs &amp; consistently static attributes for EIA boilers
+2022-02-10 14:31:13 [    INFO] pudl.transform.eia:609 Average consistency of static boilers values is 99.12%
+2022-02-10 14:31:13 [    INFO] pudl.transform.eia:682 Inferring complete EIA boiler-generator associations.
+2022-02-10 14:31:32 [ WARNING] pudl.transform.eia:967 Multiple EIA unit codes:plant_id_eia=10725, unit_id_pudl=1, unit_id_eia=['F802' 'F801']
+2022-02-10 14:31:32 [ WARNING] pudl.transform.eia:967 Multiple EIA unit codes:plant_id_eia=55309, unit_id_pudl=1, unit_id_eia=['SMR2' 'SMR1']
+2022-02-10 14:31:32 [ WARNING] pudl.transform.eia:967 Multiple EIA unit codes:plant_id_eia=57794, unit_id_pudl=1, unit_id_eia=['CC01' 'CC02']
+2022-02-10 14:31:32 [ WARNING] pudl.transform.eia:967 Multiple EIA unit codes:plant_id_eia=60786, unit_id_pudl=1, unit_id_eia=['4343' '4141']
+2022-02-10 14:31:33 [    INFO] pudl.metadata.classes:1439 Recoding plants_entity_eia.sector_id_eia
+2022-02-10 14:31:33 [    INFO] pudl.metadata.classes:1439 Recoding generators_entity_eia.prime_mover_code
+2022-02-10 14:31:33 [    INFO] pudl.metadata.classes:1439 Recoding boilers_entity_eia.prime_mover_code
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;_io.FileIO name='/home/sam/box/charmonium.cache/benchmark/.repos/pudl/src/pudl/package_data/glue/mapping_eia923_ferc1.xlsx' mode='rb' closefd=True&gt;, *(), **{'sheet_name': 'plants_output', 'na_values': '', 'keep_default_na': False, 'converters': {'plant_id_pudl': &lt;class 'int'&gt;, 'plant_name_pudl': &lt;class 'str'&gt;, 'utility_id_ferc1': &lt;class 'int'&gt;, 'utility_name_ferc1': &lt;class 'str'&gt;, 'plant_name_ferc1': &lt;class 'str'&gt;, 'plant_id_eia': &lt;class 'int'&gt;, 'plant_name_eia': &lt;class 'str'&gt;, 'utility_name_eia': &lt;class 'str'&gt;, 'utility_id_eia': &lt;class 'int'&gt;}})
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;_io.FileIO name='/home/sam/box/charmonium.cache/benchmark/.repos/pudl/src/pudl/package_data/glue/mapping_eia923_ferc1.xlsx' mode='rb' closefd=True&gt;, *(), **{'sheet_name': 'utilities_output', 'na_values': '', 'keep_default_na': False, 'converters': {'utility_id_pudl': &lt;class 'int'&gt;, 'utility_name_pudl': &lt;class 'str'&gt;, 'utility_id_ferc1': &lt;class 'int'&gt;, 'utility_name_ferc1': &lt;class 'str'&gt;, 'utility_id_eia': &lt;class 'int'&gt;, 'utility_name_eia': &lt;class 'str'&gt;}})
+2022-02-10 14:31:39 [ WARNING] pudl.glue.ferc1_eia:803 FERC to EIA glue breaking in plants_eia. There are too many null fields. Check the mapping spreadhseet.
+2022-02-10 14:31:39 [ WARNING] pudl.glue.ferc1_eia:803 FERC to EIA glue breaking in utilities_eia. There are too many null fields. Check the mapping spreadhseet.
+2022-02-10 14:31:39 [    INFO] pudl.glue.eia_epacems:37 grabbing original crosswalk
+2022-02-10 14:31:39 [    INFO] pudl.glue.eia_epacems:77 splitting crosswalk into three normalized tables
+2022-02-10 14:31:41 [    INFO] pudl.load.sqlite:63 Loading coalmine_eia923 into PUDL SQLite DB.
+2022-02-10 14:31:41 [    INFO] pudl.load.sqlite:63 Loading contract_types_eia into PUDL SQLite DB.
+2022-02-10 14:31:41 [    INFO] pudl.load.sqlite:63 Loading energy_sources_eia into PUDL SQLite DB.
+2022-02-10 14:31:41 [    INFO] pudl.load.sqlite:63 Loading ferc_accounts into PUDL SQLite DB.
+2022-02-10 14:31:41 [    INFO] pudl.load.sqlite:63 Loading ferc_depreciation_lines into PUDL SQLite DB.
+2022-02-10 14:31:41 [    INFO] pudl.load.sqlite:63 Loading fuel_transportation_modes_eia into PUDL SQLite DB.
+2022-02-10 14:31:41 [    INFO] pudl.load.sqlite:63 Loading fuel_types_aer_eia into PUDL SQLite DB.
+2022-02-10 14:31:41 [    INFO] pudl.load.sqlite:63 Loading plant_unit_epa into PUDL SQLite DB.
+2022-02-10 14:31:41 [    INFO] pudl.load.sqlite:63 Loading plants_pudl into PUDL SQLite DB.
+2022-02-10 14:31:41 [    INFO] pudl.load.sqlite:63 Loading prime_movers_eia into PUDL SQLite DB.
+2022-02-10 14:31:41 [    INFO] pudl.load.sqlite:63 Loading sector_consolidated_eia into PUDL SQLite DB.
+2022-02-10 14:31:41 [    INFO] pudl.load.sqlite:63 Loading utilities_entity_eia into PUDL SQLite DB.
+2022-02-10 14:31:41 [    INFO] pudl.load.sqlite:63 Loading utilities_pudl into PUDL SQLite DB.
+2022-02-10 14:31:41 [    INFO] pudl.load.sqlite:63 Loading plants_eia into PUDL SQLite DB.
+2022-02-10 14:31:42 [    INFO] pudl.load.sqlite:63 Loading plants_entity_eia into PUDL SQLite DB.
+2022-02-10 14:31:48 [    INFO] pudl.load.sqlite:63 Loading utilities_eia into PUDL SQLite DB.
+2022-02-10 14:31:48 [    INFO] pudl.load.sqlite:63 Loading utilities_eia860 into PUDL SQLite DB.
+2022-02-10 14:31:49 [    INFO] pudl.load.sqlite:63 Loading utilities_ferc1 into PUDL SQLite DB.
+2022-02-10 14:31:49 [    INFO] pudl.load.sqlite:63 Loading utility_plant_assn into PUDL SQLite DB.
+2022-02-10 14:31:49 [    INFO] pudl.load.sqlite:63 Loading assn_plant_id_eia_epa into PUDL SQLite DB.
+2022-02-10 14:31:49 [    INFO] pudl.load.sqlite:63 Loading boilers_entity_eia into PUDL SQLite DB.
+2022-02-10 14:31:49 [    INFO] pudl.load.sqlite:63 Loading fuel_receipts_costs_eia923 into PUDL SQLite DB.
+2022-02-10 14:31:51 [    INFO] pudl.load.sqlite:63 Loading generation_fuel_eia923 into PUDL SQLite DB.
+2022-02-10 14:31:57 [    INFO] pudl.load.sqlite:63 Loading generation_fuel_nuclear_eia923 into PUDL SQLite DB.
+2022-02-10 14:31:57 [    INFO] pudl.load.sqlite:63 Loading generators_entity_eia into PUDL SQLite DB.
+2022-02-10 14:31:58 [    INFO] pudl.load.sqlite:63 Loading plant_in_service_ferc1 into PUDL SQLite DB.
+2022-02-10 14:31:58 [    INFO] pudl.load.sqlite:63 Loading plants_eia860 into PUDL SQLite DB.
+2022-02-10 14:32:00 [    INFO] pudl.load.sqlite:63 Loading plants_ferc1 into PUDL SQLite DB.
+2022-02-10 14:32:00 [    INFO] pudl.load.sqlite:63 Loading purchased_power_ferc1 into PUDL SQLite DB.
+2022-02-10 14:32:00 [    INFO] pudl.load.sqlite:63 Loading assn_gen_eia_unit_epa into PUDL SQLite DB.
+2022-02-10 14:32:00 [    INFO] pudl.load.sqlite:63 Loading boiler_fuel_eia923 into PUDL SQLite DB.
+2022-02-10 14:32:03 [    INFO] pudl.load.sqlite:63 Loading fuel_ferc1 into PUDL SQLite DB.
+2022-02-10 14:32:03 [    INFO] pudl.load.sqlite:63 Loading generation_eia923 into PUDL SQLite DB.
+2022-02-10 14:32:04 [    INFO] pudl.load.sqlite:63 Loading generators_eia860 into PUDL SQLite DB.
+2022-02-10 14:32:11 [    INFO] pudl.load.sqlite:63 Loading plants_hydro_ferc1 into PUDL SQLite DB.
+2022-02-10 14:32:11 [    INFO] pudl.load.sqlite:63 Loading plants_pumped_storage_ferc1 into PUDL SQLite DB.
+2022-02-10 14:32:11 [    INFO] pudl.load.sqlite:63 Loading plants_small_ferc1 into PUDL SQLite DB.
+2022-02-10 14:32:11 [    INFO] pudl.load.sqlite:63 Loading plants_steam_ferc1 into PUDL SQLite DB.
+2022-02-10 14:32:11 [    INFO] pudl.load.sqlite:63 Loading boiler_generator_assn_eia860 into PUDL SQLite DB.
+2022-02-10 14:32:11 [    INFO] pudl.load.sqlite:63 Loading ownership_eia860 into PUDL SQLite DB.
+2022-02-10 14:32:12 [    INFO] pudl.etl:277 Processing EPA CEMS data and writing it to Apache Parquet.
+2022-02-10 14:32:12 [    INFO] pudl.extract.epacems:168 Processing EPA CEMS hourly data for ID-2020
+/home/sam/box/charmonium.cache/benchmark/.repos/pudl/src/pudl/helpers.py:1000: FutureWarning: Using .astype to convert from timezone-aware dtype to timezone-naive dtype is deprecated and will raise in a future version.  Use obj.tz_localize(None) or obj.tz_convert('UTC').tz_localize(None) instead
+  df.astype(non_bool_cols)
+2022-02-10 14:32:20 [    INFO] pudl.etl:292 Processing EPA CEMS took 00:00:08
+</code></pre></td><td><pre><code class="language-plaintext" style="max-width: 60ch;max-height: 20vw;resize: both">/home/sam/.local/share/virtualenvs/pudl-gKD-Mnhe/lib/python3.9/site-packages/geopandas/_compat.py:111: UserWarning: The Shapely GEOS version (3.9.1-CAPI-1.14.2) is incompatible with the GEOS version PyGEOS was compiled with (3.10.1-CAPI-1.16.0). Conversions between both will be slow.
+  warnings.warn(
+Monkeypatching `pandas.read_excel` v2
+/nix/store/i6vabb4div9iy6lsl642d86k1q8riasn-python3-3.9.9/lib/python3.9/runpy.py:127: RuntimeWarning: 'pudl.cli' found in sys.modules after import of package 'pudl', but prior to execution of 'pudl.cli'; this may result in unpredictable behaviour
+  warn(RuntimeWarning(msg))
+2022-02-10 14:56:51 [    INFO] pudl.extract.ferc1:880 Converting extracted FERC Form 1 table fuel_ferc1 into a pandas DataFrame.
+2022-02-10 14:56:51 [    INFO] pudl.extract.ferc1:880 Converting extracted FERC Form 1 table plant_in_service_ferc1 into a pandas DataFrame.
+2022-02-10 14:56:51 [    INFO] pudl.extract.ferc1:880 Converting extracted FERC Form 1 table plants_hydro_ferc1 into a pandas DataFrame.
+2022-02-10 14:56:51 [    INFO] pudl.extract.ferc1:880 Converting extracted FERC Form 1 table plants_pumped_storage_ferc1 into a pandas DataFrame.
+2022-02-10 14:56:52 [    INFO] pudl.extract.ferc1:880 Converting extracted FERC Form 1 table plants_small_ferc1 into a pandas DataFrame.
+2022-02-10 14:56:52 [    INFO] pudl.extract.ferc1:880 Converting extracted FERC Form 1 table plants_steam_ferc1 into a pandas DataFrame.
+2022-02-10 14:56:52 [    INFO] pudl.extract.ferc1:880 Converting extracted FERC Form 1 table purchased_power_ferc1 into a pandas DataFrame.
+2022-02-10 14:56:52 [    INFO] pudl.transform.ferc1:1579 Transforming raw FERC Form 1 dataframe for loading into fuel_ferc1
+2022-02-10 14:56:52 [    INFO] pudl.transform.ferc1:1579 Transforming raw FERC Form 1 dataframe for loading into plants_steam_ferc1
+2022-02-10 14:56:52 [    INFO] pudl.transform.ferc1:799 Identifying distinct large FERC plants for ID assignment.
+/home/sam/.local/share/virtualenvs/pudl-gKD-Mnhe/lib/python3.9/site-packages/sklearn/utils/validation.py:1688: FutureWarning: Feature names only support names that are all strings. Got feature names with dtypes: ['quoted_name', 'str']. An error will be raised in 1.2.
+  warnings.warn(
+2022-02-10 14:57:00 [    INFO] pudl.transform.ferc1:834 Successfully associated 908 of 910 (99.78%) FERC Form 1 plant records with multi-year plant entities.
+2022-02-10 14:57:00 [    INFO] pudl.transform.ferc1:846 Assigning IDs to multi-year FERC plant entities.
+2022-02-10 14:57:00 [    INFO] pudl.transform.ferc1:863 Identified 0 orphaned FERC plant records. Adding orphans to list of plant entities.
+2022-02-10 14:57:02 [    INFO] pudl.transform.ferc1:886 Successfully Identified 908 multi-year plant entities.
+2022-02-10 14:57:02 [   ERROR] pudl.transform.ferc1:957 Found report_year=2020 2 times in plant_id_ferc1=569
+2022-02-10 14:57:02 [   ERROR] pudl.transform.ferc1:957 Found report_year=2020 2 times in plant_id_ferc1=570
+2022-02-10 14:57:02 [    INFO] pudl.transform.ferc1:1579 Transforming raw FERC Form 1 dataframe for loading into plants_small_ferc1
+Env vars  /tmp/log/perf.log
+read_excel(&lt;_io.FileIO name='/home/sam/box/charmonium.cache/benchmark/.repos/pudl/src/pudl/package_data/ferc1/small_plants_2004-2016.xlsx' mode='rb' closefd=True&gt;, *(), **{})
+/home/sam/.local/share/virtualenvs/pudl-gKD-Mnhe/lib/python3.9/site-packages/openpyxl/worksheet/_reader.py:312: UserWarning: Unknown extension is not supported and will be removed
+  warn(msg)
+2022-02-10 14:57:04 [    INFO] pudl.transform.ferc1:1579 Transforming raw FERC Form 1 dataframe for loading into plants_hydro_ferc1
+2022-02-10 14:57:04 [    INFO] pudl.transform.ferc1:1579 Transforming raw FERC Form 1 dataframe for loading into plants_pumped_storage_ferc1
+2022-02-10 14:57:04 [    INFO] pudl.transform.ferc1:1579 Transforming raw FERC Form 1 dataframe for loading into plant_in_service_ferc1
+2022-02-10 14:57:04 [    INFO] pudl.transform.ferc1:507 0.0000% of unpacked records were duplicates, and discarded.
+2022-02-10 14:57:04 [    INFO] pudl.transform.ferc1:549 Col: begin_yr_bal, Cat: starting_balance
+2022-02-10 14:57:04 [    INFO] pudl.transform.ferc1:549 Col: addition, Cat: additions
+2022-02-10 14:57:04 [    INFO] pudl.transform.ferc1:549 Col: retirements, Cat: retirements
+2022-02-10 14:57:04 [    INFO] pudl.transform.ferc1:549 Col: adjustments, Cat: adjustments
+2022-02-10 14:57:04 [    INFO] pudl.transform.ferc1:549 Col: transfers, Cat: transfers
+2022-02-10 14:57:04 [    INFO] pudl.transform.ferc1:549 Col: yr_end_bal, Cat: ending_balance
+2022-02-10 14:57:05 [    INFO] pudl.transform.ferc1:1579 Transforming raw FERC Form 1 dataframe for loading into purchased_power_ferc1
+2022-02-10 14:57:05 [    INFO] pudl.extract.excel:207 Extracting eia923 spreadsheet data.
+Env vars  /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f81fb8607c0&gt;, *(), **{'sheet_name': 5, 'skiprows': 5, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+Env vars  /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f81fb8607c0&gt;, *(), **{'sheet_name': 7, 'skiprows': 4, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+Env vars  /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f81fb8607c0&gt;, *(), **{'sheet_name': 0, 'skiprows': 5, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+Env vars  /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f81fb8607c0&gt;, *(), **{'sheet_name': 6, 'skiprows': 5, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+Env vars  /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f81fb8607c0&gt;, *(), **{'sheet_name': 3, 'skiprows': 5, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+2022-02-10 14:57:59 [    INFO] pudl.extract.excel:207 Extracting eia860 spreadsheet data.
+Env vars  /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f81fbcc48e0&gt;, *(), **{'sheet_name': 0, 'skiprows': 1, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+2022-02-10 14:58:00 [ WARNING] pudl.extract.excel:250 Extra columns found in page boiler_generator_assn: {'plant_name', 'steam_plant_type', 'utility_name'}
+2022-02-10 14:58:00 [ WARNING] pudl.extract.excel:255 Columns found missing from page generator: {'report_year'}
+Env vars  /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f81fb8fa2e0&gt;, *(), **{'sheet_name': 0, 'skiprows': 1, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+Env vars  /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f81fb8fa2e0&gt;, *(), **{'sheet_name': 1, 'skiprows': 1, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+Env vars  /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f81fb8fa2e0&gt;, *(), **{'sheet_name': 2, 'skiprows': 1, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+Env vars  /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f81fb8623d0&gt;, *(), **{'sheet_name': 0, 'skiprows': 1, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+Env vars  /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f81fb862af0&gt;, *(), **{'sheet_name': 0, 'skiprows': 1, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+2022-02-10 14:58:43 [ WARNING] pudl.extract.excel:250 Extra columns found in page plant: {'ferc_exempt_wholesale_generator_docket_number'}
+Env vars  /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f81fb9b5ac0&gt;, *(), **{'sheet_name': 0, 'skiprows': 1, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+2022-02-10 14:58:44 [    INFO] pudl.extract.excel:207 Extracting eia860m spreadsheet data.
+Env vars  /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f81fb9734c0&gt;, *(), **{'sheet_name': 0, 'skiprows': 2, 'skipfooter': 2, 'dtype': {'Plant ID': Int64Dtype()}})
+Env vars  /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f81fb9734c0&gt;, *(), **{'sheet_name': 1, 'skiprows': 2, 'skipfooter': 2, 'dtype': {'Plant ID': Int64Dtype()}})
+Env vars  /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f81fb9734c0&gt;, *(), **{'sheet_name': 2, 'skiprows': 2, 'skipfooter': 2, 'dtype': {'Plant ID': Int64Dtype()}})
+2022-02-10 14:59:01 [    INFO] pudl.transform.eia860:620 Transforming raw EIA 860 DataFrames for ownership_eia860 concatenated across all years.
+/home/sam/box/charmonium.cache/benchmark/.repos/pudl/src/pudl/transform/eia860.py:84: PerformanceWarning: indexing past lexsort depth may impact performance.
+  own_df.set_index(["plant_id_eia", "generator_id"])
+2022-02-10 14:59:03 [    INFO] pudl.transform.eia860:620 Transforming raw EIA 860 DataFrames for generators_eia860 concatenated across all years.
+2022-02-10 14:59:18 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_code_1
+2022-02-10 14:59:18 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_code_2
+2022-02-10 14:59:18 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_code_3
+2022-02-10 14:59:18 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_code_4
+2022-02-10 14:59:18 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_code_5
+2022-02-10 14:59:18 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_code_6
+2022-02-10 14:59:19 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_1_transport_1
+2022-02-10 14:59:19 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_1_transport_2
+2022-02-10 14:59:19 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_1_transport_3
+2022-02-10 14:59:19 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_2_transport_1
+2022-02-10 14:59:19 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_2_transport_2
+2022-02-10 14:59:19 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_2_transport_3
+2022-02-10 14:59:19 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.planned_new_prime_mover_code
+2022-02-10 14:59:19 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.planned_energy_source_code_1
+2022-02-10 14:59:19 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.startup_source_code_1
+2022-02-10 14:59:19 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.startup_source_code_2
+2022-02-10 14:59:19 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.startup_source_code_3
+2022-02-10 14:59:19 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.startup_source_code_4
+2022-02-10 14:59:19 [    INFO] pudl.transform.eia860:620 Transforming raw EIA 860 DataFrames for plants_eia860 concatenated across all years.
+2022-02-10 14:59:20 [    INFO] pudl.transform.eia860:620 Transforming raw EIA 860 DataFrames for boiler_generator_assn_eia860 concatenated across all years.
+2022-02-10 14:59:20 [    INFO] pudl.transform.eia860:620 Transforming raw EIA 860 DataFrames for utilities_eia860 concatenated across all years.
+2022-02-10 14:59:21 [    INFO] pudl.transform.eia923:1162 Transforming raw EIA 923 DataFrames for generation_fuel_eia923 concatenated across all years.
+2022-02-10 14:59:28 [    INFO] pudl.metadata.classes:1439 Recoding generation_fuel_eia923.energy_source_code
+2022-02-10 14:59:28 [    INFO] pudl.metadata.classes:1439 Recoding generation_fuel_eia923.fuel_type_code_aer
+2022-02-10 14:59:28 [    INFO] pudl.metadata.classes:1439 Recoding generation_fuel_eia923.prime_mover_code
+2022-02-10 14:59:30 [    INFO] pudl.transform.eia923:1162 Transforming raw EIA 923 DataFrames for boiler_fuel_eia923 concatenated across all years.
+2022-02-10 14:59:32 [    INFO] pudl.metadata.classes:1439 Recoding boiler_fuel_eia923.energy_source_code
+2022-02-10 14:59:32 [    INFO] pudl.transform.eia923:1162 Transforming raw EIA 923 DataFrames for generation_eia923 concatenated across all years.
+2022-02-10 14:59:33 [    INFO] pudl.transform.eia923:1162 Transforming raw EIA 923 DataFrames for coalmine_eia923 concatenated across all years.
+2022-02-10 14:59:33 [    INFO] pudl.transform.eia923:1162 Transforming raw EIA 923 DataFrames for fuel_receipts_costs_eia923 concatenated across all years.
+2022-02-10 14:59:35 [    INFO] pudl.metadata.classes:1439 Recoding fuel_receipts_costs_eia923.contract_type_code
+2022-02-10 14:59:35 [    INFO] pudl.metadata.classes:1439 Recoding fuel_receipts_costs_eia923.energy_source_code
+2022-02-10 14:59:35 [    INFO] pudl.metadata.classes:1439 Recoding fuel_receipts_costs_eia923.primary_transportation_mode_code
+2022-02-10 14:59:35 [    INFO] pudl.metadata.classes:1439 Recoding fuel_receipts_costs_eia923.secondary_transportation_mode_code
+2022-02-10 14:59:41 [    INFO] pudl.transform.eia:1080 Harvesting IDs &amp; consistently static attributes for EIA plants
+2022-02-10 14:59:55 [    INFO] pudl.transform.eia:609 Average consistency of static plants values is 99.97%
+2022-02-10 15:02:08 [    INFO] pudl.transform.eia:1080 Harvesting IDs &amp; consistently static attributes for EIA generators
+2022-02-10 15:02:47 [    INFO] pudl.transform.eia:609 Average consistency of static generators values is 100.00%
+2022-02-10 15:02:47 [    INFO] pudl.transform.eia:1080 Harvesting IDs &amp; consistently static attributes for EIA utilities
+2022-02-10 15:02:51 [    INFO] pudl.transform.eia:609 Average consistency of static utilities values is 100.00%
+2022-02-10 15:02:51 [    INFO] pudl.transform.eia:1080 Harvesting IDs &amp; consistently static attributes for EIA boilers
+2022-02-10 15:02:52 [    INFO] pudl.transform.eia:609 Average consistency of static boilers values is 99.12%
+2022-02-10 15:02:52 [    INFO] pudl.transform.eia:682 Inferring complete EIA boiler-generator associations.
+2022-02-10 15:03:07 [ WARNING] pudl.transform.eia:967 Multiple EIA unit codes:plant_id_eia=10725, unit_id_pudl=1, unit_id_eia=['F802' 'F801']
+2022-02-10 15:03:07 [ WARNING] pudl.transform.eia:967 Multiple EIA unit codes:plant_id_eia=55309, unit_id_pudl=1, unit_id_eia=['SMR2' 'SMR1']
+2022-02-10 15:03:07 [ WARNING] pudl.transform.eia:967 Multiple EIA unit codes:plant_id_eia=57794, unit_id_pudl=1, unit_id_eia=['CC01' 'CC02']
+2022-02-10 15:03:07 [ WARNING] pudl.transform.eia:967 Multiple EIA unit codes:plant_id_eia=60786, unit_id_pudl=1, unit_id_eia=['4343' '4141']
+2022-02-10 15:03:08 [    INFO] pudl.metadata.classes:1439 Recoding plants_entity_eia.sector_id_eia
+2022-02-10 15:03:08 [    INFO] pudl.metadata.classes:1439 Recoding generators_entity_eia.prime_mover_code
+2022-02-10 15:03:08 [    INFO] pudl.metadata.classes:1439 Recoding boilers_entity_eia.prime_mover_code
+Env vars  /tmp/log/perf.log
+read_excel(&lt;_io.FileIO name='/home/sam/box/charmonium.cache/benchmark/.repos/pudl/src/pudl/package_data/glue/mapping_eia923_ferc1.xlsx' mode='rb' closefd=True&gt;, *(), **{'sheet_name': 'plants_output', 'na_values': '', 'keep_default_na': False, 'converters': {'plant_id_pudl': &lt;class 'int'&gt;, 'plant_name_pudl': &lt;class 'str'&gt;, 'utility_id_ferc1': &lt;class 'int'&gt;, 'utility_name_ferc1': &lt;class 'str'&gt;, 'plant_name_ferc1': &lt;class 'str'&gt;, 'plant_id_eia': &lt;class 'int'&gt;, 'plant_name_eia': &lt;class 'str'&gt;, 'utility_name_eia': &lt;class 'str'&gt;, 'utility_id_eia': &lt;class 'int'&gt;}})
+Env vars  /tmp/log/perf.log
+read_excel(&lt;_io.FileIO name='/home/sam/box/charmonium.cache/benchmark/.repos/pudl/src/pudl/package_data/glue/mapping_eia923_ferc1.xlsx' mode='rb' closefd=True&gt;, *(), **{'sheet_name': 'utilities_output', 'na_values': '', 'keep_default_na': False, 'converters': {'utility_id_pudl': &lt;class 'int'&gt;, 'utility_name_pudl': &lt;class 'str'&gt;, 'utility_id_ferc1': &lt;class 'int'&gt;, 'utility_name_ferc1': &lt;class 'str'&gt;, 'utility_id_eia': &lt;class 'int'&gt;, 'utility_name_eia': &lt;class 'str'&gt;}})
+2022-02-10 15:03:14 [ WARNING] pudl.glue.ferc1_eia:804 FERC to EIA glue breaking in plants_eia. There are too many null fields. Check the mapping spreadhseet.
+2022-02-10 15:03:14 [ WARNING] pudl.glue.ferc1_eia:804 FERC to EIA glue breaking in utilities_eia. There are too many null fields. Check the mapping spreadhseet.
+2022-02-10 15:03:14 [    INFO] pudl.glue.eia_epacems:37 grabbing original crosswalk
+2022-02-10 15:03:14 [    INFO] pudl.glue.eia_epacems:77 splitting crosswalk into three normalized tables
+2022-02-10 15:03:16 [    INFO] pudl.load.sqlite:63 Loading coalmine_eia923 into PUDL SQLite DB.
+2022-02-10 15:03:16 [    INFO] pudl.load.sqlite:63 Loading contract_types_eia into PUDL SQLite DB.
+2022-02-10 15:03:16 [    INFO] pudl.load.sqlite:63 Loading energy_sources_eia into PUDL SQLite DB.
+2022-02-10 15:03:16 [    INFO] pudl.load.sqlite:63 Loading ferc_accounts into PUDL SQLite DB.
+2022-02-10 15:03:16 [    INFO] pudl.load.sqlite:63 Loading ferc_depreciation_lines into PUDL SQLite DB.
+2022-02-10 15:03:16 [    INFO] pudl.load.sqlite:63 Loading fuel_transportation_modes_eia into PUDL SQLite DB.
+2022-02-10 15:03:16 [    INFO] pudl.load.sqlite:63 Loading fuel_types_aer_eia into PUDL SQLite DB.
+2022-02-10 15:03:16 [    INFO] pudl.load.sqlite:63 Loading plant_unit_epa into PUDL SQLite DB.
+2022-02-10 15:03:16 [    INFO] pudl.load.sqlite:63 Loading plants_pudl into PUDL SQLite DB.
+2022-02-10 15:03:16 [    INFO] pudl.load.sqlite:63 Loading prime_movers_eia into PUDL SQLite DB.
+2022-02-10 15:03:16 [    INFO] pudl.load.sqlite:63 Loading sector_consolidated_eia into PUDL SQLite DB.
+2022-02-10 15:03:16 [    INFO] pudl.load.sqlite:63 Loading utilities_entity_eia into PUDL SQLite DB.
+2022-02-10 15:03:17 [    INFO] pudl.load.sqlite:63 Loading utilities_pudl into PUDL SQLite DB.
+2022-02-10 15:03:17 [    INFO] pudl.load.sqlite:63 Loading plants_eia into PUDL SQLite DB.
+2022-02-10 15:03:17 [    INFO] pudl.load.sqlite:63 Loading plants_entity_eia into PUDL SQLite DB.
+2022-02-10 15:03:21 [    INFO] pudl.load.sqlite:63 Loading utilities_eia into PUDL SQLite DB.
+2022-02-10 15:03:21 [    INFO] pudl.load.sqlite:63 Loading utilities_eia860 into PUDL SQLite DB.
+2022-02-10 15:03:22 [    INFO] pudl.load.sqlite:63 Loading utilities_ferc1 into PUDL SQLite DB.
+2022-02-10 15:03:22 [    INFO] pudl.load.sqlite:63 Loading utility_plant_assn into PUDL SQLite DB.
+2022-02-10 15:03:22 [    INFO] pudl.load.sqlite:63 Loading assn_plant_id_eia_epa into PUDL SQLite DB.
+2022-02-10 15:03:22 [    INFO] pudl.load.sqlite:63 Loading boilers_entity_eia into PUDL SQLite DB.
+2022-02-10 15:03:22 [    INFO] pudl.load.sqlite:63 Loading fuel_receipts_costs_eia923 into PUDL SQLite DB.
+2022-02-10 15:03:24 [    INFO] pudl.load.sqlite:63 Loading generation_fuel_eia923 into PUDL SQLite DB.
+2022-02-10 15:03:29 [    INFO] pudl.load.sqlite:63 Loading generation_fuel_nuclear_eia923 into PUDL SQLite DB.
+2022-02-10 15:03:29 [    INFO] pudl.load.sqlite:63 Loading generators_entity_eia into PUDL SQLite DB.
+2022-02-10 15:03:30 [    INFO] pudl.load.sqlite:63 Loading plant_in_service_ferc1 into PUDL SQLite DB.
+2022-02-10 15:03:30 [    INFO] pudl.load.sqlite:63 Loading plants_eia860 into PUDL SQLite DB.
+2022-02-10 15:03:32 [    INFO] pudl.load.sqlite:63 Loading plants_ferc1 into PUDL SQLite DB.
+2022-02-10 15:03:32 [    INFO] pudl.load.sqlite:63 Loading purchased_power_ferc1 into PUDL SQLite DB.
+2022-02-10 15:03:32 [    INFO] pudl.load.sqlite:63 Loading assn_gen_eia_unit_epa into PUDL SQLite DB.
+2022-02-10 15:03:32 [    INFO] pudl.load.sqlite:63 Loading boiler_fuel_eia923 into PUDL SQLite DB.
+2022-02-10 15:03:35 [    INFO] pudl.load.sqlite:63 Loading fuel_ferc1 into PUDL SQLite DB.
+2022-02-10 15:03:35 [    INFO] pudl.load.sqlite:63 Loading generation_eia923 into PUDL SQLite DB.
+2022-02-10 15:03:36 [    INFO] pudl.load.sqlite:63 Loading generators_eia860 into PUDL SQLite DB.
+2022-02-10 15:03:42 [    INFO] pudl.load.sqlite:63 Loading plants_hydro_ferc1 into PUDL SQLite DB.
+2022-02-10 15:03:42 [    INFO] pudl.load.sqlite:63 Loading plants_pumped_storage_ferc1 into PUDL SQLite DB.
+2022-02-10 15:03:42 [    INFO] pudl.load.sqlite:63 Loading plants_small_ferc1 into PUDL SQLite DB.
+2022-02-10 15:03:42 [    INFO] pudl.load.sqlite:63 Loading plants_steam_ferc1 into PUDL SQLite DB.
+2022-02-10 15:03:42 [    INFO] pudl.load.sqlite:63 Loading boiler_generator_assn_eia860 into PUDL SQLite DB.
+2022-02-10 15:03:42 [    INFO] pudl.load.sqlite:63 Loading ownership_eia860 into PUDL SQLite DB.
+2022-02-10 15:03:43 [    INFO] pudl.etl:277 Processing EPA CEMS data and writing it to Apache Parquet.
+2022-02-10 15:03:43 [    INFO] pudl.extract.epacems:168 Processing EPA CEMS hourly data for ID-2020
+/home/sam/box/charmonium.cache/benchmark/.repos/pudl/src/pudl/helpers.py:1000: FutureWarning: Using .astype to convert from timezone-aware dtype to timezone-naive dtype is deprecated and will raise in a future version.  Use obj.tz_localize(None) or obj.tz_convert('UTC').tz_localize(None) instead
+  df.astype(non_bool_cols)
+2022-02-10 15:03:50 [    INFO] pudl.etl:292 Processing EPA CEMS took 00:00:07
+</code></pre></td></tr><tr><td>Time (s)</td><td><span>452.6s</span></td><td><span>416.4s</span></td></tr><tr><td>Overhead (s)</td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr><tr><td>Function calls</td><td><details><summary>Show</summary><table><thead><tr><td>name</td><td>hash(args)</td><td>hash(ret)</td><td>hit</td><td>outer</td><td>inner</td><td>hash time</td><td>rest of overhead</td></tr></thead><tbody></tbody></table></details></td><td><details><summary>Show</summary><table><thead><tr><td>name</td><td>hash(args)</td><td>hash(ret)</td><td>hit</td><td>outer</td><td>inner</td><td>hash time</td><td>rest of overhead</td></tr></thead><tbody><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>❌</span></td><td><span>2.4s</span></td><td><span>2.3s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>❌</span></td><td><span>8.6s</span></td><td><span>8.5s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>❌</span></td><td><span>15.3s</span></td><td><span>15.2s</span></td><td><span>0.0s</span></td><td><span>0.1s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>❌</span></td><td><span>26.1s</span></td><td><span>25.9s</span></td><td><span>0.0s</span></td><td><span>0.2s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>❌</span></td><td><span>2.3s</span></td><td><span>2.3s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>❌</span></td><td><span>0.1s</span></td><td><span>0.1s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>❌</span></td><td><span>0.8s</span></td><td><span>0.8s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>❌</span></td><td><span>29.1s</span></td><td><span>29.0s</span></td><td><span>0.0s</span></td><td><span>0.1s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>❌</span></td><td><span>1.3s</span></td><td><span>1.3s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>❌</span></td><td><span>3.5s</span></td><td><span>3.5s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>❌</span></td><td><span>0.8s</span></td><td><span>0.8s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>❌</span></td><td><span>6.3s</span></td><td><span>6.3s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>❌</span></td><td><span>0.7s</span></td><td><span>0.7s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>❌</span></td><td><span>11.3s</span></td><td><span>11.3s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>❌</span></td><td><span>0.5s</span></td><td><span>0.4s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>❌</span></td><td><span>1.8s</span></td><td><span>1.8s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>❌</span></td><td><span>3.4s</span></td><td><span>3.4s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>❌</span></td><td><span>2.1s</span></td><td><span>2.1s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr></tbody></table></details></td></tr></tbody></table></details></td></tr><tr><td><span>2021-12-21</span></td><td><a href="https://github.com/catalyst-cooperative/pudl/commit/eccddc9892f56904ef7159cb7156caa961c08fd5">eccddc</a></td><td><span>397.6s</span></td><td><span>284.8s</span></td><td><span style="background-color: green; display: block;">match</span></td><td><details><summary>Details</summary><table><thead><tr><td></td><td>Unmodified</td><td>Memoized</td></tr></thead><tbody><tr><td>Status</td><td><span style="background-color: green; display: block;">Success</span></td><td><span style="background-color: green; display: block;">Success</span></td></tr><tr><td>Output</td><td><pre><code class="language-plaintext" style="max-width: 60ch;max-height: 20vw;resize: both"></code></pre></td><td><pre><code class="language-plaintext" style="max-width: 60ch;max-height: 20vw;resize: both"></code></pre></td></tr><tr><td>Log</td><td><pre><code class="language-plaintext" style="max-width: 60ch;max-height: 20vw;resize: both">/home/sam/.local/share/virtualenvs/pudl-gKD-Mnhe/lib/python3.9/site-packages/geopandas/_compat.py:111: UserWarning: The Shapely GEOS version (3.9.1-CAPI-1.14.2) is incompatible with the GEOS version PyGEOS was compiled with (3.10.1-CAPI-1.16.0). Conversions between both will be slow.
+  warnings.warn(
+Monkeypatching `pandas.read_excel` v2
+/nix/store/i6vabb4div9iy6lsl642d86k1q8riasn-python3-3.9.9/lib/python3.9/runpy.py:127: RuntimeWarning: 'pudl.cli' found in sys.modules after import of package 'pudl', but prior to execution of 'pudl.cli'; this may result in unpredictable behaviour
+  warn(RuntimeWarning(msg))
+2022-02-10 14:32:27 [    INFO] pudl.extract.ferc1:880 Converting extracted FERC Form 1 table fuel_ferc1 into a pandas DataFrame.
+2022-02-10 14:32:27 [    INFO] pudl.extract.ferc1:880 Converting extracted FERC Form 1 table plant_in_service_ferc1 into a pandas DataFrame.
+2022-02-10 14:32:28 [    INFO] pudl.extract.ferc1:880 Converting extracted FERC Form 1 table plants_hydro_ferc1 into a pandas DataFrame.
+2022-02-10 14:32:28 [    INFO] pudl.extract.ferc1:880 Converting extracted FERC Form 1 table plants_pumped_storage_ferc1 into a pandas DataFrame.
+2022-02-10 14:32:28 [    INFO] pudl.extract.ferc1:880 Converting extracted FERC Form 1 table plants_small_ferc1 into a pandas DataFrame.
+2022-02-10 14:32:28 [    INFO] pudl.extract.ferc1:880 Converting extracted FERC Form 1 table plants_steam_ferc1 into a pandas DataFrame.
+2022-02-10 14:32:28 [    INFO] pudl.extract.ferc1:880 Converting extracted FERC Form 1 table purchased_power_ferc1 into a pandas DataFrame.
+2022-02-10 14:32:28 [    INFO] pudl.transform.ferc1:1578 Transforming raw FERC Form 1 dataframe for loading into fuel_ferc1
+2022-02-10 14:32:28 [    INFO] pudl.transform.ferc1:1578 Transforming raw FERC Form 1 dataframe for loading into plants_steam_ferc1
+2022-02-10 14:32:28 [    INFO] pudl.transform.ferc1:798 Identifying distinct large FERC plants for ID assignment.
+/home/sam/.local/share/virtualenvs/pudl-gKD-Mnhe/lib/python3.9/site-packages/sklearn/utils/validation.py:1688: FutureWarning: Feature names only support names that are all strings. Got feature names with dtypes: ['quoted_name', 'str']. An error will be raised in 1.2.
+  warnings.warn(
+2022-02-10 14:32:36 [    INFO] pudl.transform.ferc1:833 Successfully associated 908 of 910 (99.78%) FERC Form 1 plant records with multi-year plant entities.
+2022-02-10 14:32:36 [    INFO] pudl.transform.ferc1:845 Assigning IDs to multi-year FERC plant entities.
+2022-02-10 14:32:36 [    INFO] pudl.transform.ferc1:862 Identified 0 orphaned FERC plant records. Adding orphans to list of plant entities.
+2022-02-10 14:32:37 [    INFO] pudl.transform.ferc1:885 Successfully Identified 908 multi-year plant entities.
+2022-02-10 14:32:37 [   ERROR] pudl.transform.ferc1:956 Found report_year=2020 2 times in plant_id_ferc1=569
+2022-02-10 14:32:37 [   ERROR] pudl.transform.ferc1:956 Found report_year=2020 2 times in plant_id_ferc1=570
+2022-02-10 14:32:37 [    INFO] pudl.transform.ferc1:1578 Transforming raw FERC Form 1 dataframe for loading into plants_small_ferc1
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;_io.FileIO name='/home/sam/box/charmonium.cache/benchmark/.repos/pudl/src/pudl/package_data/ferc1/small_plants_2004-2016.xlsx' mode='rb' closefd=True&gt;, *(), **{})
+/home/sam/.local/share/virtualenvs/pudl-gKD-Mnhe/lib/python3.9/site-packages/openpyxl/worksheet/_reader.py:312: UserWarning: Unknown extension is not supported and will be removed
+  warn(msg)
+2022-02-10 14:32:40 [    INFO] pudl.transform.ferc1:1578 Transforming raw FERC Form 1 dataframe for loading into plants_hydro_ferc1
+2022-02-10 14:32:40 [    INFO] pudl.transform.ferc1:1578 Transforming raw FERC Form 1 dataframe for loading into plants_pumped_storage_ferc1
+2022-02-10 14:32:40 [    INFO] pudl.transform.ferc1:1578 Transforming raw FERC Form 1 dataframe for loading into plant_in_service_ferc1
+2022-02-10 14:32:40 [    INFO] pudl.transform.ferc1:506 0.0000% of unpacked records were duplicates, and discarded.
+2022-02-10 14:32:40 [    INFO] pudl.transform.ferc1:548 Col: begin_yr_bal, Cat: starting_balance
+2022-02-10 14:32:40 [    INFO] pudl.transform.ferc1:548 Col: addition, Cat: additions
+2022-02-10 14:32:40 [    INFO] pudl.transform.ferc1:548 Col: retirements, Cat: retirements
+2022-02-10 14:32:40 [    INFO] pudl.transform.ferc1:548 Col: adjustments, Cat: adjustments
+2022-02-10 14:32:40 [    INFO] pudl.transform.ferc1:548 Col: transfers, Cat: transfers
+2022-02-10 14:32:40 [    INFO] pudl.transform.ferc1:548 Col: yr_end_bal, Cat: ending_balance
+2022-02-10 14:32:40 [    INFO] pudl.transform.ferc1:1578 Transforming raw FERC Form 1 dataframe for loading into purchased_power_ferc1
+2022-02-10 14:32:40 [    INFO] pudl.extract.excel:206 Extracting eia923 spreadsheet data.
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f8e9c72fcd0&gt;, *(), **{'sheet_name': 5, 'skiprows': 5, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f8e9c72fcd0&gt;, *(), **{'sheet_name': 7, 'skiprows': 4, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f8e9c72fcd0&gt;, *(), **{'sheet_name': 0, 'skiprows': 5, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f8e9c72fcd0&gt;, *(), **{'sheet_name': 6, 'skiprows': 5, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f8e9c72fcd0&gt;, *(), **{'sheet_name': 3, 'skiprows': 5, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+2022-02-10 14:33:26 [    INFO] pudl.extract.excel:206 Extracting eia860 spreadsheet data.
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f8e9c6728b0&gt;, *(), **{'sheet_name': 0, 'skiprows': 1, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+2022-02-10 14:33:27 [ WARNING] pudl.extract.excel:249 Extra columns found in page boiler_generator_assn: {'plant_name', 'steam_plant_type', 'utility_name'}
+2022-02-10 14:33:27 [ WARNING] pudl.extract.excel:254 Columns found missing from page generator: {'report_year'}
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f8e9ca80340&gt;, *(), **{'sheet_name': 0, 'skiprows': 1, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f8e9ca80340&gt;, *(), **{'sheet_name': 1, 'skiprows': 1, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f8e9ca80340&gt;, *(), **{'sheet_name': 2, 'skiprows': 1, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f8e9c66d8e0&gt;, *(), **{'sheet_name': 0, 'skiprows': 1, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f8e9c6ecb20&gt;, *(), **{'sheet_name': 0, 'skiprows': 1, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+2022-02-10 14:34:09 [ WARNING] pudl.extract.excel:249 Extra columns found in page plant: {'ferc_exempt_wholesale_generator_docket_number'}
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f8e9c1f4850&gt;, *(), **{'sheet_name': 0, 'skiprows': 1, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+2022-02-10 14:34:10 [    INFO] pudl.extract.excel:206 Extracting eia860m spreadsheet data.
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f8e9c87a3d0&gt;, *(), **{'sheet_name': 0, 'skiprows': 2, 'skipfooter': 2, 'dtype': {'Plant ID': Int64Dtype()}})
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f8e9c87a3d0&gt;, *(), **{'sheet_name': 1, 'skiprows': 2, 'skipfooter': 2, 'dtype': {'Plant ID': Int64Dtype()}})
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f8e9c87a3d0&gt;, *(), **{'sheet_name': 2, 'skiprows': 2, 'skipfooter': 2, 'dtype': {'Plant ID': Int64Dtype()}})
+2022-02-10 14:34:25 [    INFO] pudl.transform.eia860:620 Transforming raw EIA 860 DataFrames for ownership_eia860 concatenated across all years.
+/home/sam/box/charmonium.cache/benchmark/.repos/pudl/src/pudl/transform/eia860.py:84: PerformanceWarning: indexing past lexsort depth may impact performance.
+  own_df.set_index(["plant_id_eia", "generator_id"])
+2022-02-10 14:34:27 [    INFO] pudl.transform.eia860:620 Transforming raw EIA 860 DataFrames for generators_eia860 concatenated across all years.
+2022-02-10 14:34:43 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_code_1
+2022-02-10 14:34:43 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_code_2
+2022-02-10 14:34:43 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_code_3
+2022-02-10 14:34:43 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_code_4
+2022-02-10 14:34:43 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_code_5
+2022-02-10 14:34:43 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_code_6
+2022-02-10 14:34:43 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_1_transport_1
+2022-02-10 14:34:43 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_1_transport_2
+2022-02-10 14:34:43 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_1_transport_3
+2022-02-10 14:34:43 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_2_transport_1
+2022-02-10 14:34:43 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_2_transport_2
+2022-02-10 14:34:43 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_2_transport_3
+2022-02-10 14:34:43 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.planned_new_prime_mover_code
+2022-02-10 14:34:44 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.planned_energy_source_code_1
+2022-02-10 14:34:44 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.startup_source_code_1
+2022-02-10 14:34:44 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.startup_source_code_2
+2022-02-10 14:34:44 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.startup_source_code_3
+2022-02-10 14:34:44 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.startup_source_code_4
+2022-02-10 14:34:44 [    INFO] pudl.transform.eia860:620 Transforming raw EIA 860 DataFrames for plants_eia860 concatenated across all years.
+2022-02-10 14:34:45 [    INFO] pudl.transform.eia860:620 Transforming raw EIA 860 DataFrames for boiler_generator_assn_eia860 concatenated across all years.
+2022-02-10 14:34:45 [    INFO] pudl.transform.eia860:620 Transforming raw EIA 860 DataFrames for utilities_eia860 concatenated across all years.
+2022-02-10 14:34:45 [    INFO] pudl.transform.eia923:1162 Transforming raw EIA 923 DataFrames for generation_fuel_eia923 concatenated across all years.
+2022-02-10 14:34:52 [    INFO] pudl.metadata.classes:1439 Recoding generation_fuel_eia923.energy_source_code
+2022-02-10 14:34:52 [    INFO] pudl.metadata.classes:1439 Recoding generation_fuel_eia923.fuel_type_code_aer
+2022-02-10 14:34:52 [    INFO] pudl.metadata.classes:1439 Recoding generation_fuel_eia923.prime_mover_code
+2022-02-10 14:34:54 [    INFO] pudl.transform.eia923:1162 Transforming raw EIA 923 DataFrames for boiler_fuel_eia923 concatenated across all years.
+2022-02-10 14:34:56 [    INFO] pudl.metadata.classes:1439 Recoding boiler_fuel_eia923.energy_source_code
+2022-02-10 14:34:56 [    INFO] pudl.transform.eia923:1162 Transforming raw EIA 923 DataFrames for generation_eia923 concatenated across all years.
+2022-02-10 14:34:57 [    INFO] pudl.transform.eia923:1162 Transforming raw EIA 923 DataFrames for coalmine_eia923 concatenated across all years.
+2022-02-10 14:34:57 [    INFO] pudl.transform.eia923:1162 Transforming raw EIA 923 DataFrames for fuel_receipts_costs_eia923 concatenated across all years.
+2022-02-10 14:35:00 [    INFO] pudl.metadata.classes:1439 Recoding fuel_receipts_costs_eia923.contract_type_code
+2022-02-10 14:35:00 [    INFO] pudl.metadata.classes:1439 Recoding fuel_receipts_costs_eia923.energy_source_code
+2022-02-10 14:35:00 [    INFO] pudl.metadata.classes:1439 Recoding fuel_receipts_costs_eia923.primary_transportation_mode_code
+2022-02-10 14:35:00 [    INFO] pudl.metadata.classes:1439 Recoding fuel_receipts_costs_eia923.secondary_transportation_mode_code
+2022-02-10 14:35:05 [    INFO] pudl.transform.eia:1080 Harvesting IDs &amp; consistently static attributes for EIA plants
+2022-02-10 14:35:18 [    INFO] pudl.transform.eia:609 Average consistency of static plants values is 99.97%
+2022-02-10 14:37:18 [    INFO] pudl.transform.eia:1080 Harvesting IDs &amp; consistently static attributes for EIA generators
+2022-02-10 14:37:57 [    INFO] pudl.transform.eia:609 Average consistency of static generators values is 100.00%
+2022-02-10 14:37:57 [    INFO] pudl.transform.eia:1080 Harvesting IDs &amp; consistently static attributes for EIA utilities
+2022-02-10 14:38:01 [    INFO] pudl.transform.eia:609 Average consistency of static utilities values is 100.00%
+2022-02-10 14:38:01 [    INFO] pudl.transform.eia:1080 Harvesting IDs &amp; consistently static attributes for EIA boilers
+2022-02-10 14:38:01 [    INFO] pudl.transform.eia:609 Average consistency of static boilers values is 99.12%
+2022-02-10 14:38:01 [    INFO] pudl.transform.eia:682 Inferring complete EIA boiler-generator associations.
+2022-02-10 14:38:17 [ WARNING] pudl.transform.eia:967 Multiple EIA unit codes:plant_id_eia=10725, unit_id_pudl=1, unit_id_eia=['F802' 'F801']
+2022-02-10 14:38:17 [ WARNING] pudl.transform.eia:967 Multiple EIA unit codes:plant_id_eia=55309, unit_id_pudl=1, unit_id_eia=['SMR2' 'SMR1']
+2022-02-10 14:38:17 [ WARNING] pudl.transform.eia:967 Multiple EIA unit codes:plant_id_eia=57794, unit_id_pudl=1, unit_id_eia=['CC01' 'CC02']
+2022-02-10 14:38:17 [ WARNING] pudl.transform.eia:967 Multiple EIA unit codes:plant_id_eia=60786, unit_id_pudl=1, unit_id_eia=['4343' '4141']
+2022-02-10 14:38:18 [    INFO] pudl.metadata.classes:1439 Recoding plants_entity_eia.sector_id_eia
+2022-02-10 14:38:18 [    INFO] pudl.metadata.classes:1439 Recoding generators_entity_eia.prime_mover_code
+2022-02-10 14:38:18 [    INFO] pudl.metadata.classes:1439 Recoding boilers_entity_eia.prime_mover_code
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;_io.FileIO name='/home/sam/box/charmonium.cache/benchmark/.repos/pudl/src/pudl/package_data/glue/mapping_eia923_ferc1.xlsx' mode='rb' closefd=True&gt;, *(), **{'sheet_name': 'plants_output', 'na_values': '', 'keep_default_na': False, 'converters': {'plant_id_pudl': &lt;class 'int'&gt;, 'plant_name_pudl': &lt;class 'str'&gt;, 'utility_id_ferc1': &lt;class 'int'&gt;, 'utility_name_ferc1': &lt;class 'str'&gt;, 'plant_name_ferc1': &lt;class 'str'&gt;, 'plant_id_eia': &lt;class 'int'&gt;, 'plant_name_eia': &lt;class 'str'&gt;, 'utility_name_eia': &lt;class 'str'&gt;, 'utility_id_eia': &lt;class 'int'&gt;}})
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;_io.FileIO name='/home/sam/box/charmonium.cache/benchmark/.repos/pudl/src/pudl/package_data/glue/mapping_eia923_ferc1.xlsx' mode='rb' closefd=True&gt;, *(), **{'sheet_name': 'utilities_output', 'na_values': '', 'keep_default_na': False, 'converters': {'utility_id_pudl': &lt;class 'int'&gt;, 'utility_name_pudl': &lt;class 'str'&gt;, 'utility_id_ferc1': &lt;class 'int'&gt;, 'utility_name_ferc1': &lt;class 'str'&gt;, 'utility_id_eia': &lt;class 'int'&gt;, 'utility_name_eia': &lt;class 'str'&gt;}})
+2022-02-10 14:38:23 [ WARNING] pudl.glue.ferc1_eia:803 FERC to EIA glue breaking in plants_eia. There are too many null fields. Check the mapping spreadhseet.
+2022-02-10 14:38:23 [ WARNING] pudl.glue.ferc1_eia:803 FERC to EIA glue breaking in utilities_eia. There are too many null fields. Check the mapping spreadhseet.
+2022-02-10 14:38:23 [    INFO] pudl.glue.eia_epacems:37 grabbing original crosswalk
+2022-02-10 14:38:23 [    INFO] pudl.glue.eia_epacems:77 splitting crosswalk into three normalized tables
+2022-02-10 14:38:25 [    INFO] pudl.load.sqlite:63 Loading coalmine_eia923 into PUDL SQLite DB.
+2022-02-10 14:38:25 [    INFO] pudl.load.sqlite:63 Loading contract_types_eia into PUDL SQLite DB.
+2022-02-10 14:38:25 [    INFO] pudl.load.sqlite:63 Loading energy_sources_eia into PUDL SQLite DB.
+2022-02-10 14:38:25 [    INFO] pudl.load.sqlite:63 Loading ferc_accounts into PUDL SQLite DB.
+2022-02-10 14:38:26 [    INFO] pudl.load.sqlite:63 Loading ferc_depreciation_lines into PUDL SQLite DB.
+2022-02-10 14:38:26 [    INFO] pudl.load.sqlite:63 Loading fuel_transportation_modes_eia into PUDL SQLite DB.
+2022-02-10 14:38:26 [    INFO] pudl.load.sqlite:63 Loading fuel_types_aer_eia into PUDL SQLite DB.
+2022-02-10 14:38:26 [    INFO] pudl.load.sqlite:63 Loading plant_unit_epa into PUDL SQLite DB.
+2022-02-10 14:38:26 [    INFO] pudl.load.sqlite:63 Loading plants_pudl into PUDL SQLite DB.
+2022-02-10 14:38:26 [    INFO] pudl.load.sqlite:63 Loading prime_movers_eia into PUDL SQLite DB.
+2022-02-10 14:38:26 [    INFO] pudl.load.sqlite:63 Loading sector_consolidated_eia into PUDL SQLite DB.
+2022-02-10 14:38:26 [    INFO] pudl.load.sqlite:63 Loading utilities_entity_eia into PUDL SQLite DB.
+2022-02-10 14:38:26 [    INFO] pudl.load.sqlite:63 Loading utilities_pudl into PUDL SQLite DB.
+2022-02-10 14:38:26 [    INFO] pudl.load.sqlite:63 Loading plants_eia into PUDL SQLite DB.
+2022-02-10 14:38:26 [    INFO] pudl.load.sqlite:63 Loading plants_entity_eia into PUDL SQLite DB.
+2022-02-10 14:38:30 [    INFO] pudl.load.sqlite:63 Loading utilities_eia into PUDL SQLite DB.
+2022-02-10 14:38:30 [    INFO] pudl.load.sqlite:63 Loading utilities_eia860 into PUDL SQLite DB.
+2022-02-10 14:38:31 [    INFO] pudl.load.sqlite:63 Loading utilities_ferc1 into PUDL SQLite DB.
+2022-02-10 14:38:31 [    INFO] pudl.load.sqlite:63 Loading utility_plant_assn into PUDL SQLite DB.
+2022-02-10 14:38:31 [    INFO] pudl.load.sqlite:63 Loading assn_plant_id_eia_epa into PUDL SQLite DB.
+2022-02-10 14:38:31 [    INFO] pudl.load.sqlite:63 Loading boilers_entity_eia into PUDL SQLite DB.
+2022-02-10 14:38:31 [    INFO] pudl.load.sqlite:63 Loading fuel_receipts_costs_eia923 into PUDL SQLite DB.
+2022-02-10 14:38:33 [    INFO] pudl.load.sqlite:63 Loading generation_fuel_eia923 into PUDL SQLite DB.
+2022-02-10 14:38:38 [    INFO] pudl.load.sqlite:63 Loading generation_fuel_nuclear_eia923 into PUDL SQLite DB.
+2022-02-10 14:38:38 [    INFO] pudl.load.sqlite:63 Loading generators_entity_eia into PUDL SQLite DB.
+2022-02-10 14:38:39 [    INFO] pudl.load.sqlite:63 Loading plant_in_service_ferc1 into PUDL SQLite DB.
+2022-02-10 14:38:40 [    INFO] pudl.load.sqlite:63 Loading plants_eia860 into PUDL SQLite DB.
+2022-02-10 14:38:41 [    INFO] pudl.load.sqlite:63 Loading plants_ferc1 into PUDL SQLite DB.
+2022-02-10 14:38:41 [    INFO] pudl.load.sqlite:63 Loading purchased_power_ferc1 into PUDL SQLite DB.
+2022-02-10 14:38:42 [    INFO] pudl.load.sqlite:63 Loading assn_gen_eia_unit_epa into PUDL SQLite DB.
+2022-02-10 14:38:42 [    INFO] pudl.load.sqlite:63 Loading boiler_fuel_eia923 into PUDL SQLite DB.
+2022-02-10 14:38:44 [    INFO] pudl.load.sqlite:63 Loading fuel_ferc1 into PUDL SQLite DB.
+2022-02-10 14:38:44 [    INFO] pudl.load.sqlite:63 Loading generation_eia923 into PUDL SQLite DB.
+2022-02-10 14:38:45 [    INFO] pudl.load.sqlite:63 Loading generators_eia860 into PUDL SQLite DB.
+2022-02-10 14:38:52 [    INFO] pudl.load.sqlite:63 Loading plants_hydro_ferc1 into PUDL SQLite DB.
+2022-02-10 14:38:52 [    INFO] pudl.load.sqlite:63 Loading plants_pumped_storage_ferc1 into PUDL SQLite DB.
+2022-02-10 14:38:52 [    INFO] pudl.load.sqlite:63 Loading plants_small_ferc1 into PUDL SQLite DB.
+2022-02-10 14:38:52 [    INFO] pudl.load.sqlite:63 Loading plants_steam_ferc1 into PUDL SQLite DB.
+2022-02-10 14:38:53 [    INFO] pudl.load.sqlite:63 Loading boiler_generator_assn_eia860 into PUDL SQLite DB.
+2022-02-10 14:38:53 [    INFO] pudl.load.sqlite:63 Loading ownership_eia860 into PUDL SQLite DB.
+2022-02-10 14:38:53 [    INFO] pudl.etl:277 Processing EPA CEMS data and writing it to Apache Parquet.
+2022-02-10 14:38:54 [    INFO] pudl.extract.epacems:168 Processing EPA CEMS hourly data for ID-2020
+/home/sam/box/charmonium.cache/benchmark/.repos/pudl/src/pudl/helpers.py:1000: FutureWarning: Using .astype to convert from timezone-aware dtype to timezone-naive dtype is deprecated and will raise in a future version.  Use obj.tz_localize(None) or obj.tz_convert('UTC').tz_localize(None) instead
+  df.astype(non_bool_cols)
+2022-02-10 14:39:01 [    INFO] pudl.etl:292 Processing EPA CEMS took 00:00:08
+</code></pre></td><td><pre><code class="language-plaintext" style="max-width: 60ch;max-height: 20vw;resize: both">/home/sam/.local/share/virtualenvs/pudl-gKD-Mnhe/lib/python3.9/site-packages/geopandas/_compat.py:111: UserWarning: The Shapely GEOS version (3.9.1-CAPI-1.14.2) is incompatible with the GEOS version PyGEOS was compiled with (3.10.1-CAPI-1.16.0). Conversions between both will be slow.
+  warnings.warn(
+Monkeypatching `pandas.read_excel` v2
+/nix/store/i6vabb4div9iy6lsl642d86k1q8riasn-python3-3.9.9/lib/python3.9/runpy.py:127: RuntimeWarning: 'pudl.cli' found in sys.modules after import of package 'pudl', but prior to execution of 'pudl.cli'; this may result in unpredictable behaviour
+  warn(RuntimeWarning(msg))
+2022-02-10 15:03:57 [    INFO] pudl.extract.ferc1:880 Converting extracted FERC Form 1 table fuel_ferc1 into a pandas DataFrame.
+2022-02-10 15:03:57 [    INFO] pudl.extract.ferc1:880 Converting extracted FERC Form 1 table plant_in_service_ferc1 into a pandas DataFrame.
+2022-02-10 15:03:57 [    INFO] pudl.extract.ferc1:880 Converting extracted FERC Form 1 table plants_hydro_ferc1 into a pandas DataFrame.
+2022-02-10 15:03:57 [    INFO] pudl.extract.ferc1:880 Converting extracted FERC Form 1 table plants_pumped_storage_ferc1 into a pandas DataFrame.
+2022-02-10 15:03:57 [    INFO] pudl.extract.ferc1:880 Converting extracted FERC Form 1 table plants_small_ferc1 into a pandas DataFrame.
+2022-02-10 15:03:57 [    INFO] pudl.extract.ferc1:880 Converting extracted FERC Form 1 table plants_steam_ferc1 into a pandas DataFrame.
+2022-02-10 15:03:57 [    INFO] pudl.extract.ferc1:880 Converting extracted FERC Form 1 table purchased_power_ferc1 into a pandas DataFrame.
+2022-02-10 15:03:57 [    INFO] pudl.transform.ferc1:1579 Transforming raw FERC Form 1 dataframe for loading into fuel_ferc1
+2022-02-10 15:03:58 [    INFO] pudl.transform.ferc1:1579 Transforming raw FERC Form 1 dataframe for loading into plants_steam_ferc1
+2022-02-10 15:03:58 [    INFO] pudl.transform.ferc1:799 Identifying distinct large FERC plants for ID assignment.
+/home/sam/.local/share/virtualenvs/pudl-gKD-Mnhe/lib/python3.9/site-packages/sklearn/utils/validation.py:1688: FutureWarning: Feature names only support names that are all strings. Got feature names with dtypes: ['quoted_name', 'str']. An error will be raised in 1.2.
+  warnings.warn(
+2022-02-10 15:04:04 [    INFO] pudl.transform.ferc1:834 Successfully associated 908 of 910 (99.78%) FERC Form 1 plant records with multi-year plant entities.
+2022-02-10 15:04:04 [    INFO] pudl.transform.ferc1:846 Assigning IDs to multi-year FERC plant entities.
+2022-02-10 15:04:04 [    INFO] pudl.transform.ferc1:863 Identified 0 orphaned FERC plant records. Adding orphans to list of plant entities.
+2022-02-10 15:04:06 [    INFO] pudl.transform.ferc1:886 Successfully Identified 908 multi-year plant entities.
+2022-02-10 15:04:06 [   ERROR] pudl.transform.ferc1:957 Found report_year=2020 2 times in plant_id_ferc1=569
+2022-02-10 15:04:06 [   ERROR] pudl.transform.ferc1:957 Found report_year=2020 2 times in plant_id_ferc1=570
+2022-02-10 15:04:06 [    INFO] pudl.transform.ferc1:1579 Transforming raw FERC Form 1 dataframe for loading into plants_small_ferc1
+Env vars  /tmp/log/perf.log
+read_excel(&lt;_io.FileIO name='/home/sam/box/charmonium.cache/benchmark/.repos/pudl/src/pudl/package_data/ferc1/small_plants_2004-2016.xlsx' mode='rb' closefd=True&gt;, *(), **{})
+2022-02-10 15:04:06 [    INFO] pudl.transform.ferc1:1579 Transforming raw FERC Form 1 dataframe for loading into plants_hydro_ferc1
+2022-02-10 15:04:06 [    INFO] pudl.transform.ferc1:1579 Transforming raw FERC Form 1 dataframe for loading into plants_pumped_storage_ferc1
+2022-02-10 15:04:06 [    INFO] pudl.transform.ferc1:1579 Transforming raw FERC Form 1 dataframe for loading into plant_in_service_ferc1
+2022-02-10 15:04:06 [    INFO] pudl.transform.ferc1:507 0.0000% of unpacked records were duplicates, and discarded.
+2022-02-10 15:04:06 [    INFO] pudl.transform.ferc1:549 Col: begin_yr_bal, Cat: starting_balance
+2022-02-10 15:04:06 [    INFO] pudl.transform.ferc1:549 Col: addition, Cat: additions
+2022-02-10 15:04:06 [    INFO] pudl.transform.ferc1:549 Col: retirements, Cat: retirements
+2022-02-10 15:04:06 [    INFO] pudl.transform.ferc1:549 Col: adjustments, Cat: adjustments
+2022-02-10 15:04:06 [    INFO] pudl.transform.ferc1:549 Col: transfers, Cat: transfers
+2022-02-10 15:04:06 [    INFO] pudl.transform.ferc1:549 Col: yr_end_bal, Cat: ending_balance
+2022-02-10 15:04:06 [    INFO] pudl.transform.ferc1:1579 Transforming raw FERC Form 1 dataframe for loading into purchased_power_ferc1
+2022-02-10 15:04:06 [    INFO] pudl.extract.excel:207 Extracting eia923 spreadsheet data.
+Env vars  /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f1da011e160&gt;, *(), **{'sheet_name': 5, 'skiprows': 5, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+Env vars  /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f1da011e160&gt;, *(), **{'sheet_name': 7, 'skiprows': 4, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+Env vars  /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f1da011e160&gt;, *(), **{'sheet_name': 0, 'skiprows': 5, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+Env vars  /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f1da011e160&gt;, *(), **{'sheet_name': 6, 'skiprows': 5, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+Env vars  /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f1da011e160&gt;, *(), **{'sheet_name': 3, 'skiprows': 5, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+2022-02-10 15:04:08 [    INFO] pudl.extract.excel:207 Extracting eia860 spreadsheet data.
+Env vars  /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f1d9fadc910&gt;, *(), **{'sheet_name': 0, 'skiprows': 1, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+2022-02-10 15:04:08 [ WARNING] pudl.extract.excel:250 Extra columns found in page boiler_generator_assn: {'plant_name', 'steam_plant_type', 'utility_name'}
+2022-02-10 15:04:08 [ WARNING] pudl.extract.excel:255 Columns found missing from page generator: {'report_year'}
+Env vars  /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f1dd05c4f10&gt;, *(), **{'sheet_name': 0, 'skiprows': 1, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+Env vars  /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f1dd05c4f10&gt;, *(), **{'sheet_name': 1, 'skiprows': 1, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+Env vars  /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f1dd05c4f10&gt;, *(), **{'sheet_name': 2, 'skiprows': 1, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+Env vars  /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f1da0337430&gt;, *(), **{'sheet_name': 0, 'skiprows': 1, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+Env vars  /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f1da031ee80&gt;, *(), **{'sheet_name': 0, 'skiprows': 1, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+2022-02-10 15:04:10 [ WARNING] pudl.extract.excel:250 Extra columns found in page plant: {'ferc_exempt_wholesale_generator_docket_number'}
+Env vars  /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f1da008c1f0&gt;, *(), **{'sheet_name': 0, 'skiprows': 1, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+2022-02-10 15:04:11 [    INFO] pudl.extract.excel:207 Extracting eia860m spreadsheet data.
+Env vars  /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f1da0171fd0&gt;, *(), **{'sheet_name': 0, 'skiprows': 2, 'skipfooter': 2, 'dtype': {'Plant ID': Int64Dtype()}})
+Env vars  /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f1da0171fd0&gt;, *(), **{'sheet_name': 1, 'skiprows': 2, 'skipfooter': 2, 'dtype': {'Plant ID': Int64Dtype()}})
+Env vars  /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f1da0171fd0&gt;, *(), **{'sheet_name': 2, 'skiprows': 2, 'skipfooter': 2, 'dtype': {'Plant ID': Int64Dtype()}})
+2022-02-10 15:04:14 [    INFO] pudl.transform.eia860:620 Transforming raw EIA 860 DataFrames for ownership_eia860 concatenated across all years.
+/home/sam/box/charmonium.cache/benchmark/.repos/pudl/src/pudl/transform/eia860.py:84: PerformanceWarning: indexing past lexsort depth may impact performance.
+  own_df.set_index(["plant_id_eia", "generator_id"])
+2022-02-10 15:04:15 [    INFO] pudl.transform.eia860:620 Transforming raw EIA 860 DataFrames for generators_eia860 concatenated across all years.
+2022-02-10 15:04:30 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_code_1
+2022-02-10 15:04:30 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_code_2
+2022-02-10 15:04:30 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_code_3
+2022-02-10 15:04:30 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_code_4
+2022-02-10 15:04:30 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_code_5
+2022-02-10 15:04:30 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_code_6
+2022-02-10 15:04:30 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_1_transport_1
+2022-02-10 15:04:30 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_1_transport_2
+2022-02-10 15:04:30 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_1_transport_3
+2022-02-10 15:04:30 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_2_transport_1
+2022-02-10 15:04:30 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_2_transport_2
+2022-02-10 15:04:30 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_2_transport_3
+2022-02-10 15:04:30 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.planned_new_prime_mover_code
+2022-02-10 15:04:30 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.planned_energy_source_code_1
+2022-02-10 15:04:31 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.startup_source_code_1
+2022-02-10 15:04:31 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.startup_source_code_2
+2022-02-10 15:04:31 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.startup_source_code_3
+2022-02-10 15:04:31 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.startup_source_code_4
+2022-02-10 15:04:31 [    INFO] pudl.transform.eia860:620 Transforming raw EIA 860 DataFrames for plants_eia860 concatenated across all years.
+2022-02-10 15:04:32 [    INFO] pudl.transform.eia860:620 Transforming raw EIA 860 DataFrames for boiler_generator_assn_eia860 concatenated across all years.
+2022-02-10 15:04:32 [    INFO] pudl.transform.eia860:620 Transforming raw EIA 860 DataFrames for utilities_eia860 concatenated across all years.
+2022-02-10 15:04:32 [    INFO] pudl.transform.eia923:1162 Transforming raw EIA 923 DataFrames for generation_fuel_eia923 concatenated across all years.
+2022-02-10 15:04:38 [    INFO] pudl.metadata.classes:1439 Recoding generation_fuel_eia923.energy_source_code
+2022-02-10 15:04:38 [    INFO] pudl.metadata.classes:1439 Recoding generation_fuel_eia923.fuel_type_code_aer
+2022-02-10 15:04:38 [    INFO] pudl.metadata.classes:1439 Recoding generation_fuel_eia923.prime_mover_code
+2022-02-10 15:04:40 [    INFO] pudl.transform.eia923:1162 Transforming raw EIA 923 DataFrames for boiler_fuel_eia923 concatenated across all years.
+2022-02-10 15:04:42 [    INFO] pudl.metadata.classes:1439 Recoding boiler_fuel_eia923.energy_source_code
+2022-02-10 15:04:42 [    INFO] pudl.transform.eia923:1162 Transforming raw EIA 923 DataFrames for generation_eia923 concatenated across all years.
+2022-02-10 15:04:43 [    INFO] pudl.transform.eia923:1162 Transforming raw EIA 923 DataFrames for coalmine_eia923 concatenated across all years.
+2022-02-10 15:04:43 [    INFO] pudl.transform.eia923:1162 Transforming raw EIA 923 DataFrames for fuel_receipts_costs_eia923 concatenated across all years.
+2022-02-10 15:04:46 [    INFO] pudl.metadata.classes:1439 Recoding fuel_receipts_costs_eia923.contract_type_code
+2022-02-10 15:04:46 [    INFO] pudl.metadata.classes:1439 Recoding fuel_receipts_costs_eia923.energy_source_code
+2022-02-10 15:04:46 [    INFO] pudl.metadata.classes:1439 Recoding fuel_receipts_costs_eia923.primary_transportation_mode_code
+2022-02-10 15:04:46 [    INFO] pudl.metadata.classes:1439 Recoding fuel_receipts_costs_eia923.secondary_transportation_mode_code
+2022-02-10 15:04:51 [    INFO] pudl.transform.eia:1080 Harvesting IDs &amp; consistently static attributes for EIA plants
+2022-02-10 15:05:04 [    INFO] pudl.transform.eia:609 Average consistency of static plants values is 99.97%
+2022-02-10 15:07:01 [    INFO] pudl.transform.eia:1080 Harvesting IDs &amp; consistently static attributes for EIA generators
+2022-02-10 15:07:39 [    INFO] pudl.transform.eia:609 Average consistency of static generators values is 100.00%
+2022-02-10 15:07:39 [    INFO] pudl.transform.eia:1080 Harvesting IDs &amp; consistently static attributes for EIA utilities
+2022-02-10 15:07:43 [    INFO] pudl.transform.eia:609 Average consistency of static utilities values is 100.00%
+2022-02-10 15:07:43 [    INFO] pudl.transform.eia:1080 Harvesting IDs &amp; consistently static attributes for EIA boilers
+2022-02-10 15:07:43 [    INFO] pudl.transform.eia:609 Average consistency of static boilers values is 99.12%
+2022-02-10 15:07:43 [    INFO] pudl.transform.eia:682 Inferring complete EIA boiler-generator associations.
+2022-02-10 15:07:58 [ WARNING] pudl.transform.eia:967 Multiple EIA unit codes:plant_id_eia=10725, unit_id_pudl=1, unit_id_eia=['F802' 'F801']
+2022-02-10 15:07:58 [ WARNING] pudl.transform.eia:967 Multiple EIA unit codes:plant_id_eia=55309, unit_id_pudl=1, unit_id_eia=['SMR2' 'SMR1']
+2022-02-10 15:07:58 [ WARNING] pudl.transform.eia:967 Multiple EIA unit codes:plant_id_eia=57794, unit_id_pudl=1, unit_id_eia=['CC01' 'CC02']
+2022-02-10 15:07:58 [ WARNING] pudl.transform.eia:967 Multiple EIA unit codes:plant_id_eia=60786, unit_id_pudl=1, unit_id_eia=['4343' '4141']
+2022-02-10 15:07:59 [    INFO] pudl.metadata.classes:1439 Recoding plants_entity_eia.sector_id_eia
+2022-02-10 15:07:59 [    INFO] pudl.metadata.classes:1439 Recoding generators_entity_eia.prime_mover_code
+2022-02-10 15:07:59 [    INFO] pudl.metadata.classes:1439 Recoding boilers_entity_eia.prime_mover_code
+Env vars  /tmp/log/perf.log
+read_excel(&lt;_io.FileIO name='/home/sam/box/charmonium.cache/benchmark/.repos/pudl/src/pudl/package_data/glue/mapping_eia923_ferc1.xlsx' mode='rb' closefd=True&gt;, *(), **{'sheet_name': 'plants_output', 'na_values': '', 'keep_default_na': False, 'converters': {'plant_id_pudl': &lt;class 'int'&gt;, 'plant_name_pudl': &lt;class 'str'&gt;, 'utility_id_ferc1': &lt;class 'int'&gt;, 'utility_name_ferc1': &lt;class 'str'&gt;, 'plant_name_ferc1': &lt;class 'str'&gt;, 'plant_id_eia': &lt;class 'int'&gt;, 'plant_name_eia': &lt;class 'str'&gt;, 'utility_name_eia': &lt;class 'str'&gt;, 'utility_id_eia': &lt;class 'int'&gt;}})
+Env vars  /tmp/log/perf.log
+read_excel(&lt;_io.FileIO name='/home/sam/box/charmonium.cache/benchmark/.repos/pudl/src/pudl/package_data/glue/mapping_eia923_ferc1.xlsx' mode='rb' closefd=True&gt;, *(), **{'sheet_name': 'utilities_output', 'na_values': '', 'keep_default_na': False, 'converters': {'utility_id_pudl': &lt;class 'int'&gt;, 'utility_name_pudl': &lt;class 'str'&gt;, 'utility_id_ferc1': &lt;class 'int'&gt;, 'utility_name_ferc1': &lt;class 'str'&gt;, 'utility_id_eia': &lt;class 'int'&gt;, 'utility_name_eia': &lt;class 'str'&gt;}})
+2022-02-10 15:08:00 [ WARNING] pudl.glue.ferc1_eia:804 FERC to EIA glue breaking in plants_eia. There are too many null fields. Check the mapping spreadhseet.
+2022-02-10 15:08:00 [ WARNING] pudl.glue.ferc1_eia:804 FERC to EIA glue breaking in utilities_eia. There are too many null fields. Check the mapping spreadhseet.
+2022-02-10 15:08:00 [    INFO] pudl.glue.eia_epacems:37 grabbing original crosswalk
+2022-02-10 15:08:00 [    INFO] pudl.glue.eia_epacems:77 splitting crosswalk into three normalized tables
+2022-02-10 15:08:02 [    INFO] pudl.load.sqlite:63 Loading coalmine_eia923 into PUDL SQLite DB.
+2022-02-10 15:08:02 [    INFO] pudl.load.sqlite:63 Loading contract_types_eia into PUDL SQLite DB.
+2022-02-10 15:08:02 [    INFO] pudl.load.sqlite:63 Loading energy_sources_eia into PUDL SQLite DB.
+2022-02-10 15:08:02 [    INFO] pudl.load.sqlite:63 Loading ferc_accounts into PUDL SQLite DB.
+2022-02-10 15:08:02 [    INFO] pudl.load.sqlite:63 Loading ferc_depreciation_lines into PUDL SQLite DB.
+2022-02-10 15:08:02 [    INFO] pudl.load.sqlite:63 Loading fuel_transportation_modes_eia into PUDL SQLite DB.
+2022-02-10 15:08:02 [    INFO] pudl.load.sqlite:63 Loading fuel_types_aer_eia into PUDL SQLite DB.
+2022-02-10 15:08:02 [    INFO] pudl.load.sqlite:63 Loading plant_unit_epa into PUDL SQLite DB.
+2022-02-10 15:08:02 [    INFO] pudl.load.sqlite:63 Loading plants_pudl into PUDL SQLite DB.
+2022-02-10 15:08:02 [    INFO] pudl.load.sqlite:63 Loading prime_movers_eia into PUDL SQLite DB.
+2022-02-10 15:08:02 [    INFO] pudl.load.sqlite:63 Loading sector_consolidated_eia into PUDL SQLite DB.
+2022-02-10 15:08:02 [    INFO] pudl.load.sqlite:63 Loading utilities_entity_eia into PUDL SQLite DB.
+2022-02-10 15:08:02 [    INFO] pudl.load.sqlite:63 Loading utilities_pudl into PUDL SQLite DB.
+2022-02-10 15:08:02 [    INFO] pudl.load.sqlite:63 Loading plants_eia into PUDL SQLite DB.
+2022-02-10 15:08:02 [    INFO] pudl.load.sqlite:63 Loading plants_entity_eia into PUDL SQLite DB.
+2022-02-10 15:08:06 [    INFO] pudl.load.sqlite:63 Loading utilities_eia into PUDL SQLite DB.
+2022-02-10 15:08:07 [    INFO] pudl.load.sqlite:63 Loading utilities_eia860 into PUDL SQLite DB.
+2022-02-10 15:08:07 [    INFO] pudl.load.sqlite:63 Loading utilities_ferc1 into PUDL SQLite DB.
+2022-02-10 15:08:07 [    INFO] pudl.load.sqlite:63 Loading utility_plant_assn into PUDL SQLite DB.
+2022-02-10 15:08:07 [    INFO] pudl.load.sqlite:63 Loading assn_plant_id_eia_epa into PUDL SQLite DB.
+2022-02-10 15:08:07 [    INFO] pudl.load.sqlite:63 Loading boilers_entity_eia into PUDL SQLite DB.
+2022-02-10 15:08:07 [    INFO] pudl.load.sqlite:63 Loading fuel_receipts_costs_eia923 into PUDL SQLite DB.
+2022-02-10 15:08:09 [    INFO] pudl.load.sqlite:63 Loading generation_fuel_eia923 into PUDL SQLite DB.
+2022-02-10 15:08:14 [    INFO] pudl.load.sqlite:63 Loading generation_fuel_nuclear_eia923 into PUDL SQLite DB.
+2022-02-10 15:08:14 [    INFO] pudl.load.sqlite:63 Loading generators_entity_eia into PUDL SQLite DB.
+2022-02-10 15:08:15 [    INFO] pudl.load.sqlite:63 Loading plant_in_service_ferc1 into PUDL SQLite DB.
+2022-02-10 15:08:16 [    INFO] pudl.load.sqlite:63 Loading plants_eia860 into PUDL SQLite DB.
+2022-02-10 15:08:17 [    INFO] pudl.load.sqlite:63 Loading plants_ferc1 into PUDL SQLite DB.
+2022-02-10 15:08:17 [    INFO] pudl.load.sqlite:63 Loading purchased_power_ferc1 into PUDL SQLite DB.
+2022-02-10 15:08:18 [    INFO] pudl.load.sqlite:63 Loading assn_gen_eia_unit_epa into PUDL SQLite DB.
+2022-02-10 15:08:18 [    INFO] pudl.load.sqlite:63 Loading boiler_fuel_eia923 into PUDL SQLite DB.
+2022-02-10 15:08:21 [    INFO] pudl.load.sqlite:63 Loading fuel_ferc1 into PUDL SQLite DB.
+2022-02-10 15:08:21 [    INFO] pudl.load.sqlite:63 Loading generation_eia923 into PUDL SQLite DB.
+2022-02-10 15:08:22 [    INFO] pudl.load.sqlite:63 Loading generators_eia860 into PUDL SQLite DB.
+2022-02-10 15:08:28 [    INFO] pudl.load.sqlite:63 Loading plants_hydro_ferc1 into PUDL SQLite DB.
+2022-02-10 15:08:28 [    INFO] pudl.load.sqlite:63 Loading plants_pumped_storage_ferc1 into PUDL SQLite DB.
+2022-02-10 15:08:28 [    INFO] pudl.load.sqlite:63 Loading plants_small_ferc1 into PUDL SQLite DB.
+2022-02-10 15:08:28 [    INFO] pudl.load.sqlite:63 Loading plants_steam_ferc1 into PUDL SQLite DB.
+2022-02-10 15:08:28 [    INFO] pudl.load.sqlite:63 Loading boiler_generator_assn_eia860 into PUDL SQLite DB.
+2022-02-10 15:08:29 [    INFO] pudl.load.sqlite:63 Loading ownership_eia860 into PUDL SQLite DB.
+2022-02-10 15:08:29 [    INFO] pudl.etl:277 Processing EPA CEMS data and writing it to Apache Parquet.
+2022-02-10 15:08:29 [    INFO] pudl.extract.epacems:168 Processing EPA CEMS hourly data for ID-2020
+/home/sam/box/charmonium.cache/benchmark/.repos/pudl/src/pudl/helpers.py:1000: FutureWarning: Using .astype to convert from timezone-aware dtype to timezone-naive dtype is deprecated and will raise in a future version.  Use obj.tz_localize(None) or obj.tz_convert('UTC').tz_localize(None) instead
+  df.astype(non_bool_cols)
+2022-02-10 15:08:36 [    INFO] pudl.etl:292 Processing EPA CEMS took 00:00:07
+</code></pre></td></tr><tr><td>Time (s)</td><td><span>397.6s</span></td><td><span>284.8s</span></td></tr><tr><td>Overhead (s)</td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr><tr><td>Function calls</td><td><details><summary>Show</summary><table><thead><tr><td>name</td><td>hash(args)</td><td>hash(ret)</td><td>hit</td><td>outer</td><td>inner</td><td>hash time</td><td>rest of overhead</td></tr></thead><tbody></tbody></table></details></td><td><details><summary>Show</summary><table><thead><tr><td>name</td><td>hash(args)</td><td>hash(ret)</td><td>hit</td><td>outer</td><td>inner</td><td>hash time</td><td>rest of overhead</td></tr></thead><tbody><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>✅</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>✅</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>✅</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>✅</span></td><td><span>0.1s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.1s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>✅</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>✅</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>✅</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>✅</span></td><td><span>0.1s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.1s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>✅</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>✅</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>✅</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>✅</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>✅</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>✅</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>✅</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>✅</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>✅</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>✅</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr></tbody></table></details></td></tr></tbody></table></details></td></tr><tr><td><span>2021-12-21</span></td><td><a href="https://github.com/catalyst-cooperative/pudl/commit/ca8c434d9dac4694e77623e85aa906d33fa26e36">ca8c43</a></td><td><span>458.3s</span></td><td><span>281.1s</span></td><td><span style="background-color: green; display: block;">match</span></td><td><details><summary>Details</summary><table><thead><tr><td></td><td>Unmodified</td><td>Memoized</td></tr></thead><tbody><tr><td>Status</td><td><span style="background-color: green; display: block;">Success</span></td><td><span style="background-color: green; display: block;">Success</span></td></tr><tr><td>Output</td><td><pre><code class="language-plaintext" style="max-width: 60ch;max-height: 20vw;resize: both"></code></pre></td><td><pre><code class="language-plaintext" style="max-width: 60ch;max-height: 20vw;resize: both"></code></pre></td></tr><tr><td>Log</td><td><pre><code class="language-plaintext" style="max-width: 60ch;max-height: 20vw;resize: both">/home/sam/.local/share/virtualenvs/pudl-gKD-Mnhe/lib/python3.9/site-packages/geopandas/_compat.py:111: UserWarning: The Shapely GEOS version (3.9.1-CAPI-1.14.2) is incompatible with the GEOS version PyGEOS was compiled with (3.10.1-CAPI-1.16.0). Conversions between both will be slow.
+  warnings.warn(
+Monkeypatching `pandas.read_excel` v2
+/nix/store/i6vabb4div9iy6lsl642d86k1q8riasn-python3-3.9.9/lib/python3.9/runpy.py:127: RuntimeWarning: 'pudl.cli' found in sys.modules after import of package 'pudl', but prior to execution of 'pudl.cli'; this may result in unpredictable behaviour
+  warn(RuntimeWarning(msg))
+2022-02-10 14:39:08 [    INFO] pudl.extract.ferc1:880 Converting extracted FERC Form 1 table fuel_ferc1 into a pandas DataFrame.
+2022-02-10 14:39:08 [    INFO] pudl.extract.ferc1:880 Converting extracted FERC Form 1 table plant_in_service_ferc1 into a pandas DataFrame.
+2022-02-10 14:39:08 [    INFO] pudl.extract.ferc1:880 Converting extracted FERC Form 1 table plants_hydro_ferc1 into a pandas DataFrame.
+2022-02-10 14:39:08 [    INFO] pudl.extract.ferc1:880 Converting extracted FERC Form 1 table plants_pumped_storage_ferc1 into a pandas DataFrame.
+2022-02-10 14:39:08 [    INFO] pudl.extract.ferc1:880 Converting extracted FERC Form 1 table plants_small_ferc1 into a pandas DataFrame.
+2022-02-10 14:39:08 [    INFO] pudl.extract.ferc1:880 Converting extracted FERC Form 1 table plants_steam_ferc1 into a pandas DataFrame.
+2022-02-10 14:39:08 [    INFO] pudl.extract.ferc1:880 Converting extracted FERC Form 1 table purchased_power_ferc1 into a pandas DataFrame.
+2022-02-10 14:39:09 [    INFO] pudl.transform.ferc1:1578 Transforming raw FERC Form 1 dataframe for loading into fuel_ferc1
+2022-02-10 14:39:09 [    INFO] pudl.transform.ferc1:1578 Transforming raw FERC Form 1 dataframe for loading into plants_steam_ferc1
+2022-02-10 14:39:09 [    INFO] pudl.transform.ferc1:798 Identifying distinct large FERC plants for ID assignment.
+/home/sam/.local/share/virtualenvs/pudl-gKD-Mnhe/lib/python3.9/site-packages/sklearn/utils/validation.py:1688: FutureWarning: Feature names only support names that are all strings. Got feature names with dtypes: ['quoted_name', 'str']. An error will be raised in 1.2.
+  warnings.warn(
+2022-02-10 14:39:16 [    INFO] pudl.transform.ferc1:833 Successfully associated 908 of 910 (99.78%) FERC Form 1 plant records with multi-year plant entities.
+2022-02-10 14:39:16 [    INFO] pudl.transform.ferc1:845 Assigning IDs to multi-year FERC plant entities.
+2022-02-10 14:39:16 [    INFO] pudl.transform.ferc1:862 Identified 0 orphaned FERC plant records. Adding orphans to list of plant entities.
+2022-02-10 14:39:17 [    INFO] pudl.transform.ferc1:885 Successfully Identified 908 multi-year plant entities.
+2022-02-10 14:39:17 [   ERROR] pudl.transform.ferc1:956 Found report_year=2020 2 times in plant_id_ferc1=569
+2022-02-10 14:39:17 [   ERROR] pudl.transform.ferc1:956 Found report_year=2020 2 times in plant_id_ferc1=570
+2022-02-10 14:39:17 [    INFO] pudl.transform.ferc1:1578 Transforming raw FERC Form 1 dataframe for loading into plants_small_ferc1
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;_io.FileIO name='/home/sam/box/charmonium.cache/benchmark/.repos/pudl/src/pudl/package_data/ferc1/small_plants_2004-2016.xlsx' mode='rb' closefd=True&gt;, *(), **{})
+/home/sam/.local/share/virtualenvs/pudl-gKD-Mnhe/lib/python3.9/site-packages/openpyxl/worksheet/_reader.py:312: UserWarning: Unknown extension is not supported and will be removed
+  warn(msg)
+2022-02-10 14:39:19 [    INFO] pudl.transform.ferc1:1578 Transforming raw FERC Form 1 dataframe for loading into plants_hydro_ferc1
+2022-02-10 14:39:19 [    INFO] pudl.transform.ferc1:1578 Transforming raw FERC Form 1 dataframe for loading into plants_pumped_storage_ferc1
+2022-02-10 14:39:19 [    INFO] pudl.transform.ferc1:1578 Transforming raw FERC Form 1 dataframe for loading into plant_in_service_ferc1
+2022-02-10 14:39:19 [    INFO] pudl.transform.ferc1:506 0.0000% of unpacked records were duplicates, and discarded.
+2022-02-10 14:39:19 [    INFO] pudl.transform.ferc1:548 Col: begin_yr_bal, Cat: starting_balance
+2022-02-10 14:39:19 [    INFO] pudl.transform.ferc1:548 Col: addition, Cat: additions
+2022-02-10 14:39:19 [    INFO] pudl.transform.ferc1:548 Col: retirements, Cat: retirements
+2022-02-10 14:39:19 [    INFO] pudl.transform.ferc1:548 Col: adjustments, Cat: adjustments
+2022-02-10 14:39:19 [    INFO] pudl.transform.ferc1:548 Col: transfers, Cat: transfers
+2022-02-10 14:39:19 [    INFO] pudl.transform.ferc1:548 Col: yr_end_bal, Cat: ending_balance
+2022-02-10 14:39:19 [    INFO] pudl.transform.ferc1:1578 Transforming raw FERC Form 1 dataframe for loading into purchased_power_ferc1
+2022-02-10 14:39:20 [    INFO] pudl.extract.excel:206 Extracting eia923 spreadsheet data.
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f57ead97e50&gt;, *(), **{'sheet_name': 5, 'skiprows': 5, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f57ead97e50&gt;, *(), **{'sheet_name': 7, 'skiprows': 4, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f57ead97e50&gt;, *(), **{'sheet_name': 0, 'skiprows': 5, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f57ead97e50&gt;, *(), **{'sheet_name': 6, 'skiprows': 5, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f57ead97e50&gt;, *(), **{'sheet_name': 3, 'skiprows': 5, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+2022-02-10 14:40:02 [    INFO] pudl.extract.excel:206 Extracting eia860 spreadsheet data.
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f57eadbb970&gt;, *(), **{'sheet_name': 0, 'skiprows': 1, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+2022-02-10 14:40:03 [ WARNING] pudl.extract.excel:249 Extra columns found in page boiler_generator_assn: {'plant_name', 'steam_plant_type', 'utility_name'}
+2022-02-10 14:40:03 [ WARNING] pudl.extract.excel:254 Columns found missing from page generator: {'report_year'}
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f57ead97b20&gt;, *(), **{'sheet_name': 0, 'skiprows': 1, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f57ead97b20&gt;, *(), **{'sheet_name': 1, 'skiprows': 1, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f57ead97b20&gt;, *(), **{'sheet_name': 2, 'skiprows': 1, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f57eb00b2e0&gt;, *(), **{'sheet_name': 0, 'skiprows': 1, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f57eb00b760&gt;, *(), **{'sheet_name': 0, 'skiprows': 1, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+2022-02-10 14:40:37 [ WARNING] pudl.extract.excel:249 Extra columns found in page plant: {'ferc_exempt_wholesale_generator_docket_number'}
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f57ea90edc0&gt;, *(), **{'sheet_name': 0, 'skiprows': 1, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+2022-02-10 14:40:38 [    INFO] pudl.extract.excel:206 Extracting eia860m spreadsheet data.
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f57eb162400&gt;, *(), **{'sheet_name': 0, 'skiprows': 2, 'skipfooter': 2, 'dtype': {'Plant ID': Int64Dtype()}})
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f57eb162400&gt;, *(), **{'sheet_name': 1, 'skiprows': 2, 'skipfooter': 2, 'dtype': {'Plant ID': Int64Dtype()}})
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f57eb162400&gt;, *(), **{'sheet_name': 2, 'skiprows': 2, 'skipfooter': 2, 'dtype': {'Plant ID': Int64Dtype()}})
+2022-02-10 14:40:53 [    INFO] pudl.transform.eia860:620 Transforming raw EIA 860 DataFrames for ownership_eia860 concatenated across all years.
+/home/sam/box/charmonium.cache/benchmark/.repos/pudl/src/pudl/transform/eia860.py:84: PerformanceWarning: indexing past lexsort depth may impact performance.
+  own_df.set_index(["plant_id_eia", "generator_id"])
+2022-02-10 14:40:55 [    INFO] pudl.transform.eia860:620 Transforming raw EIA 860 DataFrames for generators_eia860 concatenated across all years.
+2022-02-10 14:41:10 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_code_1
+2022-02-10 14:41:10 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_code_2
+2022-02-10 14:41:10 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_code_3
+2022-02-10 14:41:10 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_code_4
+2022-02-10 14:41:10 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_code_5
+2022-02-10 14:41:10 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_code_6
+2022-02-10 14:41:10 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_1_transport_1
+2022-02-10 14:41:10 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_1_transport_2
+2022-02-10 14:41:10 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_1_transport_3
+2022-02-10 14:41:10 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_2_transport_1
+2022-02-10 14:41:11 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_2_transport_2
+2022-02-10 14:41:11 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_2_transport_3
+2022-02-10 14:41:11 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.planned_new_prime_mover_code
+2022-02-10 14:41:11 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.planned_energy_source_code_1
+2022-02-10 14:41:11 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.startup_source_code_1
+2022-02-10 14:41:11 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.startup_source_code_2
+2022-02-10 14:41:11 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.startup_source_code_3
+2022-02-10 14:41:11 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.startup_source_code_4
+2022-02-10 14:41:11 [    INFO] pudl.transform.eia860:620 Transforming raw EIA 860 DataFrames for plants_eia860 concatenated across all years.
+2022-02-10 14:41:12 [    INFO] pudl.transform.eia860:620 Transforming raw EIA 860 DataFrames for boiler_generator_assn_eia860 concatenated across all years.
+2022-02-10 14:41:12 [    INFO] pudl.transform.eia860:620 Transforming raw EIA 860 DataFrames for utilities_eia860 concatenated across all years.
+2022-02-10 14:41:13 [    INFO] pudl.transform.eia923:1162 Transforming raw EIA 923 DataFrames for generation_fuel_eia923 concatenated across all years.
+2022-02-10 14:41:19 [    INFO] pudl.metadata.classes:1439 Recoding generation_fuel_eia923.energy_source_code
+2022-02-10 14:41:19 [    INFO] pudl.metadata.classes:1439 Recoding generation_fuel_eia923.fuel_type_code_aer
+2022-02-10 14:41:19 [    INFO] pudl.metadata.classes:1439 Recoding generation_fuel_eia923.prime_mover_code
+2022-02-10 14:41:21 [    INFO] pudl.transform.eia923:1162 Transforming raw EIA 923 DataFrames for boiler_fuel_eia923 concatenated across all years.
+2022-02-10 14:41:23 [    INFO] pudl.metadata.classes:1439 Recoding boiler_fuel_eia923.energy_source_code
+2022-02-10 14:41:23 [    INFO] pudl.transform.eia923:1162 Transforming raw EIA 923 DataFrames for generation_eia923 concatenated across all years.
+2022-02-10 14:41:24 [    INFO] pudl.transform.eia923:1162 Transforming raw EIA 923 DataFrames for coalmine_eia923 concatenated across all years.
+2022-02-10 14:41:24 [    INFO] pudl.transform.eia923:1162 Transforming raw EIA 923 DataFrames for fuel_receipts_costs_eia923 concatenated across all years.
+2022-02-10 14:41:26 [    INFO] pudl.metadata.classes:1439 Recoding fuel_receipts_costs_eia923.contract_type_code
+2022-02-10 14:41:26 [    INFO] pudl.metadata.classes:1439 Recoding fuel_receipts_costs_eia923.energy_source_code
+2022-02-10 14:41:26 [    INFO] pudl.metadata.classes:1439 Recoding fuel_receipts_costs_eia923.primary_transportation_mode_code
+2022-02-10 14:41:26 [    INFO] pudl.metadata.classes:1439 Recoding fuel_receipts_costs_eia923.secondary_transportation_mode_code
+2022-02-10 14:41:31 [    INFO] pudl.transform.eia:1080 Harvesting IDs &amp; consistently static attributes for EIA plants
+2022-02-10 14:41:45 [    INFO] pudl.transform.eia:609 Average consistency of static plants values is 99.97%
+2022-02-10 14:44:28 [    INFO] pudl.transform.eia:1080 Harvesting IDs &amp; consistently static attributes for EIA generators
+2022-02-10 14:45:59 [    INFO] pudl.transform.eia:609 Average consistency of static generators values is 100.00%
+2022-02-10 14:45:59 [    INFO] pudl.transform.eia:1080 Harvesting IDs &amp; consistently static attributes for EIA utilities
+2022-02-10 14:46:08 [    INFO] pudl.transform.eia:609 Average consistency of static utilities values is 100.00%
+2022-02-10 14:46:08 [    INFO] pudl.transform.eia:1080 Harvesting IDs &amp; consistently static attributes for EIA boilers
+2022-02-10 14:46:09 [    INFO] pudl.transform.eia:609 Average consistency of static boilers values is 99.12%
+2022-02-10 14:46:09 [    INFO] pudl.transform.eia:682 Inferring complete EIA boiler-generator associations.
+2022-02-10 14:46:29 [ WARNING] pudl.transform.eia:967 Multiple EIA unit codes:plant_id_eia=10725, unit_id_pudl=1, unit_id_eia=['F802' 'F801']
+2022-02-10 14:46:29 [ WARNING] pudl.transform.eia:967 Multiple EIA unit codes:plant_id_eia=55309, unit_id_pudl=1, unit_id_eia=['SMR2' 'SMR1']
+2022-02-10 14:46:29 [ WARNING] pudl.transform.eia:967 Multiple EIA unit codes:plant_id_eia=57794, unit_id_pudl=1, unit_id_eia=['CC01' 'CC02']
+2022-02-10 14:46:29 [ WARNING] pudl.transform.eia:967 Multiple EIA unit codes:plant_id_eia=60786, unit_id_pudl=1, unit_id_eia=['4343' '4141']
+2022-02-10 14:46:30 [    INFO] pudl.metadata.classes:1439 Recoding plants_entity_eia.sector_id_eia
+2022-02-10 14:46:30 [    INFO] pudl.metadata.classes:1439 Recoding generators_entity_eia.prime_mover_code
+2022-02-10 14:46:30 [    INFO] pudl.metadata.classes:1439 Recoding boilers_entity_eia.prime_mover_code
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;_io.FileIO name='/home/sam/box/charmonium.cache/benchmark/.repos/pudl/src/pudl/package_data/glue/mapping_eia923_ferc1.xlsx' mode='rb' closefd=True&gt;, *(), **{'sheet_name': 'plants_output', 'na_values': '', 'keep_default_na': False, 'converters': {'plant_id_pudl': &lt;class 'int'&gt;, 'plant_name_pudl': &lt;class 'str'&gt;, 'utility_id_ferc1': &lt;class 'int'&gt;, 'utility_name_ferc1': &lt;class 'str'&gt;, 'plant_name_ferc1': &lt;class 'str'&gt;, 'plant_id_eia': &lt;class 'int'&gt;, 'plant_name_eia': &lt;class 'str'&gt;, 'utility_name_eia': &lt;class 'str'&gt;, 'utility_id_eia': &lt;class 'int'&gt;}})
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;_io.FileIO name='/home/sam/box/charmonium.cache/benchmark/.repos/pudl/src/pudl/package_data/glue/mapping_eia923_ferc1.xlsx' mode='rb' closefd=True&gt;, *(), **{'sheet_name': 'utilities_output', 'na_values': '', 'keep_default_na': False, 'converters': {'utility_id_pudl': &lt;class 'int'&gt;, 'utility_name_pudl': &lt;class 'str'&gt;, 'utility_id_ferc1': &lt;class 'int'&gt;, 'utility_name_ferc1': &lt;class 'str'&gt;, 'utility_id_eia': &lt;class 'int'&gt;, 'utility_name_eia': &lt;class 'str'&gt;}})
+2022-02-10 14:46:36 [ WARNING] pudl.glue.ferc1_eia:803 FERC to EIA glue breaking in plants_eia. There are too many null fields. Check the mapping spreadhseet.
+2022-02-10 14:46:36 [ WARNING] pudl.glue.ferc1_eia:803 FERC to EIA glue breaking in utilities_eia. There are too many null fields. Check the mapping spreadhseet.
+2022-02-10 14:46:36 [    INFO] pudl.glue.eia_epacems:37 grabbing original crosswalk
+2022-02-10 14:46:36 [    INFO] pudl.glue.eia_epacems:77 splitting crosswalk into three normalized tables
+2022-02-10 14:46:39 [    INFO] pudl.load.sqlite:63 Loading coalmine_eia923 into PUDL SQLite DB.
+2022-02-10 14:46:39 [    INFO] pudl.load.sqlite:63 Loading contract_types_eia into PUDL SQLite DB.
+2022-02-10 14:46:39 [    INFO] pudl.load.sqlite:63 Loading energy_sources_eia into PUDL SQLite DB.
+2022-02-10 14:46:39 [    INFO] pudl.load.sqlite:63 Loading ferc_accounts into PUDL SQLite DB.
+2022-02-10 14:46:39 [    INFO] pudl.load.sqlite:63 Loading ferc_depreciation_lines into PUDL SQLite DB.
+2022-02-10 14:46:39 [    INFO] pudl.load.sqlite:63 Loading fuel_transportation_modes_eia into PUDL SQLite DB.
+2022-02-10 14:46:39 [    INFO] pudl.load.sqlite:63 Loading fuel_types_aer_eia into PUDL SQLite DB.
+2022-02-10 14:46:39 [    INFO] pudl.load.sqlite:63 Loading plant_unit_epa into PUDL SQLite DB.
+2022-02-10 14:46:40 [    INFO] pudl.load.sqlite:63 Loading plants_pudl into PUDL SQLite DB.
+2022-02-10 14:46:40 [    INFO] pudl.load.sqlite:63 Loading prime_movers_eia into PUDL SQLite DB.
+2022-02-10 14:46:40 [    INFO] pudl.load.sqlite:63 Loading sector_consolidated_eia into PUDL SQLite DB.
+2022-02-10 14:46:40 [    INFO] pudl.load.sqlite:63 Loading utilities_entity_eia into PUDL SQLite DB.
+2022-02-10 14:46:40 [    INFO] pudl.load.sqlite:63 Loading utilities_pudl into PUDL SQLite DB.
+2022-02-10 14:46:40 [    INFO] pudl.load.sqlite:63 Loading plants_eia into PUDL SQLite DB.
+2022-02-10 14:46:41 [    INFO] pudl.load.sqlite:63 Loading plants_entity_eia into PUDL SQLite DB.
+2022-02-10 14:46:51 [    INFO] pudl.load.sqlite:63 Loading utilities_eia into PUDL SQLite DB.
+2022-02-10 14:46:51 [    INFO] pudl.load.sqlite:63 Loading utilities_eia860 into PUDL SQLite DB.
+2022-02-10 14:46:52 [    INFO] pudl.load.sqlite:63 Loading utilities_ferc1 into PUDL SQLite DB.
+2022-02-10 14:46:52 [    INFO] pudl.load.sqlite:63 Loading utility_plant_assn into PUDL SQLite DB.
+2022-02-10 14:46:52 [    INFO] pudl.load.sqlite:63 Loading assn_plant_id_eia_epa into PUDL SQLite DB.
+2022-02-10 14:46:52 [    INFO] pudl.load.sqlite:63 Loading boilers_entity_eia into PUDL SQLite DB.
+2022-02-10 14:46:52 [    INFO] pudl.load.sqlite:63 Loading fuel_receipts_costs_eia923 into PUDL SQLite DB.
+2022-02-10 14:46:55 [    INFO] pudl.load.sqlite:63 Loading generation_fuel_eia923 into PUDL SQLite DB.
+2022-02-10 14:47:01 [    INFO] pudl.load.sqlite:63 Loading generation_fuel_nuclear_eia923 into PUDL SQLite DB.
+2022-02-10 14:47:01 [    INFO] pudl.load.sqlite:63 Loading generators_entity_eia into PUDL SQLite DB.
+2022-02-10 14:47:02 [    INFO] pudl.load.sqlite:63 Loading plant_in_service_ferc1 into PUDL SQLite DB.
+2022-02-10 14:47:02 [    INFO] pudl.load.sqlite:63 Loading plants_eia860 into PUDL SQLite DB.
+2022-02-10 14:47:04 [    INFO] pudl.load.sqlite:63 Loading plants_ferc1 into PUDL SQLite DB.
+2022-02-10 14:47:04 [    INFO] pudl.load.sqlite:63 Loading purchased_power_ferc1 into PUDL SQLite DB.
+2022-02-10 14:47:04 [    INFO] pudl.load.sqlite:63 Loading assn_gen_eia_unit_epa into PUDL SQLite DB.
+2022-02-10 14:47:04 [    INFO] pudl.load.sqlite:63 Loading boiler_fuel_eia923 into PUDL SQLite DB.
+2022-02-10 14:47:07 [    INFO] pudl.load.sqlite:63 Loading fuel_ferc1 into PUDL SQLite DB.
+2022-02-10 14:47:07 [    INFO] pudl.load.sqlite:63 Loading generation_eia923 into PUDL SQLite DB.
+2022-02-10 14:47:08 [    INFO] pudl.load.sqlite:63 Loading generators_eia860 into PUDL SQLite DB.
+2022-02-10 14:47:17 [    INFO] pudl.load.sqlite:63 Loading plants_hydro_ferc1 into PUDL SQLite DB.
+2022-02-10 14:47:17 [    INFO] pudl.load.sqlite:63 Loading plants_pumped_storage_ferc1 into PUDL SQLite DB.
+2022-02-10 14:47:17 [    INFO] pudl.load.sqlite:63 Loading plants_small_ferc1 into PUDL SQLite DB.
+2022-02-10 14:47:17 [    INFO] pudl.load.sqlite:63 Loading plants_steam_ferc1 into PUDL SQLite DB.
+2022-02-10 14:47:17 [    INFO] pudl.load.sqlite:63 Loading boiler_generator_assn_eia860 into PUDL SQLite DB.
+2022-02-10 14:47:18 [    INFO] pudl.load.sqlite:63 Loading ownership_eia860 into PUDL SQLite DB.
+2022-02-10 14:47:20 [    INFO] pudl.etl:277 Processing EPA CEMS data and writing it to Apache Parquet.
+2022-02-10 14:47:21 [    INFO] pudl.extract.epacems:168 Processing EPA CEMS hourly data for ID-2020
+/home/sam/box/charmonium.cache/benchmark/.repos/pudl/src/pudl/helpers.py:1000: FutureWarning: Using .astype to convert from timezone-aware dtype to timezone-naive dtype is deprecated and will raise in a future version.  Use obj.tz_localize(None) or obj.tz_convert('UTC').tz_localize(None) instead
+  df.astype(non_bool_cols)
+2022-02-10 14:47:34 [    INFO] pudl.etl:292 Processing EPA CEMS took 00:00:14
+</code></pre></td><td><pre><code class="language-plaintext" style="max-width: 60ch;max-height: 20vw;resize: both">/home/sam/.local/share/virtualenvs/pudl-gKD-Mnhe/lib/python3.9/site-packages/geopandas/_compat.py:111: UserWarning: The Shapely GEOS version (3.9.1-CAPI-1.14.2) is incompatible with the GEOS version PyGEOS was compiled with (3.10.1-CAPI-1.16.0). Conversions between both will be slow.
+  warnings.warn(
+Monkeypatching `pandas.read_excel` v2
+/nix/store/i6vabb4div9iy6lsl642d86k1q8riasn-python3-3.9.9/lib/python3.9/runpy.py:127: RuntimeWarning: 'pudl.cli' found in sys.modules after import of package 'pudl', but prior to execution of 'pudl.cli'; this may result in unpredictable behaviour
+  warn(RuntimeWarning(msg))
+2022-02-10 15:08:43 [    INFO] pudl.extract.ferc1:880 Converting extracted FERC Form 1 table fuel_ferc1 into a pandas DataFrame.
+2022-02-10 15:08:43 [    INFO] pudl.extract.ferc1:880 Converting extracted FERC Form 1 table plant_in_service_ferc1 into a pandas DataFrame.
+2022-02-10 15:08:43 [    INFO] pudl.extract.ferc1:880 Converting extracted FERC Form 1 table plants_hydro_ferc1 into a pandas DataFrame.
+2022-02-10 15:08:43 [    INFO] pudl.extract.ferc1:880 Converting extracted FERC Form 1 table plants_pumped_storage_ferc1 into a pandas DataFrame.
+2022-02-10 15:08:43 [    INFO] pudl.extract.ferc1:880 Converting extracted FERC Form 1 table plants_small_ferc1 into a pandas DataFrame.
+2022-02-10 15:08:43 [    INFO] pudl.extract.ferc1:880 Converting extracted FERC Form 1 table plants_steam_ferc1 into a pandas DataFrame.
+2022-02-10 15:08:43 [    INFO] pudl.extract.ferc1:880 Converting extracted FERC Form 1 table purchased_power_ferc1 into a pandas DataFrame.
+2022-02-10 15:08:43 [    INFO] pudl.transform.ferc1:1579 Transforming raw FERC Form 1 dataframe for loading into fuel_ferc1
+2022-02-10 15:08:43 [    INFO] pudl.transform.ferc1:1579 Transforming raw FERC Form 1 dataframe for loading into plants_steam_ferc1
+2022-02-10 15:08:43 [    INFO] pudl.transform.ferc1:799 Identifying distinct large FERC plants for ID assignment.
+/home/sam/.local/share/virtualenvs/pudl-gKD-Mnhe/lib/python3.9/site-packages/sklearn/utils/validation.py:1688: FutureWarning: Feature names only support names that are all strings. Got feature names with dtypes: ['quoted_name', 'str']. An error will be raised in 1.2.
+  warnings.warn(
+2022-02-10 15:08:50 [    INFO] pudl.transform.ferc1:834 Successfully associated 908 of 910 (99.78%) FERC Form 1 plant records with multi-year plant entities.
+2022-02-10 15:08:50 [    INFO] pudl.transform.ferc1:846 Assigning IDs to multi-year FERC plant entities.
+2022-02-10 15:08:50 [    INFO] pudl.transform.ferc1:863 Identified 0 orphaned FERC plant records. Adding orphans to list of plant entities.
+2022-02-10 15:08:51 [    INFO] pudl.transform.ferc1:886 Successfully Identified 908 multi-year plant entities.
+2022-02-10 15:08:51 [   ERROR] pudl.transform.ferc1:957 Found report_year=2020 2 times in plant_id_ferc1=569
+2022-02-10 15:08:51 [   ERROR] pudl.transform.ferc1:957 Found report_year=2020 2 times in plant_id_ferc1=570
+2022-02-10 15:08:51 [    INFO] pudl.transform.ferc1:1579 Transforming raw FERC Form 1 dataframe for loading into plants_small_ferc1
+Env vars  /tmp/log/perf.log
+read_excel(&lt;_io.FileIO name='/home/sam/box/charmonium.cache/benchmark/.repos/pudl/src/pudl/package_data/ferc1/small_plants_2004-2016.xlsx' mode='rb' closefd=True&gt;, *(), **{})
+2022-02-10 15:08:51 [    INFO] pudl.transform.ferc1:1579 Transforming raw FERC Form 1 dataframe for loading into plants_hydro_ferc1
+2022-02-10 15:08:51 [    INFO] pudl.transform.ferc1:1579 Transforming raw FERC Form 1 dataframe for loading into plants_pumped_storage_ferc1
+2022-02-10 15:08:51 [    INFO] pudl.transform.ferc1:1579 Transforming raw FERC Form 1 dataframe for loading into plant_in_service_ferc1
+2022-02-10 15:08:52 [    INFO] pudl.transform.ferc1:507 0.0000% of unpacked records were duplicates, and discarded.
+2022-02-10 15:08:52 [    INFO] pudl.transform.ferc1:549 Col: begin_yr_bal, Cat: starting_balance
+2022-02-10 15:08:52 [    INFO] pudl.transform.ferc1:549 Col: addition, Cat: additions
+2022-02-10 15:08:52 [    INFO] pudl.transform.ferc1:549 Col: retirements, Cat: retirements
+2022-02-10 15:08:52 [    INFO] pudl.transform.ferc1:549 Col: adjustments, Cat: adjustments
+2022-02-10 15:08:52 [    INFO] pudl.transform.ferc1:549 Col: transfers, Cat: transfers
+2022-02-10 15:08:52 [    INFO] pudl.transform.ferc1:549 Col: yr_end_bal, Cat: ending_balance
+2022-02-10 15:08:52 [    INFO] pudl.transform.ferc1:1579 Transforming raw FERC Form 1 dataframe for loading into purchased_power_ferc1
+2022-02-10 15:08:52 [    INFO] pudl.extract.excel:207 Extracting eia923 spreadsheet data.
+Env vars  /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f0214371160&gt;, *(), **{'sheet_name': 5, 'skiprows': 5, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+Env vars  /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f0214371160&gt;, *(), **{'sheet_name': 7, 'skiprows': 4, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+Env vars  /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f0214371160&gt;, *(), **{'sheet_name': 0, 'skiprows': 5, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+Env vars  /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f0214371160&gt;, *(), **{'sheet_name': 6, 'skiprows': 5, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+Env vars  /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f0214371160&gt;, *(), **{'sheet_name': 3, 'skiprows': 5, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+2022-02-10 15:08:53 [    INFO] pudl.extract.excel:207 Extracting eia860 spreadsheet data.
+Env vars  /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f0213d2f910&gt;, *(), **{'sheet_name': 0, 'skiprows': 1, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+2022-02-10 15:08:54 [ WARNING] pudl.extract.excel:250 Extra columns found in page boiler_generator_assn: {'plant_name', 'steam_plant_type', 'utility_name'}
+2022-02-10 15:08:54 [ WARNING] pudl.extract.excel:255 Columns found missing from page generator: {'report_year'}
+Env vars  /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f021491adc0&gt;, *(), **{'sheet_name': 0, 'skiprows': 1, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+Env vars  /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f021491adc0&gt;, *(), **{'sheet_name': 1, 'skiprows': 1, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+Env vars  /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f021491adc0&gt;, *(), **{'sheet_name': 2, 'skiprows': 1, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+Env vars  /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f0214123c40&gt;, *(), **{'sheet_name': 0, 'skiprows': 1, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+Env vars  /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f02145d6190&gt;, *(), **{'sheet_name': 0, 'skiprows': 1, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+2022-02-10 15:08:56 [ WARNING] pudl.extract.excel:250 Extra columns found in page plant: {'ferc_exempt_wholesale_generator_docket_number'}
+Env vars  /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f0214508b80&gt;, *(), **{'sheet_name': 0, 'skiprows': 1, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+2022-02-10 15:08:56 [    INFO] pudl.extract.excel:207 Extracting eia860m spreadsheet data.
+Env vars  /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f02143c47c0&gt;, *(), **{'sheet_name': 0, 'skiprows': 2, 'skipfooter': 2, 'dtype': {'Plant ID': Int64Dtype()}})
+Env vars  /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f02143c47c0&gt;, *(), **{'sheet_name': 1, 'skiprows': 2, 'skipfooter': 2, 'dtype': {'Plant ID': Int64Dtype()}})
+Env vars  /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f02143c47c0&gt;, *(), **{'sheet_name': 2, 'skiprows': 2, 'skipfooter': 2, 'dtype': {'Plant ID': Int64Dtype()}})
+2022-02-10 15:08:59 [    INFO] pudl.transform.eia860:620 Transforming raw EIA 860 DataFrames for ownership_eia860 concatenated across all years.
+/home/sam/box/charmonium.cache/benchmark/.repos/pudl/src/pudl/transform/eia860.py:84: PerformanceWarning: indexing past lexsort depth may impact performance.
+  own_df.set_index(["plant_id_eia", "generator_id"])
+2022-02-10 15:09:01 [    INFO] pudl.transform.eia860:620 Transforming raw EIA 860 DataFrames for generators_eia860 concatenated across all years.
+2022-02-10 15:09:15 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_code_1
+2022-02-10 15:09:15 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_code_2
+2022-02-10 15:09:16 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_code_3
+2022-02-10 15:09:16 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_code_4
+2022-02-10 15:09:16 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_code_5
+2022-02-10 15:09:16 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_code_6
+2022-02-10 15:09:16 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_1_transport_1
+2022-02-10 15:09:16 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_1_transport_2
+2022-02-10 15:09:16 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_1_transport_3
+2022-02-10 15:09:16 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_2_transport_1
+2022-02-10 15:09:16 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_2_transport_2
+2022-02-10 15:09:16 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_2_transport_3
+2022-02-10 15:09:16 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.planned_new_prime_mover_code
+2022-02-10 15:09:16 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.planned_energy_source_code_1
+2022-02-10 15:09:16 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.startup_source_code_1
+2022-02-10 15:09:16 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.startup_source_code_2
+2022-02-10 15:09:16 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.startup_source_code_3
+2022-02-10 15:09:16 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.startup_source_code_4
+2022-02-10 15:09:16 [    INFO] pudl.transform.eia860:620 Transforming raw EIA 860 DataFrames for plants_eia860 concatenated across all years.
+2022-02-10 15:09:18 [    INFO] pudl.transform.eia860:620 Transforming raw EIA 860 DataFrames for boiler_generator_assn_eia860 concatenated across all years.
+2022-02-10 15:09:18 [    INFO] pudl.transform.eia860:620 Transforming raw EIA 860 DataFrames for utilities_eia860 concatenated across all years.
+2022-02-10 15:09:18 [    INFO] pudl.transform.eia923:1162 Transforming raw EIA 923 DataFrames for generation_fuel_eia923 concatenated across all years.
+2022-02-10 15:09:24 [    INFO] pudl.metadata.classes:1439 Recoding generation_fuel_eia923.energy_source_code
+2022-02-10 15:09:24 [    INFO] pudl.metadata.classes:1439 Recoding generation_fuel_eia923.fuel_type_code_aer
+2022-02-10 15:09:24 [    INFO] pudl.metadata.classes:1439 Recoding generation_fuel_eia923.prime_mover_code
+2022-02-10 15:09:26 [    INFO] pudl.transform.eia923:1162 Transforming raw EIA 923 DataFrames for boiler_fuel_eia923 concatenated across all years.
+2022-02-10 15:09:27 [    INFO] pudl.metadata.classes:1439 Recoding boiler_fuel_eia923.energy_source_code
+2022-02-10 15:09:28 [    INFO] pudl.transform.eia923:1162 Transforming raw EIA 923 DataFrames for generation_eia923 concatenated across all years.
+2022-02-10 15:09:29 [    INFO] pudl.transform.eia923:1162 Transforming raw EIA 923 DataFrames for coalmine_eia923 concatenated across all years.
+2022-02-10 15:09:29 [    INFO] pudl.transform.eia923:1162 Transforming raw EIA 923 DataFrames for fuel_receipts_costs_eia923 concatenated across all years.
+2022-02-10 15:09:31 [    INFO] pudl.metadata.classes:1439 Recoding fuel_receipts_costs_eia923.contract_type_code
+2022-02-10 15:09:31 [    INFO] pudl.metadata.classes:1439 Recoding fuel_receipts_costs_eia923.energy_source_code
+2022-02-10 15:09:31 [    INFO] pudl.metadata.classes:1439 Recoding fuel_receipts_costs_eia923.primary_transportation_mode_code
+2022-02-10 15:09:31 [    INFO] pudl.metadata.classes:1439 Recoding fuel_receipts_costs_eia923.secondary_transportation_mode_code
+2022-02-10 15:09:36 [    INFO] pudl.transform.eia:1080 Harvesting IDs &amp; consistently static attributes for EIA plants
+2022-02-10 15:09:48 [    INFO] pudl.transform.eia:609 Average consistency of static plants values is 99.97%
+2022-02-10 15:11:44 [    INFO] pudl.transform.eia:1080 Harvesting IDs &amp; consistently static attributes for EIA generators
+2022-02-10 15:12:21 [    INFO] pudl.transform.eia:609 Average consistency of static generators values is 100.00%
+2022-02-10 15:12:21 [    INFO] pudl.transform.eia:1080 Harvesting IDs &amp; consistently static attributes for EIA utilities
+2022-02-10 15:12:25 [    INFO] pudl.transform.eia:609 Average consistency of static utilities values is 100.00%
+2022-02-10 15:12:25 [    INFO] pudl.transform.eia:1080 Harvesting IDs &amp; consistently static attributes for EIA boilers
+2022-02-10 15:12:26 [    INFO] pudl.transform.eia:609 Average consistency of static boilers values is 99.12%
+2022-02-10 15:12:26 [    INFO] pudl.transform.eia:682 Inferring complete EIA boiler-generator associations.
+2022-02-10 15:12:41 [ WARNING] pudl.transform.eia:967 Multiple EIA unit codes:plant_id_eia=10725, unit_id_pudl=1, unit_id_eia=['F802' 'F801']
+2022-02-10 15:12:41 [ WARNING] pudl.transform.eia:967 Multiple EIA unit codes:plant_id_eia=55309, unit_id_pudl=1, unit_id_eia=['SMR2' 'SMR1']
+2022-02-10 15:12:41 [ WARNING] pudl.transform.eia:967 Multiple EIA unit codes:plant_id_eia=57794, unit_id_pudl=1, unit_id_eia=['CC01' 'CC02']
+2022-02-10 15:12:41 [ WARNING] pudl.transform.eia:967 Multiple EIA unit codes:plant_id_eia=60786, unit_id_pudl=1, unit_id_eia=['4343' '4141']
+2022-02-10 15:12:42 [    INFO] pudl.metadata.classes:1439 Recoding plants_entity_eia.sector_id_eia
+2022-02-10 15:12:42 [    INFO] pudl.metadata.classes:1439 Recoding generators_entity_eia.prime_mover_code
+2022-02-10 15:12:42 [    INFO] pudl.metadata.classes:1439 Recoding boilers_entity_eia.prime_mover_code
+Env vars  /tmp/log/perf.log
+read_excel(&lt;_io.FileIO name='/home/sam/box/charmonium.cache/benchmark/.repos/pudl/src/pudl/package_data/glue/mapping_eia923_ferc1.xlsx' mode='rb' closefd=True&gt;, *(), **{'sheet_name': 'plants_output', 'na_values': '', 'keep_default_na': False, 'converters': {'plant_id_pudl': &lt;class 'int'&gt;, 'plant_name_pudl': &lt;class 'str'&gt;, 'utility_id_ferc1': &lt;class 'int'&gt;, 'utility_name_ferc1': &lt;class 'str'&gt;, 'plant_name_ferc1': &lt;class 'str'&gt;, 'plant_id_eia': &lt;class 'int'&gt;, 'plant_name_eia': &lt;class 'str'&gt;, 'utility_name_eia': &lt;class 'str'&gt;, 'utility_id_eia': &lt;class 'int'&gt;}})
+Env vars  /tmp/log/perf.log
+read_excel(&lt;_io.FileIO name='/home/sam/box/charmonium.cache/benchmark/.repos/pudl/src/pudl/package_data/glue/mapping_eia923_ferc1.xlsx' mode='rb' closefd=True&gt;, *(), **{'sheet_name': 'utilities_output', 'na_values': '', 'keep_default_na': False, 'converters': {'utility_id_pudl': &lt;class 'int'&gt;, 'utility_name_pudl': &lt;class 'str'&gt;, 'utility_id_ferc1': &lt;class 'int'&gt;, 'utility_name_ferc1': &lt;class 'str'&gt;, 'utility_id_eia': &lt;class 'int'&gt;, 'utility_name_eia': &lt;class 'str'&gt;}})
+2022-02-10 15:12:43 [ WARNING] pudl.glue.ferc1_eia:804 FERC to EIA glue breaking in plants_eia. There are too many null fields. Check the mapping spreadhseet.
+2022-02-10 15:12:43 [ WARNING] pudl.glue.ferc1_eia:804 FERC to EIA glue breaking in utilities_eia. There are too many null fields. Check the mapping spreadhseet.
+2022-02-10 15:12:43 [    INFO] pudl.glue.eia_epacems:37 grabbing original crosswalk
+2022-02-10 15:12:43 [    INFO] pudl.glue.eia_epacems:77 splitting crosswalk into three normalized tables
+2022-02-10 15:12:45 [    INFO] pudl.load.sqlite:63 Loading coalmine_eia923 into PUDL SQLite DB.
+2022-02-10 15:12:45 [    INFO] pudl.load.sqlite:63 Loading contract_types_eia into PUDL SQLite DB.
+2022-02-10 15:12:45 [    INFO] pudl.load.sqlite:63 Loading energy_sources_eia into PUDL SQLite DB.
+2022-02-10 15:12:45 [    INFO] pudl.load.sqlite:63 Loading ferc_accounts into PUDL SQLite DB.
+2022-02-10 15:12:45 [    INFO] pudl.load.sqlite:63 Loading ferc_depreciation_lines into PUDL SQLite DB.
+2022-02-10 15:12:45 [    INFO] pudl.load.sqlite:63 Loading fuel_transportation_modes_eia into PUDL SQLite DB.
+2022-02-10 15:12:45 [    INFO] pudl.load.sqlite:63 Loading fuel_types_aer_eia into PUDL SQLite DB.
+2022-02-10 15:12:45 [    INFO] pudl.load.sqlite:63 Loading plant_unit_epa into PUDL SQLite DB.
+2022-02-10 15:12:45 [    INFO] pudl.load.sqlite:63 Loading plants_pudl into PUDL SQLite DB.
+2022-02-10 15:12:45 [    INFO] pudl.load.sqlite:63 Loading prime_movers_eia into PUDL SQLite DB.
+2022-02-10 15:12:45 [    INFO] pudl.load.sqlite:63 Loading sector_consolidated_eia into PUDL SQLite DB.
+2022-02-10 15:12:45 [    INFO] pudl.load.sqlite:63 Loading utilities_entity_eia into PUDL SQLite DB.
+2022-02-10 15:12:45 [    INFO] pudl.load.sqlite:63 Loading utilities_pudl into PUDL SQLite DB.
+2022-02-10 15:12:45 [    INFO] pudl.load.sqlite:63 Loading plants_eia into PUDL SQLite DB.
+2022-02-10 15:12:45 [    INFO] pudl.load.sqlite:63 Loading plants_entity_eia into PUDL SQLite DB.
+2022-02-10 15:12:50 [    INFO] pudl.load.sqlite:63 Loading utilities_eia into PUDL SQLite DB.
+2022-02-10 15:12:50 [    INFO] pudl.load.sqlite:63 Loading utilities_eia860 into PUDL SQLite DB.
+2022-02-10 15:12:50 [    INFO] pudl.load.sqlite:63 Loading utilities_ferc1 into PUDL SQLite DB.
+2022-02-10 15:12:50 [    INFO] pudl.load.sqlite:63 Loading utility_plant_assn into PUDL SQLite DB.
+2022-02-10 15:12:50 [    INFO] pudl.load.sqlite:63 Loading assn_plant_id_eia_epa into PUDL SQLite DB.
+2022-02-10 15:12:50 [    INFO] pudl.load.sqlite:63 Loading boilers_entity_eia into PUDL SQLite DB.
+2022-02-10 15:12:50 [    INFO] pudl.load.sqlite:63 Loading fuel_receipts_costs_eia923 into PUDL SQLite DB.
+2022-02-10 15:12:53 [    INFO] pudl.load.sqlite:63 Loading generation_fuel_eia923 into PUDL SQLite DB.
+2022-02-10 15:12:57 [    INFO] pudl.load.sqlite:63 Loading generation_fuel_nuclear_eia923 into PUDL SQLite DB.
+2022-02-10 15:12:57 [    INFO] pudl.load.sqlite:63 Loading generators_entity_eia into PUDL SQLite DB.
+2022-02-10 15:12:59 [    INFO] pudl.load.sqlite:63 Loading plant_in_service_ferc1 into PUDL SQLite DB.
+2022-02-10 15:12:59 [    INFO] pudl.load.sqlite:63 Loading plants_eia860 into PUDL SQLite DB.
+2022-02-10 15:13:00 [    INFO] pudl.load.sqlite:63 Loading plants_ferc1 into PUDL SQLite DB.
+2022-02-10 15:13:01 [    INFO] pudl.load.sqlite:63 Loading purchased_power_ferc1 into PUDL SQLite DB.
+2022-02-10 15:13:01 [    INFO] pudl.load.sqlite:63 Loading assn_gen_eia_unit_epa into PUDL SQLite DB.
+2022-02-10 15:13:01 [    INFO] pudl.load.sqlite:63 Loading boiler_fuel_eia923 into PUDL SQLite DB.
+2022-02-10 15:13:03 [    INFO] pudl.load.sqlite:63 Loading fuel_ferc1 into PUDL SQLite DB.
+2022-02-10 15:13:04 [    INFO] pudl.load.sqlite:63 Loading generation_eia923 into PUDL SQLite DB.
+2022-02-10 15:13:04 [    INFO] pudl.load.sqlite:63 Loading generators_eia860 into PUDL SQLite DB.
+2022-02-10 15:13:11 [    INFO] pudl.load.sqlite:63 Loading plants_hydro_ferc1 into PUDL SQLite DB.
+2022-02-10 15:13:11 [    INFO] pudl.load.sqlite:63 Loading plants_pumped_storage_ferc1 into PUDL SQLite DB.
+2022-02-10 15:13:11 [    INFO] pudl.load.sqlite:63 Loading plants_small_ferc1 into PUDL SQLite DB.
+2022-02-10 15:13:11 [    INFO] pudl.load.sqlite:63 Loading plants_steam_ferc1 into PUDL SQLite DB.
+2022-02-10 15:13:11 [    INFO] pudl.load.sqlite:63 Loading boiler_generator_assn_eia860 into PUDL SQLite DB.
+2022-02-10 15:13:11 [    INFO] pudl.load.sqlite:63 Loading ownership_eia860 into PUDL SQLite DB.
+2022-02-10 15:13:11 [    INFO] pudl.etl:277 Processing EPA CEMS data and writing it to Apache Parquet.
+2022-02-10 15:13:12 [    INFO] pudl.extract.epacems:168 Processing EPA CEMS hourly data for ID-2020
+/home/sam/box/charmonium.cache/benchmark/.repos/pudl/src/pudl/helpers.py:1000: FutureWarning: Using .astype to convert from timezone-aware dtype to timezone-naive dtype is deprecated and will raise in a future version.  Use obj.tz_localize(None) or obj.tz_convert('UTC').tz_localize(None) instead
+  df.astype(non_bool_cols)
+2022-02-10 15:13:19 [    INFO] pudl.etl:292 Processing EPA CEMS took 00:00:07
+</code></pre></td></tr><tr><td>Time (s)</td><td><span>458.3s</span></td><td><span>281.1s</span></td></tr><tr><td>Overhead (s)</td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr><tr><td>Function calls</td><td><details><summary>Show</summary><table><thead><tr><td>name</td><td>hash(args)</td><td>hash(ret)</td><td>hit</td><td>outer</td><td>inner</td><td>hash time</td><td>rest of overhead</td></tr></thead><tbody></tbody></table></details></td><td><details><summary>Show</summary><table><thead><tr><td>name</td><td>hash(args)</td><td>hash(ret)</td><td>hit</td><td>outer</td><td>inner</td><td>hash time</td><td>rest of overhead</td></tr></thead><tbody><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>✅</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>✅</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>✅</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>✅</span></td><td><span>0.1s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.1s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>✅</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>✅</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>✅</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>✅</span></td><td><span>0.1s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.1s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>✅</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>✅</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>✅</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>✅</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>✅</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>✅</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>✅</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>✅</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>✅</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>✅</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr></tbody></table></details></td></tr></tbody></table></details></td></tr><tr><td><span>2021-12-20</span></td><td><a href="https://github.com/catalyst-cooperative/pudl/commit/62d08068785cc1b4edaf2228be65be5105621223">62d080</a></td><td><span>486.7s</span></td><td><span>290.6s</span></td><td><span style="background-color: green; display: block;">match</span></td><td><details><summary>Details</summary><table><thead><tr><td></td><td>Unmodified</td><td>Memoized</td></tr></thead><tbody><tr><td>Status</td><td><span style="background-color: green; display: block;">Success</span></td><td><span style="background-color: green; display: block;">Success</span></td></tr><tr><td>Output</td><td><pre><code class="language-plaintext" style="max-width: 60ch;max-height: 20vw;resize: both"></code></pre></td><td><pre><code class="language-plaintext" style="max-width: 60ch;max-height: 20vw;resize: both"></code></pre></td></tr><tr><td>Log</td><td><pre><code class="language-plaintext" style="max-width: 60ch;max-height: 20vw;resize: both">/home/sam/.local/share/virtualenvs/pudl-gKD-Mnhe/lib/python3.9/site-packages/geopandas/_compat.py:111: UserWarning: The Shapely GEOS version (3.9.1-CAPI-1.14.2) is incompatible with the GEOS version PyGEOS was compiled with (3.10.1-CAPI-1.16.0). Conversions between both will be slow.
+  warnings.warn(
+Monkeypatching `pandas.read_excel` v2
+/nix/store/i6vabb4div9iy6lsl642d86k1q8riasn-python3-3.9.9/lib/python3.9/runpy.py:127: RuntimeWarning: 'pudl.cli' found in sys.modules after import of package 'pudl', but prior to execution of 'pudl.cli'; this may result in unpredictable behaviour
+  warn(RuntimeWarning(msg))
+2022-02-10 14:47:47 [    INFO] pudl.extract.ferc1:880 Converting extracted FERC Form 1 table fuel_ferc1 into a pandas DataFrame.
+2022-02-10 14:47:48 [    INFO] pudl.extract.ferc1:880 Converting extracted FERC Form 1 table plant_in_service_ferc1 into a pandas DataFrame.
+2022-02-10 14:47:48 [    INFO] pudl.extract.ferc1:880 Converting extracted FERC Form 1 table plants_hydro_ferc1 into a pandas DataFrame.
+2022-02-10 14:47:48 [    INFO] pudl.extract.ferc1:880 Converting extracted FERC Form 1 table plants_pumped_storage_ferc1 into a pandas DataFrame.
+2022-02-10 14:47:48 [    INFO] pudl.extract.ferc1:880 Converting extracted FERC Form 1 table plants_small_ferc1 into a pandas DataFrame.
+2022-02-10 14:47:49 [    INFO] pudl.extract.ferc1:880 Converting extracted FERC Form 1 table plants_steam_ferc1 into a pandas DataFrame.
+2022-02-10 14:47:49 [    INFO] pudl.extract.ferc1:880 Converting extracted FERC Form 1 table purchased_power_ferc1 into a pandas DataFrame.
+2022-02-10 14:47:49 [    INFO] pudl.transform.ferc1:1578 Transforming raw FERC Form 1 dataframe for loading into fuel_ferc1
+2022-02-10 14:47:49 [    INFO] pudl.transform.ferc1:1578 Transforming raw FERC Form 1 dataframe for loading into plants_steam_ferc1
+2022-02-10 14:47:49 [    INFO] pudl.transform.ferc1:798 Identifying distinct large FERC plants for ID assignment.
+/home/sam/.local/share/virtualenvs/pudl-gKD-Mnhe/lib/python3.9/site-packages/sklearn/utils/validation.py:1688: FutureWarning: Feature names only support names that are all strings. Got feature names with dtypes: ['quoted_name', 'str']. An error will be raised in 1.2.
+  warnings.warn(
+2022-02-10 14:48:03 [    INFO] pudl.transform.ferc1:833 Successfully associated 908 of 910 (99.78%) FERC Form 1 plant records with multi-year plant entities.
+2022-02-10 14:48:03 [    INFO] pudl.transform.ferc1:845 Assigning IDs to multi-year FERC plant entities.
+2022-02-10 14:48:03 [    INFO] pudl.transform.ferc1:862 Identified 0 orphaned FERC plant records. Adding orphans to list of plant entities.
+2022-02-10 14:48:05 [    INFO] pudl.transform.ferc1:885 Successfully Identified 908 multi-year plant entities.
+2022-02-10 14:48:05 [   ERROR] pudl.transform.ferc1:956 Found report_year=2020 2 times in plant_id_ferc1=569
+2022-02-10 14:48:05 [   ERROR] pudl.transform.ferc1:956 Found report_year=2020 2 times in plant_id_ferc1=570
+2022-02-10 14:48:05 [    INFO] pudl.transform.ferc1:1578 Transforming raw FERC Form 1 dataframe for loading into plants_small_ferc1
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;_io.FileIO name='/home/sam/box/charmonium.cache/benchmark/.repos/pudl/src/pudl/package_data/ferc1/small_plants_2004-2016.xlsx' mode='rb' closefd=True&gt;, *(), **{})
+/home/sam/.local/share/virtualenvs/pudl-gKD-Mnhe/lib/python3.9/site-packages/openpyxl/worksheet/_reader.py:312: UserWarning: Unknown extension is not supported and will be removed
+  warn(msg)
+2022-02-10 14:48:08 [    INFO] pudl.transform.ferc1:1578 Transforming raw FERC Form 1 dataframe for loading into plants_hydro_ferc1
+2022-02-10 14:48:08 [    INFO] pudl.transform.ferc1:1578 Transforming raw FERC Form 1 dataframe for loading into plants_pumped_storage_ferc1
+2022-02-10 14:48:08 [    INFO] pudl.transform.ferc1:1578 Transforming raw FERC Form 1 dataframe for loading into plant_in_service_ferc1
+2022-02-10 14:48:08 [    INFO] pudl.transform.ferc1:506 0.0000% of unpacked records were duplicates, and discarded.
+2022-02-10 14:48:08 [    INFO] pudl.transform.ferc1:548 Col: begin_yr_bal, Cat: starting_balance
+2022-02-10 14:48:08 [    INFO] pudl.transform.ferc1:548 Col: addition, Cat: additions
+2022-02-10 14:48:08 [    INFO] pudl.transform.ferc1:548 Col: retirements, Cat: retirements
+2022-02-10 14:48:08 [    INFO] pudl.transform.ferc1:548 Col: adjustments, Cat: adjustments
+2022-02-10 14:48:08 [    INFO] pudl.transform.ferc1:548 Col: transfers, Cat: transfers
+2022-02-10 14:48:08 [    INFO] pudl.transform.ferc1:548 Col: yr_end_bal, Cat: ending_balance
+2022-02-10 14:48:08 [    INFO] pudl.transform.ferc1:1578 Transforming raw FERC Form 1 dataframe for loading into purchased_power_ferc1
+2022-02-10 14:48:09 [    INFO] pudl.extract.excel:206 Extracting eia923 spreadsheet data.
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f82fecebcd0&gt;, *(), **{'sheet_name': 5, 'skiprows': 5, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f82fecebcd0&gt;, *(), **{'sheet_name': 7, 'skiprows': 4, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f82fecebcd0&gt;, *(), **{'sheet_name': 0, 'skiprows': 5, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f82fecebcd0&gt;, *(), **{'sheet_name': 6, 'skiprows': 5, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f82fecebcd0&gt;, *(), **{'sheet_name': 3, 'skiprows': 5, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+2022-02-10 14:49:18 [    INFO] pudl.extract.excel:206 Extracting eia860 spreadsheet data.
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f82fee2fd30&gt;, *(), **{'sheet_name': 0, 'skiprows': 1, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+2022-02-10 14:49:20 [ WARNING] pudl.extract.excel:249 Extra columns found in page boiler_generator_assn: {'plant_name', 'steam_plant_type', 'utility_name'}
+2022-02-10 14:49:21 [ WARNING] pudl.extract.excel:254 Columns found missing from page generator: {'report_year'}
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f82fe7be370&gt;, *(), **{'sheet_name': 0, 'skiprows': 1, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f82fe7be370&gt;, *(), **{'sheet_name': 1, 'skiprows': 1, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f82fe7be370&gt;, *(), **{'sheet_name': 2, 'skiprows': 1, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f82feca8640&gt;, *(), **{'sheet_name': 0, 'skiprows': 1, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f82fec60d00&gt;, *(), **{'sheet_name': 0, 'skiprows': 1, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+2022-02-10 14:50:07 [ WARNING] pudl.extract.excel:249 Extra columns found in page plant: {'ferc_exempt_wholesale_generator_docket_number'}
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f82feffc700&gt;, *(), **{'sheet_name': 0, 'skiprows': 1, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+2022-02-10 14:50:08 [    INFO] pudl.extract.excel:206 Extracting eia860m spreadsheet data.
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f82feca9160&gt;, *(), **{'sheet_name': 0, 'skiprows': 2, 'skipfooter': 2, 'dtype': {'Plant ID': Int64Dtype()}})
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f82feca9160&gt;, *(), **{'sheet_name': 1, 'skiprows': 2, 'skipfooter': 2, 'dtype': {'Plant ID': Int64Dtype()}})
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f82feca9160&gt;, *(), **{'sheet_name': 2, 'skiprows': 2, 'skipfooter': 2, 'dtype': {'Plant ID': Int64Dtype()}})
+2022-02-10 14:50:35 [    INFO] pudl.transform.eia860:620 Transforming raw EIA 860 DataFrames for ownership_eia860 concatenated across all years.
+/home/sam/box/charmonium.cache/benchmark/.repos/pudl/src/pudl/transform/eia860.py:84: PerformanceWarning: indexing past lexsort depth may impact performance.
+  own_df.set_index(["plant_id_eia", "generator_id"])
+2022-02-10 14:50:37 [    INFO] pudl.transform.eia860:620 Transforming raw EIA 860 DataFrames for generators_eia860 concatenated across all years.
+2022-02-10 14:51:00 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_code_1
+2022-02-10 14:51:00 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_code_2
+2022-02-10 14:51:00 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_code_3
+2022-02-10 14:51:00 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_code_4
+2022-02-10 14:51:01 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_code_5
+2022-02-10 14:51:01 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_code_6
+2022-02-10 14:51:01 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_1_transport_1
+2022-02-10 14:51:01 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_1_transport_2
+2022-02-10 14:51:01 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_1_transport_3
+2022-02-10 14:51:01 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_2_transport_1
+2022-02-10 14:51:01 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_2_transport_2
+2022-02-10 14:51:01 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_2_transport_3
+2022-02-10 14:51:01 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.planned_new_prime_mover_code
+2022-02-10 14:51:01 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.planned_energy_source_code_1
+2022-02-10 14:51:01 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.startup_source_code_1
+2022-02-10 14:51:02 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.startup_source_code_2
+2022-02-10 14:51:02 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.startup_source_code_3
+2022-02-10 14:51:02 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.startup_source_code_4
+2022-02-10 14:51:02 [    INFO] pudl.transform.eia860:620 Transforming raw EIA 860 DataFrames for plants_eia860 concatenated across all years.
+2022-02-10 14:51:04 [    INFO] pudl.transform.eia860:620 Transforming raw EIA 860 DataFrames for boiler_generator_assn_eia860 concatenated across all years.
+2022-02-10 14:51:04 [    INFO] pudl.transform.eia860:620 Transforming raw EIA 860 DataFrames for utilities_eia860 concatenated across all years.
+2022-02-10 14:51:04 [    INFO] pudl.transform.eia923:1162 Transforming raw EIA 923 DataFrames for generation_fuel_eia923 concatenated across all years.
+2022-02-10 14:51:13 [    INFO] pudl.metadata.classes:1439 Recoding generation_fuel_eia923.energy_source_code
+2022-02-10 14:51:13 [    INFO] pudl.metadata.classes:1439 Recoding generation_fuel_eia923.fuel_type_code_aer
+2022-02-10 14:51:13 [    INFO] pudl.metadata.classes:1439 Recoding generation_fuel_eia923.prime_mover_code
+2022-02-10 14:51:19 [    INFO] pudl.transform.eia923:1162 Transforming raw EIA 923 DataFrames for boiler_fuel_eia923 concatenated across all years.
+2022-02-10 14:51:22 [    INFO] pudl.metadata.classes:1439 Recoding boiler_fuel_eia923.energy_source_code
+2022-02-10 14:51:23 [    INFO] pudl.transform.eia923:1162 Transforming raw EIA 923 DataFrames for generation_eia923 concatenated across all years.
+2022-02-10 14:51:24 [    INFO] pudl.transform.eia923:1162 Transforming raw EIA 923 DataFrames for coalmine_eia923 concatenated across all years.
+2022-02-10 14:51:24 [    INFO] pudl.transform.eia923:1162 Transforming raw EIA 923 DataFrames for fuel_receipts_costs_eia923 concatenated across all years.
+2022-02-10 14:51:28 [    INFO] pudl.metadata.classes:1439 Recoding fuel_receipts_costs_eia923.contract_type_code
+2022-02-10 14:51:28 [    INFO] pudl.metadata.classes:1439 Recoding fuel_receipts_costs_eia923.energy_source_code
+2022-02-10 14:51:28 [    INFO] pudl.metadata.classes:1439 Recoding fuel_receipts_costs_eia923.primary_transportation_mode_code
+2022-02-10 14:51:28 [    INFO] pudl.metadata.classes:1439 Recoding fuel_receipts_costs_eia923.secondary_transportation_mode_code
+2022-02-10 14:51:39 [    INFO] pudl.transform.eia:1080 Harvesting IDs &amp; consistently static attributes for EIA plants
+2022-02-10 14:52:03 [    INFO] pudl.transform.eia:609 Average consistency of static plants values is 99.97%
+2022-02-10 14:54:41 [    INFO] pudl.transform.eia:1080 Harvesting IDs &amp; consistently static attributes for EIA generators
+2022-02-10 14:55:21 [    INFO] pudl.transform.eia:609 Average consistency of static generators values is 100.00%
+2022-02-10 14:55:21 [    INFO] pudl.transform.eia:1080 Harvesting IDs &amp; consistently static attributes for EIA utilities
+2022-02-10 14:55:25 [    INFO] pudl.transform.eia:609 Average consistency of static utilities values is 100.00%
+2022-02-10 14:55:25 [    INFO] pudl.transform.eia:1080 Harvesting IDs &amp; consistently static attributes for EIA boilers
+2022-02-10 14:55:26 [    INFO] pudl.transform.eia:609 Average consistency of static boilers values is 99.12%
+2022-02-10 14:55:26 [    INFO] pudl.transform.eia:682 Inferring complete EIA boiler-generator associations.
+2022-02-10 14:55:41 [ WARNING] pudl.transform.eia:967 Multiple EIA unit codes:plant_id_eia=10725, unit_id_pudl=1, unit_id_eia=['F802' 'F801']
+2022-02-10 14:55:41 [ WARNING] pudl.transform.eia:967 Multiple EIA unit codes:plant_id_eia=55309, unit_id_pudl=1, unit_id_eia=['SMR2' 'SMR1']
+2022-02-10 14:55:41 [ WARNING] pudl.transform.eia:967 Multiple EIA unit codes:plant_id_eia=57794, unit_id_pudl=1, unit_id_eia=['CC01' 'CC02']
+2022-02-10 14:55:41 [ WARNING] pudl.transform.eia:967 Multiple EIA unit codes:plant_id_eia=60786, unit_id_pudl=1, unit_id_eia=['4343' '4141']
+2022-02-10 14:55:43 [    INFO] pudl.metadata.classes:1439 Recoding plants_entity_eia.sector_id_eia
+2022-02-10 14:55:43 [    INFO] pudl.metadata.classes:1439 Recoding generators_entity_eia.prime_mover_code
+2022-02-10 14:55:43 [    INFO] pudl.metadata.classes:1439 Recoding boilers_entity_eia.prime_mover_code
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;_io.FileIO name='/home/sam/box/charmonium.cache/benchmark/.repos/pudl/src/pudl/package_data/glue/mapping_eia923_ferc1.xlsx' mode='rb' closefd=True&gt;, *(), **{'sheet_name': 'plants_output', 'na_values': '', 'keep_default_na': False, 'converters': {'plant_id_pudl': &lt;class 'int'&gt;, 'plant_name_pudl': &lt;class 'str'&gt;, 'utility_id_ferc1': &lt;class 'int'&gt;, 'utility_name_ferc1': &lt;class 'str'&gt;, 'plant_name_ferc1': &lt;class 'str'&gt;, 'plant_id_eia': &lt;class 'int'&gt;, 'plant_name_eia': &lt;class 'str'&gt;, 'utility_name_eia': &lt;class 'str'&gt;, 'utility_id_eia': &lt;class 'int'&gt;}})
+Env vars 1 /tmp/log/perf.log
+read_excel(&lt;_io.FileIO name='/home/sam/box/charmonium.cache/benchmark/.repos/pudl/src/pudl/package_data/glue/mapping_eia923_ferc1.xlsx' mode='rb' closefd=True&gt;, *(), **{'sheet_name': 'utilities_output', 'na_values': '', 'keep_default_na': False, 'converters': {'utility_id_pudl': &lt;class 'int'&gt;, 'utility_name_pudl': &lt;class 'str'&gt;, 'utility_id_ferc1': &lt;class 'int'&gt;, 'utility_name_ferc1': &lt;class 'str'&gt;, 'utility_id_eia': &lt;class 'int'&gt;, 'utility_name_eia': &lt;class 'str'&gt;}})
+2022-02-10 14:55:54 [ WARNING] pudl.glue.ferc1_eia:803 FERC to EIA glue breaking in plants_eia. There are too many null fields. Check the mapping spreadhseet.
+2022-02-10 14:55:54 [ WARNING] pudl.glue.ferc1_eia:803 FERC to EIA glue breaking in utilities_eia. There are too many null fields. Check the mapping spreadhseet.
+2022-02-10 14:55:54 [    INFO] pudl.glue.eia_epacems:37 grabbing original crosswalk
+2022-02-10 14:55:55 [    INFO] pudl.glue.eia_epacems:77 splitting crosswalk into three normalized tables
+2022-02-10 14:55:59 [    INFO] pudl.load.sqlite:63 Loading coalmine_eia923 into PUDL SQLite DB.
+2022-02-10 14:56:00 [    INFO] pudl.load.sqlite:63 Loading contract_types_eia into PUDL SQLite DB.
+2022-02-10 14:56:00 [    INFO] pudl.load.sqlite:63 Loading energy_sources_eia into PUDL SQLite DB.
+2022-02-10 14:56:00 [    INFO] pudl.load.sqlite:63 Loading ferc_accounts into PUDL SQLite DB.
+2022-02-10 14:56:00 [    INFO] pudl.load.sqlite:63 Loading ferc_depreciation_lines into PUDL SQLite DB.
+2022-02-10 14:56:00 [    INFO] pudl.load.sqlite:63 Loading fuel_transportation_modes_eia into PUDL SQLite DB.
+2022-02-10 14:56:00 [    INFO] pudl.load.sqlite:63 Loading fuel_types_aer_eia into PUDL SQLite DB.
+2022-02-10 14:56:00 [    INFO] pudl.load.sqlite:63 Loading plant_unit_epa into PUDL SQLite DB.
+2022-02-10 14:56:00 [    INFO] pudl.load.sqlite:63 Loading plants_pudl into PUDL SQLite DB.
+2022-02-10 14:56:00 [    INFO] pudl.load.sqlite:63 Loading prime_movers_eia into PUDL SQLite DB.
+2022-02-10 14:56:00 [    INFO] pudl.load.sqlite:63 Loading sector_consolidated_eia into PUDL SQLite DB.
+2022-02-10 14:56:00 [    INFO] pudl.load.sqlite:63 Loading utilities_entity_eia into PUDL SQLite DB.
+2022-02-10 14:56:00 [    INFO] pudl.load.sqlite:63 Loading utilities_pudl into PUDL SQLite DB.
+2022-02-10 14:56:00 [    INFO] pudl.load.sqlite:63 Loading plants_eia into PUDL SQLite DB.
+2022-02-10 14:56:01 [    INFO] pudl.load.sqlite:63 Loading plants_entity_eia into PUDL SQLite DB.
+2022-02-10 14:56:06 [    INFO] pudl.load.sqlite:63 Loading utilities_eia into PUDL SQLite DB.
+2022-02-10 14:56:06 [    INFO] pudl.load.sqlite:63 Loading utilities_eia860 into PUDL SQLite DB.
+2022-02-10 14:56:07 [    INFO] pudl.load.sqlite:63 Loading utilities_ferc1 into PUDL SQLite DB.
+2022-02-10 14:56:08 [    INFO] pudl.load.sqlite:63 Loading utility_plant_assn into PUDL SQLite DB.
+2022-02-10 14:56:08 [    INFO] pudl.load.sqlite:63 Loading assn_plant_id_eia_epa into PUDL SQLite DB.
+2022-02-10 14:56:08 [    INFO] pudl.load.sqlite:63 Loading boilers_entity_eia into PUDL SQLite DB.
+2022-02-10 14:56:08 [    INFO] pudl.load.sqlite:63 Loading fuel_receipts_costs_eia923 into PUDL SQLite DB.
+2022-02-10 14:56:10 [    INFO] pudl.load.sqlite:63 Loading generation_fuel_eia923 into PUDL SQLite DB.
+2022-02-10 14:56:16 [    INFO] pudl.load.sqlite:63 Loading generation_fuel_nuclear_eia923 into PUDL SQLite DB.
+2022-02-10 14:56:16 [    INFO] pudl.load.sqlite:63 Loading generators_entity_eia into PUDL SQLite DB.
+2022-02-10 14:56:18 [    INFO] pudl.load.sqlite:63 Loading plant_in_service_ferc1 into PUDL SQLite DB.
+2022-02-10 14:56:18 [    INFO] pudl.load.sqlite:63 Loading plants_eia860 into PUDL SQLite DB.
+2022-02-10 14:56:20 [    INFO] pudl.load.sqlite:63 Loading plants_ferc1 into PUDL SQLite DB.
+2022-02-10 14:56:20 [    INFO] pudl.load.sqlite:63 Loading purchased_power_ferc1 into PUDL SQLite DB.
+2022-02-10 14:56:20 [    INFO] pudl.load.sqlite:63 Loading assn_gen_eia_unit_epa into PUDL SQLite DB.
+2022-02-10 14:56:21 [    INFO] pudl.load.sqlite:63 Loading boiler_fuel_eia923 into PUDL SQLite DB.
+2022-02-10 14:56:24 [    INFO] pudl.load.sqlite:63 Loading fuel_ferc1 into PUDL SQLite DB.
+2022-02-10 14:56:24 [    INFO] pudl.load.sqlite:63 Loading generation_eia923 into PUDL SQLite DB.
+2022-02-10 14:56:25 [    INFO] pudl.load.sqlite:63 Loading generators_eia860 into PUDL SQLite DB.
+2022-02-10 14:56:32 [    INFO] pudl.load.sqlite:63 Loading plants_hydro_ferc1 into PUDL SQLite DB.
+2022-02-10 14:56:32 [    INFO] pudl.load.sqlite:63 Loading plants_pumped_storage_ferc1 into PUDL SQLite DB.
+2022-02-10 14:56:32 [    INFO] pudl.load.sqlite:63 Loading plants_small_ferc1 into PUDL SQLite DB.
+2022-02-10 14:56:32 [    INFO] pudl.load.sqlite:63 Loading plants_steam_ferc1 into PUDL SQLite DB.
+2022-02-10 14:56:32 [    INFO] pudl.load.sqlite:63 Loading boiler_generator_assn_eia860 into PUDL SQLite DB.
+2022-02-10 14:56:33 [    INFO] pudl.load.sqlite:63 Loading ownership_eia860 into PUDL SQLite DB.
+2022-02-10 14:56:33 [    INFO] pudl.etl:277 Processing EPA CEMS data and writing it to Apache Parquet.
+2022-02-10 14:56:33 [    INFO] pudl.extract.epacems:168 Processing EPA CEMS hourly data for ID-2020
+/home/sam/box/charmonium.cache/benchmark/.repos/pudl/src/pudl/helpers.py:1000: FutureWarning: Using .astype to convert from timezone-aware dtype to timezone-naive dtype is deprecated and will raise in a future version.  Use obj.tz_localize(None) or obj.tz_convert('UTC').tz_localize(None) instead
+  df.astype(non_bool_cols)
+2022-02-10 14:56:44 [    INFO] pudl.etl:292 Processing EPA CEMS took 00:00:10
+</code></pre></td><td><pre><code class="language-plaintext" style="max-width: 60ch;max-height: 20vw;resize: both">/home/sam/.local/share/virtualenvs/pudl-gKD-Mnhe/lib/python3.9/site-packages/geopandas/_compat.py:111: UserWarning: The Shapely GEOS version (3.9.1-CAPI-1.14.2) is incompatible with the GEOS version PyGEOS was compiled with (3.10.1-CAPI-1.16.0). Conversions between both will be slow.
+  warnings.warn(
+Monkeypatching `pandas.read_excel` v2
+/nix/store/i6vabb4div9iy6lsl642d86k1q8riasn-python3-3.9.9/lib/python3.9/runpy.py:127: RuntimeWarning: 'pudl.cli' found in sys.modules after import of package 'pudl', but prior to execution of 'pudl.cli'; this may result in unpredictable behaviour
+  warn(RuntimeWarning(msg))
+2022-02-10 15:13:25 [    INFO] pudl.extract.ferc1:880 Converting extracted FERC Form 1 table fuel_ferc1 into a pandas DataFrame.
+2022-02-10 15:13:25 [    INFO] pudl.extract.ferc1:880 Converting extracted FERC Form 1 table plant_in_service_ferc1 into a pandas DataFrame.
+2022-02-10 15:13:25 [    INFO] pudl.extract.ferc1:880 Converting extracted FERC Form 1 table plants_hydro_ferc1 into a pandas DataFrame.
+2022-02-10 15:13:25 [    INFO] pudl.extract.ferc1:880 Converting extracted FERC Form 1 table plants_pumped_storage_ferc1 into a pandas DataFrame.
+2022-02-10 15:13:25 [    INFO] pudl.extract.ferc1:880 Converting extracted FERC Form 1 table plants_small_ferc1 into a pandas DataFrame.
+2022-02-10 15:13:25 [    INFO] pudl.extract.ferc1:880 Converting extracted FERC Form 1 table plants_steam_ferc1 into a pandas DataFrame.
+2022-02-10 15:13:25 [    INFO] pudl.extract.ferc1:880 Converting extracted FERC Form 1 table purchased_power_ferc1 into a pandas DataFrame.
+2022-02-10 15:13:26 [    INFO] pudl.transform.ferc1:1579 Transforming raw FERC Form 1 dataframe for loading into fuel_ferc1
+2022-02-10 15:13:26 [    INFO] pudl.transform.ferc1:1579 Transforming raw FERC Form 1 dataframe for loading into plants_steam_ferc1
+2022-02-10 15:13:26 [    INFO] pudl.transform.ferc1:799 Identifying distinct large FERC plants for ID assignment.
+/home/sam/.local/share/virtualenvs/pudl-gKD-Mnhe/lib/python3.9/site-packages/sklearn/utils/validation.py:1688: FutureWarning: Feature names only support names that are all strings. Got feature names with dtypes: ['quoted_name', 'str']. An error will be raised in 1.2.
+  warnings.warn(
+2022-02-10 15:13:34 [    INFO] pudl.transform.ferc1:834 Successfully associated 908 of 910 (99.78%) FERC Form 1 plant records with multi-year plant entities.
+2022-02-10 15:13:34 [    INFO] pudl.transform.ferc1:846 Assigning IDs to multi-year FERC plant entities.
+2022-02-10 15:13:34 [    INFO] pudl.transform.ferc1:863 Identified 0 orphaned FERC plant records. Adding orphans to list of plant entities.
+2022-02-10 15:13:35 [    INFO] pudl.transform.ferc1:886 Successfully Identified 908 multi-year plant entities.
+2022-02-10 15:13:35 [   ERROR] pudl.transform.ferc1:957 Found report_year=2020 2 times in plant_id_ferc1=569
+2022-02-10 15:13:35 [   ERROR] pudl.transform.ferc1:957 Found report_year=2020 2 times in plant_id_ferc1=570
+2022-02-10 15:13:35 [    INFO] pudl.transform.ferc1:1579 Transforming raw FERC Form 1 dataframe for loading into plants_small_ferc1
+Env vars  /tmp/log/perf.log
+read_excel(&lt;_io.FileIO name='/home/sam/box/charmonium.cache/benchmark/.repos/pudl/src/pudl/package_data/ferc1/small_plants_2004-2016.xlsx' mode='rb' closefd=True&gt;, *(), **{})
+2022-02-10 15:13:35 [    INFO] pudl.transform.ferc1:1579 Transforming raw FERC Form 1 dataframe for loading into plants_hydro_ferc1
+2022-02-10 15:13:35 [    INFO] pudl.transform.ferc1:1579 Transforming raw FERC Form 1 dataframe for loading into plants_pumped_storage_ferc1
+2022-02-10 15:13:35 [    INFO] pudl.transform.ferc1:1579 Transforming raw FERC Form 1 dataframe for loading into plant_in_service_ferc1
+2022-02-10 15:13:36 [    INFO] pudl.transform.ferc1:507 0.0000% of unpacked records were duplicates, and discarded.
+2022-02-10 15:13:36 [    INFO] pudl.transform.ferc1:549 Col: begin_yr_bal, Cat: starting_balance
+2022-02-10 15:13:36 [    INFO] pudl.transform.ferc1:549 Col: addition, Cat: additions
+2022-02-10 15:13:36 [    INFO] pudl.transform.ferc1:549 Col: retirements, Cat: retirements
+2022-02-10 15:13:36 [    INFO] pudl.transform.ferc1:549 Col: adjustments, Cat: adjustments
+2022-02-10 15:13:36 [    INFO] pudl.transform.ferc1:549 Col: transfers, Cat: transfers
+2022-02-10 15:13:36 [    INFO] pudl.transform.ferc1:549 Col: yr_end_bal, Cat: ending_balance
+2022-02-10 15:13:36 [    INFO] pudl.transform.ferc1:1579 Transforming raw FERC Form 1 dataframe for loading into purchased_power_ferc1
+2022-02-10 15:13:36 [    INFO] pudl.extract.excel:207 Extracting eia923 spreadsheet data.
+Env vars  /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f7cedb53160&gt;, *(), **{'sheet_name': 5, 'skiprows': 5, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+Env vars  /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f7cedb53160&gt;, *(), **{'sheet_name': 7, 'skiprows': 4, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+Env vars  /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f7cedb53160&gt;, *(), **{'sheet_name': 0, 'skiprows': 5, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+Env vars  /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f7cedb53160&gt;, *(), **{'sheet_name': 6, 'skiprows': 5, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+Env vars  /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f7cedb53160&gt;, *(), **{'sheet_name': 3, 'skiprows': 5, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+2022-02-10 15:13:38 [    INFO] pudl.extract.excel:207 Extracting eia860 spreadsheet data.
+Env vars  /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f7ced511910&gt;, *(), **{'sheet_name': 0, 'skiprows': 1, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+2022-02-10 15:13:38 [ WARNING] pudl.extract.excel:250 Extra columns found in page boiler_generator_assn: {'plant_name', 'steam_plant_type', 'utility_name'}
+2022-02-10 15:13:38 [ WARNING] pudl.extract.excel:255 Columns found missing from page generator: {'report_year'}
+Env vars  /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f7d1dff9f10&gt;, *(), **{'sheet_name': 0, 'skiprows': 1, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+Env vars  /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f7d1dff9f10&gt;, *(), **{'sheet_name': 1, 'skiprows': 1, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+Env vars  /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f7d1dff9f10&gt;, *(), **{'sheet_name': 2, 'skiprows': 1, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+Env vars  /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f7cedaace80&gt;, *(), **{'sheet_name': 0, 'skiprows': 1, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+Env vars  /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f7ceddb8dc0&gt;, *(), **{'sheet_name': 0, 'skiprows': 1, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+2022-02-10 15:13:41 [ WARNING] pudl.extract.excel:250 Extra columns found in page plant: {'ferc_exempt_wholesale_generator_docket_number'}
+Env vars  /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f7cedcaef40&gt;, *(), **{'sheet_name': 0, 'skiprows': 1, 'skipfooter': 0, 'dtype': {'Plant ID': Int64Dtype(), 'Plant Id': Int64Dtype()}})
+2022-02-10 15:13:42 [    INFO] pudl.extract.excel:207 Extracting eia860m spreadsheet data.
+Env vars  /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f7cedba60a0&gt;, *(), **{'sheet_name': 0, 'skiprows': 2, 'skipfooter': 2, 'dtype': {'Plant ID': Int64Dtype()}})
+Env vars  /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f7cedba60a0&gt;, *(), **{'sheet_name': 1, 'skiprows': 2, 'skipfooter': 2, 'dtype': {'Plant ID': Int64Dtype()}})
+Env vars  /tmp/log/perf.log
+read_excel(&lt;pandas.io.excel._base.ExcelFile object at 0x7f7cedba60a0&gt;, *(), **{'sheet_name': 2, 'skiprows': 2, 'skipfooter': 2, 'dtype': {'Plant ID': Int64Dtype()}})
+2022-02-10 15:13:46 [    INFO] pudl.transform.eia860:620 Transforming raw EIA 860 DataFrames for ownership_eia860 concatenated across all years.
+/home/sam/box/charmonium.cache/benchmark/.repos/pudl/src/pudl/transform/eia860.py:84: PerformanceWarning: indexing past lexsort depth may impact performance.
+  own_df.set_index(["plant_id_eia", "generator_id"])
+2022-02-10 15:13:49 [    INFO] pudl.transform.eia860:620 Transforming raw EIA 860 DataFrames for generators_eia860 concatenated across all years.
+2022-02-10 15:14:08 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_code_1
+2022-02-10 15:14:09 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_code_2
+2022-02-10 15:14:09 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_code_3
+2022-02-10 15:14:09 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_code_4
+2022-02-10 15:14:09 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_code_5
+2022-02-10 15:14:09 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_code_6
+2022-02-10 15:14:09 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_1_transport_1
+2022-02-10 15:14:09 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_1_transport_2
+2022-02-10 15:14:09 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_1_transport_3
+2022-02-10 15:14:09 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_2_transport_1
+2022-02-10 15:14:09 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_2_transport_2
+2022-02-10 15:14:09 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.energy_source_2_transport_3
+2022-02-10 15:14:09 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.planned_new_prime_mover_code
+2022-02-10 15:14:09 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.planned_energy_source_code_1
+2022-02-10 15:14:09 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.startup_source_code_1
+2022-02-10 15:14:09 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.startup_source_code_2
+2022-02-10 15:14:09 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.startup_source_code_3
+2022-02-10 15:14:09 [    INFO] pudl.metadata.classes:1439 Recoding generators_eia860.startup_source_code_4
+2022-02-10 15:14:09 [    INFO] pudl.transform.eia860:620 Transforming raw EIA 860 DataFrames for plants_eia860 concatenated across all years.
+2022-02-10 15:14:11 [    INFO] pudl.transform.eia860:620 Transforming raw EIA 860 DataFrames for boiler_generator_assn_eia860 concatenated across all years.
+2022-02-10 15:14:11 [    INFO] pudl.transform.eia860:620 Transforming raw EIA 860 DataFrames for utilities_eia860 concatenated across all years.
+2022-02-10 15:14:11 [    INFO] pudl.transform.eia923:1162 Transforming raw EIA 923 DataFrames for generation_fuel_eia923 concatenated across all years.
+2022-02-10 15:14:17 [    INFO] pudl.metadata.classes:1439 Recoding generation_fuel_eia923.energy_source_code
+2022-02-10 15:14:17 [    INFO] pudl.metadata.classes:1439 Recoding generation_fuel_eia923.fuel_type_code_aer
+2022-02-10 15:14:17 [    INFO] pudl.metadata.classes:1439 Recoding generation_fuel_eia923.prime_mover_code
+2022-02-10 15:14:19 [    INFO] pudl.transform.eia923:1162 Transforming raw EIA 923 DataFrames for boiler_fuel_eia923 concatenated across all years.
+2022-02-10 15:14:20 [    INFO] pudl.metadata.classes:1439 Recoding boiler_fuel_eia923.energy_source_code
+2022-02-10 15:14:21 [    INFO] pudl.transform.eia923:1162 Transforming raw EIA 923 DataFrames for generation_eia923 concatenated across all years.
+2022-02-10 15:14:22 [    INFO] pudl.transform.eia923:1162 Transforming raw EIA 923 DataFrames for coalmine_eia923 concatenated across all years.
+2022-02-10 15:14:22 [    INFO] pudl.transform.eia923:1162 Transforming raw EIA 923 DataFrames for fuel_receipts_costs_eia923 concatenated across all years.
+2022-02-10 15:14:24 [    INFO] pudl.metadata.classes:1439 Recoding fuel_receipts_costs_eia923.contract_type_code
+2022-02-10 15:14:24 [    INFO] pudl.metadata.classes:1439 Recoding fuel_receipts_costs_eia923.energy_source_code
+2022-02-10 15:14:24 [    INFO] pudl.metadata.classes:1439 Recoding fuel_receipts_costs_eia923.primary_transportation_mode_code
+2022-02-10 15:14:24 [    INFO] pudl.metadata.classes:1439 Recoding fuel_receipts_costs_eia923.secondary_transportation_mode_code
+2022-02-10 15:14:29 [    INFO] pudl.transform.eia:1080 Harvesting IDs &amp; consistently static attributes for EIA plants
+2022-02-10 15:14:42 [    INFO] pudl.transform.eia:609 Average consistency of static plants values is 99.97%
+2022-02-10 15:16:38 [    INFO] pudl.transform.eia:1080 Harvesting IDs &amp; consistently static attributes for EIA generators
+2022-02-10 15:17:14 [    INFO] pudl.transform.eia:609 Average consistency of static generators values is 100.00%
+2022-02-10 15:17:14 [    INFO] pudl.transform.eia:1080 Harvesting IDs &amp; consistently static attributes for EIA utilities
+2022-02-10 15:17:18 [    INFO] pudl.transform.eia:609 Average consistency of static utilities values is 100.00%
+2022-02-10 15:17:18 [    INFO] pudl.transform.eia:1080 Harvesting IDs &amp; consistently static attributes for EIA boilers
+2022-02-10 15:17:19 [    INFO] pudl.transform.eia:609 Average consistency of static boilers values is 99.12%
+2022-02-10 15:17:19 [    INFO] pudl.transform.eia:682 Inferring complete EIA boiler-generator associations.
+2022-02-10 15:17:34 [ WARNING] pudl.transform.eia:967 Multiple EIA unit codes:plant_id_eia=10725, unit_id_pudl=1, unit_id_eia=['F802' 'F801']
+2022-02-10 15:17:34 [ WARNING] pudl.transform.eia:967 Multiple EIA unit codes:plant_id_eia=55309, unit_id_pudl=1, unit_id_eia=['SMR2' 'SMR1']
+2022-02-10 15:17:34 [ WARNING] pudl.transform.eia:967 Multiple EIA unit codes:plant_id_eia=57794, unit_id_pudl=1, unit_id_eia=['CC01' 'CC02']
+2022-02-10 15:17:34 [ WARNING] pudl.transform.eia:967 Multiple EIA unit codes:plant_id_eia=60786, unit_id_pudl=1, unit_id_eia=['4343' '4141']
+2022-02-10 15:17:35 [    INFO] pudl.metadata.classes:1439 Recoding plants_entity_eia.sector_id_eia
+2022-02-10 15:17:35 [    INFO] pudl.metadata.classes:1439 Recoding generators_entity_eia.prime_mover_code
+2022-02-10 15:17:35 [    INFO] pudl.metadata.classes:1439 Recoding boilers_entity_eia.prime_mover_code
+Env vars  /tmp/log/perf.log
+read_excel(&lt;_io.FileIO name='/home/sam/box/charmonium.cache/benchmark/.repos/pudl/src/pudl/package_data/glue/mapping_eia923_ferc1.xlsx' mode='rb' closefd=True&gt;, *(), **{'sheet_name': 'plants_output', 'na_values': '', 'keep_default_na': False, 'converters': {'plant_id_pudl': &lt;class 'int'&gt;, 'plant_name_pudl': &lt;class 'str'&gt;, 'utility_id_ferc1': &lt;class 'int'&gt;, 'utility_name_ferc1': &lt;class 'str'&gt;, 'plant_name_ferc1': &lt;class 'str'&gt;, 'plant_id_eia': &lt;class 'int'&gt;, 'plant_name_eia': &lt;class 'str'&gt;, 'utility_name_eia': &lt;class 'str'&gt;, 'utility_id_eia': &lt;class 'int'&gt;}})
+Env vars  /tmp/log/perf.log
+read_excel(&lt;_io.FileIO name='/home/sam/box/charmonium.cache/benchmark/.repos/pudl/src/pudl/package_data/glue/mapping_eia923_ferc1.xlsx' mode='rb' closefd=True&gt;, *(), **{'sheet_name': 'utilities_output', 'na_values': '', 'keep_default_na': False, 'converters': {'utility_id_pudl': &lt;class 'int'&gt;, 'utility_name_pudl': &lt;class 'str'&gt;, 'utility_id_ferc1': &lt;class 'int'&gt;, 'utility_name_ferc1': &lt;class 'str'&gt;, 'utility_id_eia': &lt;class 'int'&gt;, 'utility_name_eia': &lt;class 'str'&gt;}})
+2022-02-10 15:17:36 [ WARNING] pudl.glue.ferc1_eia:804 FERC to EIA glue breaking in plants_eia. There are too many null fields. Check the mapping spreadhseet.
+2022-02-10 15:17:36 [ WARNING] pudl.glue.ferc1_eia:804 FERC to EIA glue breaking in utilities_eia. There are too many null fields. Check the mapping spreadhseet.
+2022-02-10 15:17:36 [    INFO] pudl.glue.eia_epacems:37 grabbing original crosswalk
+2022-02-10 15:17:36 [    INFO] pudl.glue.eia_epacems:77 splitting crosswalk into three normalized tables
+2022-02-10 15:17:38 [    INFO] pudl.load.sqlite:63 Loading coalmine_eia923 into PUDL SQLite DB.
+2022-02-10 15:17:38 [    INFO] pudl.load.sqlite:63 Loading contract_types_eia into PUDL SQLite DB.
+2022-02-10 15:17:38 [    INFO] pudl.load.sqlite:63 Loading energy_sources_eia into PUDL SQLite DB.
+2022-02-10 15:17:38 [    INFO] pudl.load.sqlite:63 Loading ferc_accounts into PUDL SQLite DB.
+2022-02-10 15:17:38 [    INFO] pudl.load.sqlite:63 Loading ferc_depreciation_lines into PUDL SQLite DB.
+2022-02-10 15:17:38 [    INFO] pudl.load.sqlite:63 Loading fuel_transportation_modes_eia into PUDL SQLite DB.
+2022-02-10 15:17:38 [    INFO] pudl.load.sqlite:63 Loading fuel_types_aer_eia into PUDL SQLite DB.
+2022-02-10 15:17:38 [    INFO] pudl.load.sqlite:63 Loading plant_unit_epa into PUDL SQLite DB.
+2022-02-10 15:17:38 [    INFO] pudl.load.sqlite:63 Loading plants_pudl into PUDL SQLite DB.
+2022-02-10 15:17:39 [    INFO] pudl.load.sqlite:63 Loading prime_movers_eia into PUDL SQLite DB.
+2022-02-10 15:17:39 [    INFO] pudl.load.sqlite:63 Loading sector_consolidated_eia into PUDL SQLite DB.
+2022-02-10 15:17:39 [    INFO] pudl.load.sqlite:63 Loading utilities_entity_eia into PUDL SQLite DB.
+2022-02-10 15:17:39 [    INFO] pudl.load.sqlite:63 Loading utilities_pudl into PUDL SQLite DB.
+2022-02-10 15:17:39 [    INFO] pudl.load.sqlite:63 Loading plants_eia into PUDL SQLite DB.
+2022-02-10 15:17:39 [    INFO] pudl.load.sqlite:63 Loading plants_entity_eia into PUDL SQLite DB.
+2022-02-10 15:17:43 [    INFO] pudl.load.sqlite:63 Loading utilities_eia into PUDL SQLite DB.
+2022-02-10 15:17:43 [    INFO] pudl.load.sqlite:63 Loading utilities_eia860 into PUDL SQLite DB.
+2022-02-10 15:17:44 [    INFO] pudl.load.sqlite:63 Loading utilities_ferc1 into PUDL SQLite DB.
+2022-02-10 15:17:44 [    INFO] pudl.load.sqlite:63 Loading utility_plant_assn into PUDL SQLite DB.
+2022-02-10 15:17:44 [    INFO] pudl.load.sqlite:63 Loading assn_plant_id_eia_epa into PUDL SQLite DB.
+2022-02-10 15:17:44 [    INFO] pudl.load.sqlite:63 Loading boilers_entity_eia into PUDL SQLite DB.
+2022-02-10 15:17:44 [    INFO] pudl.load.sqlite:63 Loading fuel_receipts_costs_eia923 into PUDL SQLite DB.
+2022-02-10 15:17:46 [    INFO] pudl.load.sqlite:63 Loading generation_fuel_eia923 into PUDL SQLite DB.
+2022-02-10 15:17:51 [    INFO] pudl.load.sqlite:63 Loading generation_fuel_nuclear_eia923 into PUDL SQLite DB.
+2022-02-10 15:17:51 [    INFO] pudl.load.sqlite:63 Loading generators_entity_eia into PUDL SQLite DB.
+2022-02-10 15:17:52 [    INFO] pudl.load.sqlite:63 Loading plant_in_service_ferc1 into PUDL SQLite DB.
+2022-02-10 15:17:53 [    INFO] pudl.load.sqlite:63 Loading plants_eia860 into PUDL SQLite DB.
+2022-02-10 15:17:54 [    INFO] pudl.load.sqlite:63 Loading plants_ferc1 into PUDL SQLite DB.
+2022-02-10 15:17:54 [    INFO] pudl.load.sqlite:63 Loading purchased_power_ferc1 into PUDL SQLite DB.
+2022-02-10 15:17:55 [    INFO] pudl.load.sqlite:63 Loading assn_gen_eia_unit_epa into PUDL SQLite DB.
+2022-02-10 15:17:55 [    INFO] pudl.load.sqlite:63 Loading boiler_fuel_eia923 into PUDL SQLite DB.
+2022-02-10 15:17:57 [    INFO] pudl.load.sqlite:63 Loading fuel_ferc1 into PUDL SQLite DB.
+2022-02-10 15:17:57 [    INFO] pudl.load.sqlite:63 Loading generation_eia923 into PUDL SQLite DB.
+2022-02-10 15:17:58 [    INFO] pudl.load.sqlite:63 Loading generators_eia860 into PUDL SQLite DB.
+2022-02-10 15:18:04 [    INFO] pudl.load.sqlite:63 Loading plants_hydro_ferc1 into PUDL SQLite DB.
+2022-02-10 15:18:05 [    INFO] pudl.load.sqlite:63 Loading plants_pumped_storage_ferc1 into PUDL SQLite DB.
+2022-02-10 15:18:05 [    INFO] pudl.load.sqlite:63 Loading plants_small_ferc1 into PUDL SQLite DB.
+2022-02-10 15:18:05 [    INFO] pudl.load.sqlite:63 Loading plants_steam_ferc1 into PUDL SQLite DB.
+2022-02-10 15:18:05 [    INFO] pudl.load.sqlite:63 Loading boiler_generator_assn_eia860 into PUDL SQLite DB.
+2022-02-10 15:18:05 [    INFO] pudl.load.sqlite:63 Loading ownership_eia860 into PUDL SQLite DB.
+2022-02-10 15:18:05 [    INFO] pudl.etl:277 Processing EPA CEMS data and writing it to Apache Parquet.
+2022-02-10 15:18:06 [    INFO] pudl.extract.epacems:168 Processing EPA CEMS hourly data for ID-2020
+/home/sam/box/charmonium.cache/benchmark/.repos/pudl/src/pudl/helpers.py:1000: FutureWarning: Using .astype to convert from timezone-aware dtype to timezone-naive dtype is deprecated and will raise in a future version.  Use obj.tz_localize(None) or obj.tz_convert('UTC').tz_localize(None) instead
+  df.astype(non_bool_cols)
+2022-02-10 15:18:13 [    INFO] pudl.etl:292 Processing EPA CEMS took 00:00:07
+</code></pre></td></tr><tr><td>Time (s)</td><td><span>486.7s</span></td><td><span>290.6s</span></td></tr><tr><td>Overhead (s)</td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr><tr><td>Function calls</td><td><details><summary>Show</summary><table><thead><tr><td>name</td><td>hash(args)</td><td>hash(ret)</td><td>hit</td><td>outer</td><td>inner</td><td>hash time</td><td>rest of overhead</td></tr></thead><tbody></tbody></table></details></td><td><details><summary>Show</summary><table><thead><tr><td>name</td><td>hash(args)</td><td>hash(ret)</td><td>hit</td><td>outer</td><td>inner</td><td>hash time</td><td>rest of overhead</td></tr></thead><tbody><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>✅</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>✅</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>✅</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>✅</span></td><td><span>0.1s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.1s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>✅</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>✅</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>✅</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>✅</span></td><td><span>0.1s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.1s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>✅</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>✅</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>✅</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>✅</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>✅</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>✅</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>✅</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>✅</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>✅</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr><tr><td>pudl.read_excel.read_excel2</td><td><code>0</code></td><td><code>0</code></td><td><span>✅</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td><td><span>0.0s</span></td></tr></tbody></table></details></td></tr></tbody></table></details></td></tr></tbody></table></td></tr></tbody></table></div></div></body></html>

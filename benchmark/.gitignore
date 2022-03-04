@@ -5,3 +5,5 @@ __pycache__
 .r-mount
 report.html
 .repos
+.my-venv
+.manual_cache

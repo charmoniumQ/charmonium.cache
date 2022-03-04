@@ -1,11 +1,12 @@
-from typing import List, Optional, Union, Mapping
+from pathlib import Path
+from typing import Sequence, Optional, Union, Mapping
 
 from . import html
 
 
 def html_table(
-    elems: List[List[html.TagLike]],
-    headers: Optional[List[html.TagLike]] = None
+    elems: Sequence[Sequence[html.TagLike]],
+    headers: Optional[Sequence[html.TagLike]] = None
 ) -> html.Tag:
     if headers is not None:
         thead = [html.thead()(html.tr()(*[html.td()(header) for header in headers]))]
@@ -16,8 +17,17 @@ def html_table(
         html.tbody()(*[html.tr()(*[html.td()(elem) for elem in row]) for row in elems]),
     )
 
+def html_list(elements: Sequence[html.TagLike], ordered: bool = False) -> html.Tag:
+    list_factory = html.ol() if ordered else html.ul()
+    return list_factory(*[
+        html.li()(element)
+        for element in elements
+    ])
 
-def highlighted_head(languages: List[str]) -> List[html.Tag]:
+def html_path(path: Path) -> html.Tag:
+    return html.a(href=f"file://{path.resolve()}")(html.code()(str(path)))
+
+def highlighted_head(languages: Sequence[str]) -> Sequence[html.Tag]:
     # for supported langs https://cdnjs.com/libraries/highlight.js
     return [
         html.link(

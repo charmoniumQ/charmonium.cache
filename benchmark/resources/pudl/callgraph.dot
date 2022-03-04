@@ -1,75 +1,25 @@
-> /home/sam/.local/share/virtualenvs/.repos-OcsR-W1w/lib/python3.9/site-packages/pyan/main.py(3)<module>()
--> """
-(Pdb) (Pdb) (Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) 
+digraph G {
+    graph [rankdir=TB, clusterrank="local"];
+    subgraph cluster_G {
+
+        graph [style="filled,rounded", fillcolor="#80808018", label=""];
+        pudl__etl [label="pudl.etl", style="filled", fillcolor="#ffffffb2", fontcolor="#000000", group="0"];
+        subgraph cluster_pudl__etl {
+
+            graph [style="filled,rounded", fillcolor="#80808018", label="pudl.etl"];
+            pudl__etl___etl_eia [label="_etl_eia", style="filled", fillcolor="#ff9999b2", fontcolor="#000000", group="0"];
+            pudl__etl___etl_ferc1 [label="_etl_ferc1", style="filled", fillcolor="#ff9999b2", fontcolor="#000000", group="0"];
+            pudl__etl___etl_glue [label="_etl_glue", style="filled", fillcolor="#ff9999b2", fontcolor="#000000", group="0"];
+            pudl__etl___read_static_tables_eia [label="_read_static_tables_eia", style="filled", fillcolor="#ff9999b2", fontcolor="#000000", group="0"];
+            pudl__etl___read_static_tables_ferc1 [label="_read_static_tables_ferc1", style="filled", fillcolor="#ff9999b2", fontcolor="#000000", group="0"];
+            pudl__etl__etl [label="etl", style="filled", fillcolor="#ff9999b2", fontcolor="#000000", group="0"];
+            pudl__etl__etl_epacems [label="etl_epacems", style="filled", fillcolor="#ff9999b2", fontcolor="#000000", group="0"];
+        }
+    }
+        pudl__etl___etl_eia -> pudl__etl___read_static_tables_eia [style="solid",  color="#000000"];
+        pudl__etl___etl_ferc1 -> pudl__etl___read_static_tables_ferc1 [style="solid",  color="#000000"];
+        pudl__etl__etl -> pudl__etl___etl_ferc1 [style="solid",  color="#000000"];
+        pudl__etl__etl -> pudl__etl___etl_eia [style="solid",  color="#000000"];
+        pudl__etl__etl -> pudl__etl__etl_epacems [style="solid",  color="#000000"];
+        pudl__etl__etl -> pudl__etl___etl_glue [style="solid",  color="#000000"];
+    }
