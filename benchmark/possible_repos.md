@@ -103,7 +103,7 @@ Repo mining:
     - http://boa.cs.iastate.edu/
     - https://grep.app/search
   - Other repos:
-    - https://acsl.net
+    - https://ascl.net
 - Requirements for pipeline:
   - Language is 90% Python
   - >15 commits

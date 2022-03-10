@@ -6,16 +6,22 @@ import datetime
 import json
 import itertools
 import logging
-import subprocess
+import os
 from pathlib import Path
+import re
 import pickle
+import signal
 import shlex
 import shutil
 import subprocess
 import sys
 import tempfile
-from typing import Any, Dict, List, Mapping, Tuple, Type, Optional, Sequence, cast
+from typing import Any, Dict, List, Mapping, Tuple, Type, Optional, Sequence, cast, List
+import types
 import warnings
+import xml.etree.ElementTree
+from benchexec import container # type: ignore
+from benchexec.runexecutor import RunExecutor # type: ignore
 
 import charmonium.time_block as ch_time_block
 #from charmonium.cache import MemoizedGroup, memoize
@@ -24,25 +30,8 @@ from tqdm import tqdm  # type: ignore
 
 from .environment import Environment, EnvironmentChooser
 from .repo import Repo, CommitChooser
-from .util import merge
 
-ROOT = Path(__file__).parent.parent
-
-
-# group = MemoizedGroup(
-#     size="4GiB",
-#     fine_grain_persistence=True,
-# )
-
-# hash_logger = logging.getLogger("charmonium.freeze")
-# hash_logger.setLevel(logging.DEBUG)
-# hash_logger.addHandler(logging.FileHandler("freeze.log"))
-# hash_logger.propagate = False
-
-# ops_logger = logging.getLogger("charmonium.cache.ops")
-# ops_logger.setLevel(logging.DEBUG)
-# ops_logger.addHandler(logging.FileHandler("ops.log"))
-# ops_logger.propagate = False
+ROOT = Path(__file__).resolve().parent.parent
 
 @dataclass
 class FuncCallProfile:
@@ -58,9 +47,9 @@ class FuncCallProfile:
     obj_load: float = 0
     deserialize: float = 0
 
-    @classmethod
-    def empty(Class: Type[FuncCallProfile]) -> FuncCallProfile:
-        return Class(
+    @staticmethod
+    def empty() -> FuncCallProfile:
+        return FuncCallProfile(
             name="unknown",
             args=0,
             ret=0,
@@ -69,93 +58,11 @@ class FuncCallProfile:
         )
 
     @property
-    def misc_hit_overhead(self) -> float:
-        if not self.hit:
-            raise ValueError("Can't compute hit overhead for a miss.")
-        else:
-            return self.outer_function - sum(
-                [self.hash, self.obj_load, self.deserialize]
-            )
-
-    @property
-    def misc_miss_overhead(self) -> float:
-        if not self.hit:
-            raise ValueError("Can't compute miss overhead for a hit.")
-        else:
-            return self.outer_function - sum(
-                [self.hash, self.inner_function, self.serialize, self.obj_store]
-            )
-
-    @property
     def total_overhead(self) -> float:
         if self.hit:
             return self.outer_function
         else:
             return self.outer_function - self.inner_function
-
-
-@dataclass
-class ExecutionProfile:
-    func_calls: Sequence[FuncCallProfile]
-    cpu_time: float
-    wall_time: float
-    output: str
-    log: str
-    success: bool
-    index_read: float = 0
-    index_write: float = 0
-    cascading_delete: float = 0
-    evict: float = 0
-    remove_orphan: float = 0
-    empty: bool = False
-    hash: float = 0
-
-    @classmethod
-    def create_empty(Class: Type[ExecutionProfile]) -> ExecutionProfile:
-        return Class(
-            func_calls=[],
-            cpu_time=0,
-            wall_time=0,
-            output="",
-            log="",
-            success=False,
-            empty=True,
-        )
-
-    @property
-    def function_overhead(self) -> float:
-        return sum([func_call.total_overhead for func_call in self.func_calls])
-
-    @property
-    def process_overhead(self) -> float:
-        return sum(
-            [
-                self.index_read,
-                self.index_write,
-                self.cascading_delete,
-                self.evict,
-                self.remove_orphan,
-            ]
-        )
-
-def parse_unmemoized_log(log_path: Path) -> Tuple[Sequence[FuncCallProfile], Mapping[str, Any]]:
-    lst = []
-    with (log_path).open() as log:
-        for line in log:
-            record = json.loads(line)
-            lst.append(
-                FuncCallProfile(
-                    name=record["name"],
-                    args=record["args"],
-                    ret=record["ret"],
-                    hit=False,
-                    hash=record["hash"],
-                    outer_function=record["outer_function"],
-                    inner_function=record["inner_function"],
-                )
-            )
-    return lst, {}
-
 
 def parse_memoized_log(log_path: Path) -> Tuple[Sequence[FuncCallProfile], Mapping[str, Any]]:
     calls: Mapping[int, FuncCallProfile] = collections.defaultdict(
@@ -178,54 +85,122 @@ def parse_memoized_log(log_path: Path) -> Tuple[Sequence[FuncCallProfile], Mappi
                 process_kwargs[record["event"]] += record["duration"]
             else:
                 warnings.warn(f"Unknown record {record} on line {line_no} of {perf_log}.")
-    return list(calls.values()), process_kwargs
+    return list(calls.values()), dict(process_kwargs)
 
+@dataclass
+class RunexecStats:
+    exitcode: int
+    walltime: float
+    cputime: float
+    memory: int
+    blkio_read: Optional[int]
+    blkio_write: Optional[int]
+    cpuenergy: Optional[float]
+    termination_reason: Optional[str]
 
-log_dir = Path("/tmp/log")
+    @staticmethod
+    def create(result: Mapping[str, Any]) -> RunexecStats:
+        keys = set("exitcode walltime cputime memory blkio_read blkio_write cpuenergy".split(" "))
+        attrs = {
+            key: result.get(key, None)
+            for key in keys
+        }
+        attrs["termination_reason"] = result.get("terminationreason", None)
+        return RunexecStats(**attrs)
 
-@ch_time_block.decor(print_start=False)
+@dataclass
+class ExecutionProfile:
+    output: str
+    log: str
+    success: bool
+    command: Sequence[str]
+    func_calls: Sequence[FuncCallProfile]
+    runexec: RunexecStats
+    internal_stats: Mapping[str, float]
+    warnings: Sequence[str]
+
+tmp_dir = ROOT / ".tmp"
+limits = {
+    "softtimelimit": 120,
+    "hardtimelimit": 130,
+    "memlimit": 2**28,
+}
+
+# @ch_time_block.decor(print_start=False)
 def run_once(
         repo: Repo,
         environment: Environment,
         cmd: Sequence[str],
         memoize: bool
 ) -> ExecutionProfile:
-    if log_dir.exists():
-        shutil.rmtree(log_dir)
-    log_dir.mkdir(parents=True)
-    perf_log = log_dir / "perf.log"
-    proc = environment.run(
-        cmd,
-        cwd=repo.dir,
-        env_override={
+    warnings = []
+    perf_log = tmp_dir / "perf.log"
+    junit_xml_log = tmp_dir / "junit.xml"
+    output_log = tmp_dir / "output.log"
+    cmd, env, cwd = environment.run(
+        [
+            "python", "-m", "pytest", "--quiet", str(repo.dir), "--junitxml", str(junit_xml_log),
+        ],
+        {
             "CHARMONIUM_CACHE_DISABLE": "" if memoize else "1",
             "CHARMONIUM_CACHE_PERF_LOG": str(perf_log),
         },
+        tmp_dir,
     )
-    sys.stderr.buffer.write(proc.stderr)
-    # times = psutil.Process().cpu_times(proc.pid)
+    combined_cmd = ["env", "--chdir", str(cwd), *[key + "=" + val for key, val in env.items()], *cmd]
+    runexecutor = RunExecutor(
+        dir_modes={
+            "/": container.DIR_READ_ONLY,
+            # TODO: Ideally, I would use `--overlay-dir` with tmp_dir instead of --full--access-dir.
+            # See https://github.com/sosy-lab/benchexec/issues/815
+            "/home": container.DIR_OVERLAY,
+            str(tmp_dir): container.DIR_FULL_ACCESS,
+            str(repo.dir): container.DIR_FULL_ACCESS,
+        },
+    )
+    def signal_handler_kill(signum: signal.Signals, _: types.FrameType) -> None:
+        runexecutor.stop()
+    signal.signal(signal.SIGTERM, signal_handler_kill)
+    signal.signal(signal.SIGQUIT, signal_handler_kill)
+    signal.signal(signal.SIGINT, signal_handler_kill)
+    runexec = RunexecStats.create(runexecutor.execute_run(
+        args=combined_cmd,
+        # environments={
+        #     "keepEnv": {},
+        # },
+        workingDir=cwd,
+        output_filename=output_log,
+        **limits
+    ))
+    if runexec.termination_reason:
+        warnings.append(f"Terminated for {runexec.termination_reason} out with {limits=}")
     if perf_log.exists():
         calls, kwargs = parse_memoized_log(perf_log)
     else:
-        # no profiling informatoin
+        if memoize:
+            warnings.append("No perf log produced, despite enabling memoization.")
+        # no profiling information
         calls = []
         kwargs = {}
-
-    log_path = repo.dir / "log"
-    log = log_path.read_text() if log_path.exists() else ""
-    log += proc.stderr.decode() + proc.stdout.decode()
-
-    output_path = repo.dir / "output"
-    output = output_path.read_text() if output_path.exists() else ""
-
+    if junit_xml_log.exists():
+        output_xml = xml.etree.ElementTree.parse(junit_xml_log)
+        output: str = json.dumps(dict(sorted([
+            (key, val)
+            for key, val in output_xml.getroot().attrib.items()
+            if key != "time"
+        ])))
+    else:
+        warnings.append("No junit xml log produced, despite passing --junitxml.")
+        output = ""
     return ExecutionProfile(
-        func_calls=calls,
-        success=proc.returncode == 0,
-        wall_time=proc.wall_time,
-        cpu_time=proc.cpu_time,
-        log=log,
         output=output,
-        **kwargs,
+        command=cmd,
+        log=output_log.read_text() if output_log.exists() else "",
+        success=True,
+        func_calls=calls,
+        internal_stats=kwargs,
+        runexec=runexec,
+        warnings=warnings,
     )
 
 @dataclass
@@ -251,23 +226,20 @@ def run_many(
     repo.clean()
 
     if memoize:
-        cache_dir = repo.dir / ".cache"
-        if cache_dir.exists():
-            shutil.rmtree(cache_dir)
-        conftest = repo.dir / "conftest.py"
-        conftest.touch(exist_ok=True)
-        conftest.write_text("\n\n".join([
-            conftest.read_text(),
-            Path("that_conftest.py").read_text(),
-        ]))
+        if tmp_dir.exists():
+            shutil.rmtree(tmp_dir)
+        tmp_dir.mkdir()
+    conftest_dest = repo.dir / "conftest.py"
+    if conftest_dest.exists():
+        conftest_dest.unlink()
+    shutil.copy(Path("that_conftest.py"), conftest_dest)
 
     executions = []
-    for commit in commits:
+    for commit in tqdm(commits, total=len(commits), desc="Commits"):
         execution = run_once(repo, environment, command, memoize)
         executions.append(execution)
-        if short_circuit and not execution.success:
+        if short_circuit and execution.runexec.termination_reason:
             break
-
     return executions
 
 manual_cache = Path(".manual_cache")
@@ -286,61 +258,70 @@ def get_repo_result(
         cache_dest.write_bytes(pickle.dumps(ret))
         return ret
 
-@ch_time_block.decor(print_start=False)
+#@ch_time_block.decor(print_start=False)
 def get_repo_result2(
         repo: Repo,
         commit_chooser: CommitChooser,
         environment_chooser: EnvironmentChooser,
         command: Sequence[str],
 ) -> RepoResult:
+    warnings = []
     print(repo.name)
-    with ch_time_block.ctx("repo.setup()", print_start=False):
+    # with ch_time_block.ctx("repo.setup()", print_start=False):
+    if True:
         repo.setup()
     environment = environment_chooser.choose(repo)
     if environment is None:
-        warning = f"{environment_chooser!s} could not choose an environment."
-        warnings.warn(warning)
+        warnings.append(f"{environment_chooser!s} could not choose an environment.")
         return RepoResult(
             repo=repo,
             environment=environment,
             command=command,
             commit_results=[],
-            warnings=[warning],
+            warnings=warnings,
         )
     else:
         try:
-            with ch_time_block.ctx("environment.setup()", print_start=False):
+            # with ch_time_block.ctx("environment.setup()"):
+            if True:
                 environment.setup()
                 packages = ["https://github.com/charmoniumQ/charmonium.cache/tarball/main"]
-                proc = environment.run(
+                command, env, cwd = environment.run(
                     ["python", "-c", "import pytest"],
-                    cwd=None,
+                    os.environ,
+                    Path(),
+                )
+                proc = subprocess.run(
+                    command,
+                    env=env,
+                    cwd=cwd,
+                    check=False,
+                    capture_output=True,
                 )
                 if proc.returncode != 0:
                     packages.append("pytest")
                 environment.install(packages)
         except subprocess.CalledProcessError as e:
-            warning = "\n".join([
+            warnings.append("\n".join([
                 f"{environment!s} could not setup {repo!s}.",
-                "$ " + shlex.join(e.cmd),
-                str(e.stdout),
-                str(e.stderr),
-            ])
-            warnings.warn(warning)
+                str(e),
+                e.stdout.decode() if isinstance(e.stdout, bytes) else "No stdout",
+                e.stderr.decode() if isinstance(e.stderr, bytes) else "No stderr",
+            ]))
             return RepoResult(
                 repo=repo,
                 environment=None,
                 command=command,
                 commit_results=[],
-                warnings=[warning],
+                warnings=warnings,
             )
         else:
             commits = commit_chooser.choose(repo)
-
-            orig_executions = run_many(repo, environment, commits, command, memoize=False, short_circuit=False)
-            #working_commits = commits[:len(orig_executions)]
-            memo_executions = run_many(repo, environment, commits, command, memoize=True, short_circuit=False)
-
+            if len(commits) < 2:
+                warnings.append(f"Only {len(commits)} commit.")
+            orig_executions = run_many(repo, environment, commits, command, memoize=False, short_circuit=True)
+            working_commits = commits[:len(orig_executions)]
+            memo_executions = run_many(repo, environment, commits, command, memoize=True, short_circuit=True)
             commit_results = [
                 CommitResult.from_commit(repo, commit, {
                     "orig": orig_execution,
@@ -348,13 +329,12 @@ def get_repo_result2(
                 })
                 for commit, orig_execution, memo_execution in zip(commits, orig_executions, memo_executions)
             ]
-
             return RepoResult(
                 repo=repo,
                 environment=environment,
                 command=command,
                 commit_results=commit_results,
-                warnings=[],
+                warnings=warnings,
             )
 
 @dataclass
@@ -368,6 +348,7 @@ class RepoResult:
 def run_experiment(
         repos: Sequence[Tuple[Repo, CommitChooser, EnvironmentChooser, Sequence[str]]],
 ) -> Sequence[RepoResult]:
+    repos = repos[:250]
     return [
         get_repo_result(*repo_info)
         for repo_info in tqdm(repos, total=len(repos), desc="Repos")

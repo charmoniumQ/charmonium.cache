@@ -20,6 +20,8 @@ toml = "^0.10.2"
 "charmonium.time-block" = "^0.3.0"
 numpy = "^1.22.2"
 scipy = "^1.8.0"
+matplotlib = "^3.5.1"
+BenchExec = "^3.11"
 
 [tool.poetry.dev-dependencies]
 mypy = "^0.910"

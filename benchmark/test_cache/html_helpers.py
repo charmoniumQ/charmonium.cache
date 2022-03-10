@@ -1,5 +1,6 @@
 from pathlib import Path
 from typing import Sequence, Optional, Union, Mapping
+import itertools
 
 from . import html
 
@@ -46,9 +47,9 @@ def highlighted_head(languages: Sequence[str]) -> Sequence[html.Tag]:
         html.script()("hljs.highlightAll();")
     ]
 
-def css_string(declarations: Mapping[str, str]) -> str:
+def css_string(**declarations: str) -> str:
     return ";".join([
-        f"{property}: {value}"
+        f"{property.replace('_', '-')}: {value}"
         for property, value in declarations.items()
     ])
 
@@ -56,11 +57,11 @@ def highlighted_code(lang: str, code: str, width: int = 60) -> html.Tag:
     # see https://highlightjs.org/usage/
     return html.pre()(html.code(**{
         "class": f"language-{lang}",
-        "style": css_string({
-            "max-width": f"{width}ch",
-            "max-height": "20vw",
-            "resize": "both",
-        }),
+        "style": css_string(
+            max_width=f"{width}ch",
+            max_height="20vw",
+            resize="both",
+        ),
     })(code))
 
 def collapsed(summary: html.TagLike, *details: html.TagLike) -> html.Tag:
@@ -77,3 +78,12 @@ def disp_bool(val: bool) -> html.Tag:
             True: "✅",
         }[val]
     )
+
+def br_join(lines: Sequence[html.TagLike]) -> html.Tag:
+    return html.span()(*itertools.chain.from_iterable(
+        (html.span()(line) if isinstance(line, str) else line, html.br()())
+        for line in lines
+    ))
+
+def small(text: str) -> html.Tag:
+    return html.span(style=css_string(font_size="8pt"))(text)

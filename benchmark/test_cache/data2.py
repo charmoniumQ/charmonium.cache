@@ -8,8 +8,16 @@ from .util import BenchmarkError
 from .repo import Repo, GitHubRepo, CommitChooser, RecentCommitChooser
 from .environment import EnvironmentChooser, SmartEnvironmentChooser
 
-data_path = Path("data.csv")
+data_path = Path("repos.csv")
 venv_location = Path(".my-venv/")
+
+denylist = {
+    "persefone",
+    "celery",
+    "python-lego-wireless-protocol",
+    "onnx-caffe2",
+    "enhancesa",
+}
 
 def get_data() -> Sequence[Tuple[Repo, CommitChooser, EnvironmentChooser, Sequence[str]]]:
     results = []
@@ -20,8 +28,8 @@ def get_data() -> Sequence[Tuple[Repo, CommitChooser, EnvironmentChooser, Sequen
             if not line.startswith("#")
         )))
     random.seed(0)
-    subdata = random.sample(data, 20)
-    for row in subdata:
+    random.shuffle(data)
+    for row in data:
         url = row["Project_URL"]
         commit = row["Project_Hash"]
         if True:
@@ -35,5 +43,12 @@ def get_data() -> Sequence[Tuple[Repo, CommitChooser, EnvironmentChooser, Sequen
                     RecentCommitChooser(commit, n=10),
                     SmartEnvironmentChooser(venv_location),
                     ["python", "-m", "pytest", "--quiet"],
+                    # TODO: Use benchexec
+                    # TODO: Print report
                 ))
+    results = [
+        result
+        for result in results
+        if result[0].name not in denylist
+    ]
     return results

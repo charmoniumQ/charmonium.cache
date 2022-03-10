@@ -1,16 +1,29 @@
-FROM python:3.8-slim
+FROM debian:buster-slim
 
-RUN curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -
+RUN apt-get update
 
-RUN mkdir test
-WORKDIR test
-RUN /root/.poetry/bin/poetry new .
+RUN apt-get -y install \
+		software-properties-common \
+		ca-certificates \
+		gnupg \
+		curl \
+		git-core \
+&& true
 
-# This should work
-RUN /root/.poetry/bin/poetry run true
+ENV PATH=/miniconda/bin:${PATH}
 
-RUN mkdir test/venv
-RUN python -m venv venv
+ARG CONDA_VER=latest
+ARG OS_TYPE=x86_64
+RUN \
+	curl -L "http://repo.continuum.io/miniconda/Miniconda3-${CONDA_VER}-Linux-${OS_TYPE}.sh" > Miniconda3.sh && \
+	bash Miniconda3.sh -p /miniconda -b && \
+	rm Miniconda3.sh && \
+	conda update -y conda && \
+	conda init && \
+	conda install mamba -n base -c conda-forge && \
+	conda run pip install poetry pipenv && \
+true
 
-# This should fail
-RUN /root/.poetry/bin/poetry run true
+COPY . /app
+WORKDIR /app
+RUN conda run poetry install

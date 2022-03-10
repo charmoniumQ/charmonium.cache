@@ -9,9 +9,9 @@ import sys
 from typing import List, Optional, Protocol, Tuple, Callable, cast
 from .util import BenchmarkError
 
-ROOT = Path(__file__).parent.parent
+ROOT = Path(__file__).parent.parent.resolve()
 
-CACHE_PATH = ROOT / ".repos"
+REPO_PATH = ROOT / ".repos"
 
 
 class Repo(ABC):
@@ -66,7 +66,9 @@ class Repo(ABC):
         if self.patch_func:
             self.patch_func(self)
 
-    def setup(self) -> None:
+    def setup(self, parent: Optional[Path] = None) -> None:
+        if parent is not None:
+            self.dir = parent / self.dir
         self._setup()
         self.apply_patch()
         if self.setup_func:
@@ -99,7 +101,7 @@ class GitRepo(Repo):
         super().__init__(
             name=name,
             url=url,
-            dir=CACHE_PATH / name,
+            dir=REPO_PATH / name,
             display_url=display_url,
             patch=patch,
             setup_func=setup_func,
@@ -112,7 +114,21 @@ class GitRepo(Repo):
     def _setup(self) -> None:
         self.dir.mkdir(exist_ok=True, parents=True)
         if not list(self.dir.iterdir()):
-            subprocess.run(["git", "clone", "--recursive", self.url, "."], cwd=self.dir, check=True, capture_output=True)
+            try:
+                subprocess.run(
+                    ["git", "clone", "--recursive", self.url, "."],
+                    cwd=self.dir,
+                    check=True,
+                    capture_output=True,
+                )
+            except subprocess.CalledProcessError as e:
+                if e.stdout:
+                    sys.stdout.buffer.write(e.stdout)
+                if e.stderr:
+                    sys.stderr.buffer.write(e.stderr)
+                if e.output:
+                    sys.stdout.buffer.write(e.output)
+                raise e
         else:
             ref = subprocess.run(
                 ["git", "symbolic-ref", "refs/remotes/origin/HEAD"],
@@ -218,9 +234,11 @@ class GitHubRepo(GitRepo):
             self,
             url: str
     ) -> None:
+        if url.endswith(".git"):
+            url = url[:-4]
         parsed_url = github_pattern.match(url)
-        if not parsed_url or parsed_url.group("name").endswith(".git"):
-            raise BenchmarkError(f"{url!r} is does not match {github_pattern!r} or ends with '.git'.")
+        if not parsed_url:
+            raise BenchmarkError(f"{url!r} is does not match {github_pattern!r}.")
         super().__init__(
             name=parsed_url.group("name"),
             url=url,
@@ -248,7 +266,7 @@ class RecentCommitChooser(CommitChooser):
             )
             n = self.n
             cmd = ["git", "log", "--pretty=format:%H", "HEAD", f"^HEAD~{n - 1}"]
-            while True:
+            while n > 0:
                 commits_proc = subprocess.run(
                     cmd,
                     cwd=repo.dir,
@@ -267,7 +285,9 @@ class RecentCommitChooser(CommitChooser):
                         )
                 else:
                     break
-            commits = commits_proc.stdout.strip().split()[::-1]
+            else:
+                return [self.seed]
+            commits = commits_proc.stdout.strip().split()[:n][:-1]
             return [*commits, self.seed]
         else:
             raise BenchmarkError(f"{self.__class__.__name__} doesn't know how to deal with {type(repo).__name__} as in {repo}.")
