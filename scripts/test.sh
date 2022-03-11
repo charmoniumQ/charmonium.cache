@@ -2,8 +2,9 @@
 
 cd "$(dirname "${0}")/.."
 
-if [ -z "${POETRY_ACTIVE}" ]; then
-	exec nix-shell --run "${0}"
+if [ -z "${VIRTUAL_ENV}" ]; then
+	echo "Run with Nix or Poetry"
+	exit 1
 fi
 
 check=${check:-}
