@@ -15,9 +15,9 @@ charmonium.cache
 .. image:: https://img.shields.io/github/stars/charmoniumQ/charmonium.cache?style=social
    :alt: GitHub stars
    :target: https://github.com/chamroniumQ/charmonium.cache
-.. image:: https://github.com/chamroniumQ/charmonium.cache/actions/workflows/test/badge.svg
+.. image:: https://github.com/chamroniumQ/charmonium.cache/actions/workflows/main.yaml/badge.svg
    :alt: CI status
-   :target: https://github.com/chamroniumQ/charmonium.cache//actions/workflows/test
+   :target: https://github.com/chamroniumQ/charmonium.cache//actions/workflows/main.yaml
 .. image:: https://img.shields.io/github/last-commit/charmoniumQ/charmonium.determ_hash
    :alt: GitHub last commit
    :target: https://github.com/chamroniumQ/charmonium.cache/commits
