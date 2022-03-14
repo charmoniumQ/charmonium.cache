@@ -12,7 +12,7 @@ charmonium.cache
    :alt: PyPI License
 .. image:: https://img.shields.io/pypi/pyversions/charmonium.cache
    :alt: Python Versions
-.. image:: https://img.shields.io/github/stars/chamroniumQ/charmonium.cache?style=social
+.. image:: https://img.shields.io/github/stars/charmoniumQ/charmonium.cache?style=social
    :alt: GitHub stars
    :target: https://github.com/chamroniumQ/charmonium.cache
 .. image:: https://github.com/chamroniumQ/charmonium.cache/actions/workflows/test/badge.svg

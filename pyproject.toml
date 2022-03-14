@@ -5,7 +5,7 @@ description = "Provides a decorator for caching a function between subsequent pr
 authors = ["Samuel Grayson <sam+dev@samgrayson.me>"]
 license = "MIT"
 readme = "README.rst"
-repository = "https://github.com/chamroniumQ/charmonium.cache.git"
+repository = "https://github.com/chamroniumQ/charmonium.cache"
 packages = [
     { include = "charmonium" },
 ]
