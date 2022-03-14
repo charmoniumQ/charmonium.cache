@@ -1,0 +1,21 @@
+{
+  "cookiecutter": {
+    "repo_name": "charmonium.cache",
+    "package_name": "charmonium.cache",
+    "description": "Provides a decorator for caching a function between subsequent processes.",
+    "author_name": "Samuel Grayson",
+    "author_email": "sam+dev@samgrayson.me",
+    "license": "MIT",
+    "__year": "2022",
+    "repo_user": "chamroniumQ",
+    "repo_url": "https://github.com/chamroniumQ/charmonium.cache.git",
+    "version": "1.2.6",
+    "keywords": "cache memoize decorator",
+    "trove_intended_audience": "Intended Audience :: Science/Research,Intended Audience :: Developers",
+    "trove_license": "License :: OSI Approved :: MIT License",
+    "trove_topics": "Topic :: Scientific/Engineering,Topic :: Software Development :: Libraries :: Python Modules",
+    "trove_classifiers": "",
+    "nix_dependencies": "pkgs.nodePackages.pyright"
+  },
+  "comment": "This repository was created from a template in <https://github.com/charmoniumQ/sams-cookiecutter-pypackage.git> with these options. Use `cookiecutter gh:charmoniumQ/sams-cookiecutter-pypackage.git --output-dir . --overwrite-if-exists --reply --replay-file cookiecutter_replay.json` to regenerate."
+}

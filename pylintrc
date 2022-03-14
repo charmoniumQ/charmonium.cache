@@ -67,9 +67,10 @@ disable=
 	# We have black, so I won't worry about this
 	line-too-long,
     bad-continuation,
+    wrong-import-position,
 
     # We have isort, so don't worry about this
-    wrong-import-position,
+    wrong-import-order,    
 
     # We have mypy, so don't worry about this
     no-member,
@@ -90,9 +91,16 @@ disable=
     no-else-raise,
     no-else-return,
     no-else-continue,
+    no-else-break,
 
     # `from .module import blah as blah` is needed to make pyright know that blah is exported
     useless-import-alias,
+
+    # In many cases, using the platform default makes sense.
+    unspecified-encoding,
+
+    # I'm using `if logger.isEnabledFor(...)`, so it is actually lazy.
+    logging-not-lazy,
 
     missing-docstring
 

@@ -1,30 +1,130 @@
 [tool.poetry]
 name = "charmonium.cache"
 version = "1.2.6"
-description = "Provides a decorator for caching a function and an equivalent command-line util."
+description = "Provides a decorator for caching a function between subsequent processes."
 authors = ["Samuel Grayson <sam+dev@samgrayson.me>"]
-license = "MPL-2.0"
-readme = 'README.rst'
-repository = "https://github.com/charmoniumQ/charmonium.cache.git"
+license = "MIT"
+readme = "README.rst"
+repository = "https://github.com/chamroniumQ/charmonium.cache.git"
 packages = [
     { include = "charmonium" },
 ]
 documentation = "https://charmoniumq.github.io/charmonium.cache/"
 keywords = ["cache", "memoize", "decorator"]
 classifiers = [
-			"Development Status :: 4 - Beta",
-			"Operating System :: MacOS",
-			"Operating System :: Microsoft :: Windows",
-			"Operating System :: POSIX :: Linux",
-			"Intended Audience :: Developers",
-			"Intended Audience :: Science/Research",
-			"Natural Language :: English",
-			"Topic :: Scientific/Engineering",
-			"Topic :: Software Development :: Libraries",
+	"Operating System :: OS Independent",
+	"Typing :: Typed",
+	"Natural Language :: English",
+	"Development Status :: 5 - Production/Stable",
+	"License :: OSI Approved :: MIT License",
+	"Intended Audience :: Science/Research",
+	"Intended Audience :: Developers",
+	"Topic :: Scientific/Engineering",
+	"Topic :: Software Development :: Libraries :: Python Modules",
 ]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.isort]
+profile = "black"
+
+[tool.pytest.ini_options]
+addopts = "--quiet --numprocesses=auto --doctest-modules --doctest-glob='*.rst' --ignore=benchmark"
+
+[tool.coverage.run]
+branch = true
+data_file = "build/.coverage"
+
+[tool.coverage.html]
+directory = "build/htmlcov"
+
+[tool.coverage.report]
+# Regexes for lines to exclude from consideration
+exclude_lines = [
+    'pragma: no cover',
+    'def __repr__',
+    'if self\.debug',
+    'raise AssertionError',
+    'raise NotImplementedError',
+    'if False:',
+    'if __name__ == .__main__.:',
+	'if TYPE_CHECKING',
+    '@(abc\.)?abstractmethod',
+    '\w*\.\.\.$',
+    '\w*pass$',
+]
+
+# [tool.pylint]
+# Too long for inclusion here
+# see pylintrc
+
+[tool.mypy]
+strict = true
+pretty = true
+error_summary = true
+color_output = true
+#mypy_path = stubs
+
+[tool.bump2version]
+current_version = "1.2.6"
+commit = true
+tag = true
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+envlist = py{37,38,39,310}
+# Make sure to install the Python versions listed here in the Nix flake.
+isolated_build = True
+
+[testenv]
+whitelist_externals = poetry
+skip_install = true
+commands =
+    poetry install
+    {toxinidir}/script.py per-env-tests
+"""
+
+[tool.black]
+target-version = ["py38"]
 
 [tool.poetry.scripts]
 cache = "charmonium.cache._cli:main"
+
+[tool.poetry.dev-dependencies]
+autoimport = "^0.7.5"
+isort = "^5.10.0"
+black = "^21.10b0"
+pylint = "^2.11.1"
+mypy = "^0.910"
+pytest = "^6.2.5"
+pytest-xdist = "^2.4.0"
+pytest-cov = "^3.0.0"
+coverage = "^6.1.2"
+tox = "^3.24.4"
+radon = "^5.1.0"
+twine = "^3.5.0"
+proselint = "^0.13.0"
+rstcheck = "^3.3.1"
+bump2version = "^1.0.1"
+"charmonium.async-subprocess" = "^0.1.7"
+typer = "^0.4.0"
+termcolor = "^1.1.0"
+typing-extensions = "^4.1.1"
+ipython = "^7.29.0"
+ipdb = "^0.13.9"
+codecov = "^2.1.4"
+sphinx = "^3.1.0"
+pytest-assume = "^2.4.2"
+sphinx-autodoc-typehints = "^1.12.0"
+sphinxcontrib-spelling = "^7.1.0"
+cloudpickle = "^1.6.0"
+dask = {extras = ["bag"], version = "^2021.4.1"}
+gitchangelog = "^3.0.4"
+numpy = "^1.20.3"
+"charmonium.time-block" = "^0.3.0"
 
 [tool.poetry.dependencies]
 # Note that versions <3.7 cannot be supported because they do not have "delayed evaluation of type annotations."
@@ -36,37 +136,3 @@ attrs = "^20.3.0"
 "charmonium.determ-hash" = "^0.2.0"
 "charmonium.freeze" = "^0.5.2"
 #{git = "https://github.com/charmoniumQ/charmonium.freeze", rev = "main"}
-
-[tool.poetry.dev-dependencies]
-isort = "^4.3.21"
-black = "^19.10b0"
-pylint = "^2.5.2"
-pylint-exit = "^1.2.0"
-pytest = "^5.4.1"
-pytest-cov = "^2.10.0"
-coverage = "^5.1"
-codecov = "^2.1.4"
-sphinx = "^3.1.0"
-tox = "^3.15.2"
-twine = "^3.1.1"
-mypy = "^0.812"
-pytest-assume = "^2.4.2"
-pytest-parallel = "^0.1.0"
-sphinx-autodoc-typehints = "^1.12.0"
-sphinxcontrib-spelling = "^7.1.0"
-radon = "^4.5.0"
-cloudpickle = "^1.6.0"
-autoimport = "^0.7.0"
-dask = {extras = ["bag"], version = "^2021.4.1"}
-gitchangelog = "^3.0.4"
-bump2version = "^1.0.1"
-numpy = "^1.20.3"
-ipython = "^7.24.0"
-"charmonium.time-block" = "^0.3.0"
-
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
-
-[tool.black]
-target-version = ["py38"]

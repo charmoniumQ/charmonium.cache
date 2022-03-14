@@ -1,44 +1,75 @@
-================
+==========================
 charmonium.cache
-================
+==========================
 
-.. image: https://img.shields.io/pypi/dm/charmonium.cache
+.. image:: https://img.shields.io/pypi/v/charmonium.cache
+   :alt: PyPI Package
+   :target: https://pypi.org/project/charmonium.cache
+
+.. image:: https://img.shields.io/pypi/dm/charmonium.cache
    :alt: PyPI Downloads
-.. image: https://img.shields.io/pypi/l/charmonium.cache
-   :alt: PyPI Downloads
-.. image: https://img.shields.io/pypi/pyversions/charmonium.cache
-   :alt: Python versions
-.. image: https://img.shields.io/github/stars/charmoniumQ/charmonium.cache?style=social
+   :target: https://pypi.org/project/charmonium.cache
+
+.. image:: https://img.shields.io/pypi/l/charmonium.cache
+   :alt: PyPI License
+
+.. image:: https://img.shields.io/pypi/pyversions/charmonium.cache
+   :alt: Python Versions
+
+.. image:: https://img.shields.io/github/stars/chamroniumQ/charmonium.cache?style=social
    :alt: GitHub stars
-.. image: https://img.shields.io/librariesio/sourcerank/pypi/charmonium.cache
+   :target: https://github.com/chamroniumQ/charmonium.cache.git
+
+.. image:: https://github.com/chamroniumQ/charmonium.cache.git/actions/workflows/test/badge.svg
+   :alt: CI status
+   :target: https://github.com/chamroniumQ/charmonium.cache.git//actions/workflows/test
+
+.. image:: https://img.shields.io/github/last-commit/charmoniumQ/charmonium.determ_hash
+   :alt: GitHub last commit
+   :target: https://github.com/chamroniumQ/charmonium.cache.git/commits
+
+.. image:: https://img.shields.io/librariesio/sourcerank/pypi/charmonium.cache
    :alt: libraries.io sourcerank
+   :target: https://libraries.io/pypi/charmonium.cache
 
-- `PyPI`_
-- `GitHub`_
-- `Docs`_
+.. image:: https://img.shields.io/badge/docs-yes-success
+   :alt: Documentation link
 
-Provides a decorator for caching a function. Whenever the function is called
-with the same arguments, the result is loaded from the cache instead of
-computed. This cache is **persistent across runs**. If the arguments, source
-code, or enclosing environment have changed, the cache recomputes the data
-transparently (**no need for manual invalidation**).
+.. image:: http://www.mypy-lang.org/static/mypy_badge.svg
+   :target: https://mypy.readthedocs.io/en/stable/
+   :alt: Checked with Mypy
+
+.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
+   :target: https://github.com/psf/black
+   :alt: Code style: black
+
+Provides a decorator for caching a function between subsequent processes.
+
+Whenever the function is called with the same arguments, the result is
+loaded from the cache instead of computed. This cache is **persistent
+across runs**. If the arguments, source code, or enclosing environment
+have changed, the cache recomputes the data transparently (**no need
+for manual invalidation**).
 
 The use case is meant for iterative development, especially on scientific
 experiments. Many times a developer will tweak some of the code but not
 all. Often, reusing intermediate results saves a significant amount of time
 every run.
 
+
 Quickstart
 ----------
 
 If you don't have ``pip`` installed, see the `pip install
-guide`_. Then run:
+guide`_.
 
-::
+.. _`pip install guide`: https://pip.pypa.io/en/latest/installing/
+
+.. code-block:: console
 
     $ pip install charmonium.cache
 
-.. code:: python
+.. highlight:: python
 
     >>> from charmonium.cache import memoize
     >>> i = 0
@@ -123,7 +154,6 @@ See `CLI`_ for more details.
 
 .. _`LRU`: https://en.wikipedia.org/wiki/Cache_replacement_policies#Least_recently_used_(LRU)
 .. _`decorator`: https://en.wikipedia.org/wiki/Python_syntax_and_semantics#Decorators
-.. _`pip install guide`: https://pip.pypa.io/en/latest/installing/
 .. _`PyPI`: https://pypi.org/project/charmonium.cache/
 .. _`GitHub`: https://github.com/charmoniumQ/charmonium.cache
 .. _`docs`: https://charmoniumq.github.io/charmonium.cache/

@@ -27,7 +27,8 @@ def test_pathlike() -> None:
         (path / "test").read_bytes() == payload
 
     with pytest.raises(TypeError):
-        pathlike_from(3)  # type: ignore (deliberate error for testing)
+        # (deliberate type error for testing)
+        pathlike_from(3)  # type: ignore
 
 
 def test_future() -> None:

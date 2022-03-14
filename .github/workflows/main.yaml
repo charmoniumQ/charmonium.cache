@@ -1,35 +1,23 @@
 on: [push, pull_request]
+name: test
 jobs:
-  minimal:
+  test:
     runs-on: ubuntu-latest
+
     steps:
 
-      - uses: snok/install-poetry@v1
+      - uses: cachix/install-nix-action@v15
         with:
-          version: 1.1.10
-          virtualenvs-create: true
-          virtualenvs-in-project: true
+          nix_path: nixpkgs=channel:nixos-unstable
 
       - uses: actions/checkout@v2
 
-      - id: cached-poetry-dependencies
-        uses: actions/cache@v2
+      - uses: actions/cache@v2
         with:
           path: |
-            .venv
-            .tox
+            build/
+            .tox/
+            $HOME/.cache/pypoetry/
           key: venv-${{ hashFiles('poetry.lock') }}-${{ hashFiles('pyproject.toml') }}
 
-      - run: poetry install
-
-      - run: poetry run ./scripts/test.sh
-
-      # - uses: cachix/install-nix-action@v15
-      #   with:
-      #     nix_path: nixpkgs=channel:nixos-unstable
-
-      # - uses: actions/checkout@v2
-
-      #- run: nix develop --command poetry install
-
-      #- run: nix develop --command ./scripts/test.sh
+      #- run: nix develop --command ./script.py all-tests --no-interactive
