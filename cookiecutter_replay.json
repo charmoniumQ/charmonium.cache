@@ -8,7 +8,7 @@
     "license": "MIT",
     "__year": "2022",
     "repo_user": "charmoniumQ",
-    "repo_url": "https://github.com/chamroniumQ/charmonium.cache",
+    "repo_url": "https://github.com/charmoniumQ/charmonium.cache",
     "version": "1.2.6",
     "keywords": "cache memoize decorator",
     "trove_intended_audience": "Intended Audience :: Science/Research,Intended Audience :: Developers",

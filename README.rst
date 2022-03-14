@@ -14,13 +14,13 @@ charmonium.cache
    :alt: Python Versions
 .. image:: https://img.shields.io/github/stars/charmoniumQ/charmonium.cache?style=social
    :alt: GitHub stars
-   :target: https://github.com/chamroniumQ/charmonium.cache
-.. image:: https://github.com/chamroniumQ/charmonium.cache/actions/workflows/main.yaml/badge.svg
+   :target: https://github.com/charmoniumQ/charmonium.cache
+.. image:: https://github.com/charmoniumQ/charmonium.cache/actions/workflows/main.yaml/badge.svg
    :alt: CI status
-   :target: https://github.com/chamroniumQ/charmonium.cache//actions/workflows/main.yaml
+   :target: https://github.com/charmoniumQ/charmonium.cache/actions/workflows/main.yaml
 .. image:: https://img.shields.io/github/last-commit/charmoniumQ/charmonium.determ_hash
    :alt: GitHub last commit
-   :target: https://github.com/chamroniumQ/charmonium.cache/commits
+   :target: https://github.com/charmoniumQ/charmonium.cache/commits
 .. image:: https://img.shields.io/librariesio/sourcerank/pypi/charmonium.cache
    :alt: libraries.io sourcerank
    :target: https://libraries.io/pypi/charmonium.cache
