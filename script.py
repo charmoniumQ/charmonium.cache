@@ -245,8 +245,6 @@ async def docs_inner() -> None:
         pretty_run(
             [
                 "proselint",
-                "--config",
-                "proselint.json",
                 "README.rst",
                 *docsrc_dir.glob("*.rst"),
             ]
