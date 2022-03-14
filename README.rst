@@ -59,25 +59,23 @@ guide`_.
 
     $ pip install charmonium.cache
 
-.. highlight:: python
-
-    >>> from charmonium.cache import memoize
-    >>> i = 0
-    >>> @memoize()
-    ... def square(x):
-    ...     print("recomputing")
-    ...     # Imagine a more expensive computation here.
-    ...     return x**2 + i
-    ...
-    >>> square(4)
-    recomputing
-    16
-    >>> square(4) # no need to recompute
-    16
-    >>> i = 1
-    >>> square(4) # global i changed; must recompute
-    recomputing
-    17
+>>> from charmonium.cache import memoize
+>>> i = 0
+>>> @memoize()
+... def square(x):
+...     print("recomputing")
+...     # Imagine a more expensive computation here.
+...     return x**2 + i
+...
+>>> square(4)
+recomputing
+16
+>>> square(4) # no need to recompute
+16
+>>> i = 1
+>>> square(4) # global i changed; must recompute
+recomputing
+17
 
 Advantages
 ----------
@@ -144,9 +142,6 @@ See `CLI`_ for more details.
 
 .. _`LRU`: https://en.wikipedia.org/wiki/Cache_replacement_policies#Least_recently_used_(LRU)
 .. _`decorator`: https://en.wikipedia.org/wiki/Python_syntax_and_semantics#Decorators
-.. _`PyPI`: https://pypi.org/project/charmonium.cache/
-.. _`GitHub`: https://github.com/charmoniumQ/charmonium.cache
-.. _`docs`: https://charmoniumq.github.io/charmonium.cache/
 .. _`Detecting Changes in Functions`: https://charmoniumq.github.io/charmonium.cache/tutorial.html#detecting-changes-in-functions
 .. _`Klepto`: https://klepto.readthedocs.io/en/latest/
 .. _`joblib.Memory`: https://joblib.readthedocs.io/en/latest/memory.html
