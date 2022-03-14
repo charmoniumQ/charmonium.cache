@@ -5,40 +5,30 @@ charmonium.cache
 .. image:: https://img.shields.io/pypi/v/charmonium.cache
    :alt: PyPI Package
    :target: https://pypi.org/project/charmonium.cache
-
 .. image:: https://img.shields.io/pypi/dm/charmonium.cache
    :alt: PyPI Downloads
    :target: https://pypi.org/project/charmonium.cache
-
 .. image:: https://img.shields.io/pypi/l/charmonium.cache
    :alt: PyPI License
-
 .. image:: https://img.shields.io/pypi/pyversions/charmonium.cache
    :alt: Python Versions
-
 .. image:: https://img.shields.io/github/stars/chamroniumQ/charmonium.cache?style=social
    :alt: GitHub stars
-   :target: https://github.com/chamroniumQ/charmonium.cache.git
-
-.. image:: https://github.com/chamroniumQ/charmonium.cache.git/actions/workflows/test/badge.svg
+   :target: https://github.com/chamroniumQ/charmonium.cache
+.. image:: https://github.com/chamroniumQ/charmonium.cache/actions/workflows/test/badge.svg
    :alt: CI status
-   :target: https://github.com/chamroniumQ/charmonium.cache.git//actions/workflows/test
-
+   :target: https://github.com/chamroniumQ/charmonium.cache//actions/workflows/test
 .. image:: https://img.shields.io/github/last-commit/charmoniumQ/charmonium.determ_hash
    :alt: GitHub last commit
-   :target: https://github.com/chamroniumQ/charmonium.cache.git/commits
-
+   :target: https://github.com/chamroniumQ/charmonium.cache/commits
 .. image:: https://img.shields.io/librariesio/sourcerank/pypi/charmonium.cache
    :alt: libraries.io sourcerank
    :target: https://libraries.io/pypi/charmonium.cache
-
 .. image:: https://img.shields.io/badge/docs-yes-success
    :alt: Documentation link
-
 .. image:: http://www.mypy-lang.org/static/mypy_badge.svg
    :target: https://mypy.readthedocs.io/en/stable/
    :alt: Checked with Mypy
-
 .. image:: https://img.shields.io/badge/code%20style-black-000000.svg
    :target: https://github.com/psf/black
    :alt: Code style: black
