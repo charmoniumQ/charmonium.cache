@@ -85,6 +85,7 @@ disable=
     # We use classes like structs, so many will have no public methods.
     # I actually want to encourage fewer methods.
 	too-few-public-methods,
+	too-many-instance-attributes,
 
     # my personal style is to explicitly else-return and else-raise.
     # that way, if you change the return or raise, same functionality
@@ -235,7 +236,7 @@ redefining-builtins-modules=six.moves,past.builtins,future.builtins,builtins,io
 
 # Format style used to check logging format string. `old` means using %
 # formatting, while `new` is for `{}` formatting.
-logging-format-style=old
+logging-format-style=new
 
 # Logging modules to check that the string format arguments are in logging
 # function parameter format.
@@ -304,7 +305,7 @@ good-names=i,
            k,
 		   n,
 		   m,
-           ex,
+           exc,
            Run,
            _
 

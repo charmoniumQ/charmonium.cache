@@ -1,7 +1,8 @@
-from typing import List, Sequence, Iterable, cast
-import json
 import ast
+import json
 from pathlib import Path
+from typing import Iterable, List, Sequence, cast
+
 
 def add_memoization(code: Iterable[ast.stmt]) -> Sequence[ast.stmt]:
     future_imports = []
@@ -21,12 +22,10 @@ def add_memoization(code: Iterable[ast.stmt]) -> Sequence[ast.stmt]:
                         decorator_list=[
                             cast(
                                 ast.expr,
-                                ast.Name(
-                                    id="memoize",
-                                    ctx=ast.Load()
-                                ),
+                                ast.Name(id="memoize", ctx=ast.Load()),
                             )
-                        ] + stmt.decorator_list,
+                        ]
+                        + stmt.decorator_list,
                         returns=stmt.returns,
                         type_comment=stmt.type_comment,
                     ),

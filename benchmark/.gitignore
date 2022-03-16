@@ -1,6 +1,10 @@
-__pycache__
-.dmypy.json
-.coverage*
+/build/
+__pycache__/
+/.mypy_cache/
+/.pytest_cache/
+/.tox/
+/.direnv/
+
 .cache
 .r-mount
 report.html

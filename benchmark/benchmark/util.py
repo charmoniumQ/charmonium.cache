@@ -1,23 +1,27 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
 import datetime
 import os
-from pathlib import Path
-from typing import NoReturn, Sequence, Optional, Mapping, Iterable, TypeVar, Dict, Set
 import shlex
 import subprocess
 import sys
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Dict, Iterable, Mapping, NoReturn, Optional, Sequence, Set, TypeVar
 
 import psutil  # type: ignore
 
+
 class BenchmarkError(Exception):
     """Errors that originate from the benchmark code, rather than included libraries."""
+
     pass
 
 
 K = TypeVar("K")
 V = TypeVar("V")
+
+
 def merge(dcts: Iterable[Mapping[K, V]]) -> Mapping[K, V]:
     result = {}
     for dct in dcts:
@@ -25,8 +29,10 @@ def merge(dcts: Iterable[Mapping[K, V]]) -> Mapping[K, V]:
             result[key] = val
     return dct
 
+
 def raise_(exception: Exception) -> NoReturn:
     raise exception
+
 
 def relative_to(dest: Path, source: Path) -> Path:
     if not dest.is_absolute():
@@ -42,6 +48,7 @@ def relative_to(dest: Path, source: Path) -> Path:
         assert (source / ret).resolve() == dest
         return ret
 
+
 @dataclass
 class CalledProcessError(Exception):
     cmd: Sequence[str]
@@ -52,13 +59,13 @@ class CalledProcessError(Exception):
     stderr: str
 
     def __init__(
-            self,
-            cmd: Sequence[str],
-            env: Optional[Mapping[str, str]],
-            cwd: Optional[Path],
-            returncode: int,
-            stdout: str,
-            stderr: str,
+        self,
+        cmd: Sequence[str],
+        env: Optional[Mapping[str, str]],
+        cwd: Optional[Path],
+        returncode: int,
+        stdout: str,
+        stderr: str,
     ) -> None:
         self.cmd = cmd
         self.env = env
@@ -70,11 +77,12 @@ class CalledProcessError(Exception):
     def __str__(self) -> str:
         return f"$ {format_command(self.cmd, env=self.env, cwd=self.cwd)}\n{self.stdout}\n{self.stderr}\n\nFailed with {self.returncode}"
 
+
 def timed_subprocess_run(
-        cmd: Sequence[str],
-        env: Optional[Mapping[str, str]] = None,
-        cwd: Optional[Path] = None,
-        check: bool = True,
+    cmd: Sequence[str],
+    env: Optional[Mapping[str, str]] = None,
+    cwd: Optional[Path] = None,
+    check: bool = True,
 ) -> TimedCompletedProcess:
     start_wall = datetime.datetime.now()
     start = psutil.Process().cpu_times()
@@ -92,7 +100,14 @@ def timed_subprocess_run(
     stop = psutil.Process().cpu_times()
     stop_wall = datetime.datetime.now()
     if check and proc.returncode != 0:
-        raise CalledProcessError(cmd=cmd, cwd=cwd, env=env, stdout=stdout, stderr=stderr, returncode=proc.returncode)
+        raise CalledProcessError(
+            cmd=cmd,
+            cwd=cwd,
+            env=env,
+            stdout=stdout,
+            stderr=stderr,
+            returncode=proc.returncode,
+        )
     return TimedCompletedProcess(
         cmd,
         proc.returncode,
@@ -103,15 +118,14 @@ def timed_subprocess_run(
         (stop_wall - start_wall).total_seconds(),
     )
 
+
 def which(binary: str) -> Path:
     proc = subprocess.run(
         ["which", binary],
         text=True,
         capture_output=True,
         check=True,
-        env={
-            "PATH": os.environ.get("PATH", "")
-        },
+        env={"PATH": os.environ.get("PATH", "")},
     )
     return Path(proc.stdout.strip())
     # if proc.returncode == 0:
@@ -120,6 +134,7 @@ def which(binary: str) -> Path:
     #     return None
     # else:
     #     raise RuntimeError(f"`which {binary}` failed with {proc.returncode}.\n{proc.stdout}\n{proc.stderr}")
+
 
 @dataclass
 class TimedCompletedProcess:
@@ -135,28 +150,37 @@ class TimedCompletedProcess:
     def cpu_time(self) -> float:
         return self.user_time + self.system_time
 
+
 def format_command(
-        cmd: Sequence[str],
-        cwd: Optional[Path] = None,
-        env_override: Optional[Mapping[str, str]] = None,
-        env: Optional[Mapping[str, str]] = None,
+    cmd: Sequence[str],
+    cwd: Optional[Path] = None,
+    env_override: Optional[Mapping[str, str]] = None,
+    env: Optional[Mapping[str, str]] = None,
 ) -> str:
     if env_override and env:
         raise ValueError("Cannot pass `env_override` and `env`.")
     print_cwd = cwd and cwd != Path()
     actual_env = env if env else (env_override if env_override else None)
-    return shlex.join([
-        *(["env"] if env or print_cwd else []),
-        *(["-C", str(cwd)] if print_cwd else []),
-        *(["-"] if env else []),
-        *([key + "=" + val for key, val in actual_env.items()] if actual_env else []),
-        *cmd,
-    ])
+    return shlex.join(
+        [
+            *(["env"] if env or print_cwd else []),
+            *(["-C", str(cwd)] if print_cwd else []),
+            *(["-"] if env else []),
+            *(
+                [key + "=" + val for key, val in actual_env.items()]
+                if actual_env
+                else []
+            ),
+            *cmd,
+        ]
+    )
+
 
 colon_variables = {
     "PATH",
     "LD_LIBRARY_PATH",
 }
+
 
 def merge_envs(*envs: Optional[Mapping[str, str]]) -> Mapping[str, str]:
     merged_env: Dict[str, str] = {}
@@ -169,9 +193,6 @@ def merge_envs(*envs: Optional[Mapping[str, str]]) -> Mapping[str, str]:
                     merged_env[key] = env[key]
     return merged_env
 
+
 def project(dct: Mapping[K, V], keys: Set[K]) -> Mapping[K, V]:
-    return {
-        key: val
-        for key, val in dct.items()
-        if key in keys
-    }
+    return {key: val for key, val in dct.items() if key in keys}

@@ -1,0 +1,23 @@
+{
+  "cookiecutter": {
+    "repo_name": "benchmark",
+    "package_name": "benchmark",
+    "description": "Benchmark charmonium.cache",
+    "author_name": "Samuel Grayson",
+    "author_email": "sam+dev@samgrayson.me",
+    "license": "MIT",
+    "__year": "2022",
+    "repo_user": "fake",
+    "repo_url": "fake",
+    "version": "0.1.0",
+    "keywords": "",
+    "trove_license": "License :: OSI Approved :: MIT License",
+    "trove_intended_audience": "fake",
+    "trove_topics": "fake",
+    "trove_classifiers": "fake",
+    "nix_dependencies": "pkgs.libseccomp.lib pkgs.gcc-unwrapped.lib",
+    "use_poetry": "yes",
+    "pypi_package": "no"
+  },
+  "comment": "This repository was created from a template in <https://github.com/charmoniumQ/sams-cookiecutter-pypackage.git> with these options. Use `cookiecutter gh:charmoniumQ/sams-cookiecutter-pypackage.git --output-dir . --overwrite-if-exists --reply --replay-file cookiecutter_replay.json` to regenerate."
+}

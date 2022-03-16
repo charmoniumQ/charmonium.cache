@@ -1,12 +1,14 @@
 from __future__ import annotations
-from abc import ABC
+
 import datetime
-from pathlib import Path
 import re
 import shlex
 import subprocess
 import sys
-from typing import List, Optional, Protocol, Tuple, Callable, cast
+from abc import ABC
+from pathlib import Path
+from typing import Callable, List, Optional, Protocol, Tuple, cast
+
 from .util import BenchmarkError
 
 ROOT = Path(__file__).parent.parent.resolve()
@@ -16,15 +18,15 @@ REPO_PATH = ROOT / ".repos"
 
 class Repo(ABC):
     def __init__(
-            self,
-            name: str,
-            url: str,
-            dir: Path,
-            display_url: str,
-            patch: Optional[str] = None,
-            patch_cmds: List[List[str]] = [],
-            setup_func: Optional[Callable[[Repo], None]] = None,
-            patch_func: Optional[Callable[[Repo], None]] = None,
+        self,
+        name: str,
+        url: str,
+        dir: Path,
+        display_url: str,
+        patch: Optional[str] = None,
+        patch_cmds: List[List[str]] = [],
+        setup_func: Optional[Callable[[Repo], None]] = None,
+        patch_func: Optional[Callable[[Repo], None]] = None,
     ) -> None:
         self.name = name
         self.url = url
@@ -48,12 +50,12 @@ class Repo(ABC):
     def apply_patch(self) -> None:
         if self.patch is not None:
             cmd = [
-                    "patch",
-                    "--quiet",
-                    "--strip=1",
-                    f"--directory={self.dir!s}",
-                    f"--input=/dev/stdin",
-                ]
+                "patch",
+                "--quiet",
+                "--strip=1",
+                f"--directory={self.dir!s}",
+                f"--input=/dev/stdin",
+            ]
             proc = subprocess.run(
                 cmd,
                 input=self.patch.encode(),
@@ -86,6 +88,7 @@ class Repo(ABC):
 
     dir: Path
     name: str
+
 
 class GitRepo(Repo):
     def __init__(
@@ -161,32 +164,42 @@ class GitRepo(Repo):
 
     def interesting_commits(self, path: Path, min_diff: int) -> List[str]:
         """
-for commit in $(git log --pretty=%h .); do
-    total=0
-    total+=$(git show --numstat --pretty='' $commit | cut --fields=1 | tr -d - | python -c "import sys; print(sum([int(line.strip()) for line in sys.stdin if line.strip()]))")
-    total+=$(git show --numstat --pretty='' $commit | cut --fields=2 | tr -d - | python -c "import sys; print(sum([int(line.strip()) for line in sys.stdin if line.strip()]))")
-    echo $total $commit
-done | sort --numeric-sort > log
+        for commit in $(git log --pretty=%h .); do
+            total=0
+            total+=$(git show --numstat --pretty='' $commit | cut --fields=1 | tr -d - | python -c "import sys; print(sum([int(line.strip()) for line in sys.stdin if line.strip()]))")
+            total+=$(git show --numstat --pretty='' $commit | cut --fields=2 | tr -d - | python -c "import sys; print(sum([int(line.strip()) for line in sys.stdin if line.strip()]))")
+            echo $total $commit
+        done | sort --numeric-sort > log
         """
-        commits = subprocess.run(
-            ["git", "log", "--pretty=%h", str(path)],
-            cwd=self.dir,
-            check=True,
-            capture_output=True,
-            text=True,
-        ).stdout.strip().split("\n")
-        def filter_pred(commit: str) -> bool:
-            total_changed = 0
-            for line in subprocess.run(
-                ["git", "show", "--numstat", "--pretty=", commit],
+        commits = (
+            subprocess.run(
+                ["git", "log", "--pretty=%h", str(path)],
                 cwd=self.dir,
                 check=True,
                 capture_output=True,
                 text=True,
-            ).stdout.strip().split("\n"):
+            )
+            .stdout.strip()
+            .split("\n")
+        )
+
+        def filter_pred(commit: str) -> bool:
+            total_changed = 0
+            for line in (
+                subprocess.run(
+                    ["git", "show", "--numstat", "--pretty=", commit],
+                    cwd=self.dir,
+                    check=True,
+                    capture_output=True,
+                    text=True,
+                )
+                .stdout.strip()
+                .split("\n")
+            ):
                 if m := re.match("(\\d+)\t(\\d+)\t", line):
                     total_changed += int(m.group(1)) + int(m.group(2))
             return total_changed >= min_diff
+
         return list(filter(filter_pred, commits))
 
     def _checkout(self, commit: str) -> None:
@@ -228,12 +241,14 @@ done | sort --numeric-sort > log
         ).stdout
         return diff, date
 
-github_pattern = re.compile("https://github.com/[a-zA-Z0-9-.]+/(?P<name>[a-zA-Z0-9-.]+)")
+
+github_pattern = re.compile(
+    "https://github.com/[a-zA-Z0-9-.]+/(?P<name>[a-zA-Z0-9-.]+)"
+)
+
+
 class GitHubRepo(GitRepo):
-    def __init__(
-            self,
-            url: str
-    ) -> None:
+    def __init__(self, url: str) -> None:
         if url.endswith(".git"):
             url = url[:-4]
         parsed_url = github_pattern.match(url)
@@ -248,8 +263,11 @@ class GitHubRepo(GitRepo):
             patch_func=None,
         )
 
+
 class CommitChooser(Protocol):
-    def choose(self, repo: Repo) -> List[str]: ...
+    def choose(self, repo: Repo) -> List[str]:
+        ...
+
 
 class RecentCommitChooser(CommitChooser):
     def __init__(self, seed: str, n: int = 2) -> None:
@@ -290,4 +308,6 @@ class RecentCommitChooser(CommitChooser):
             commits = commits_proc.stdout.strip().split()[:n][:-1]
             return [*commits, self.seed]
         else:
-            raise BenchmarkError(f"{self.__class__.__name__} doesn't know how to deal with {type(repo).__name__} as in {repo}.")
+            raise BenchmarkError(
+                f"{self.__class__.__name__} doesn't know how to deal with {type(repo).__name__} as in {repo}."
+            )

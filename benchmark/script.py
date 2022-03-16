@@ -9,6 +9,7 @@ import os
 import shlex
 import shutil
 import subprocess
+import sys
 from enum import Enum
 from functools import wraps
 from pathlib import Path
@@ -25,13 +26,13 @@ from typing import (
     cast,
 )
 
-import autoimport
+# import autoimport
 import isort
-import setuptools  # type: ignore
-import toml  # type: ignore
+import setuptools
+import toml
 import typer
 from charmonium.async_subprocess import run
-from termcolor import cprint  # type: ignore
+from termcolor import cprint
 from typing_extensions import ParamSpec
 
 Params = ParamSpec("Parms")
@@ -51,7 +52,7 @@ def coroutine_to_function(
 if TYPE_CHECKING:
     CompletedProc = subprocess.CompletedProcess[str]
 else:
-    CompletedProc = None
+    CompletedProc = object
 
 
 def default_checker(proc: CompletedProc) -> bool:
@@ -72,7 +73,10 @@ async def pretty_run(
     delta = stop - start
     success = checker(proc)
     color = "green" if success else "red"
-    cmd_str = shlex.join(map(str, cmd))
+    if sys.version_info >= (3, 8):
+        cmd_str = shlex.join(map(str, cmd))
+    else:
+        cmd_str = " ".join(map(str, cmd))
     cprint(
         f"$ {cmd_str}\nexited with status {proc.returncode} in {delta.total_seconds():.1f}s",
         color,
@@ -82,7 +86,7 @@ async def pretty_run(
     if proc.stderr:
         print(proc.stderr)
     if not success:
-        raise RuntimeError()
+        raise typer.Exit(code=1)
     return proc
 
 
@@ -103,7 +107,6 @@ def get_package_path(package: str) -> Path:
 
 
 app = typer.Typer()
-# TODO: don't use packages
 tests_dir = Path("tests")
 pyproject = toml.loads(Path("pyproject.toml").read_text())
 extra_packages = [
@@ -125,9 +128,14 @@ all_python_files = list(
 )
 
 
-def run_autoimport(path: Path) -> None:
-    with path.open("r+") as file:
-        autoimport.fix_files([file])  # type: ignore
+def autoimport_and_isort(path: Path) -> None:
+    orig_code = path.read_text()
+    code = orig_code
+    # code = autoimport.fix_code(orig_code)
+    code = isort.code(code)
+    # if hash(code) != hash(orig_code):
+    #     path.write_text(code)
+    path.write_text(code)
 
 
 T1 = TypeVar("T1")
@@ -137,13 +145,12 @@ T2 = TypeVar("T2")
 @app.command()
 @coroutine_to_function
 async def fmt(parallel: bool = True) -> None:
-    pool = multiprocessing.Pool()
-    mapper = cast(
-        Callable[[Callable[[T1], T2], Iterable[T1]], Iterable[T2]],
-        pool.imap_unordered if parallel else map,
-    )
-    list(mapper(run_autoimport, all_python_files))
-    list(mapper(isort.file, all_python_files))
+    with multiprocessing.Pool() as pool:
+        mapper = cast(
+            Callable[[Callable[[T1], T2], Iterable[T1]], Iterable[T2]],
+            pool.imap_unordered if parallel else map,
+        )
+        list(mapper(autoimport_and_isort, all_python_files))
     await pretty_run(["black", "--quiet", *all_python_files])
 
 
@@ -152,7 +159,15 @@ async def fmt(parallel: bool = True) -> None:
 async def test() -> None:
     await asyncio.gather(
         pretty_run(
-            ["dmypy", "run", "--", *all_python_files],
+            [
+                "mypy",
+                # "dmypy",
+                # "run",
+                # "--",
+                "--explicit-package-bases",
+                "--namespace-packages",
+                *all_python_files,
+            ],
             env_override={"MYPY_FORCE_COLOR": "1"},
         ),
         pretty_run(
@@ -168,7 +183,7 @@ async def test() -> None:
             # see https://pylint.pycqa.org/en/latest/user_guide/run.html#exit-codes
             checker=lambda proc: proc.returncode & (1 | 2) == 0,
         ),
-        pytest(use_coverage=True),
+        pytest(use_coverage=True, show_slow=True),
         pretty_run(
             [
                 "radon",
@@ -202,10 +217,15 @@ async def per_env_tests() -> None:
     await asyncio.gather(
         pretty_run(
             # No daemon
-            ["mypy", *all_python_files],
+            [
+                "mypy",
+                "--explicit-package-bases",
+                "--namespace-packages",
+                *map(str, all_python_files),
+            ],
             env_override={"MYPY_FORCE_COLOR": "1"},
         ),
-        pytest(use_coverage=False),
+        pytest(use_coverage=False, show_slow=False),
     )
 
 
@@ -216,58 +236,77 @@ async def docs() -> None:
 
 
 async def docs_inner() -> None:
+    await asyncio.gather(
+        *(
+            [pretty_run(["sphinx-build", "-W", "-b", "html", docsrc_dir, "docs"])]
+            if docsrc_dir.exists()
+            else []
+        ),
+        pretty_run(
+            [
+                "proselint",
+                "--config",
+                "proselint.json",
+                "README.rst",
+                *docsrc_dir.glob("*.rst"),
+            ]
+        ),
+    )
     if docsrc_dir.exists():
-        await asyncio.gather(
-            pretty_run(["sphinx-build", "-W", "-b", "html", docsrc_dir, "docs"]),
-            pretty_run(["proselint", "README.rst", *docsrc_dir.glob("*.rst")]),
-        )
         print(f"See docs in: file://{(Path() / 'docs' / 'index.html').resolve()}")
 
 
 @app.command()
 @coroutine_to_function
-async def all_tests() -> None:
-    await all_tests_inner()
+async def all_tests(interactive: bool = True) -> None:
+    await all_tests_inner(interactive)
 
 
-async def all_tests_inner() -> None:
+async def all_tests_inner(interactive: bool) -> None:
     async def poetry_build() -> None:
         dist = Path("dist")
         if dist.exists():
             shutil.rmtree(dist)
-        await pretty_run(["poetry", "build"])
-        await pretty_run(["twine", "check", *dist.iterdir()])
+        await pretty_run(["rstcheck", "README.rst"])
+        await pretty_run(["poetry", "build", "--quiet"])
+        await pretty_run(["twine", "check", "--strict", *dist.iterdir()])
         shutil.rmtree(dist)
 
     await asyncio.gather(
         poetry_build(),
         docs_inner(),
+        pytest(use_coverage=False, show_slow=False),
     )
+    # Tox already has its own parallelism,
+    # and it shows a nice stateus spinner.
+    # so I'll not `await pretty_run`
     subprocess.run(
-        ["tox", "--parallel", "auto"], env={**os.environ, "PY_COLORS": "1"}, check=True
+        ["tox", "--parallel", "auto"],
+        env={
+            **os.environ,
+            "PY_COLORS": "1",
+            "TOX_PARALLEL_NO_SPINNER": "" if interactive else "1",
+        },
+        check=True,
     )
 
 
-async def pytest(use_coverage: bool) -> None:
+async def pytest(use_coverage: bool, show_slow: bool) -> None:
     if tests_dir.exists():
         await pretty_run(
             [
                 "pytest",
-                "--color=yes",
                 "--exitfirst",
-                "--workers=auto",
-                "--doctest-modules",
-                "--doctest-glob='*.rst'",
+                *(["--durations=3"] if show_slow else []),
                 *([f"--cov={main_package_dir!s}"] if use_coverage else []),
             ],
             checker=lambda proc: proc.returncode in {0, 5},
         )
         if use_coverage:
-            await pretty_run(
-                ["coverage", "html", "--directory", build_dir / "coverage"]
-            )
+            await pretty_run(["coverage", "html"])
+            report_dir = Path(pyproject["tool"]["coverage"]["html"]["directory"])
             print(
-                f"See code coverage in: file://{(build_dir / 'coverage' / 'index.html').resolve()}"
+                f"See code coverage in: file://{(report_dir / 'index.html').resolve()}"
             )
 
 
@@ -277,15 +316,62 @@ class VersionPart(str, Enum):
     MAJOR = "major"
 
 
+T = TypeVar("T")
+
+
+def flatten1(seq: Iterable[Iterable[T]]) -> Iterable[T]:
+    return (item2 for item1 in seq for item2 in item1)
+
+
+def dct_to_args(dct: Mapping[str, Union[bool, int, float, str]]) -> List[str]:
+    def inner() -> Iterable[List[str]]:
+        for key, val in dct.items():
+            key = key.replace("_", "-")
+            if isinstance(val, bool):
+                modifier = "" if val else "no-"
+                yield [f"--{modifier}{key}"]
+            else:
+                yield [f"--{key}", str(val)]
+
+    return list(flatten1(inner()))
+
+
 @app.command()
-@coroutine_to_function
-async def publish(version_part: VersionPart, verify: bool = True) -> None:
-    await (all_tests_inner() if verify else docs_inner())
-    if (await pretty_run(["git", "status", "--porcelain"])).stdout:
-        raise RuntimeError("git status is not clean")
-    await pretty_run(["bump2version", version_part.value])
-    await pretty_run(["poetry", "publish", "--build"])
-    await pretty_run(["git", "push", "--tags"])
+def publish(
+    version_part: VersionPart,
+    verify: bool = True,
+    docs: bool = True,
+    bump: bool = True,
+) -> None:
+    if verify:
+        asyncio.run(all_tests_inner(True))
+    elif docs:
+        # verify => all_tests_inner => docs already.
+        # This is only need for the case where (not verify and docs).
+        asyncio.run(docs_inner())
+    if bump:
+        subprocess.run(
+            [
+                "bump2version",
+                *dct_to_args(pyproject["tool"]["bump2version"]),
+                "--current-version",
+                pyproject["tool"]["poetry"]["version"],
+                version_part.value,
+                "pyproject.toml",
+                *[
+                    str(Path(package.replace(".", "/")) / "__init__.py")
+                    for package in src_packages
+                    if (Path(package.replace(".", "/")) / "__init__.py").exists()
+                ],
+            ],
+            check=True,
+        )
+    subprocess.run(
+        ["poetry", "publish", "--build"],
+        check=True,
+    )
+    shutil.rmtree("dist")
+    subprocess.run(["git", "push", "--tags"], check=True)
     # TODO: publish docs
 
 

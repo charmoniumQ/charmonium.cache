@@ -1,7 +1,7 @@
-from copy import deepcopy
 import ast
+from copy import deepcopy
 from pathlib import Path
-from typing import cast, Union
+from typing import Union, cast
 
 stmts_with_body = (
     ast.FunctionDef,
@@ -23,28 +23,24 @@ stmts_with_orelse = (
     ast.If,
     ast.Try,
 )
-stmts_with_finalbody = (
-    ast.Try,
-)
-stmts_with_handler = (
-    ast.Try,
-)
+stmts_with_finalbody = (ast.Try,)
+stmts_with_handler = (ast.Try,)
 
 memoize = cast(ast.expr, ast.parse("memoize()", mode="eval"))
-from_charmonium_cache_import_memoize = ast.parse("from charmonium.cache import memoize").body[0]
+from_charmonium_cache_import_memoize = ast.parse(
+    "from charmonium.cache import memoize"
+).body[0]
+
 
 def annotate_funcs_in_stmt(stmt: ast.stmt, copy: bool = False) -> ast.stmt:
     if copy:
         stmt = deepcopy(stmt)
     if isinstance(stmt, ast.FunctionDef) and not any(
-            "savefig" in ast.unparse(stmt) or "self" in ast.unparse(stmt)
-            for stmt in stmt.body
+        "savefig" in ast.unparse(stmt) or "self" in ast.unparse(stmt)
+        for stmt in stmt.body
     ):
         stmt.decorator_list = [memoize] + stmt.decorator_list
-        stmt.body = [
-            annotate_funcs_in_stmt(stmt, copy=False)
-            for stmt in stmt.body
-        ]
+        stmt.body = [annotate_funcs_in_stmt(stmt, copy=False) for stmt in stmt.body]
         return stmt
     else:
         if isinstance(stmt, stmts_with_body):
@@ -69,6 +65,7 @@ def annotate_funcs_in_stmt(stmt: ast.stmt, copy: bool = False) -> ast.stmt:
         #     ]
         return cast(ast.stmt, stmt)
 
+
 def annotate_funcs_in_module(module: ast.Module, copy: bool = False) -> ast.Module:
     if copy:
         module = deepcopy(module)
@@ -79,13 +76,8 @@ def annotate_funcs_in_module(module: ast.Module, copy: bool = False) -> ast.Modu
     ]
     return module
 
+
 def annotate_funcs_in_file(source: Path) -> None:
     source.write_text(
-        ast.unparse(
-            annotate_funcs_in_module(
-                ast.parse(
-                    source.read_text()
-                )
-            )
-        )
+        ast.unparse(annotate_funcs_in_module(ast.parse(source.read_text())))
     )
