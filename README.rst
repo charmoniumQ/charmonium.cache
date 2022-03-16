@@ -10,8 +10,10 @@ charmonium.cache
    :target: https://pypi.org/project/charmonium.cache
 .. image:: https://img.shields.io/pypi/l/charmonium.cache
    :alt: PyPI License
+   :target: https://github.com/charmoniumQ/charmonium.cache/blob/main/LICENSE
 .. image:: https://img.shields.io/pypi/pyversions/charmonium.cache
    :alt: Python Versions
+   :target: https://pypi.org/project/charmonium.cache
 .. image:: https://img.shields.io/github/stars/charmoniumQ/charmonium.cache?style=social
    :alt: GitHub stars
    :target: https://github.com/charmoniumQ/charmonium.cache
@@ -26,6 +28,7 @@ charmonium.cache
    :target: https://libraries.io/pypi/charmonium.cache
 .. image:: https://img.shields.io/badge/docs-yes-success
    :alt: Documentation link
+   :target: https://charmoniumq.github.io/charmonium.cache/
 .. image:: http://www.mypy-lang.org/static/mypy_badge.svg
    :target: https://mypy.readthedocs.io/en/stable/
    :alt: Checked with Mypy
@@ -45,6 +48,10 @@ The use case is meant for iterative development, especially on scientific
 experiments. Many times a developer will tweak some of the code but not
 all. Often, reusing intermediate results saves a significant amount of time
 every run.
+
+See full documentation `here`_.
+
+.. _`here`: https://charmoniumq.github.io/charmonium.cache/
 
 
 Quickstart
@@ -114,6 +121,11 @@ one is unique because it is:
 6. **Overhead aware:** The library measures the time saved versus overhead. It
    warns the user if the overhead of caching is not worth it.
 
+.. _`Detecting Changes in Functions`: https://charmoniumq.github.io/charmonium.cache/tutorial.html#detecting-changes-in-functions
+.. _`Klepto`: https://klepto.readthedocs.io/en/latest/
+.. _`joblib.Memory`: https://joblib.readthedocs.io/en/latest/memory.html
+.. _`functools.lru_cache`: https://docs.python.org/3/library/functools.html#functools.lru_cache
+
 Memoize CLI
 -----------
 
@@ -140,10 +152,4 @@ what inputs you depend on and what outputs you produce.
 
 See `CLI`_ for more details.
 
-.. _`LRU`: https://en.wikipedia.org/wiki/Cache_replacement_policies#Least_recently_used_(LRU)
-.. _`decorator`: https://en.wikipedia.org/wiki/Python_syntax_and_semantics#Decorators
-.. _`Detecting Changes in Functions`: https://charmoniumq.github.io/charmonium.cache/tutorial.html#detecting-changes-in-functions
-.. _`Klepto`: https://klepto.readthedocs.io/en/latest/
-.. _`joblib.Memory`: https://joblib.readthedocs.io/en/latest/memory.html
-.. _`functools.lru_cache`: https://docs.python.org/3/library/functools.html#functools.lru_cache
 .. _`CLI`: https://charmoniumq.github.io/charmonium.cache/cli.html
