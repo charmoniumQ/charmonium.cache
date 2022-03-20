@@ -125,6 +125,8 @@ one is unique because it is:
 .. _`Klepto`: https://klepto.readthedocs.io/en/latest/
 .. _`joblib.Memory`: https://joblib.readthedocs.io/en/latest/memory.html
 .. _`functools.lru_cache`: https://docs.python.org/3/library/functools.html#functools.lru_cache
+.. _`decorator`: https://docs.python.org/3/glossary.html#term-decorator
+.. _`LRU`: https://en.wikipedia.org/wiki/Cache_replacement_policies#Least_recently_used_(LRU)
 
 Memoize CLI
 -----------

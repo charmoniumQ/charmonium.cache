@@ -80,6 +80,8 @@
 - [ ] Create a better API for group configuration.
 - [ ] Make it easier to add a freeze method for a type.
 - [ ] Use environment variable to specify cache location.
+- [ ] Make freeze work for Pandas.
+- [ ] Improve test coverage in charmonium.cache, charmonium.determ_hash
 
 [audit events]: https://docs.python.org/3/library/audit_events.html#audit-events
 [importhook]: https://brettlangdon.github.io/importhook/
