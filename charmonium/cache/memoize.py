@@ -133,6 +133,7 @@ class MemoizedGroup:
     time_cost: dict[str, datetime.timedelta]
     time_saved: dict[str, datetime.timedelta]
     temporary: bool
+    warn_thrashing: bool
 
     def __getstate__(self) -> Any:
         return {
@@ -364,6 +365,10 @@ class MemoizedGroup:
 DEFAULT_MEMOIZED_GROUP = Future[MemoizedGroup].create(
     cast(Callable[[], MemoizedGroup], MemoizedGroup)
 )
+
+
+class CacheThrashingWarning(UserWarning):
+    pass
 
 
 # pyright thinks attrs has ambiguous overload
@@ -673,10 +678,11 @@ class Memoized(Generic[FuncParams, FuncReturn]):
                     }
                 )
             )
+
         if ts < tc and tc.total_seconds() > 5:
             warnings.warn(
                 f"Caching {self._func} cost {tc.total_seconds():.1f}s but only saved {ts.total_seconds():.1f}s",
-                UserWarning,
+                CacheThrashingWarning,
             )
 
         return value
