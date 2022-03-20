@@ -27,7 +27,7 @@ from benchexec.runexecutor import RunExecutor  # type: ignore
 
 # from charmonium.cache import MemoizedGroup, memoize
 from charmonium.determ_hash import determ_hash
-from tqdm import tqdm  # type: ignore
+from tqdm import tqdm
 
 from .environment import Environment, EnvironmentChooser
 from .repo import CommitChooser, Repo

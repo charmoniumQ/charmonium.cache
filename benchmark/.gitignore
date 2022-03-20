@@ -11,3 +11,4 @@ report.html
 .repos
 .my-venv
 .manual_cache
+secrets.env
