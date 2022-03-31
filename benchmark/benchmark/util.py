@@ -1,13 +1,30 @@
 from __future__ import annotations
 
+import contextlib
 import datetime
 import os
 import shlex
+import signal
 import subprocess
 import sys
+import types
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, Iterable, Mapping, NoReturn, Optional, Sequence, Set, TypeVar
+from typing import (
+    Callable,
+    Dict,
+    Iterable,
+    List,
+    Mapping,
+    NoReturn,
+    Optional,
+    Sequence,
+    Set,
+    TypeVar,
+    Generator,
+    Union,
+    Any,
+)
 
 import psutil  # type: ignore
 
@@ -196,3 +213,48 @@ def merge_envs(*envs: Optional[Mapping[str, str]]) -> Mapping[str, str]:
 
 def project(dct: Mapping[K, V], keys: Set[K]) -> Mapping[K, V]:
     return {key: val for key, val in dct.items() if key in keys}
+
+
+def combine_cmd(cmd: Sequence[str], env: Mapping[str, str], cwd: Path) -> List[str]:
+    return [
+        "env",
+        "--chdir",
+        str(cwd),
+        "-",
+        *[key + "=" + val for key, val in env.items()],
+        *cmd,
+    ]
+
+
+SignalCatcher = Union[Callable[[signal.Signals, types.FrameType], Any], int, signal.Handlers, None]
+
+
+@contextlib.contextmanager
+def catch_signals(signal_catchers: Mapping[signal.Signals, SignalCatcher]) -> Generator[None, None, None]:
+    old_signal_catchers: Dict[signal.Signals, SignalCatcher] = {}
+    for signal_num, new_catcher in signal_catchers.items():
+        old_catcher = signal.signal(signal_num, new_catcher)
+        old_signal_catchers[signal_num] = old_catcher
+    yield
+    for signal_num, old_catcher in old_signal_catchers.items():
+        signal.signal(signal_num, old_catcher)
+
+
+from benchexec.runexecutor import RunExecutor  # type: ignore
+
+@contextlib.contextmanager
+def runexec_catch_signals(run_executor: RunExecutor) -> Generator[None, None, None]:
+    caught_signal_number: Optional[signal.Signals] = None
+    def run_executor_stop(signal_number: signal.Signals, _: types.FrameType) -> None:
+        global caught_signal_number
+        caught_signal_number = signal_number
+        run_executor.stop()
+
+    with catch_signals({
+            signal.SIGTERM: run_executor_stop,
+            signal.SIGQUIT: run_executor_stop,
+            signal.SIGINT: run_executor_stop,
+    }):
+        yield
+    if caught_signal_number is not None:
+        raise InterruptedError(f"Caught signal {caught_signal_number}")
