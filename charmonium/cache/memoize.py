@@ -133,7 +133,6 @@ class MemoizedGroup:
     time_cost: dict[str, datetime.timedelta]
     time_saved: dict[str, datetime.timedelta]
     temporary: bool
-    warn_thrashing: bool
 
     def __getstate__(self) -> Any:
         return {
@@ -675,6 +674,7 @@ class Memoized(Generic[FuncParams, FuncReturn]):
                         "call_id": call_id,
                         "hit": would_hit,
                         "duration": (call_stop - call_start).total_seconds(),
+                        "obj_key": obj_key,
                     }
                 )
             )

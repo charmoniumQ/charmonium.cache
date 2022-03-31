@@ -5,6 +5,7 @@ from .memoize import (
     MemoizedGroup as MemoizedGroup,
     __version__ as __version__,
     memoize as memoize,
+    CacheThrashingWarning as CacheThrashingWarning,
 )
 from .obj_store import DirObjStore as DirObjStore, ObjStore as ObjStore
 from .pathlike import PathLike as PathLike, pathlike_from as pathlike_from
