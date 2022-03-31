@@ -45,7 +45,6 @@ def get_data() -> Sequence[
                         RecentCommitChooser(commit, n=10),
                         SmartEnvironmentChooser(venv_location),
                         ["python", "-m", "pytest", "--quiet"],
-                        # TODO: Use benchexec
                         # TODO: Print report
                     )
                 )

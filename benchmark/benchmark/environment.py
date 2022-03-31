@@ -40,10 +40,34 @@ class Environment(Protocol):
     def run(
         self,
         command: Sequence[str],
-        env_override: Mapping[str, str],
+        env: Mapping[str, str],
         cwd: Path,
     ) -> Tuple[List[str], Mapping[str, str], Path]:
         ...
+
+    def has_package(self, name: str) -> bool:
+        script = f"""
+try:
+    import {name}
+except ImportError:
+    print(0)
+# Other exceptions will still bubble up.
+else:
+    print(1)
+"""
+        cmd, env, cwd = self.run(["python", "-c", script], env={}, cwd=Path())
+        proc = subprocess.run(
+            cmd,
+            env=env,
+            cwd=cwd,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        if proc.returncode == 0:
+            return bool(int(proc.stdout.strip()))
+        else:
+            raise RuntimeError(proc.stderr)
 
 
 conda_env = {
@@ -51,6 +75,8 @@ conda_env = {
         [
             str(which("mamba").parent),
             str(which("conda").parent),
+            str(which("bash").parent),
+            str(which("dirname").parent),
         ]
     ),
     "CONDA_EXE": os.environ["CONDA_EXE"],
@@ -89,7 +115,8 @@ class CondaEnvironment(Environment):
     def setup(self) -> None:
         out = (self._conda("env", "export", "--name", self.name)).stdout
         if out != self.environment.read_bytes():
-            self._conda("env", "remove", "--name", self.name)
+            if f"\n{self.name} ".encode() in self._conda("env", "list").stdout:
+                self._conda("env", "remove", "--name", self.name)
             self._conda(
                 "env", "create", "--name", self.name, "--file", str(self.environment)
             )
@@ -113,7 +140,7 @@ class CondaEnvironment(Environment):
         cwd: Path,
     ) -> Tuple[List[str], Mapping[str, str], Path]:
         return (
-            ["mamba", "run", "--no-capture-output", "--name", self.name, *command],
+            ["conda", "run", "--no-capture-output", "--name", self.name, *command],
             merge_envs(conda_env, env),
             cwd,
         )
@@ -155,12 +182,12 @@ class PipenvEnvironment(Environment):
     def run(
         self,
         command: Sequence[str],
-        env_override: Mapping[str, str],
+        env: Mapping[str, str],
         cwd: Path,
     ) -> Tuple[List[str], Mapping[str, str], Path]:
         return (
             ["pipenv", "run", *command],
-            merge_envs(self.pipenv_env, env_override),
+            merge_envs(self.pipenv_env, env),
             cwd,
         )
 
@@ -319,7 +346,15 @@ class VirtualEnv(Environment):
 
 class EnvironmentChooser(Protocol):
     def choose(self, repo: Repo) -> Optional[Environment]:
-        ...
+        raise NotImplementedError
+
+
+class StaticEnvironmentChooser(EnvironmentChooser):
+    def __init__(self, environment: Environment) -> None:
+        self.environment = environment
+
+    def choose(self, repo: Repo) -> Optional[Environment]:
+        return self.environment
 
 
 class SmartEnvironmentChooser(EnvironmentChooser):

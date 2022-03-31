@@ -19,7 +19,7 @@ import warnings
 import xml.etree.ElementTree
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Mapping, Optional, Sequence, Tuple, Type, cast
+from typing import Any, Dict, Mapping, Optional, Sequence, Tuple, Type, cast
 
 import charmonium.time_block as ch_time_block
 from benchexec import container  # type: ignore
@@ -31,6 +31,7 @@ from tqdm import tqdm
 
 from .environment import Environment, EnvironmentChooser
 from .repo import CommitChooser, Repo
+from .util import runexec_catch_signals, combine_cmd
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -86,6 +87,8 @@ def parse_memoized_log(
                     calls[record["call_id"]].__dict__[record["event"]] = record[
                         "duration"
                     ]
+                if "obj_key" in record:
+                    calls[record["call_id"]].args = record["obj_key"]
             elif "duration" in record and "event" in record:
                 process_kwargs[record["event"]] += record["duration"]
             else:
@@ -109,12 +112,13 @@ class RunexecStats:
     @staticmethod
     def create(result: Mapping[str, Any]) -> RunexecStats:
         keys = set(
-            "exitcode walltime cputime memory blkio_read blkio_write cpuenergy".split(
+            "walltime cputime memory blkio_read blkio_write cpuenergy".split(
                 " "
             )
         )
         attrs = {key: result.get(key, None) for key in keys}
         attrs["termination_reason"] = result.get("terminationreason", None)
+        attrs["exitcode"] = result["exitcode"].raw
         return RunexecStats(**attrs)
 
 
@@ -131,11 +135,41 @@ class ExecutionProfile:
 
 
 tmp_dir = ROOT / ".tmp"
-limits = {
-    "softtimelimit": 120,
-    "hardtimelimit": 130,
-    "memlimit": 2 ** 28,
-}
+time_limit = 500
+mem_limit = 2 ** 34
+
+def run_exec_cmd(
+        environment: Environment,
+        cmd: Sequence[str],
+        env: Mapping[str, str],
+        cwd: Path,
+        dir_modes: Mapping[str, Any],
+) -> Tuple[RunexecStats, str]:
+    info_log = tmp_dir / "info.log"
+    if info_log.exists():
+        info_log.unlink()
+    combined_cmd = combine_cmd(*environment.run(cmd, env, cwd))
+    run_executor = RunExecutor(
+        use_namespaces=False,
+        # dir_modes=dir_modes,
+        # network_access=True,
+        # # Need to system config so DNS works.
+        # container_system_config=True,
+    )
+    with runexec_catch_signals(run_executor):
+        run_exec_run = run_executor.execute_run(
+            args=combined_cmd,
+            environments={
+                "keepEnv": {},
+            },
+            workingDir="/",
+            output_filename=info_log,
+            softtimelimit=time_limit,
+            hardtimelimit=int(time_limit * 1.1),
+            walltimelimit=int(time_limit * 1.2),
+            memlimit=mem_limit,
+        )
+    return RunexecStats.create(run_exec_run), info_log.read_text()
 
 # @ch_time_block.decor(print_start=False)
 def run_once(
@@ -143,32 +177,18 @@ def run_once(
 ) -> ExecutionProfile:
     warnings = []
     perf_log = tmp_dir / "perf.log"
-    junit_xml_log = tmp_dir / "junit.xml"
     output_log = tmp_dir / "output.log"
-    cmd, env, cwd = environment.run(
-        [
-            "python",
-            "-m",
-            "pytest",
-            "--quiet",
-            str(repo.dir),
-            "--junitxml",
-            str(junit_xml_log),
-        ],
+    if perf_log.exists():
+        perf_log.unlink()
+    runexec_stats, info_log = run_exec_cmd(
+        environment,
+        cmd,
         {
-            "CHARMONIUM_CACHE_DISABLE": "" if memoize else "1",
+            "CHARMONIUM_CACHE_ENABLE": "1" if memoize else "0",
             "CHARMONIUM_CACHE_PERF_LOG": str(perf_log),
+            "OUTPUT_LOG": str(output_log),
         },
-        tmp_dir,
-    )
-    combined_cmd = [
-        "env",
-        "--chdir",
-        str(cwd),
-        *[key + "=" + val for key, val in env.items()],
-        *cmd,
-    ]
-    runexecutor = RunExecutor(
+        repo.dir,
         dir_modes={
             "/": container.DIR_READ_ONLY,
             # TODO: Ideally, I would use `--overlay-dir` with tmp_dir instead of --full--access-dir.
@@ -179,26 +199,9 @@ def run_once(
         },
     )
 
-    def signal_handler_kill(signum: signal.Signals, _: types.FrameType) -> None:
-        runexecutor.stop()
-
-    signal.signal(signal.SIGTERM, signal_handler_kill)
-    signal.signal(signal.SIGQUIT, signal_handler_kill)
-    signal.signal(signal.SIGINT, signal_handler_kill)
-    runexec = RunexecStats.create(
-        runexecutor.execute_run(
-            args=combined_cmd,
-            # environments={
-            #     "keepEnv": {},
-            # },
-            workingDir=cwd,
-            output_filename=output_log,
-            **limits,
-        )
-    )
-    if runexec.termination_reason:
+    if runexec_stats.termination_reason:
         warnings.append(
-            f"Terminated for {runexec.termination_reason} out with {limits=}"
+            f"Terminated for {runexec_stats.termination_reason} out with {time_limit=} {mem_limit=}"
         )
     if perf_log.exists():
         calls, kwargs = parse_memoized_log(perf_log)
@@ -208,30 +211,14 @@ def run_once(
         # no profiling information
         calls = []
         kwargs = {}
-    if junit_xml_log.exists():
-        output_xml = xml.etree.ElementTree.parse(junit_xml_log)
-        output: str = json.dumps(
-            dict(
-                sorted(
-                    [
-                        (key, val)
-                        for key, val in output_xml.getroot().attrib.items()
-                        if key != "time"
-                    ]
-                )
-            )
-        )
-    else:
-        warnings.append("No junit xml log produced, despite passing --junitxml.")
-        output = ""
     return ExecutionProfile(
-        output=output,
+        output=output_log.read_text() if output_log.exists() else "",
         command=cmd,
-        log=output_log.read_text() if output_log.exists() else "",
-        success=True,
+        log=info_log,
+        success=runexec_stats.exitcode == 0,
         func_calls=calls,
         internal_stats=kwargs,
-        runexec=runexec,
+        runexec=runexec_stats,
         warnings=warnings,
     )
 
@@ -271,7 +258,7 @@ def run_many(
     shutil.copy(Path("that_conftest.py"), conftest_dest)
 
     executions = []
-    for commit in tqdm(commits, total=len(commits), desc="Commits"):
+    for commit in tqdm(commits, unit="commit", leave=False):
         execution = run_once(repo, environment, command, memoize)
         executions.append(execution)
         if short_circuit and execution.runexec.termination_reason:
@@ -306,10 +293,7 @@ def get_repo_result2(
     command: Sequence[str],
 ) -> RepoResult:
     warnings = []
-    print(repo.name)
-    # with ch_time_block.ctx("repo.setup()", print_start=False):
-    if True:
-        repo.setup()
+    repo.setup()
     environment = environment_chooser.choose(repo)
     if environment is None:
         warnings.append(f"{environment_chooser!s} could not choose an environment.")
@@ -322,27 +306,11 @@ def get_repo_result2(
         )
     else:
         try:
-            # with ch_time_block.ctx("environment.setup()"):
-            if True:
-                environment.setup()
-                packages = [
-                    "https://github.com/charmoniumQ/charmonium.cache/tarball/main"
-                ]
-                command, env, cwd = environment.run(
-                    ["python", "-c", "import pytest"],
-                    os.environ,
-                    Path(),
+            environment.setup()
+            if not environment.has_package("charmonium.cache"):
+                environment.install(
+                    ["https://github.com/charmoniumQ/charmonium.cache/tarball/main"]
                 )
-                proc = subprocess.run(
-                    command,
-                    env=env,
-                    cwd=cwd,
-                    check=False,
-                    capture_output=True,
-                )
-                if proc.returncode != 0:
-                    packages.append("pytest")
-                environment.install(packages)
         except subprocess.CalledProcessError as e:
             warnings.append(
                 "\n".join(
@@ -413,5 +381,5 @@ def run_experiment(
     repos = repos[:250]
     return [
         get_repo_result(*repo_info)
-        for repo_info in tqdm(repos, total=len(repos), desc="Repos")
+        for repo_info in tqdm(repos, unit="repos", leave=False)
     ]

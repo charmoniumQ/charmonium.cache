@@ -10,7 +10,10 @@ class Tag:
         self, name: str, attrib: Dict[str, str], *children: Union[str, Tag]
     ) -> None:
         self.name = name
-        self.attrib = attrib
+        self.attrib = {
+            key.replace("_", ""): val
+            for key, val in attrib.items()
+        }
         self.children = children
 
     def to_xml(self) -> xml.Element:

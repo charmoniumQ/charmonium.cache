@@ -114,6 +114,27 @@ class GitRepo(Repo):
     def __str__(self) -> str:
         return f"Repo({self.name!r}, {self.url!r}, ...)"
 
+    @property
+    def commit(self) -> str:
+        return subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=self.dir,
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout.strip()
+
+    @property
+    def main_branch(self) -> str:
+        ref = subprocess.run(
+            ["git", "symbolic-ref", "refs/remotes/origin/HEAD"],
+            cwd=self.dir,
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout.strip()
+        return ref.split("/")[-1]
+
     def _setup(self) -> None:
         self.dir.mkdir(exist_ok=True, parents=True)
         if not list(self.dir.iterdir()):
@@ -133,14 +154,7 @@ class GitRepo(Repo):
                     sys.stdout.buffer.write(e.output)
                 raise e
         else:
-            ref = subprocess.run(
-                ["git", "symbolic-ref", "refs/remotes/origin/HEAD"],
-                cwd=self.dir,
-                check=True,
-                capture_output=True,
-                text=True,
-            ).stdout.strip()
-            branch = ref.split("/")[-1]
+            branch = self.main_branch
             subprocess.run(
                 ["git", "restore", "--", "."],
                 cwd=self.dir,
@@ -270,43 +284,30 @@ class CommitChooser(Protocol):
 
 
 class RecentCommitChooser(CommitChooser):
-    def __init__(self, seed: str, n: int = 2) -> None:
+    def __init__(self, seed: Optional[str], n: int = 2, path: Path = Path()) -> None:
         self.seed = seed
         self.n = n
+        self.path = path
 
     def choose(self, repo: Repo) -> List[str]:
         if isinstance(repo, GitRepo):
+            target = repo.main_branch if self.seed is None else self.seed
             subprocess.run(
-                ["git", "checkout", self.seed],
+                ["git", "checkout", target],
                 cwd=repo.dir,
                 capture_output=True,
                 check=True,
             )
-            n = self.n
-            cmd = ["git", "log", "--pretty=format:%H", "HEAD", f"^HEAD~{n - 1}"]
-            while n > 0:
-                commits_proc = subprocess.run(
-                    cmd,
-                    cwd=repo.dir,
-                    text=True,
-                    capture_output=True,
-                    check=False,
-                )
-                if commits_proc.returncode != 0:
-                    if "fatal: bad revision" in commits_proc.stderr:
-                        n -= 1
-                    else:
-                        raise subprocess.CalledProcessError(
-                            returncode=commits_proc.returncode,
-                            cmd=cmd,
-                            output=commits_proc.stdout + commits_proc.stderr,
-                        )
-                else:
-                    break
-            else:
-                return [self.seed]
-            commits = commits_proc.stdout.strip().split()[:n][:-1]
-            return [*commits, self.seed]
+            cmd = ["git", "log", "--pretty=format:%H", f"-{self.n}", str(self.path)]
+            commits_proc = subprocess.run(
+                cmd,
+                cwd=repo.dir,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            commits = commits_proc.stdout.strip().split()
+            return commits
         else:
             raise BenchmarkError(
                 f"{self.__class__.__name__} doesn't know how to deal with {type(repo).__name__} as in {repo}."

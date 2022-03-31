@@ -29,8 +29,8 @@ from .html_helpers import (
     disp_bool,
     highlighted_code,
     highlighted_head,
+    html_fs_link,
     html_list,
-    html_path,
     html_table,
     small,
 )
@@ -47,7 +47,7 @@ def disp_date(date: datetime.datetime) -> html.Tag:
 
 
 def disp_hash(val: int) -> html.Tag:
-    return html.code()(str(val)[:6])
+    return html.code()(f"{val:x}"[:6])
 
 
 def disp_sec(val: float) -> html.Tag:
@@ -124,8 +124,8 @@ def summarize_commit(repo: Repo, result: CommitResult) -> html.Tag:
     )
 
 
-def color_cell(elem: html.TagLike, color: str) -> html.Tag:
-    return html.span(style=css_string(background_color=color, display="block"))(elem)
+def color_cell(elem: html.TagLike, color_class: str) -> html.Tag:
+    return html.span(class_=f"color color-{color_class}")(elem)
 
 
 def get_process_overhead(prof: ExecutionProfile) -> float:
@@ -147,9 +147,9 @@ def summarize_commit_result(repo: Repo, result: CommitResult) -> Sequence[html.T
             [
                 "Status",
                 *[
-                    color_cell("Success", "green")
+                    color_cell("Success", "success")
                     if prof.success
-                    else color_cell("Error", "red")
+                    else color_cell("Error", "error")
                     for prof in result.executions.values()
                 ],
             ],
@@ -207,17 +207,17 @@ def summarize_commit_result(repo: Repo, result: CommitResult) -> Sequence[html.T
     return [
         summarize_commit(repo, result),
         collapsed(
-            color_cell("Warnings", "red"),
+            color_cell("Warnings", "error"),
             highlighted_code("plaintext", "\n".join(set(warnings))),
         )
         if warnings
-        else color_cell("None", "green"),
-        color_cell("Tests work", "green")
+        else color_cell("None", "success"),
+        color_cell("Tests work", "success")
         if tests_work
-        else color_cell("Tests don't work", "red"),
-        color_cell("Output matches", "green")
+        else color_cell("Tests don't work", "error"),
+        color_cell("Output matches", "success")
         if not result_mismatch(result)
-        else color_cell("Outputs don't match", "red"),
+        else color_cell("Outputs don't match", "error"),
         *[
             disp_sec(
                 result.executions[execution].runexec.cputime
@@ -237,20 +237,15 @@ def summarize_environment(environment: Optional[Environment]) -> html.TagLike:
         return html_table(
             [
                 ["Manager", "Conda"],
-                # [
-                #     html.code()("environment.yaml"),
-                #     collapsed("show", highlighted_code("yaml", environment.environment.read_text())),
-                # ],
+                ["environment.yaml", html_fs_link(environment.environment)],
+                ["name", str(environment.name)],
             ]
         )
     elif isinstance(environment, PoetryEnvironment):
         return html_table(
             [
                 ["Manager", "Poetry"],
-                # [
-                #     html.code()("pyproject.toml"),
-                #     collapsed("show", highlighted_code("toml", environment.pyproject.read_text())),
-                # ],
+                ["pyproject.toml", html_fs_link(environment.pyproject)],
             ]
         )
     elif isinstance(environment, VirtualEnv):
@@ -309,7 +304,7 @@ def speedup_ratio(repo_result: RepoResult) -> html.Tag:
         mid = scipy.stats.gmean([1 - low, 1 - high]) * 100
         label = f"{100*(1 - high):.0f}% – {100 * (1 - low):.0f}%"
         return color_cell(
-            label, "green" if mid > 5 else "yellow" if mid > -5 else "red"
+            label, "success" if mid > 5 else "warning" if mid > -5 else "error"
         )
 
 
@@ -328,7 +323,7 @@ def original_time(repo_result: RepoResult) -> html.Tag:
         ).confidence_interval
         mid = np.mean([low, high])
         label = f"{low:.1f}s – {high:.1f}s"
-        return color_cell(label, "green" if mid > orig_time_cutoff else "yellow")
+        return color_cell(label, "success" if mid > orig_time_cutoff else "warning")
 
 
 orig_time_cutoff = 10.0
@@ -423,11 +418,11 @@ def summarize_repo_result(result: RepoResult) -> Sequence[html.Tag]:
     ):
         status = color_cell("Limit exceeded", "orange")
     elif any(map(result_mismatch, result.commit_results)):
-        status = color_cell("Result doesn't match", "red")
+        status = color_cell("Result doesn't match", "error")
     elif warnings:
-        status = color_cell("Completed with warnings", "green")
+        status = color_cell("Completed with warnings", "success")
     else:
-        status = color_cell("Success", "green")
+        status = color_cell("Success", "success")
 
     warnings_tag = (
         collapsed("Show warnings", highlighted_code("plaintext", "\n".join(warnings)))
@@ -440,7 +435,7 @@ def summarize_repo_result(result: RepoResult) -> Sequence[html.Tag]:
             result.repo.name,
             html_table(
                 [
-                    ["Local path", html_path(result.repo.dir)],
+                    ["Local path", html_fs_link(result.repo.dir)],
                     [
                         "Remote path",
                         html.a(href=result.repo.url)(html.code()(result.repo.url)),
@@ -488,7 +483,7 @@ def sort_key(repo_result: RepoResult) -> Any:
     elif any(map(result_mismatch, repo_result.commit_results)):
         return (-2,)
     else:
-        return (4, int("green" in original_time(repo_result).attrib["style"]))
+        return (4, int("success" in original_time(repo_result).attrib["class"]))
 
 
 def summarize_repo_results(repo_results: Sequence[RepoResult]) -> html.Tag:
@@ -538,6 +533,18 @@ def write_summary(repo_results: Sequence[RepoResult]) -> None:
 table, th, td {
   border: 1px solid black;
   border-collapse: collapse;
+}
+.color {
+  display: block;
+}
+.color-success {
+  background-color: lightgreen;
+}
+.color-warning {
+  background-color: wheat;
+}
+.color-error {
+  background-color: pink;
 }
                     """
                     ),

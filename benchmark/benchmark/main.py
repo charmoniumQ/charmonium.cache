@@ -2,7 +2,7 @@ import asyncio
 
 import typer
 
-from .data2 import get_data
+from .data3 import get_data
 from .run_experiment import run_experiment
 from .write_summary import write_summary
 

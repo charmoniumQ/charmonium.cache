@@ -24,7 +24,7 @@ def html_list(elements: Sequence[html.TagLike], ordered: bool = False) -> html.T
     return list_factory(*[html.li()(element) for element in elements])
 
 
-def html_path(path: Path) -> html.Tag:
+def html_fs_link(path: Path) -> html.Tag:
     return html.a(href=f"file://{path.resolve()}")(html.code()(str(path)))
 
 

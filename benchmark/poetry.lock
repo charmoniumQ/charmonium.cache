@@ -8,7 +8,7 @@ python-versions = "*"
 
 [[package]]
 name = "ascl-net-scraper"
-version = "0.3.5"
+version = "0.3.6"
 description = "Scrapes the data from https://ascl.net"
 category = "dev"
 optional = false
@@ -217,7 +217,7 @@ python-versions = ">=3.7,<4.0"
 
 [[package]]
 name = "charmonium.cache"
-version = "1.2.7"
+version = "1.2.8"
 description = "Provides a decorator for caching a function between subsequent processes."
 category = "main"
 optional = false
@@ -228,7 +228,7 @@ develop = false
 attrs = "^20.3.0"
 bitmath = "^1.3.3"
 "charmonium.determ-hash" = "^0.2.2"
-"charmonium.freeze" = "^0.5.2"
+"charmonium.freeze" = "^0.5.3"
 fasteners = "^0.16"
 
 [package.source]
@@ -248,8 +248,8 @@ xxhash = ">=2.0.2,<3.0.0"
 
 [[package]]
 name = "charmonium.freeze"
-version = "0.5.2"
-description = ""
+version = "0.5.4"
+description = "Injectively, deterministically maps objects to hashable, immutable objects"
 category = "main"
 optional = false
 python-versions = ">=3.8,<4.0"
@@ -421,7 +421,7 @@ testing = ["covdefaults (>=1.2.0)", "coverage (>=4)", "pytest (>=4)", "pytest-co
 
 [[package]]
 name = "fonttools"
-version = "4.31.1"
+version = "4.31.2"
 description = "Tools to manipulate font files"
 category = "main"
 optional = false
@@ -1060,7 +1060,7 @@ six = ">=1.5"
 
 [[package]]
 name = "pytz"
-version = "2021.3"
+version = "2022.1"
 description = "World timezone definitions, modern and historical"
 category = "main"
 optional = false
@@ -1153,7 +1153,7 @@ idna2008 = ["idna"]
 
 [[package]]
 name = "rich"
-version = "12.0.0"
+version = "12.0.1"
 description = "Render rich text, tables, progress bars, syntax highlighting, markdown and more to the terminal"
 category = "dev"
 optional = false
@@ -1476,8 +1476,8 @@ appnope = [
     {file = "appnope-0.1.2.tar.gz", hash = "sha256:dd83cd4b5b460958838f6eb3000c660b1f9caf2a5b1de4264e941512f603258a"},
 ]
 ascl-net-scraper = [
-    {file = "ascl_net_scraper-0.3.5-py3-none-any.whl", hash = "sha256:afeb1e0a566c5a925afb3a84cbf4aba323fe938aa5f1e6d0dd285a8835338668"},
-    {file = "ascl_net_scraper-0.3.5.tar.gz", hash = "sha256:f3b2439689a34c1c02ba4260325e25911a073c19b85202bd32ba469023dd5433"},
+    {file = "ascl_net_scraper-0.3.6-py3-none-any.whl", hash = "sha256:5ff6225751729693ba2808270ce69cf0154caffe8e014cfc64ffca5d358f0226"},
+    {file = "ascl_net_scraper-0.3.6.tar.gz", hash = "sha256:9e5f5ab44170d7a2bb75ce3fcf1ab64318ae6ef31dafe20db9815c8d200867d4"},
 ]
 astroid = [
     {file = "astroid-2.9.3-py3-none-any.whl", hash = "sha256:506daabe5edffb7e696ad82483ad0228245a9742ed7d2d8c9cdb31537decf9f6"},
@@ -1598,8 +1598,8 @@ cffi = [
     {file = "charmonium.determ_hash-0.2.2.tar.gz", hash = "sha256:81197d7988afde9014feb33d4df36a214e9d40804c448d9b5ee20e4797199c0f"},
 ]
 "charmonium.freeze" = [
-    {file = "charmonium.freeze-0.5.2-py3-none-any.whl", hash = "sha256:d84dc57ceeab8a16190dfd68cd894e00c65185dce672fc2beb84efe9dfadaa98"},
-    {file = "charmonium.freeze-0.5.2.tar.gz", hash = "sha256:00261ed45b3a449642e0bd555c7f8a7247f000f0e0bcefc17fe813e1131b6968"},
+    {file = "charmonium.freeze-0.5.4-py3-none-any.whl", hash = "sha256:8cce303e4bf08da529f55152808dcaa5f572ecfdd60b3df36ad2d6101bb648f7"},
+    {file = "charmonium.freeze-0.5.4.tar.gz", hash = "sha256:4eb9479e08e51828f6ddfb75933105b2a3ca1e3fcc5bea45d9d5342e6724259f"},
 ]
 "charmonium.time-block" = [
     {file = "charmonium.time_block-0.3.0-py3-none-any.whl", hash = "sha256:1d2526fd0c7828f0980de6a9f58f2d26a398ad4ad05f6c7e26c9463bb3301c60"},
@@ -1719,8 +1719,8 @@ filelock = [
     {file = "filelock-3.6.0.tar.gz", hash = "sha256:9cd540a9352e432c7246a48fe4e8712b10acb1df2ad1f30e8c070b82ae1fed85"},
 ]
 fonttools = [
-    {file = "fonttools-4.31.1-py3-none-any.whl", hash = "sha256:2b288eae806800668cb5cdf52a37b5ac701c5adda2dd5c88b685581ce3385285"},
-    {file = "fonttools-4.31.1.zip", hash = "sha256:f8b35ed9ba189710994cec2c86b8eb5f0c49336698575e439a0d5671d3ca1ace"},
+    {file = "fonttools-4.31.2-py3-none-any.whl", hash = "sha256:2df636a3f402ef14593c6811dac0609563b8c374bd7850e76919eb51ea205426"},
+    {file = "fonttools-4.31.2.zip", hash = "sha256:236b29aee6b113e8f7bee28779c1230a86ad2aac9a74a31b0aedf57e7dfb62a4"},
 ]
 future = [
     {file = "future-0.18.2.tar.gz", hash = "sha256:b1bead90b70cf6ec3f0710ae53a525360fa360d306a86583adc6bf83a4db537d"},
@@ -2159,8 +2159,8 @@ python-dateutil = [
     {file = "python_dateutil-2.8.2-py2.py3-none-any.whl", hash = "sha256:961d03dc3453ebbc59dbdea9e4e11c5651520a876d0f4db161e8674aae935da9"},
 ]
 pytz = [
-    {file = "pytz-2021.3-py2.py3-none-any.whl", hash = "sha256:3672058bc3453457b622aab7a1c3bfd5ab0bdae451512f6cf25f64ed37f5b87c"},
-    {file = "pytz-2021.3.tar.gz", hash = "sha256:acad2d8b20a1af07d4e4c9d2e9285c5ed9104354062f275f3fcd88dcef4f1326"},
+    {file = "pytz-2022.1-py2.py3-none-any.whl", hash = "sha256:e68985985296d9a66a881eb3193b0906246245294a881e7c8afe623866ac6a5c"},
+    {file = "pytz-2022.1.tar.gz", hash = "sha256:1e760e2fe6a8163bc0b3d9a19c4f84342afa0a2affebfaa84b01b978a02ecaa7"},
 ]
 pywin32-ctypes = [
     {file = "pywin32-ctypes-0.2.0.tar.gz", hash = "sha256:24ffc3b341d457d48e8922352130cf2644024a4ff09762a2261fd34c36ee5942"},
@@ -2222,8 +2222,8 @@ rfc3986 = [
     {file = "rfc3986-2.0.0.tar.gz", hash = "sha256:97aacf9dbd4bfd829baad6e6309fa6573aaf1be3f6fa735c8ab05e46cecb261c"},
 ]
 rich = [
-    {file = "rich-12.0.0-py3-none-any.whl", hash = "sha256:fdcd2f8d416e152bcf35c659987038d1ae5a7bd336e821ca7551858a4c7e38a9"},
-    {file = "rich-12.0.0.tar.gz", hash = "sha256:14bfd0507edc633e021b02c45cbf7ca22e33b513817627b8de3412f047a3e798"},
+    {file = "rich-12.0.1-py3-none-any.whl", hash = "sha256:ce5c714e984a2d185399e4e1dd1f8b2feacb7cecfc576f1522425643a36a57ea"},
+    {file = "rich-12.0.1.tar.gz", hash = "sha256:3fba9dd15ebe048e2795a02ac19baee79dc12cc50b074ef70f2958cd651b59a9"},
 ]
 rstcheck = [
     {file = "rstcheck-3.3.1.tar.gz", hash = "sha256:92c4f79256a54270e0402ba16a2f92d0b3c15c8f4410cb9c57127067c215741f"},
