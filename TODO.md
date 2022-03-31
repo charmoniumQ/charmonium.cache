@@ -9,7 +9,6 @@
   - [x] Clean up theory.
 - [x] Make memoization Thread safety.
 - [x] Make `MemoizedGroup` picklable.
-- [x] Fix `determ_hash(numpy.inte64(1234))`
 - [x] Test usage in parallel environments.
 - [x] Fix `time_cost` overreporting bug.
 - [x] Test that Memoized functions compose.
@@ -29,27 +28,9 @@
 - [x] Print log on {invalidation, eviction, orphan, miss, hit}
   - [x] Handle long arg message
 - [x] `determ_hash`  should use `xxHash`.
-- [x] Improve determ_hash
-  - [x] Catch Pickle TypeError
-  - [x] Catch Pickle ImportError
-- [x] Make `hashable` handle more types:
-  - [x] Module: hash by name.
-  - [x] Objects: include the source-code of methods.
-  - [x] C extensions. hashed by name, like module
-  - [x] Methods
-  - [x] fastpath for numpy arrays
 
 # Research tasks
 
-- Fix hashing
-  - [x] Bring hash into separate package.
-  - [x] Test hashing sets with different orders. Assert tests fail.
-  - [x] Test hashing dicts with different orders. Assert tests fail.
-  - [ ] Test hash for objects and classes more carefully.
-  - [x] Don't include properties in hash.
-  - [ ] Support closures which include `import x` and `from x import y`
-  - [x] Use user-customizable multidispatch.
-  - [x] Make it work with `tqdm`.
 - [x] Show which part of the key is invalidated
 - Performance evaluation
   - [x] Macrobenchmark on commit history of real repositories.
@@ -59,7 +40,7 @@
 - [ ] Integrate with Parsl.
   - [ ] Resp to comment [parsl comment]
 - [ ] Documentation
-  - [ ] Explain how to use logging (ops, perf, freeze).
+  - [x] Explain how to use logging (ops, perf, freeze).
   - [ ] Write about how memoization interacts with OOP.
   - [ ] Write about when memoization is unsound.
   - [ ] Record demo, update presentation, link presentation.
@@ -69,48 +50,46 @@
   - [ ] Listen for [audit events].
   - [ ] Scan for references to non-deterministic functions (time, random, sys, os, path).
 - [x] Convert Jupyter Notebooks into scripts.
-- [ ] Memoize the hash of immutable data. This might not work, because immutable data can still contain pointers to mutable data, e.g.: in `a = ([])`, `a` is immutable, but `a[0]` is not.
-- [ ] Change hash to a member
 - [ ] The outputs of a cached function can be hashed by their progenesis.
-- [ ] Make all packages in `site_packages` be assumed constant.
+- [ ] Make all packages in stdlib be assumed constant.
 - [ ] Apply automatically using [importhook].
   - [ ] Write `maybe_memoize`.
   - [ ] Global config.
 - [ ] Do writing-to-disk off the critical path, in a thread.
 - [ ] Create a better API for group configuration.
-- [ ] Make it easier to add a freeze method for a type.
-- [ ] Use environment variable to specify cache location.
-- [ ] Make freeze work for Pandas.
-- [ ] Improve test coverage in charmonium.cache, charmonium.determ_hash
+- [ ] Write about variable name ambiguity.
+- [ ] See if [lazy_python] could be of use.
+- [ ] Cache should hit if entry is absent in index but present in obj store ("recover" orphans). In this case, we have the result, but not the metadata. Just create the metadata on the spot and use the computed result.
+- [ ] Test fine-grained persistence more carefully.
 
 [audit events]: https://docs.python.org/3/library/audit_events.html#audit-events
 [importhook]: https://brettlangdon.github.io/importhook/
 [parsl comment]: https://github.com/Parsl/parsl/issues/1591#issuecomment-954863242
-
-# IPython caching
-- [ ] https://stackoverflow.com/questions/31255894/how-to-cache-in-ipython-notebook
+[lazy_python]: https://pypi.org/project/lazy_python/
 
 # Minor release
-
-- [ ] Encapsulate global config `freeze` into object.
+- [ ] Use environment variable to specify cache location.
+- [ ] Improve test coverage in charmonium.cache, charmonium.determ_hash
 - [ ] Improve the UX for setting MemoizedGroup options.
+- [ ] Have an option for `system_wide_cache` that stores the cache directory in a deterministic (not relative to `$PWD`) path.
 - [ ] Do `fsync` before/after load?
 - [ ] Do I really need `memoize(..., temporary: bool = False)` in tests?
 - [ ] Simplify `tests/test_memoize_parallel.py`.
 - [ ] Shortcut for caching a decorator
-- [ ] Support out-of-band (zero-copy) pickle-hashing in `determ_hash`.
 - [ ] file-IO based pickle
 - [ ] Make `fine_grain*` apply to a `Memoized` level. All benefit from positive externalities.
+  - There is an argument against this. A user could puprosefully make a low-frequency call fine-grained but not a high-frequency call. This would reduce contention while still providing a checkpoint wihtin the program.
 - [ ] Make resistant to errors.
   - Add `commit()`.
   - Use`sys.excepthook`.
-- [ ] Optionally repay stdout on cache hit.
+- [ ] Optionally repay stdout (and logs?) on cache hit.
+- [ ] Make sure adding a loghandler doesn't invalidate cache.
 - [ ] Print usage report at the end, with human timedeltas.
-- [ ] Use `poetry2nix`.
 - [x] Replace `shell.nix` with `flake.nix`.
 
 # Low priorities
 
+- [ ] https://stackoverflow.com/questions/31255894/how-to-cache-in-ipython-notebook
 - Regarding logs,
   - [ ] Humanize timedeltas.
 - [ ] Reset stats
@@ -120,7 +99,6 @@
 - [ ] Add "button" images to README.
   - [ ] GitHub Actions checks
   - [ ] External code quality/analysis
-- [ ] `hashable` prints log on error
 - [ ] Make working example of caching in S3.
 - [ ] Set up git-changelog.
 - [ ] Make it work for instance methods.

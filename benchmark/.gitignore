@@ -12,3 +12,4 @@ report.html
 .my-venv
 .manual_cache
 secrets.env
+.tmp

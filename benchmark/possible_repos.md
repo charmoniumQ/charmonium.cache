@@ -56,6 +56,10 @@ These are the repos I am considering as case-studies, ordered from least likely 
 - https://ceesd.illinois.edu/directory/
 - https://github.com/GijsMulders/epos
   - Could use tutorials
+- https://github.com/raymondEhlers/pachyderm/
+  - No main command
+- https://github.com/macintoshpie/paropt
+  - Bayesian optimizer, no tests; probably has low reuse.
 - https://pysyd.readthedocs.io/en/latest/
   - Many of the important functions are impure, so it cannot be cached without significant modifications.
 - https://github.com/christopherburke/TESS-ExoClass
@@ -74,11 +78,15 @@ These are the repos I am considering as case-studies, ordered from least likely 
   - Not enough specific historical variation
   - Uses PyMC3, which I can't serialize.
     - This can be overcome with minor modifications.
+- https://github.com/andrzejnovak/NanoSkimmer
+  - No input data
+- https://github.com/raymondEhlers/reactionPlaneFit
+  - No input data
+- https://github.com/erykoff/redmapper
+  - Tests exist, but no input data for standalone run
 - https://github.com/dfm/emcee
   - Could use tutorials or tests.
   - Not enough specific historical variation.
-- https://pipelines.lsst.io/
-  - Bug: https://github.com/lsst/sconsUtils/issues/100
 - https://sandialabs.github.io/
 - https://software.llnl.gov/
 - https://github.com/ORNL
@@ -90,6 +98,9 @@ These are the repos I am considering as case-studies, ordered from least likely 
 - https://github.com/microsoft/torchgeo
   - Could use tutorials or benchmarks.
   - Ton of dependencies
+- https://pipelines.lsst.io/
+  - Bug: https://github.com/lsst/sconsUtils/issues/100
+- https://github.com/LBJ-Wade/coffea
 - https://github.com/charmoniumQ/bollywood-data-analysis
   - Attempts caching already.
 - https://github.com/ILLIXR/illixr-analysis
@@ -99,7 +110,7 @@ Do you have a slow data processing pipeline in Python? I'm trying to speed up it
 
 Repo mining:
   - GitHub mining
-    - https://ghtorrent.org/msr14.html
+    - https://ghtorrent.org/
     - http://boa.cs.iastate.edu/
     - https://grep.app/search
   - Other repos:

@@ -114,9 +114,9 @@ one is unique because it is:
    space is partitioned across all memoized functions according to the
    heuristic.
 
-5. **Supports smart heuristics:** Motivated by academic literature, I use cache
-   policies that can take into account time-to-recompute and storage-size in
-   addition to recency, unlike `LRU`_.
+5. **Supports smart heuristics:** By default, the library uses state-of-the-art
+   cache policies that can take into account time-to-recompute and storage-size
+   in addition to recency, more advanced than simple `LRU`_.
 
 6. **Overhead aware:** The library measures the time saved versus overhead. It
    warns the user if the overhead of caching is not worth it.

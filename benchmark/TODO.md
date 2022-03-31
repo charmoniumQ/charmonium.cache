@@ -1,0 +1,37 @@
+- [x] Scrape ASCL.
+- [x] Query GitHub url to get stars.
+  - Hit by ratelimiting.
+  - [x] Authenticate to GitHub to raise ratelimit.
+  - [x] Implement backoff when hitting ratelimit.
+  - [x] Cache results in a global location to avoid ratelimiting.
+- [x] Connect ASCL to GitHub in a reliable way.
+  - Current strategy: If `code site` is a GitHub repository, we are done. Otherwise, load it (with a timeout), and search through every link in the page, stop when one looks like a `github.com/user/repo` link.
+  - [ ] Could improve this by turning `user.github.io` links into a GitHub repository.
+  - [ ] Could improve this by turning `github.com/user` links into a GitHub repository.
+- [x] Fix charmonium.freeze tests.
+- [x] Debug why astronomy pipeline is recomputing when no source code changes.
+  - This was due to a variable in matplotlib called `_cache` which is an in-memory cache. `charmonium.freeze` should ignore this variable, because it doesn't change the result of any computation (just speeds it up).
+- [x] Document `charmonium.freeze` and `charmonium.cache` debugging process.
+- [x] Fix charmonium.freeze for Pandas dataframes.
+- [x] Run [eht-imaging] in the experiment
+  - Results are promising, 90% time saved on trivial commits.
+    - But these commits are too trivial. They are documentation changes could be easily ignored by other strategies.
+- [ ] Run [astropy] in the experiment.
+  - Currently astropy includes a `threading.Lock` object which `charmonium.freeze` can't handle.
+- [ ] Run testmon on commits. Indicate the testmon overhead and indicate if testmon thinks the script needs to be rerun. Ideally, I would be able to get partial reuse on intermediate values when testmon thinks the script needs to be rerun.
+  - However, many of the scripts have a ton of execution time in one critical function. If that function has to be recomputed (it changed syntactically or its predecessor changed semantically), most of the runtime will have to be reexecuted anyway.
+  - [ ] First, run the commits with testmon.
+  - [ ] Then, update the output summary.
+- [ ] Investigate testmon: how does it compare the new source code to the old trace? E.g., does inserting a comment along a taken branch cause an invalidation?
+- [ ] Find which files get covered by execution trace. Filter to commits which change one of those files. I would want to test fewer or no commits that testmon thinks _don't_ change.
+- [ ] Run commits with Joblib. Joblib is a persistent caching decorator which is unsafe. Ideally, `charmonium.cache` should be as fast as Joblib but be correct (match the unmemoized version) in cases where joblib does not.
+  - [ ] First, run the commits with Joblib.
+  - [ ] Then, update the output summary.
+- [ ] Increase automation for scripts by factoring out the "common section." This is the section helps the script know what experimental conditions to use (e.g. switching between memoization and not). I currently have this repeated for each script.
+- [ ] Examine how often existing caching decorators are used in GitHub projects.
+- [ ] Examine how often existing manuual caching mechanisms (search for kewyord `cache` as a variable name or argument name). Decide accuracy by hand.
+- [ ] Increase automation for environments. The experiment runner should install "editable" version the current project with "[dev]" extra if exists and `charmonium.cache` with Conda. The experiment runner should cache this environment. This should be backwards compatible with a manual conda `environment.yml` when the automation fails. Currently, everything uses a manually-written per-project `environment.yml`.
+- [ ] The results should be cached at a commit-level. They are currently cached at a repo-level.
+
+[eht-imaging]: https://github.com/achael/eht-imaging
+[astropy]: https://github.com/astropy/astropy
