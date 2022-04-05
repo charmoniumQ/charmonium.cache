@@ -265,14 +265,14 @@ async def all_tests_inner(interactive: bool) -> None:
         dist = Path("dist")
         if dist.exists():
             shutil.rmtree(dist)
-        await pretty_run(["rstcheck", "README.rst"])
+        # await pretty_run(["rstcheck", "README.rst"])
         await pretty_run(["poetry", "build", "--quiet"])
         await pretty_run(["twine", "check", "--strict", *dist.iterdir()])
         shutil.rmtree(dist)
 
     await asyncio.gather(
         poetry_build(),
-        docs_inner(),
+        # docs_inner(),
         pytest(use_coverage=False, show_slow=False),
     )
     # Tox already has its own parallelism,

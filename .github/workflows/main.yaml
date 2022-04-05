@@ -20,4 +20,4 @@ jobs:
             $HOME/.cache/pypoetry/
           key: venv-${{ hashFiles('poetry.lock') }}-${{ hashFiles('pyproject.toml') }}
 
-      - run: nix develop --command ./script.py all-tests --no-interactive
+      - run: nix develop --command ./script.py test
