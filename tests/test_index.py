@@ -6,7 +6,11 @@ from charmonium.cache.util import Constant
 
 def test_index() -> None:
     index = Index[int, str](
-        (IndexKeyType.MATCH, IndexKeyType.LOOKUP, IndexKeyType.MATCH,)
+        (
+            IndexKeyType.MATCH,
+            IndexKeyType.LOOKUP,
+            IndexKeyType.MATCH,
+        )
     )
     index[(1, 2, 3)] = "hello"
     assert set(index.items()) == {((1, 2, 3), "hello")}
@@ -30,7 +34,11 @@ def test_index() -> None:
 
 def test_index_del() -> None:
     index = Index[int, str](
-        (IndexKeyType.MATCH, IndexKeyType.LOOKUP, IndexKeyType.MATCH,)
+        (
+            IndexKeyType.MATCH,
+            IndexKeyType.LOOKUP,
+            IndexKeyType.MATCH,
+        )
     )
     index[(0, 2, 4)] = "hello1"
     index[(0, 3, 4)] = "hello2"
@@ -42,7 +50,11 @@ def test_index_del() -> None:
 
 def test_thunk() -> None:
     index = Index[int, str](
-        (IndexKeyType.MATCH, IndexKeyType.LOOKUP, IndexKeyType.MATCH,)
+        (
+            IndexKeyType.MATCH,
+            IndexKeyType.LOOKUP,
+            IndexKeyType.MATCH,
+        )
     )
     assert (
         index.get_or((0, 3, 4), Constant("hello3")) == "hello3"
@@ -55,7 +67,11 @@ def test_thunk() -> None:
 
 def test_contains() -> None:
     index = Index[int, str](
-        (IndexKeyType.MATCH, IndexKeyType.LOOKUP, IndexKeyType.MATCH,)
+        (
+            IndexKeyType.MATCH,
+            IndexKeyType.LOOKUP,
+            IndexKeyType.MATCH,
+        )
     )
     index[(0, 3, 4)] = "hello2"
     assert (0, 3, 4) in index
@@ -64,7 +80,11 @@ def test_contains() -> None:
 
 def test_raises_wrong_schema() -> None:
     index = Index[int, str](
-        (IndexKeyType.MATCH, IndexKeyType.LOOKUP, IndexKeyType.MATCH,)
+        (
+            IndexKeyType.MATCH,
+            IndexKeyType.LOOKUP,
+            IndexKeyType.MATCH,
+        )
     )
     with pytest.raises(ValueError):
         index[(1, 2)] = "hello5"
@@ -76,7 +96,11 @@ def test_raises_wrong_schema() -> None:
 
 def test_update() -> None:
     old = Index[int, str](
-        (IndexKeyType.MATCH, IndexKeyType.LOOKUP, IndexKeyType.MATCH,)
+        (
+            IndexKeyType.MATCH,
+            IndexKeyType.LOOKUP,
+            IndexKeyType.MATCH,
+        )
     )
     old[(1, 2, 3)] = "old"
     old[(1, 3, 3)] = "old"

@@ -70,7 +70,8 @@ class Index(Generic[Key, Val]):
         return cast(Dict[Key, Val], obj), keys[-1], self.schema[-1]
 
     def _get_or_create_last_level(
-        self, keys: tuple[Key, ...],
+        self,
+        keys: tuple[Key, ...],
     ) -> tuple[dict[Key, Val], Key, IndexKeyType]:
         if len(keys) != len(self.schema):
             raise ValueError(

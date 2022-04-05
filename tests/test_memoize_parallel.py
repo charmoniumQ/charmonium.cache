@@ -26,7 +26,7 @@ if TYPE_CHECKING:
 else:
     Protocol = object
 
-
+# TODO: rewrite without tmp_root
 tmp_root = (
     Path(tempfile.gettempdir())
     / "test_memoize_parallel"
@@ -74,11 +74,12 @@ overlap = 4
 
 
 @memoize(
-    use_obj_store=False, use_metadata_size=True,
+    use_obj_store=False,
+    use_metadata_size=True,
 )
 def square(x: int) -> int:
     (tmp_root / str(random.randint(0, 10000))).write_text(str(x))
-    return x ** 2
+    return x**2
 
 
 def square_all(lst: list[int]) -> list[int]:
@@ -96,7 +97,13 @@ def test_parallelism(ParallelType: Type[Parallel]) -> None:
     )
 
     calls, unique_calls = make_overlapping_calls(n_procs, overlap)
-    procs = [ParallelType(target=square_all, args=(call,),) for call in calls]
+    procs = [
+        ParallelType(
+            target=square_all,
+            args=(call,),
+        )
+        for call in calls
+    ]
     for proc in procs:
         proc.start()
     for proc in procs:
@@ -110,6 +117,9 @@ def test_parallelism(ParallelType: Type[Parallel]) -> None:
 
 
 def test_cloudpickle() -> None:
+    if tmp_root.exists():
+        shutil.rmtree(tmp_root)
+    tmp_root.mkdir(parents=True)
     # I need to make Memoize compatible with cloudpickle so that it can be parallelized with dask.
     global square
     square.group = MemoizedGroup(
@@ -121,9 +131,6 @@ def test_cloudpickle() -> None:
 
 
 def test_dask_bag() -> None:
-    if tmp_root.exists():
-        shutil.rmtree(tmp_root)
-    tmp_root.mkdir(parents=True)
     square.group = MemoizedGroup(
         obj_store=DirObjStore(temp_path()), fine_grain_persistence=True, temporary=True
     )

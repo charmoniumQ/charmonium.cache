@@ -5,11 +5,14 @@ import stat
 import zlib
 from typing import Any, Callable, Mapping, Tuple, Union, cast
 
+from charmonium.determ_hash import determ_hash
+
 from .pathlike import PathLike, PathLikeFrom, pathlike_from
 
 FILE_COMPARISONS: Mapping[str, Callable[[PathLike], Any]] = {
-    "mtime": lambda p: p.stat()[stat.ST_MTIME] if p.exists() else None,
-    "crc32": lambda p: zlib.crc32(p.read_bytes()) if p.exists() else None,
+    "mtime": lambda p: p.stat()[stat.ST_MTIME],
+    "crc32": lambda p: zlib.crc32(p.read_bytes()),
+    "determ_hash": lambda p: determ_hash(p.read_bytes()),
 }
 
 
@@ -35,17 +38,15 @@ class FileContents:
     """
 
     path: PathLike
-    comparison: Callable[[PathLike], Any]
+    comparison: str
 
     def __init__(
         self,
         path: PathLikeFrom,
-        comparison: Union[str, Callable[[PathLike], Any]] = "crc32",
+        comparison: str = "determ_hash",
     ) -> None:
         self.path = pathlike_from(path)
-        self.comparison = (
-            comparison if callable(comparison) else FILE_COMPARISONS[comparison]
-        )
+        self.comparison = comparison
 
     def __add__(self, path: str) -> FileContents:
         new_path = type(self.path)(str(self.path) + path)  # type: ignore
@@ -64,15 +65,22 @@ class FileContents:
 
     def __cache_ver__(self) -> Any:
         """Returns the contents of the file"""
-        return self.comparison(self.path)
+        if self.path.exists():
+            return FILE_COMPARISONS[self.comparison](self.path)
+        else:
+            return None
 
     def __getstate__(self) -> Any:
         """Captures the path and its contents"""
-        return (self.path, self.path.read_bytes() if self.path.exists() else b"")
+        return (
+            self.path,
+            self.comparison,
+            self.path.read_bytes() if self.path.exists() else b"",
+        )
 
     def __setstate__(self, state: Any) -> None:
         """Restore the contents to the path"""
-        self.path, contents = cast(Tuple[PathLike, bytes], state)
+        self.path, self.comparison, contents = cast(Tuple[PathLike, str, bytes], state)
         self.path.write_bytes(contents)
 
 

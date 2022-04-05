@@ -100,7 +100,7 @@ stderr:
         ScriptResult,
         {
             "expected": [
-                (input ** source_var + closure_func_source_var) * closure_var
+                (input**source_var + closure_func_source_var) * closure_var
                 for input in inputs
             ],
             **json.loads(out_str[-1]),
@@ -118,7 +118,11 @@ vars_ = {
 
 @pytest.mark.parametrize(
     "serializer,change,as_main",
-    itertools.product(["func_version"], vars_.keys(), [False],),
+    itertools.product(
+        ["func_version"],
+        vars_.keys(),
+        [False],
+    ),
 )
 def test_code_change(serializer: str, change: str, as_main: bool) -> None:
     with tempfile.TemporaryDirectory() as directory_:

@@ -22,8 +22,14 @@ calls: list[int] = []
         ({"use_metadata_size": True, "use_obj_store": False}, {}),
         ({"pickler": pickle}, {}),
         ({"extra_func_state": lambda func: 3}, {}),  # type: ignore
-        ({}, {"size": 1000},),
-        ({}, {"size": "10KiB"},),
+        (
+            {},
+            {"size": 1000},
+        ),
+        (
+            {},
+            {"size": "10KiB"},
+        ),
         ({}, {"pickler": pickle}),
         ({}, {"fine_grain_persistence": True}),
         ({}, {"fine_grain_eviction": True}),
@@ -42,7 +48,7 @@ def test_memoize(kwargs: dict[str, Any], group_kwargs: dict[str, Any]) -> None:
     def square(x: int) -> int:
         # I don't want `calls` to be in the closure.
         globals()["calls"].append(x)
-        return x ** 2
+        return x**2
 
     assert [square(2), square(3), square(2)] == [4, 9, 4]
     assert calls == [2, 3]
@@ -54,9 +60,11 @@ i = 0
 
 
 def test_memoize_impure_closure() -> None:
-    @memoize(group=MemoizedGroup(obj_store=DirObjStore(temp_path()), temporary=True),)
+    @memoize(
+        group=MemoizedGroup(obj_store=DirObjStore(temp_path()), temporary=True),
+    )
     def square(x: int) -> int:
-        return x ** 2 + i
+        return x**2 + i
 
     assert square(2) == 4
     global i
@@ -93,7 +101,7 @@ def test_eviction(use_obj_store: bool) -> None:
 def test_verbose(caplog: pytest.Caplog) -> None:
     @memoize(group=MemoizedGroup(obj_store=DirObjStore(temp_path()), temporary=True))
     def square_loud(x: int) -> int:
-        return x ** 2
+        return x**2
 
     square_loud(2)
     # TODO: this
@@ -111,11 +119,15 @@ def test_verbose(caplog: pytest.Caplog) -> None:
 
 
 def test_composition() -> None:
-    @memoize(group=MemoizedGroup(obj_store=DirObjStore(temp_path()), temporary=True),)
+    @memoize(
+        group=MemoizedGroup(obj_store=DirObjStore(temp_path()), temporary=True),
+    )
     def double(x: int) -> int:
         return x * 2
 
-    @memoize(group=MemoizedGroup(obj_store=DirObjStore(temp_path()), temporary=True),)
+    @memoize(
+        group=MemoizedGroup(obj_store=DirObjStore(temp_path()), temporary=True),
+    )
     def double_square(x: int) -> int:
         return double(x) ** 2
 
@@ -124,7 +136,9 @@ def test_composition() -> None:
 
 
 def test_read_write_cycle() -> None:
-    @memoize(group=MemoizedGroup(obj_store=DirObjStore(temp_path()), temporary=True),)
+    @memoize(
+        group=MemoizedGroup(obj_store=DirObjStore(temp_path()), temporary=True),
+    )
     def double(x: int) -> int:
         return x * 2
 

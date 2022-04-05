@@ -103,4 +103,6 @@ class GDSize(ReplacementPolicy):
             raise TypeError(f"Cannot update a {type(self)} from a {type(other)}")
 
 
-REPLACEMENT_POLICIES: Mapping[str, type[ReplacementPolicy]] = dict(gdsize=GDSize,)
+REPLACEMENT_POLICIES: Mapping[str, type[ReplacementPolicy]] = dict(
+    gdsize=GDSize,
+)

@@ -25,7 +25,6 @@ from typing import (
 
 import attr
 import bitmath
-
 from charmonium.determ_hash import determ_hash
 from charmonium.freeze import freeze
 
@@ -50,7 +49,9 @@ BYTE_ORDER: str = "big"
 
 
 def memoize(
-    *, disable: Union[str, bool] = None, **kwargs: Any,
+    *,
+    disable: Union[str, bool] = None,
+    **kwargs: Any,
 ) -> Callable[[Callable[FuncParams, FuncReturn]], Memoized[FuncParams, FuncReturn]]:
     """See :py:class:`charmonium.cache.Memoized`."""
 
@@ -232,7 +233,11 @@ class MemoizedGroup:
         if ops_logger.isEnabledFor(logging.DEBUG):
             ops_logger.debug(
                 json.dumps(
-                    {"event": "cascading_delete", "key": key, "obj_key": obj_key,}
+                    {
+                        "event": "cascading_delete",
+                        "key": key,
+                        "obj_key": obj_key,
+                    }
                 )
             )
 
@@ -287,7 +292,12 @@ class MemoizedGroup:
             )
         if ops_logger.isEnabledFor(logging.DEBUG):
             ops_logger.debug(
-                json.dumps({"event": "index_write", "self._version": self._version,})
+                json.dumps(
+                    {
+                        "event": "index_write",
+                        "self._version": self._version,
+                    }
+                )
             )
 
     def _system_state(self) -> Any:
@@ -356,7 +366,12 @@ class MemoizedGroup:
                 if obj_key not in found_obj_keys:
                     if ops_logger.isEnabledFor(logging.DEBUG):
                         ops_logger.debug(
-                            json.dumps({"event": "remove_orphan", "obj_key": obj_key,})
+                            json.dumps(
+                                {
+                                    "event": "remove_orphan",
+                                    "obj_key": obj_key,
+                                }
+                            )
                         )
                     del self._obj_store[obj_key]
 
@@ -589,7 +604,7 @@ class Memoized(Generic[FuncParams, FuncReturn]):
     ) -> FuncReturn:
         call_start = datetime.datetime.now()
 
-        call_id = random.randint(0, 2 ** 64 - 1)
+        call_id = random.randint(0, 2**64 - 1)
 
         would_hit, key, obj_key = self._would_hit(call_id, *args, **kwargs)
 
@@ -696,7 +711,7 @@ class Memoized(Generic[FuncParams, FuncReturn]):
     def would_hit(
         self, call_id: int, *args: FuncParams.args, **kwargs: FuncParams.kwargs
     ) -> bool:
-        return self._would_hit(call_id, *args, **kwargs)[0]
+        return self._would_hit(*args, **kwargs)[0]
 
     def _would_hit(
         self, call_id: int, *args: FuncParams.args, **kwargs: FuncParams.kwargs
