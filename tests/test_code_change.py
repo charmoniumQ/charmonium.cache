@@ -8,7 +8,7 @@ import sys
 import tempfile
 import textwrap
 from pathlib import Path
-from typing import Dict, List, TypedDict, cast
+from typing import Dict, List, Tuple, TypedDict, cast
 
 import pytest
 
@@ -31,7 +31,7 @@ def run_script(
     closure_func_source_var: int = 3,
     other_var: int = 4,
     as_main: bool = False,
-    inputs: list[int] = [2, 3, 2],
+    inputs: Tuple[int] = (2, 3, 2),
 ) -> ScriptResult:
     script = directory / f"script_{name}.py"
     script.parent.mkdir(exist_ok=True)
@@ -81,7 +81,7 @@ print(json.dumps(dict(
     )
     cmd = [script.name] if as_main else ["-m", script.stem]
     proc = subprocess.run(
-        [sys.executable, *cmd], cwd=script.parent, capture_output=True, text=True
+        [sys.executable, *cmd], cwd=script.parent, capture_output=True, text=True, check=False,
     )
     if proc.returncode != 0:
         print(

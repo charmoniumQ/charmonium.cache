@@ -59,18 +59,14 @@ def cyclic_permutation(iterable: Iterable[T], offset: int) -> Iterable[T]:
 
 
 def make_overlapping_calls(
-    workers: int, overlap: int
+    n_workers: int, n_overlap: int
 ) -> tuple[tuple[tuple[int, ...], ...], set[int]]:
     start = random.randint(0, 100000)
-    unique_calls = list(range(start, start + n_procs))
+    unique_calls = list(range(start, start + n_workers))
     return (
-        tuple(zip(*(cyclic_permutation(unique_calls, i) for i in range(overlap)))),
+        tuple(zip(*(cyclic_permutation(unique_calls, i) for i in range(n_overlap)))),
         set(unique_calls),
     )
-
-
-n_procs = 5
-overlap = 4
 
 
 @memoize(
@@ -85,6 +81,9 @@ def square(x: int) -> int:
 def square_all(lst: list[int]) -> list[int]:
     return list(map(square, lst))
 
+N_PROCS = 5
+N_OVERLAP = 4
+
 
 @pytest.mark.parametrize("ParallelType", [multiprocessing.Process, threading.Thread])
 def test_parallelism(ParallelType: Type[Parallel]) -> None:
@@ -96,7 +95,7 @@ def test_parallelism(ParallelType: Type[Parallel]) -> None:
         obj_store=DirObjStore(temp_path()), fine_grain_persistence=True, temporary=True
     )
 
-    calls, unique_calls = make_overlapping_calls(n_procs, overlap)
+    calls, unique_calls = make_overlapping_calls(N_PROCS, N_OVERLAP)
     procs = [
         ParallelType(
             target=square_all,
@@ -111,7 +110,7 @@ def test_parallelism(ParallelType: Type[Parallel]) -> None:
     recomputed = [int(log.read_text()) for log in tmp_root.iterdir()]
     # Note that two parallel workers *can* sometimes compute redundant function values because they don't know that the other is in progress.
     # However, it would be improbable that *every* worker *always* is computing redundant values.
-    assert len(recomputed) < overlap * n_procs
+    assert len(recomputed) < N_OVERLAP * N_PROCS
     assert set(recomputed) == unique_calls
     assert all(square.would_hit(x) for x in unique_calls)
 
@@ -121,7 +120,6 @@ def test_cloudpickle() -> None:
         shutil.rmtree(tmp_root)
     tmp_root.mkdir(parents=True)
     # I need to make Memoize compatible with cloudpickle so that it can be parallelized with dask.
-    global square
     square.group = MemoizedGroup(
         obj_store=DirObjStore(temp_path()), fine_grain_persistence=True, temporary=True
     )
@@ -131,13 +129,16 @@ def test_cloudpickle() -> None:
 
 
 def test_dask_bag() -> None:
+    if tmp_root.exists():
+        shutil.rmtree(tmp_root)
+    tmp_root.mkdir(parents=True)
     square.group = MemoizedGroup(
         obj_store=DirObjStore(temp_path()), fine_grain_persistence=True, temporary=True
     )
-    calls, unique_calls = make_overlapping_calls(n_procs, overlap)
-    dask.bag.from_sequence(itertools.chain.from_iterable(calls), npartitions=n_procs).map(square).compute()  # type: ignore
+    calls, unique_calls = make_overlapping_calls(N_PROCS, N_OVERLAP)
+    dask.bag.from_sequence(itertools.chain.from_iterable(calls), npartitions=N_PROCS).map(square).compute()  # type: ignore
     recomputed = [int(log.read_text()) for log in tmp_root.iterdir()]
-    assert len(recomputed) < overlap * n_procs
+    assert len(recomputed) < N_OVERLAP * N_PROCS
     assert set(recomputed) == unique_calls
     subprocess.run(["sync", "--file-system", "."], check=True)
     calls_would_hit = [square.would_hit(x) for x in unique_calls]
@@ -151,10 +152,11 @@ def test_dask_delayed() -> None:
     square.group = MemoizedGroup(
         obj_store=DirObjStore(temp_path()), fine_grain_persistence=True, temporary=True
     )
-    calls, unique_calls = make_overlapping_calls(n_procs, overlap)
+    calls, unique_calls = make_overlapping_calls(N_PROCS, N_OVERLAP)
     square2 = dask.delayed(square)  # type: ignore
     results = dask.compute(*[square2(x) for call in calls for x in call])  # type: ignore
     recomputed = [int(log.read_text()) for log in tmp_root.iterdir()]
-    assert len(recomputed) < overlap * n_procs
+    assert len(recomputed) < N_OVERLAP * N_PROCS
     assert set(recomputed) == unique_calls
     assert all(square.would_hit(x) for x in unique_calls)
+    assert results == tuple([x**2 for call in calls for x in call])

@@ -460,8 +460,7 @@ class Memoized(Generic[FuncParams, FuncReturn]):
             tc = self.group.time_cost[self.name]
             ts = self.group.time_saved[self.name]
         print(
-            "Caching %r: cost %.1fs, saved %.1fs, net saved %.1fs"
-            % (
+            "Caching {}: cost {:.1f}s, saved {:.1f}s, net saved {:.1f}s".format(
                 self.name,
                 tc.total_seconds(),
                 ts.total_seconds(),
@@ -709,9 +708,9 @@ class Memoized(Generic[FuncParams, FuncReturn]):
             return obj
 
     def would_hit(
-        self, call_id: int, *args: FuncParams.args, **kwargs: FuncParams.kwargs
+        self, *args: FuncParams.args, **kwargs: FuncParams.kwargs
     ) -> bool:
-        return self._would_hit(*args, **kwargs)[0]
+        return self._would_hit(0, *args, **kwargs)[0]
 
     def _would_hit(
         self, call_id: int, *args: FuncParams.args, **kwargs: FuncParams.kwargs

@@ -127,8 +127,9 @@ def temp_path(
     prefix: Optional[str] = None,
     directory: Optional[Union[str, Path]] = None,
 ) -> Path:
+    # TODO: Remove this function.
     temp_dir = Path(
-        tempfile.TemporaryDirectory(suffix=suffix, prefix=prefix, dir=directory).name
+        tempfile.TemporaryDirectory(suffix=suffix, prefix=prefix, dir=directory).name # pylint: disable=consider-using-with
     )
     return temp_dir
 

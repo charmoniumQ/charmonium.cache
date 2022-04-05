@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import pickle
 from typing import Any
 
@@ -56,10 +57,8 @@ def test_memoize(kwargs: dict[str, Any], group_kwargs: dict[str, Any]) -> None:
     str(square)
 
 
-i = 0
-
-
 def test_memoize_impure_closure() -> None:
+    i = 0
     @memoize(
         group=MemoizedGroup(obj_store=DirObjStore(temp_path()), temporary=True),
     )
@@ -67,7 +66,6 @@ def test_memoize_impure_closure() -> None:
         return x**2 + i
 
     assert square(2) == 4
-    global i
     i = 1
     assert square(2) == 5, "when closure updates, function should recompute"
 
@@ -99,20 +97,19 @@ def test_eviction(use_obj_store: bool) -> None:
 
 
 def test_verbose(caplog: pytest.Caplog) -> None:
+    caplog.set_level(logging.DEBUG, "charmonium.cache.ops")
     @memoize(group=MemoizedGroup(obj_store=DirObjStore(temp_path()), temporary=True))
     def square_loud(x: int) -> int:
         return x**2
 
     square_loud(2)
-    # TODO: this
-    # assert "miss" in caplog.text
+    assert "miss" in caplog.text
     square_loud(2)
-    # assert "hit" in caplog.text
-
-    # square_loud.disable_logging()
+    assert "hit" in caplog.text
 
     with pytest.warns(UserWarning):
 
+        # `not use_obj_store and not use_metadata_size` should trigger warning.
         @memoize(group=square_loud.group, use_metadata_size=False, use_obj_store=False)
         def foo() -> None:  # type: ignore
             pass
@@ -148,14 +145,14 @@ def test_read_write_cycle() -> None:
 
     # This will be the different copy.
     double.group._version += 1
-    double.group._index_write()
+    double.group._index_write()  # pylint: disable=protected-access
     double.group._version -= 1
 
     # Call
     double(3)
 
     # Read
-    double.group._index_read()
+    double.group._index_read()  # pylint: disable=protected-access
 
     # Call
     assert double.would_hit(2)

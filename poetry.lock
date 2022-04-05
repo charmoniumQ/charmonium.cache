@@ -188,7 +188,7 @@ xxhash = ">=2.0.2,<3.0.0"
 
 [[package]]
 name = "charmonium.freeze"
-version = "0.5.5"
+version = "0.5.6"
 description = "Injectively, deterministically maps arbitrary objects to hashable values"
 category = "main"
 optional = false
@@ -1576,8 +1576,8 @@ cffi = [
     {file = "charmonium.determ_hash-0.2.2.tar.gz", hash = "sha256:81197d7988afde9014feb33d4df36a214e9d40804c448d9b5ee20e4797199c0f"},
 ]
 "charmonium.freeze" = [
-    {file = "charmonium.freeze-0.5.5-py3-none-any.whl", hash = "sha256:594f4b42e5f7cdd59386d462ee08c1678b8a409a048e487259b985d7a1ad194a"},
-    {file = "charmonium.freeze-0.5.5.tar.gz", hash = "sha256:f5e5d95eedd2e62c9a0a095dd557d5b057394cf63bcd78810b9161e33df0e9b9"},
+    {file = "charmonium.freeze-0.5.6-py3-none-any.whl", hash = "sha256:087c85658d3236b23f09647a40cac48f6e20df4201df457e47477eb2e7a37e26"},
+    {file = "charmonium.freeze-0.5.6.tar.gz", hash = "sha256:9631da8ff031c4e701485132e10f9c697545c8a5714897e184617c3f3c0d390d"},
 ]
 "charmonium.time-block" = [
     {file = "charmonium.time_block-0.3.0-py3-none-any.whl", hash = "sha256:1d2526fd0c7828f0980de6a9f58f2d26a398ad4ad05f6c7e26c9463bb3301c60"},

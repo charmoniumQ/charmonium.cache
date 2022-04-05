@@ -32,7 +32,6 @@ class ObjStore(Protocol):
 
     def __contains__(self, key: int) -> bool:
         """The implementation is often slow, so it will be called rarely."""
-        ...
 
     def __iter__(self) -> Iterator[int]:
         # pylint: disable=non-iterator-returned

@@ -24,7 +24,7 @@ def test_pathlike() -> None:
         path: PathLike = pathlike_from(pathlike_from(path_))
         path2: PathLike = path / "test"
         path2.write_bytes(payload)
-        (path / "test").read_bytes() == payload
+        assert (path / "test").read_bytes() == payload
 
     with pytest.raises(TypeError):
         # (deliberate type error for testing)
@@ -49,7 +49,7 @@ def test_getattr() -> None:
         attr1 = 11423
 
         def method1(self) -> int:
-            return 2123
+            return 2123 + self.attr1
 
     obj = Class()
     assert GetAttr[int]()(obj, "attr1", 1) == obj.attr1

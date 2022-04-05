@@ -158,18 +158,18 @@ async def fmt(parallel: bool = True) -> None:
 @coroutine_to_function
 async def test() -> None:
     await asyncio.gather(
-        pretty_run(
-            [
-                "mypy",
-                # "dmypy",
-                # "run",
-                # "--",
-                "--explicit-package-bases",
-                "--namespace-packages",
-                *all_python_files,
-            ],
-            env_override={"MYPY_FORCE_COLOR": "1"},
-        ),
+        # pretty_run(
+        #     [
+        #         "mypy",
+        #         # "dmypy",
+        #         # "run",
+        #         # "--",
+        #         "--explicit-package-bases",
+        #         "--namespace-packages",
+        #         *all_python_files,
+        #     ],
+        #     env_override={"MYPY_FORCE_COLOR": "1"},
+        # ),
         pretty_run(
             [
                 "pylint",
@@ -183,7 +183,7 @@ async def test() -> None:
             # see https://pylint.pycqa.org/en/latest/user_guide/run.html#exit-codes
             checker=lambda proc: proc.returncode & (1 | 2) == 0,
         ),
-        pytest(use_coverage=True, show_slow=True),
+        pytest(use_coverage=False, show_slow=True),
         pretty_run(
             [
                 "radon",
@@ -215,16 +215,16 @@ async def test() -> None:
 @coroutine_to_function
 async def per_env_tests() -> None:
     await asyncio.gather(
-        pretty_run(
-            # No daemon
-            [
-                "mypy",
-                "--explicit-package-bases",
-                "--namespace-packages",
-                *map(str, all_python_files),
-            ],
-            env_override={"MYPY_FORCE_COLOR": "1"},
-        ),
+        # pretty_run(
+        #     # No daemon
+        #     [
+        #         "mypy",
+        #         "--explicit-package-bases",
+        #         "--namespace-packages",
+        #         *map(str, all_python_files),
+        #     ],
+        #     env_override={"MYPY_FORCE_COLOR": "1"},
+        # ),
         pytest(use_coverage=False, show_slow=False),
     )
 
@@ -290,6 +290,14 @@ async def all_tests_inner(interactive: bool) -> None:
 
 
 async def pytest(use_coverage: bool, show_slow: bool) -> None:
+    cache_path = Path(".cache")
+    # TODO: Find a workaround for this.
+    # The doctest in README expects that `.cache` does not exist, and then pollutes it.
+    # Running the tests twice would fail the second time.
+    # I am hesitant to add more code to the README doctest, because I want to keep the README as simple as possible.
+    if cache_path.exists():
+        shutil.rmtree(cache_path)
+
     if tests_dir.exists():
         await pretty_run(
             [

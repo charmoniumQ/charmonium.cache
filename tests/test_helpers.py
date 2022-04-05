@@ -63,7 +63,7 @@ def test_filecontents_add() -> None:
     assert (file2 + "123").__fspath__() == "abc123"
 
 
-dt = datetime.timedelta(seconds=0.01)
+dt = datetime.timedelta(seconds=0.5)
 
 
 @memoize(extra_func_state=TTLInterval(dt))

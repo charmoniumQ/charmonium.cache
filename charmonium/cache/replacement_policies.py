@@ -40,12 +40,10 @@ class ReplacementPolicy:  # pylint: disable=no-self-use,unused-argument
         for fast a versioned resources is changing.
 
         """
-        ...
 
     @abc.abstractmethod
     def evict(self) -> tuple[Any, Entry]:
         """Select a key, entry pair to evict."""
-        ...
 
     @abc.abstractmethod
     def update(self, other: ReplacementPolicy) -> None:
@@ -57,7 +55,6 @@ class ReplacementPolicy:  # pylint: disable=no-self-use,unused-argument
         process.
 
         """
-        ...
 
 
 class GDSize(ReplacementPolicy):

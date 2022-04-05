@@ -262,12 +262,7 @@ attr-naming-style=snake_case
 #attr-rgx=
 
 # Bad variable names which should always be refused, separated by a comma.
-bad-names=foo,
-          bar,
-          baz,
-          toto,
-          tutu,
-          tata
+bad-names=
 
 # Naming style matching correct class attribute names.
 class-attribute-naming-style=any
@@ -305,8 +300,11 @@ function-naming-style=snake_case
 good-names=i,
            j,
            k,
-		   n,
-		   m,
+           n,
+           m,
+           x,
+           y,
+           z,
            ex,
            Run,
            _

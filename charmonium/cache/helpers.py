@@ -95,8 +95,8 @@ class TTLInterval:
     .. code:: python
 
         >>> from charmonium.cache import memoize
-        >>> interval = TTLInterval(datetime.timedelta(seconds=0.1))
-        >>> # applies a 5-minute TTL to justthis function
+        >>> interval = TTLInterval(datetime.timedelta(seconds=0.5))
+        >>> # applies a 0.5-second TTL to justthis function
         >>> @memoize(extra_func_state=interval)
         ... def func():
         ...     pass
@@ -106,11 +106,11 @@ class TTLInterval:
     .. code:: python
 
         >>> import datetime, time
-        >>> interval = TTLInterval(datetime.timedelta(seconds=0.02))
+        >>> interval = TTLInterval(datetime.timedelta(seconds=0.5))
         >>> start = interval()
         >>> start == interval()
         True
-        >>> time.sleep(0.02)
+        >>> time.sleep(0.5)
         >>> start == interval()
         False
 
