@@ -73,13 +73,14 @@ else:
 conda_env = {
     "PATH": ":".join(
         [
-            str(which("mamba").parent),
-            str(which("conda").parent),
-            str(which("bash").parent),
+            str(which("mamba"  ).parent),
+            str(which("conda"  ).parent),
+            str(which("bash"   ).parent),
             str(which("dirname").parent),
         ]
     ),
-    "CONDA_EXE": os.environ["CONDA_EXE"],
+    "PYTHONNOUSERSITE": os.environ["PYTHONNOUSERSITE"],
+    "CONDA_EXE"       : os.environ["CONDA_EXE"       ],
     "CONDA_PYTHON_EXE": os.environ["CONDA_PYTHON_EXE"],
 }
 

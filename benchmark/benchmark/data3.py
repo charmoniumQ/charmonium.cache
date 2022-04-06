@@ -41,9 +41,7 @@ def get_data() -> Sequence[
             GitHubRepo("https://github.com/astropy/astropy"),
             RecentCommitChooser(None, n=5),
             StaticEnvironmentChooser(
-                CondaEnvironment(
-                    "astropy", resources / "astropy/environment.yml"
-                )
+                CondaEnvironment("astropy", resources / "astropy/environment.yml")
             ),
             [
                 "python",

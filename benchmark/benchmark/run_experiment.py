@@ -31,7 +31,7 @@ from tqdm import tqdm
 
 from .environment import Environment, EnvironmentChooser
 from .repo import CommitChooser, Repo
-from .util import runexec_catch_signals, combine_cmd
+from .util import combine_cmd, runexec_catch_signals
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -112,9 +112,7 @@ class RunexecStats:
     @staticmethod
     def create(result: Mapping[str, Any]) -> RunexecStats:
         keys = set(
-            "walltime cputime memory blkio_read blkio_write cpuenergy".split(
-                " "
-            )
+            "walltime cputime memory blkio_read blkio_write cpuenergy".split(" ")
         )
         attrs = {key: result.get(key, None) for key in keys}
         attrs["termination_reason"] = result.get("terminationreason", None)
@@ -138,12 +136,13 @@ tmp_dir = ROOT / ".tmp"
 time_limit = 500
 mem_limit = 2 ** 34
 
+
 def run_exec_cmd(
-        environment: Environment,
-        cmd: Sequence[str],
-        env: Mapping[str, str],
-        cwd: Path,
-        dir_modes: Mapping[str, Any],
+    environment: Environment,
+    cmd: Sequence[str],
+    env: Mapping[str, str],
+    cwd: Path,
+    dir_modes: Mapping[str, Any],
 ) -> Tuple[RunexecStats, str]:
     info_log = tmp_dir / "info.log"
     if info_log.exists():
@@ -153,7 +152,7 @@ def run_exec_cmd(
         use_namespaces=False,
         # dir_modes=dir_modes,
         # network_access=True,
-        # # Need to system config so DNS works.
+        # Need to system config so DNS works.
         # container_system_config=True,
     )
     with runexec_catch_signals(run_executor):
@@ -170,6 +169,7 @@ def run_exec_cmd(
             memlimit=mem_limit,
         )
     return RunexecStats.create(run_exec_run), info_log.read_text()
+
 
 # @ch_time_block.decor(print_start=False)
 def run_once(

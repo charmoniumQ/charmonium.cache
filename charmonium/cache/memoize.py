@@ -695,7 +695,7 @@ class Memoized(Generic[FuncParams, FuncReturn]):
 
         if ts < tc and tc.total_seconds() > 5:
             warnings.warn(
-                f"Caching {self._func} cost {tc.total_seconds():.1f}s but only saved {ts.total_seconds():.1f}s",
+                f"Caching {self._func.__qualname__} cost {tc.total_seconds():.1f}s but only saved {ts.total_seconds():.1f}s",
                 CacheThrashingWarning,
             )
 

@@ -36,10 +36,12 @@ memoization = bool(int(os.environ.get("CHARMONIUM_CACHE_ENABLE", "0")))
 print(f"{memoization=}")
 if memoization:
     from charmonium.cache import memoize, FileContents, MemoizedGroup
-    group = MemoizedGroup(size="10Mb")
+    group = MemoizedGroup(size="1Gb")
+    import charmonium.freeze
+    charmonium.freeze.config.ignore_globals.add(("astropy.utils.data", "_tempfilestodel"))
 else:
     memoize = lambda **kwargs: (lambda x: x)
-    FileContents = lambda x: None
+    FileContents = lambda x: x
     group = None
 
 if "OUTPUT_LOG" in os.environ:
@@ -47,18 +49,8 @@ if "OUTPUT_LOG" in os.environ:
 else:
     output_file = None
 
-if True:
-    import logging, os
-    logger = logging.getLogger("charmonium.freeze")
-    logger.setLevel(logging.DEBUG)
-    fh = logging.FileHandler("freeze.log")
-    fh.setLevel(logging.DEBUG)
-    fh.setFormatter(logging.Formatter("%(message)s"))
-    logger.addHandler(fh)
-    logger.debug("Program %d", os.getpid())
 
-
-repeats = 4
+repeats = 2
 filenames = [
     "tutorials/FITS-tables/chandra_events.fits",
     "coordinates/wright_eastmann_2014_tau_ceti.fits",
@@ -97,7 +89,6 @@ def get_data(filename):
         return fobj.read()
 
 
-@memoize(group=group)
 def get_info(event_filename):
     ##############################################################################
     # Display information about the contents of the FITS file.
@@ -105,7 +96,6 @@ def get_info(event_filename):
     return fits.info(event_filename, file=False)
 
 
-@memoize(group=group)
 def get_events(event_filename):
     ##############################################################################
     # Extension 1, EVENTS, is a Table that contains information about each X-ray

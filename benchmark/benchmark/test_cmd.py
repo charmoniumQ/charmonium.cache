@@ -1,22 +1,24 @@
 import warnings
-from typing import Any, Dict, Mapping, Optional, Sequence, Tuple, Type, cast
 from pathlib import Path
+from typing import Any, Dict, Mapping, Optional, Sequence, Tuple, Type, cast
+
+from benchexec import container  # type: ignore
 
 from .environment import (
     CondaEnvironment,
+    Environment,
     EnvironmentChooser,
     SmartEnvironmentChooser,
     StaticEnvironmentChooser,
 )
 from .repo import CommitChooser, GitHubRepo, RecentCommitChooser, Repo
-from .environment import Environment, CondaEnvironment, EnvironmentChooser
-from .run_experiment import run_exec_cmd, time_limit, mem_limit, tmp_dir
-from benchexec import container  # type: ignore
+from .run_experiment import mem_limit, run_exec_cmd, time_limit, tmp_dir
+
 
 def test_cmd(
-        repo: Repo,
-        environment: Environment,
-        cmd: Sequence[str],
+    repo: Repo,
+    environment: Environment,
+    cmd: Sequence[str],
 ) -> None:
     runexec_stats, info = run_exec_cmd(
         environment,
@@ -38,13 +40,12 @@ def test_cmd(
             f"Terminated for {runexec_stats.termination_reason} out with {time_limit=} {mem_limit=}"
         )
     if runexec_stats.exitcode != 0:
-        warnings.warn(
-            f"Terminated with exitcode {runexec_stats.exitcode!r}"
-        )
+        warnings.warn(f"Terminated with exitcode {runexec_stats.exitcode!r}")
+
 
 def setup(
-        repo: Repo,
-        environment_chooser: EnvironmentChooser,
+    repo: Repo,
+    environment_chooser: EnvironmentChooser,
 ) -> Optional[Environment]:
     repo.setup()
     environment = environment_chooser.choose(repo)
@@ -60,6 +61,7 @@ def setup(
     environment.install(packages)
     return environment
 
+
 benchmark_root = Path(__file__).parent.parent
 
 venv_location = benchmark_root / Path(".my-venv/")
@@ -72,12 +74,11 @@ if True:
             GitHubRepo("https://github.com/astropy/astropy"),
             RecentCommitChooser(None, n=5),
             StaticEnvironmentChooser(
-                CondaEnvironment(
-                    "astropy", resources / "astropy/environment.yml"
-                )
+                CondaEnvironment("astropy", resources / "astropy/environment.yml")
             ),
             [
                 "env",
+                "CHARMONIUM_CACHE_ENABLE=1",
                 "python",
                 str(resources / "astropy/examples.py"),
             ],

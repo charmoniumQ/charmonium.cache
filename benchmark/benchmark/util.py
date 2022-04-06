@@ -11,8 +11,10 @@ import types
 from dataclasses import dataclass
 from pathlib import Path
 from typing import (
+    Any,
     Callable,
     Dict,
+    Generator,
     Iterable,
     List,
     Mapping,
@@ -21,9 +23,7 @@ from typing import (
     Sequence,
     Set,
     TypeVar,
-    Generator,
     Union,
-    Any,
 )
 
 import psutil  # type: ignore
@@ -226,11 +226,15 @@ def combine_cmd(cmd: Sequence[str], env: Mapping[str, str], cwd: Path) -> List[s
     ]
 
 
-SignalCatcher = Union[Callable[[signal.Signals, types.FrameType], Any], int, signal.Handlers, None]
+SignalCatcher = Union[
+    Callable[[signal.Signals, types.FrameType], Any], int, signal.Handlers, None
+]
 
 
 @contextlib.contextmanager
-def catch_signals(signal_catchers: Mapping[signal.Signals, SignalCatcher]) -> Generator[None, None, None]:
+def catch_signals(
+    signal_catchers: Mapping[signal.Signals, SignalCatcher]
+) -> Generator[None, None, None]:
     old_signal_catchers: Dict[signal.Signals, SignalCatcher] = {}
     for signal_num, new_catcher in signal_catchers.items():
         old_catcher = signal.signal(signal_num, new_catcher)
@@ -242,19 +246,23 @@ def catch_signals(signal_catchers: Mapping[signal.Signals, SignalCatcher]) -> Ge
 
 from benchexec.runexecutor import RunExecutor  # type: ignore
 
+
 @contextlib.contextmanager
 def runexec_catch_signals(run_executor: RunExecutor) -> Generator[None, None, None]:
     caught_signal_number: Optional[signal.Signals] = None
+
     def run_executor_stop(signal_number: signal.Signals, _: types.FrameType) -> None:
         global caught_signal_number
         caught_signal_number = signal_number
         run_executor.stop()
 
-    with catch_signals({
+    with catch_signals(
+        {
             signal.SIGTERM: run_executor_stop,
             signal.SIGQUIT: run_executor_stop,
             signal.SIGINT: run_executor_stop,
-    }):
+        }
+    ):
         yield
     if caught_signal_number is not None:
         raise InterruptedError(f"Caught signal {caught_signal_number}")

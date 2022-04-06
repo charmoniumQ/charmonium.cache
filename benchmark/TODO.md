@@ -16,8 +16,10 @@
 - [x] Run [eht-imaging] in the experiment
   - Results are promising, 90% time saved on trivial commits.
     - But these commits are too trivial. They are documentation changes could be easily ignored by other strategies.
-- [ ] Run [astropy] in the experiment.
+- [x] Run [astropy] in the experiment.
   - Currently astropy includes a `threading.Lock` object which `charmonium.freeze` can't handle.
+    - [x] Avoid hashing the object that contains the lock (preferable, if there is a systematic way of doing so) or make an exception for locks.
+  - [x] Find a better example for astropy
 - [ ] Run testmon on commits. Indicate the testmon overhead and indicate if testmon thinks the script needs to be rerun. Ideally, I would be able to get partial reuse on intermediate values when testmon thinks the script needs to be rerun.
   - However, many of the scripts have a ton of execution time in one critical function. If that function has to be recomputed (it changed syntactically or its predecessor changed semantically), most of the runtime will have to be reexecuted anyway.
   - [ ] First, run the commits with testmon.
@@ -28,9 +30,10 @@
   - [ ] First, run the commits with Joblib.
   - [ ] Then, update the output summary.
 - [ ] Increase automation for scripts by factoring out the "common section." This is the section helps the script know what experimental conditions to use (e.g. switching between memoization and not). I currently have this repeated for each script.
-- [ ] Examine how often existing caching decorators are used in GitHub projects.
+- [ ] Examine how often existing caching decorators are used in GitHub projects. https://grep.app/search?q=joblib.%2Amemory&regexp=true
 - [ ] Examine how often existing manuual caching mechanisms (search for kewyord `cache` as a variable name or argument name). Decide accuracy by hand.
 - [ ] Increase automation for environments. The experiment runner should install "editable" version the current project with "[dev]" extra if exists and `charmonium.cache` with Conda. The experiment runner should cache this environment. This should be backwards compatible with a manual conda `environment.yml` when the automation fails. Currently, everything uses a manually-written per-project `environment.yml`.
+- [ ] Make a dataset consisting of repository, environment specification, command, and estimated time taken. Other researchers can use this to study the evolution of scientific code.
 - [ ] The results should be cached at a commit-level. They are currently cached at a repo-level.
 
 [eht-imaging]: https://github.com/achael/eht-imaging
