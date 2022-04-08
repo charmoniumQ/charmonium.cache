@@ -47,17 +47,21 @@ def record_dynamic_trace(granularity: Granularity) -> Generator[Sequence[Tuple[s
 
 
 def execute_with_trace(
-        module: str,
-        func: str,
+        script: str,
         trace_log: Path,
         granularity: Granularity,
         args: List[str],
 ) -> None:
-    module_obj = importlib.import_module(module)
-    func_obj = getattr(module_obj, func)
     sys.argv = args
+    script_bytecode = compile(script.read_text(), str(script), "exec")
+    script_globals = {
+        "__file__": str(script),
+        "__name__": "__main__",
+        "__package__": None,
+        "__cached__": None,
+    }
     with record_dynamic_trace(granularity) as dynamic_trace:
-        func_obj()
+        exec(script_bytecode, script_globals)
     trace_log.write_text("\n".join(
         f"{filename}" + (f":{lineno}" if lineno is not None else "")
         for (filename, lineno) in dynamic_trace
@@ -68,14 +72,14 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(description="Record the trace of a Python program.")
-    parser.add_argument("module", type=str, help="Module to load")
-    parser.add_argument("function", type=str, help="Function to run in module")
+    parser.add_argument("script", type=str, help="Script to run")
     parser.add_argument("trace_log", type=str, help="File in which to write the trace")
     parser.add_argument("granularity", type=str, help="Granularity to capture the trace (\"file\", \"function\", or \"line\")")
     parser.add_argument("args", type=str, nargs="*", help="New argv")
 
     args = parser.parse_args()
+    script = Path(args.script)
     trace_log = Path(args.trace_log)
     granularity = Granularity[args.granularity.upper()]
 
-    execute_with_trace(args.module, args.function, trace_log, granularity, args.args)
+    execute_with_trace(script, trace_log, granularity, args.args)

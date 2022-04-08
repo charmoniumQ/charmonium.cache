@@ -69,7 +69,7 @@ def annotate_funcs_in_stmt(stmt: ast.stmt, decorator: ast.expr, copy: bool = Fal
 def annotate_funcs_in_module(module: ast.Module, decorator: ast.expr, copy: bool = False) -> ast.Module:
     if copy:
         module = deepcopy(module)
-    module.body = [from_charmonium_cache_import_memoize] + [
+    module.body = [
         annotate_funcs_in_stmt(stmt, decorator, copy=False)
         # no need to copy, since we are already copied the whole module
         for stmt in module.body

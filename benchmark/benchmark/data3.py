@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Sequence, Tuple
+from typing import Sequence, Tuple, Mapping
 
 from .environment import (
     CondaEnvironment,
@@ -18,7 +18,7 @@ resources = benchmark_root / "resources"
 
 
 def get_data() -> Sequence[
-    Tuple[Repo, CommitChooser, EnvironmentChooser, Sequence[str]]
+    Tuple[Repo, CommitChooser, EnvironmentChooser, Mapping[str, str], Path, Mapping[str, int]]
 ]:
     return [
         (
@@ -29,13 +29,15 @@ def get_data() -> Sequence[
                     "eht-imaging", resources / "eht-imaging/environment.yml"
                 )
             ),
-            [
-                "env",
-                f"PYTHONPATH={benchmark_root / '.repos/eht-imaging'!s}",
-                "python",
-                str(resources / "eht-imaging/example.py"),
-                str(benchmark_root / ".repos/eht-imaging"),
-            ],
+            {
+                "PYTHONPATH": str(benchmark_root / ".repos/eht-imaging"),
+                "new_wd": str(benchmark_root / ".repos/eht-imaging"),
+            },
+            resources / "eht-imaging/example.py",
+            {
+                "time": 600,
+                "mem": 2**31,
+            },
         ),
         (
             GitHubRepo("https://github.com/astropy/astropy"),
@@ -43,10 +45,12 @@ def get_data() -> Sequence[
             StaticEnvironmentChooser(
                 CondaEnvironment("astropy", resources / "astropy/environment.yml")
             ),
-            [
-                "python",
-                str(resources / "astropy/UVES.py"),
-            ],
+            {},
+            resources / "astropy/UVES.py",
+            {
+                "time": 80,
+                "mem": 2**29,
+            },
         ),
         # (
         #     GitHubRepo("https://github.com/LBJ-Wade/coffea"),

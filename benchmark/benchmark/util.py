@@ -11,20 +11,24 @@ import sys
 import types
 from dataclasses import dataclass
 from pathlib import Path
+import itertools
 from typing import (
     Any,
     Callable,
     Dict,
     Generator,
     Iterable,
+    Iterator,
     List,
     Mapping,
     NoReturn,
     Optional,
     Sequence,
     Set,
+    Tuple,
     TypeVar,
     Union,
+    cast,
 )
 
 import psutil  # type: ignore
@@ -216,15 +220,15 @@ def project(dct: Mapping[K, V], keys: Set[K]) -> Mapping[K, V]:
     return {key: val for key, val in dct.items() if key in keys}
 
 
-def combine_cmd(cmd: Sequence[str], env: Mapping[str, str], cwd: Path) -> List[str]:
-    return [
+def combine_cmd(cmd: Sequence[str], env: Mapping[str, str], cwd: Path) -> Tuple[str, ...]:
+    return (
         "env",
         "--chdir",
         str(cwd),
         "-",
         *[key + "=" + val for key, val in env.items()],
         *cmd,
-    ]
+    )
 
 
 SignalCatcher = Union[
@@ -244,7 +248,6 @@ def catch_signals(
     for signal_num, old_catcher in old_signal_catchers.items():
         signal.signal(signal_num, old_catcher)
 
-
 from benchexec.runexecutor import RunExecutor  # type: ignore
 
 
@@ -253,7 +256,6 @@ def runexec_catch_signals(run_executor: RunExecutor) -> Generator[None, None, No
     caught_signal_number: Optional[signal.Signals] = None
 
     def run_executor_stop(signal_number: signal.Signals, _: types.FrameType) -> None:
-        global caught_signal_number
         caught_signal_number = signal_number
         run_executor.stop()
 
@@ -271,13 +273,13 @@ def runexec_catch_signals(run_executor: RunExecutor) -> Generator[None, None, No
 class CaptureHandler(logging.Handler):
     def __init__(self, level: logging._Level = logging.NOTSET) -> None:
         super().__init__(level)
-        self.records: List[logging.LogRecords] = []
+        self.records: List[logging.LogRecord] = []
 
-    def emit(self, record) -> None:
+    def emit(self, record: logging.LogRecord) -> None:
         self.records.append(record)
 
 @contextlib.contextmanager
-def capture_logs(logger: logger.Logger, level: logging._Level) -> Generator[List[str], None, None]:
+def capture_logs(logger: logging.Logger, level: logging._Level) -> Generator[List[logging.LogRecord], None, None]:
     old_level = logger.getEffectiveLevel()
     logger.setLevel(level)
     handler = CaptureHandler(level=level)
@@ -285,3 +287,23 @@ def capture_logs(logger: logger.Logger, level: logging._Level) -> Generator[List
     yield handler.records
     logger.removeHandler(handler)
     logger.setLevel(old_level)
+
+Value = TypeVar("Value")
+def first_sentinel(iterable: Iterable[Value]) -> Iterator[Tuple[Value, bool]]:
+    iterator = iter(iterable)
+    yield (next(iterator), True)
+    for elem in iterator:
+        yield (elem, False)
+
+def last_sentinel(iterable: Iterable[Value]) -> Iterator[Tuple[Value, bool]]:
+    iterator = iter(iterable)
+    elem: Optional[Value] = None
+    for _, first_time in first_sentinel(itertools.count()):
+        try:
+            next_elem = next(iterator)
+        except StopIteration:
+            yield (cast(Value, elem), True)
+        else:
+            if not first_time:
+                yield (cast(Value, elem), False)
+            elem = next_elem

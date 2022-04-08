@@ -8,9 +8,9 @@ def slice_repo(
         repo: Path,
         slice_specs: Sequence[Tuple[Path, Optional[int], Optional[int]]],
 ) -> Sequence[str]:
-    slice_specs = set(slice_specs)
+    unique_slice_specs = set(slice_specs)
     slices = []
-    for path, start, end in slice_specs:
+    for path, start, end in unique_slice_specs:
         if not path.is_absolute():
             path = repo / path
         text = path.read_text()
@@ -36,7 +36,7 @@ def main(
         repo: Path,
         slice_specs: typer.FileText,
         output: typer.FileTextWrite,
-) -> Sequence[str]:
+) -> None:
     parsed_slice_specs = [
         parse_slice_spec(line.strip())
         for line in slice_specs

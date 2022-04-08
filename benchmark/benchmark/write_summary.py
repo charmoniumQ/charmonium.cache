@@ -15,6 +15,7 @@ from typing import (
     cast,
 )
 
+import bitmath  # type: ignore
 import numpy as np
 import scipy.stats  # type: ignore
 from charmonium.determ_hash import determ_hash
@@ -52,6 +53,11 @@ def disp_hash(val: int) -> html.Tag:
 
 def disp_sec(val: float) -> html.Tag:
     return html.span()(f"{val:.1f}s")
+
+
+def disp_mem(val: int) -> html.Tag:
+    value_str = bitmath.Byte(val).best_prefix().format("{value:.1f} {unit}")
+    return html.span()(value_str)
 
 
 def summarize_func_calls(func_calls: Sequence[FuncCallProfile]) -> html.Tag:
@@ -93,6 +99,7 @@ commit_result_headers: Sequence[html.TagLike] = [
     "Tests work?",
     html.span()("Memoized output", html.br()(), "matches original?"),
     *[html.span()(execution, " time") for execution in executions.values()],
+    *[html.span()(execution, " mem") for execution in executions.values()],
     "Detailed results",
 ]
 
@@ -223,6 +230,14 @@ def summarize_commit_result(repo: Repo, result: CommitResult) -> Sequence[html.T
                 result.executions[execution].runexec.cputime
                 if execution in result.executions
                 else 0.0
+            )
+            for execution in executions
+        ],
+        *[
+            disp_mem(
+                result.executions[execution].runexec.memory
+                if execution in result.executions
+                else 0
             )
             for execution in executions
         ],

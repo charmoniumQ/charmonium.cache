@@ -83,7 +83,7 @@ class Repo(ABC):
         self._checkout(commit)
         self.apply_patch()
 
-    def info(slef, commit: str) -> Tuple[bytes, datetime.datetime]:
+    def info(self, commit: str) -> Tuple[bytes, datetime.datetime]:
         raise NotImplementedError
 
     dir: Path

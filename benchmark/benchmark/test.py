@@ -1,4 +1,4 @@
-def g(a, b):
+def g(a: int, b: int) -> int:
     if a == 0:
         return 1
     else:
@@ -6,11 +6,11 @@ def g(a, b):
         result += g(a-1, b)
         return result
 
-def f():
+def f() -> int:
     a = g(g(0, 1), g(2, 3))
     b = g(1, 2)
     c = a + b
     return c
 
-def main():
+def main() -> None:
     f()

@@ -132,18 +132,16 @@ class ExecutionProfile:
     warnings: Sequence[str]
 
 
-tmp_dir = ROOT / ".tmp"
-time_limit = 500
-mem_limit = 2 ** 34
-
-
 def run_exec_cmd(
     environment: Environment,
     cmd: Sequence[str],
     env: Mapping[str, str],
     cwd: Path,
     dir_modes: Mapping[str, Any],
-) -> Tuple[RunexecStats, str, str]:
+    tmp_dir: Path,
+    time_limit: int,
+    mem_limit: int,
+) -> Tuple[Tuple[str, ...], RunexecStats, str, str]:
     stdout = tmp_dir / "info.log"
     if stdout.exists():
         stdout.unlink()
@@ -176,6 +174,7 @@ def run_exec_cmd(
             memlimit=mem_limit,
         )
     return (
+        combined_cmd,
         RunexecStats.create(run_exec_run),
         stdout.read_text(),
         stderr.read_text() + "\n".join(record.getMessage() for record in logs),
@@ -184,34 +183,45 @@ def run_exec_cmd(
 
 # @ch_time_block.decor(print_start=False)
 def run_once(
-    repo: Repo, environment: Environment, cmd: Sequence[str], memoize: bool
+    repo: Repo,
+    environment: Environment,
+    env_vars: Mapping[str, str],
+    script: Path,
+    limits: Mapping[str, int],
+    memoize: bool,
+    trace: bool,
+    tmp_dir: Path,
 ) -> ExecutionProfile:
     warnings = []
     perf_log = tmp_dir / "perf.log"
-    output_log = tmp_dir / "output.log"
-    if perf_log.exists():
-        perf_log.unlink()
-    runexec_stats, stdout, stderr = run_exec_cmd(
+    command, runexec_stats, stdout, stderr = run_exec_cmd(
         environment,
-        cmd,
+        [
+            "python",
+            *(["trace.py", str(script), "trace.log", "function"] if trace else [str(script)]),
+        ],
         {
             "CHARMONIUM_CACHE_ENABLE": "1" if memoize else "0",
             "CHARMONIUM_CACHE_PERF_LOG": str(perf_log),
+            **env_vars,
         },
-        repo.dir,
+        tmp_dir,
+        time_limit=limits["time"],
+        mem_limit=limits["mem"],
         dir_modes={
             "/": container.DIR_READ_ONLY,
             # TODO: Ideally, I would use `--overlay-dir` with tmp_dir instead of --full--access-dir.
             # See https://github.com/sosy-lab/benchexec/issues/815
             "/home": container.DIR_OVERLAY,
             str(tmp_dir): container.DIR_FULL_ACCESS,
-            str(repo.dir): container.DIR_FULL_ACCESS,
+            str(repo.dir): container.DIR_READ_ONLY,
         },
+        tmp_dir=tmp_dir,
     )
 
     if runexec_stats.termination_reason:
         warnings.append(
-            f"Terminated for {runexec_stats.termination_reason} out with {time_limit=} {mem_limit=}"
+            f"Terminated for {runexec_stats.termination_reason} out with {limits['time']=} {limits['mem']=}"
         )
     if perf_log.exists():
         calls, kwargs = parse_memoized_log(perf_log)
@@ -223,7 +233,7 @@ def run_once(
         kwargs = {}
     return ExecutionProfile(
         output=stdout,
-        command=cmd,
+        command=command,
         log=stderr,
         success=runexec_stats.exitcode == 0,
         func_calls=calls,
@@ -252,24 +262,20 @@ def run_many(
     repo: Repo,
     environment: Environment,
     commits: Sequence[str],
-    command: Sequence[str],
+    env_vars: Mapping[str, str],
+    script: Path,
+    limits: Mapping[str, int],
     memoize: bool,
     short_circuit: bool,
 ) -> Sequence[ExecutionProfile]:
     repo.clean()
-
-    if memoize:
-        if tmp_dir.exists():
-            shutil.rmtree(tmp_dir)
-        tmp_dir.mkdir()
-    conftest_dest = repo.dir / "conftest.py"
-    if conftest_dest.exists():
-        conftest_dest.unlink()
-    shutil.copy(Path("that_conftest.py"), conftest_dest)
-
+    tmp_dir = ROOT / ".tmp"
+    if tmp_dir.exists():
+        shutil.rmtree(tmp_dir)
+    tmp_dir.mkdir()
     executions = []
     for commit in tqdm(commits, unit="commit", leave=False):
-        execution = run_once(repo, environment, command, memoize)
+        execution = run_once(repo, environment, env_vars, script, limits, memoize, trace=False, tmp_dir=tmp_dir)
         executions.append(execution)
         if short_circuit and execution.runexec.termination_reason:
             break
@@ -283,14 +289,16 @@ def get_repo_result(
     repo: Repo,
     commit_chooser: CommitChooser,
     environment_chooser: EnvironmentChooser,
-    command: Sequence[str],
+    env_vars: Mapping[str, str],
+    script: Path,
+    limits: Mapping[str, int],
 ) -> RepoResult:
     manual_cache.mkdir(exist_ok=True)
     cache_dest = manual_cache / f"{repo.name}.pkl"
     if cache_dest.exists():
         return cast(RepoResult, pickle.loads(cache_dest.read_bytes()))
     else:
-        ret = get_repo_result2(repo, commit_chooser, environment_chooser, command)
+        ret = get_repo_result2(repo, commit_chooser, environment_chooser, env_vars, script, limits)
         cache_dest.write_bytes(pickle.dumps(ret))
         return ret
 
@@ -300,7 +308,9 @@ def get_repo_result2(
     repo: Repo,
     commit_chooser: CommitChooser,
     environment_chooser: EnvironmentChooser,
-    command: Sequence[str],
+    env_vars: Mapping[str, str],
+    script: Path,
+    limits: Mapping[str, int],
 ) -> RepoResult:
     warnings = []
     repo.setup()
@@ -310,7 +320,7 @@ def get_repo_result2(
         return RepoResult(
             repo=repo,
             environment=environment,
-            command=command,
+            script=script,
             commit_results=[],
             warnings=warnings,
         )
@@ -339,7 +349,7 @@ def get_repo_result2(
             return RepoResult(
                 repo=repo,
                 environment=None,
-                command=command,
+                script=script,
                 commit_results=[],
                 warnings=warnings,
             )
@@ -348,11 +358,11 @@ def get_repo_result2(
             if len(commits) < 2:
                 warnings.append(f"Only {len(commits)} commit.")
             orig_executions = run_many(
-                repo, environment, commits, command, memoize=False, short_circuit=True
+                repo, environment, commits, env_vars, script, limits, memoize=False, short_circuit=True
             )
             working_commits = commits[: len(orig_executions)]
             memo_executions = run_many(
-                repo, environment, commits, command, memoize=True, short_circuit=True
+                repo, environment, commits, env_vars, script, limits, memoize=True, short_circuit=True
             )
             commit_results = [
                 CommitResult.from_commit(
@@ -370,7 +380,7 @@ def get_repo_result2(
             return RepoResult(
                 repo=repo,
                 environment=environment,
-                command=command,
+                script=script,
                 commit_results=commit_results,
                 warnings=warnings,
             )
@@ -379,14 +389,14 @@ def get_repo_result2(
 @dataclass
 class RepoResult:
     repo: Repo
-    command: Sequence[str]
+    script: Path
     environment: Optional[Environment]
     commit_results: Sequence[CommitResult]
     warnings: Sequence[str]
 
 
 def run_experiment(
-    repos: Sequence[Tuple[Repo, CommitChooser, EnvironmentChooser, Sequence[str]]],
+    repos: Sequence[Tuple[Repo, CommitChooser, EnvironmentChooser, Mapping[str, str], Path, Mapping[str, int]]],
 ) -> Sequence[RepoResult]:
     repos = repos[:250]
     return [
