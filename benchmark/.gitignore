@@ -13,3 +13,4 @@ report.html
 .manual_cache
 secrets.env
 .tmp
+.testmondata

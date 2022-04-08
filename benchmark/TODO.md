@@ -1,4 +1,11 @@
+- [x] Show which part of the key is invalidated
+- Performance evaluation
+  - [x] Macrobenchmark on commit history of real repositories.
+  - [x] Microbenchmark
+    - per Memoized: n misses, n hits, size of objects, hashing, deserialization, serialization, object load, object store, function, total on hit, total on miss
+    - per MemoizedGroup: index load, index store, index size
 - [x] Scrape ASCL.
+- [x] Convert Jupyter Notebooks into scripts.
 - [x] Query GitHub url to get stars.
   - Hit by ratelimiting.
   - [x] Authenticate to GitHub to raise ratelimit.
@@ -24,17 +31,38 @@
   - However, many of the scripts have a ton of execution time in one critical function. If that function has to be recomputed (it changed syntactically or its predecessor changed semantically), most of the runtime will have to be reexecuted anyway.
   - [ ] First, run the commits with testmon.
   - [ ] Then, update the output summary.
-- [ ] Investigate testmon: how does it compare the new source code to the old trace? E.g., does inserting a comment along a taken branch cause an invalidation?
+- [x] Investigate testmon: how does it compare the new source code to the old trace? E.g., does inserting a comment along a taken branch cause an invalidation?
+  - Testmon uses the dynamic trace from Coverage.py, but it throws away everything except for the "blocks" graularity. A testmon block is a function or a module. Thus, Testmon uses the dynamic callgraph.
 - [ ] Find which files get covered by execution trace. Filter to commits which change one of those files. I would want to test fewer or no commits that testmon thinks _don't_ change.
+- [ ] Increase automation for scripts.
+  - [ ] Add a disable env var, disable group flag, and disable local flag.
+  - [ ] If the function is too quick or too quick compared to overhead and auto disable is set, set local disable.
+  - [ ] Capture and replay IO. Should go into state vars. Add tests for that.
+  - [ ] Add decorator for plots.
+  - [ ] Listen for [audit events]; trigger warning and locally disable cache. Add a `assume_pure` flag.
 - [ ] Run commits with Joblib. Joblib is a persistent caching decorator which is unsafe. Ideally, `charmonium.cache` should be as fast as Joblib but be correct (match the unmemoized version) in cases where joblib does not.
   - [ ] First, run the commits with Joblib.
   - [ ] Then, update the output summary.
-- [ ] Increase automation for scripts by factoring out the "common section." This is the section helps the script know what experimental conditions to use (e.g. switching between memoization and not). I currently have this repeated for each script.
 - [ ] Examine how often existing caching decorators are used in GitHub projects. https://grep.app/search?q=joblib.%2Amemory&regexp=true
 - [ ] Examine how often existing manuual caching mechanisms (search for kewyord `cache` as a variable name or argument name). Decide accuracy by hand.
 - [ ] Increase automation for environments. The experiment runner should install "editable" version the current project with "[dev]" extra if exists and `charmonium.cache` with Conda. The experiment runner should cache this environment. This should be backwards compatible with a manual conda `environment.yml` when the automation fails. Currently, everything uses a manually-written per-project `environment.yml`.
+- [ ] Add function for enabling logs? Add timestamp to freeze and cache ops logs.
+- [ ] Develop custom audit system. `FileContents` emits custom audit events that cancel our the default ones.
+- [ ] Break callgraph into submodule.
+  - [ ] Scan for references to non-deterministic functions (time, random, sys, os, path), emit audit event.
+  - [ ] Cache callgraph and global var names.
+- [ ] Write hook on [`sys.meta_path`][sys.meta_path]. You should be able to cache every function in the module by `import charmonium.cache.auto`.
 - [ ] Make a dataset consisting of repository, environment specification, command, and estimated time taken. Other researchers can use this to study the evolution of scientific code.
 - [ ] The results should be cached at a commit-level. They are currently cached at a repo-level.
+- [ ] Integrate with Parsl.
+  - [ ] Resp to comment [parsl comment]
+- [ ] The outputs of a cached function can be hashed by their progenesis.
+  - `result.__getfrozenstate__ = lambda: obj_key`
+  - [ ] Look into [lazy_python].
 
+[sys.meta_path]: https://github.com/lihaoyi/macropy/blob/a815f5a58231d8fa65386cd71ff0d15d09fe9fa3/macropy/__init__.py#L16
+[lazy_python]: https://pypi.org/project/lazy_python/
+[audit events]: https://docs.python.org/3/library/audit_events.html#audit-events
+[parsl comment]: https://github.com/Parsl/parsl/issues/1591#issuecomment-954863242
 [eht-imaging]: https://github.com/achael/eht-imaging
 [astropy]: https://github.com/astropy/astropy
