@@ -25,11 +25,6 @@ else:
     FileContents = lambda x: None
     group = None
 
-if "OUTPUT_LOG" in os.environ:
-    output_file = open(os.environ["OUTPUT_LOG"], "w+")
-else:
-    output_file = None
-
 #from  ehtim.plotting import self_cal as sc
 plt.close('all')
 
@@ -141,8 +136,8 @@ def main():
     obs = get_obs(im, eht)
     obs = deblur(obs)
     beamparams, res = get_params(obs)
-    print("Clean beam parameters:", beamparams, file=output_file)
-    print("Nominal Resolution:", res, file=output_file)
+    print("Clean beam parameters:", beamparams)
+    print("Nominal Resolution:", res)
     save_data(obs)
     flux, gaussprior = get_prior(im, obs)
     out = fit(obs, flux, gaussprior, res)

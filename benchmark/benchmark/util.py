@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import contextlib
 import datetime
+import logging
 import os
 import shlex
 import signal
@@ -266,3 +267,21 @@ def runexec_catch_signals(run_executor: RunExecutor) -> Generator[None, None, No
         yield
     if caught_signal_number is not None:
         raise InterruptedError(f"Caught signal {caught_signal_number}")
+
+class CaptureHandler(logging.Handler):
+    def __init__(self, level: logging._Level = logging.NOTSET) -> None:
+        super().__init__(level)
+        self.records: List[logging.LogRecords] = []
+
+    def emit(self, record) -> None:
+        self.records.append(record)
+
+@contextlib.contextmanager
+def capture_logs(logger: logger.Logger, level: logging._Level) -> Generator[List[str], None, None]:
+    old_level = logger.getEffectiveLevel()
+    logger.setLevel(level)
+    handler = CaptureHandler(level=level)
+    logger.addHandler(handler)
+    yield handler.records
+    logger.removeHandler(handler)
+    logger.setLevel(old_level)

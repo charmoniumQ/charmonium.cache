@@ -31,7 +31,7 @@ from tqdm import tqdm
 
 from .environment import Environment, EnvironmentChooser
 from .repo import CommitChooser, Repo
-from .util import combine_cmd, runexec_catch_signals
+from .util import combine_cmd, runexec_catch_signals, capture_logs
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -143,11 +143,15 @@ def run_exec_cmd(
     env: Mapping[str, str],
     cwd: Path,
     dir_modes: Mapping[str, Any],
-) -> Tuple[RunexecStats, str]:
-    info_log = tmp_dir / "info.log"
-    if info_log.exists():
-        info_log.unlink()
+) -> Tuple[RunexecStats, str, str]:
+    stdout = tmp_dir / "info.log"
+    if stdout.exists():
+        stdout.unlink()
+    stderr = tmp_dir / "error.log"
+    if stderr.exists():
+        stderr.unlink()
     combined_cmd = combine_cmd(*environment.run(cmd, env, cwd))
+    stderr.write_text(" \\\n    ".join(shlex.quote(part) for part in combined_cmd) + "\n\n")
     run_executor = RunExecutor(
         use_namespaces=False,
         # dir_modes=dir_modes,
@@ -155,20 +159,27 @@ def run_exec_cmd(
         # Need to system config so DNS works.
         # container_system_config=True,
     )
-    with runexec_catch_signals(run_executor):
+    logger = logging.getLogger("root")
+    with runexec_catch_signals(run_executor), capture_logs(logger, logging.WARNING) as logs:
         run_exec_run = run_executor.execute_run(
             args=combined_cmd,
             environments={
                 "keepEnv": {},
             },
             workingDir="/",
-            output_filename=info_log,
+            write_header=False,
+            output_filename=stdout,
+            error_filename=stderr,
             softtimelimit=time_limit,
             hardtimelimit=int(time_limit * 1.1),
             walltimelimit=int(time_limit * 1.2),
             memlimit=mem_limit,
         )
-    return RunexecStats.create(run_exec_run), info_log.read_text()
+    return (
+        RunexecStats.create(run_exec_run),
+        stdout.read_text(),
+        stderr.read_text() + "\n".join(record.getMessage() for record in logs),
+    )
 
 
 # @ch_time_block.decor(print_start=False)
@@ -180,13 +191,12 @@ def run_once(
     output_log = tmp_dir / "output.log"
     if perf_log.exists():
         perf_log.unlink()
-    runexec_stats, info_log = run_exec_cmd(
+    runexec_stats, stdout, stderr = run_exec_cmd(
         environment,
         cmd,
         {
             "CHARMONIUM_CACHE_ENABLE": "1" if memoize else "0",
             "CHARMONIUM_CACHE_PERF_LOG": str(perf_log),
-            "OUTPUT_LOG": str(output_log),
         },
         repo.dir,
         dir_modes={
@@ -212,9 +222,9 @@ def run_once(
         calls = []
         kwargs = {}
     return ExecutionProfile(
-        output=output_log.read_text() if output_log.exists() else "",
+        output=stdout,
         command=cmd,
-        log=info_log,
+        log=stderr,
         success=runexec_stats.exitcode == 0,
         func_calls=calls,
         internal_stats=kwargs,

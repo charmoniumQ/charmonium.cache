@@ -45,7 +45,7 @@ def get_data() -> Sequence[
             ),
             [
                 "python",
-                str(resources / "astropy/examples.py"),
+                str(resources / "astropy/UVES.py"),
             ],
         ),
         # (

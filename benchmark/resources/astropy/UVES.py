@@ -18,8 +18,9 @@ from astropy.io import ascii
 from charmonium.determ_hash import determ_hash
 from pathlib import Path
 import os
+import sys
 memoization = bool(int(os.environ.get("CHARMONIUM_CACHE_ENABLE", "0")))
-print(f"{memoization=}")
+print(f"{memoization=}", file=sys.stderr)
 if memoization:
     from charmonium.cache import memoize, FileContents, MemoizedGroup
     group = MemoizedGroup(size="1Gb")
@@ -55,7 +56,7 @@ def cell1():
 @memoize(group=group)
 def cell2(working_dir_path):
     url = 'http://data.astropy.org/tutorials/UVES/data_UVES.tar.gz'
-    f = tarfile.open(download_file(url, cache=True), mode='r|*')
+    f = tarfile.open(download_file(url, cache=False), mode='r|*')
     f.extractall(path=working_dir_path)
     globpath = working_dir_path / 'UVES'
     print(globpath)
@@ -73,7 +74,6 @@ def cell3(filelist):
     wavelength = wavelength.flatten()
     return (header, wavelength)
 
-@memoize(group=group)
 def read_spec(filename):
     """Read a UVES spectrum from the ESO pipeline
 
@@ -121,19 +121,21 @@ def read_setup(filename):
 
 @memoize(group=group)
 def cell8(filelist):
-    setups = []
-    for f in filelist:
-        setups.append(read_setup(f))
+    for _ in range(20):
+        setups = []
+        for f in filelist:
+            setups.append(read_setup(f))
     return setups
 
 @memoize(group=group)
 def cell9(len_wavelength, filelist):
-    flux = np.zeros((len(filelist), len_wavelength))
-    date = np.zeros(len(filelist), dtype='U23')
-    for (i, fname) in enumerate(filelist):
-        (w, f, date_obs) = read_spec(fname)
-        flux[i, :] = f
-        date[i] = date_obs
+    for _ in range(20):
+        flux = np.zeros((len(filelist), len_wavelength))
+        date = np.zeros(len(filelist), dtype='U23')
+        for (i, fname) in enumerate(filelist):
+            (w, f, date_obs) = read_spec(fname)
+            flux[i, :] = f
+            date[i] = date_obs
     return (date, flux)
 
 @memoize(group=group)
@@ -270,9 +272,9 @@ def cell31(wcaII, vsini):
 
 def serialize_fig():
     plt.savefig("/tmp/fig.svg")
+    plt.close()
     return Path("/tmp/fig.svg").read_bytes()
 
-@memoize(group=group)
 def cell32(fcaII, x):
     fig = plt.figure()
     ax = fig.add_subplot(1, 1, 1)
@@ -283,7 +285,6 @@ def cell32(fcaII, x):
     ax.set_title('Ca II H line in MN Lup')
     return serialize_fig()
 
-@memoize(group=group)
 def cell33(fcaII, x):
     yshift = np.arange(fcaII.shape[0]) * 0.5
     yshift[:] += 1.5
@@ -306,7 +307,6 @@ def cell34(fcaII):
     fdiff = fcaII - fmean[np.newaxis, :]
     return fdiff
 
-@memoize(group=group)
 def cell35(fdiff):
     fig = plt.figure()
     ax = fig.add_subplot(1, 1, 1)
@@ -314,7 +314,6 @@ def cell35(fdiff):
     plt.savefig("/tmp/fig.png")
     return Path("/tmp/fig.png").read_bytes()
 
-@memoize(group=group)
 def cell36(fdiff, delta_p, x):
     ind1 = delta_p < 1 * u.dimensionless_unscaled
     ind2 = delta_p > 1 * u.dimensionless_unscaled
@@ -327,7 +326,6 @@ def cell36(fdiff, delta_p, x):
     plt.draw()
     return (ind2, ind1), serialize_fig()
 
-@memoize(group=group)
 def cell37(x, ind1, fdiff, delta_p, ind2):
     pplot = delta_p.copy().value
     pplot[ind2] -= 1.5
@@ -349,6 +347,17 @@ def cell37(x, ind1, fdiff, delta_p, ind2):
     return serialize_fig()
 
 @memoize(group=group)
+def make_graphs(fcaII, fdiff, delta_p, x):
+    for _ in range(20):
+        cell32_plot = cell32(fcaII, x)
+        print(determ_hash(cell32_plot))
+        cell33_plot = cell33(fcaII, x)
+        cell35_plot = cell35(fdiff)
+        (ind2, ind1), cell36_plot = cell36(fdiff, delta_p, x)
+        cell37_plot = cell37(x, ind1, fdiff, delta_p, ind2)
+    return [cell33_plot, cell35_plot, cell36_plot, cell37_plot]
+
+@memoize(group=group)
 def main():
     working_dir_path = cell1()
     filelist = cell2(working_dir_path)
@@ -356,7 +365,8 @@ def main():
     setups = cell8(filelist)
     print("setups", setups)
     (date, flux) = cell9(len(wavelength), filelist)
-    print("date", date, "flux", flux)
+    print("date", date)
+    print("flux", flux)
     (heliocentric, wavelength, vsini, R_MN_Lup, period, M_MN_Lup, incl) = cell10(wavelength)
     print(heliocentric, wavelength, vsini, R_MN_Lup, period, M_MN_Lup, incl)
     v_accr = cell11(M_MN_Lup, R_MN_Lup)
@@ -392,18 +402,11 @@ def main():
     print("table", table)
     x = cell31(wcaII, vsini)
     print("x", x[-5:])
-    cell32_plot = cell32(fcaII, x)
-    print(determ_hash(cell32_plot))
-    cell33_plot = cell33(fcaII, x)
-    print(determ_hash(cell33_plot))
     fdiff = cell34(fcaII)
     print("fidff", fdiff)
-    cell35_plot = cell35(fdiff)
-    print(determ_hash(cell35_plot))
-    (ind2, ind1), cell36_plot = cell36(fdiff, delta_p, x)
-    print(determ_hash(cell36_plot))
-    cell37_plot = cell37(x, ind1, fdiff, delta_p, ind2)
-    print(determ_hash(cell37_plot))
+    graphs = make_graphs(fcaII, fdiff, delta_p, x)
+    for i, graph in enumerate(graphs):
+        print("graphs", i, determ_hash(graph))
 
 if __name__ == '__main__':
     main()
