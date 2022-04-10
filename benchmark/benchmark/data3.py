@@ -23,7 +23,7 @@ def get_data() -> Sequence[
     return [
         (
             GitHubRepo("https://github.com/achael/eht-imaging"),
-            RecentCommitChooser(None, n=2, path=Path("ehtim/obsdata.py")),
+            RecentCommitChooser(None, n=4, path=Path("ehtim/obsdata.py")),
             StaticEnvironmentChooser(
                 CondaEnvironment(
                     "eht-imaging", resources / "eht-imaging/environment.yml"
@@ -31,7 +31,7 @@ def get_data() -> Sequence[
             ),
             {
                 "PYTHONPATH": str(benchmark_root / ".repos/eht-imaging"),
-                "new_wd": str(benchmark_root / ".repos/eht-imaging"),
+                "eht_root": str(benchmark_root / ".repos/eht-imaging"),
             },
             resources / "eht-imaging/example.py",
             {
@@ -39,19 +39,19 @@ def get_data() -> Sequence[
                 "mem": 2**31,
             },
         ),
-        (
-            GitHubRepo("https://github.com/astropy/astropy"),
-            RecentCommitChooser(None, n=5),
-            StaticEnvironmentChooser(
-                CondaEnvironment("astropy", resources / "astropy/environment.yml")
-            ),
-            {},
-            resources / "astropy/UVES.py",
-            {
-                "time": 80,
-                "mem": 2**29,
-            },
-        ),
+        # (
+        #     GitHubRepo("https://github.com/astropy/astropy"),
+        #     RecentCommitChooser(None, n=5),
+        #     StaticEnvironmentChooser(
+        #         CondaEnvironment("astropy", resources / "astropy/environment.yml")
+        #     ),
+        #     {},
+        #     resources / "astropy/UVES.py",
+        #     {
+        #         "time": 80,
+        #         "mem": 2**29,
+        #     },
+        # ),
         # (
         #     GitHubRepo("https://github.com/LBJ-Wade/coffea"),
         #     RecentCommitChooser("6ce872671c39d788fc9fe5e981862d4c6f7658f6", n=5),

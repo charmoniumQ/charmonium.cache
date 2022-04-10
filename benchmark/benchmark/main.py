@@ -13,8 +13,8 @@ def main() -> None:
     """
 
     data = get_data()
-    results = run_experiment(data)
-    write_summary(results)
+    for results in run_experiment(data):
+        write_summary(results)
 
 
 if __name__ == "__main__":

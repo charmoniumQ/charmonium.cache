@@ -25,15 +25,12 @@ else:
     FileContents = lambda x: None
     group = None
 
+root = Path(os.environ["eht_root"]) if "eht_root" in os.environ else Path()
+
 #from  ehtim.plotting import self_cal as sc
 plt.close('all')
 
 ttype = 'direct'
-
-if len(sys.argv) > 1:
-    root = Path(sys.argv[1])
-else:
-    root = Path()
 
 @memoize(group=group)
 def get_data():

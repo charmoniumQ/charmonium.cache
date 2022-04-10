@@ -53,7 +53,10 @@
   - [ ] Cache callgraph and global var names.
 - [ ] Write hook on [`sys.meta_path`][sys.meta_path]. You should be able to cache every function in the module by `import charmonium.cache.auto`.
 - [ ] Make a dataset consisting of repository, environment specification, command, and estimated time taken. Other researchers can use this to study the evolution of scientific code.
-- [ ] The results should be cached at a commit-level. They are currently cached at a repo-level.
+- [x] Improve experiment feedback loop.
+  - [x] The results should be cached at a commit-level. They are currently cached at a repo-level.
+  - [x] Generate the report after every run (in situ), not just at the end.
+  - [x] Make the original executions optional.
 - [ ] Integrate with Parsl.
   - [ ] Resp to comment [parsl comment]
 - [ ] The outputs of a cached function can be hashed by their progenesis.

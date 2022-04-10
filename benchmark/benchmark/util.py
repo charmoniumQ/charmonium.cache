@@ -257,6 +257,7 @@ def runexec_catch_signals(run_executor: RunExecutor) -> Generator[None, None, No
 
     def run_executor_stop(signal_number: signal.Signals, _: types.FrameType) -> None:
         caught_signal_number = signal_number
+        print(f"In signal catcher for {signal_number}")
         run_executor.stop()
 
     with catch_signals(

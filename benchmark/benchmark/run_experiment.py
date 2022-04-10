@@ -19,7 +19,7 @@ import warnings
 import xml.etree.ElementTree
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, Mapping, Optional, Sequence, Tuple, Type, cast
+from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence, Tuple, Type, cast
 
 import charmonium.time_block as ch_time_block
 from benchexec import container  # type: ignore
@@ -35,6 +35,7 @@ from .util import combine_cmd, runexec_catch_signals, capture_logs
 
 ROOT = Path(__file__).resolve().parent.parent
 
+manual_cache = Path(".manual_cache")
 
 @dataclass
 class FuncCallProfile:
@@ -129,7 +130,7 @@ class ExecutionProfile:
     func_calls: Sequence[FuncCallProfile]
     runexec: RunexecStats
     internal_stats: Mapping[str, float]
-    warnings: Sequence[str]
+    warnings: List[str]
 
 
 def run_exec_cmd(
@@ -181,8 +182,27 @@ def run_exec_cmd(
     )
 
 
-# @ch_time_block.decor(print_start=False)
 def run_once(
+    repo: Repo,
+    environment: Environment,
+    key: str,
+    env_vars: Mapping[str, str],
+    script: Path,
+    limits: Mapping[str, int],
+    memoize: bool,
+    trace: bool,
+    tmp_dir: Path,
+) -> ExecutionProfile:
+    cache_dest = manual_cache / repo.name / f"{key}-memoize{int(memoize)}-trace{int(trace)}.pkl"
+    cache_dest.parent.mkdir(exist_ok=True, parents=True)
+    if cache_dest.exists():
+        return cast(ExecutionProfile, pickle.loads(cache_dest.read_bytes()))
+    else:
+        ret = run_once2(repo, environment, env_vars, script, limits, memoize, trace, tmp_dir)
+        cache_dest.write_bytes(pickle.dumps(ret))
+        return ret
+
+def run_once2(
     repo: Repo,
     environment: Environment,
     env_vars: Mapping[str, str],
@@ -244,18 +264,18 @@ def run_once(
 
 
 @dataclass
-class CommitResult:
+class CommitInfo:
     diff: bytes
     date: datetime.datetime
     commit: str
-    executions: Mapping[str, ExecutionProfile]
 
     @staticmethod
     def from_commit(
-        repo: Repo, commit: str, executions: Mapping[str, ExecutionProfile]
-    ) -> CommitResult:
+        repo: Repo,
+        commit: str,
+    ) -> CommitInfo:
         diff, date = repo.info(commit)
-        return CommitResult(diff, date, commit, executions)
+        return CommitInfo(diff, date, commit)
 
 
 def run_many(
@@ -266,41 +286,15 @@ def run_many(
     script: Path,
     limits: Mapping[str, int],
     memoize: bool,
-    short_circuit: bool,
-) -> Sequence[ExecutionProfile]:
+) -> Iterable[ExecutionProfile]:
     repo.clean()
     tmp_dir = ROOT / ".tmp"
     if tmp_dir.exists():
         shutil.rmtree(tmp_dir)
     tmp_dir.mkdir()
-    executions = []
     for commit in tqdm(commits, unit="commit", leave=False):
-        execution = run_once(repo, environment, env_vars, script, limits, memoize, trace=False, tmp_dir=tmp_dir)
-        executions.append(execution)
-        if short_circuit and execution.runexec.termination_reason:
-            break
-    return executions
-
-
-manual_cache = Path(".manual_cache")
-
-
-def get_repo_result(
-    repo: Repo,
-    commit_chooser: CommitChooser,
-    environment_chooser: EnvironmentChooser,
-    env_vars: Mapping[str, str],
-    script: Path,
-    limits: Mapping[str, int],
-) -> RepoResult:
-    manual_cache.mkdir(exist_ok=True)
-    cache_dest = manual_cache / f"{repo.name}.pkl"
-    if cache_dest.exists():
-        return cast(RepoResult, pickle.loads(cache_dest.read_bytes()))
-    else:
-        ret = get_repo_result2(repo, commit_chooser, environment_chooser, env_vars, script, limits)
-        cache_dest.write_bytes(pickle.dumps(ret))
-        return ret
+        execution = run_once(repo, environment, commit, env_vars, script, limits, memoize, trace=False, tmp_dir=tmp_dir)
+        yield execution
 
 
 # @ch_time_block.decor(print_start=False)
@@ -311,79 +305,93 @@ def get_repo_result2(
     env_vars: Mapping[str, str],
     script: Path,
     limits: Mapping[str, int],
-) -> RepoResult:
-    warnings = []
+) -> Iterable[RepoResult]:
+    warnings: List[str] = []
     repo.setup()
     environment = environment_chooser.choose(repo)
+    repo_result = RepoResult(
+        repo=repo,
+        environment=environment,
+        script=script,
+        commits=[],
+        executions={},
+        warnings=[],
+    )
     if environment is None:
-        warnings.append(f"{environment_chooser!s} could not choose an environment.")
-        return RepoResult(
-            repo=repo,
-            environment=environment,
-            script=script,
-            commit_results=[],
-            warnings=warnings,
+        repo_result.warnings.append(f"{environment_chooser!s} could not choose an environment.")
+        yield repo_result
+        return
+    try:
+        environment.setup()
+        if not environment.has_package("charmonium.cache"):
+            environment.install(
+                ["https://github.com/charmoniumQ/charmonium.cache/tarball/main"]
+            )
+    except subprocess.CalledProcessError as e:
+        repo_result.warnings.append(
+            "\n".join(
+                [
+                    f"{environment!s} could not setup {repo!s}.",
+                    str(e),
+                    e.stdout.decode()
+                    if isinstance(e.stdout, bytes)
+                    else "No stdout",
+                    e.stderr.decode()
+                    if isinstance(e.stderr, bytes)
+                    else "No stderr",
+                ]
+            )
         )
+        yield repo_result
+        return
+
+    repo_result.commits = commit_chooser.choose(repo)
+    repo_result.executions = {
+        "memo": [None] * len(repo_result.commits),
+        "orig": [None] * len(repo_result.commits),
+    }
+
+    run_many_args = (repo, environment, repo_result.commits, env_vars, script, limits)
+
+    for i, execution in enumerate(run_many(*run_many_args, memoize=True)):
+        repo_result.executions["memo"][i] = execution
+        yield repo_result
+        if execution.runexec.termination_reason:
+            break
+
+    num_good_commits = i+1
+
+    repo_result.commits = repo_result.commits[:num_good_commits]
+    repo_result.executions = {
+        label: executions[:num_good_commits]
+        for label, executions in repo_result.executions.items()
+    }
+
+    if len(repo_result.commits) < 2:
+        repo_result.warnings.append(f"Only {len(repo_result.commits)} commit.")
+
+    for i, execution in enumerate(run_many(*run_many_args, memoize=False)):
+        repo_result.executions["orig"][i] = execution
+        yield repo_result
+
+
+def get_repo_result(
+    repo: Repo,
+    commit_chooser: CommitChooser,
+    environment_chooser: EnvironmentChooser,
+    env_vars: Mapping[str, str],
+    script: Path,
+    limits: Mapping[str, int],
+) -> Iterable[RepoResult]:
+    cache_dest = manual_cache / repo.name / f"list.pkl"
+    cache_dest.parent.mkdir(exist_ok=True, parents=True)
+    if cache_dest.exists():
+        yield cast(RepoResult, pickle.loads(cache_dest.read_bytes()))
     else:
-        try:
-            environment.setup()
-            if not environment.has_package("charmonium.cache"):
-                environment.install(
-                    ["https://github.com/charmoniumQ/charmonium.cache/tarball/main"]
-                )
-        except subprocess.CalledProcessError as e:
-            warnings.append(
-                "\n".join(
-                    [
-                        f"{environment!s} could not setup {repo!s}.",
-                        str(e),
-                        e.stdout.decode()
-                        if isinstance(e.stdout, bytes)
-                        else "No stdout",
-                        e.stderr.decode()
-                        if isinstance(e.stderr, bytes)
-                        else "No stderr",
-                    ]
-                )
-            )
-            return RepoResult(
-                repo=repo,
-                environment=None,
-                script=script,
-                commit_results=[],
-                warnings=warnings,
-            )
-        else:
-            commits = commit_chooser.choose(repo)
-            if len(commits) < 2:
-                warnings.append(f"Only {len(commits)} commit.")
-            orig_executions = run_many(
-                repo, environment, commits, env_vars, script, limits, memoize=False, short_circuit=True
-            )
-            working_commits = commits[: len(orig_executions)]
-            memo_executions = run_many(
-                repo, environment, commits, env_vars, script, limits, memoize=True, short_circuit=True
-            )
-            commit_results = [
-                CommitResult.from_commit(
-                    repo,
-                    commit,
-                    {
-                        "orig": orig_execution,
-                        "memo": memo_execution,
-                    },
-                )
-                for commit, orig_execution, memo_execution in zip(
-                    commits, orig_executions, memo_executions
-                )
-            ]
-            return RepoResult(
-                repo=repo,
-                environment=environment,
-                script=script,
-                commit_results=commit_results,
-                warnings=warnings,
-            )
+        results_gen = get_repo_result2(repo, commit_chooser, environment_chooser, env_vars, script, limits)
+        for result in results_gen:
+            yield result
+        cache_dest.write_bytes(pickle.dumps(result))
 
 
 @dataclass
@@ -391,15 +399,16 @@ class RepoResult:
     repo: Repo
     script: Path
     environment: Optional[Environment]
-    commit_results: Sequence[CommitResult]
-    warnings: Sequence[str]
+    commits: List[str]
+    executions: Mapping[str, List[Optional[ExecutionProfile]]]
+    warnings: List[str]
 
-
+# TODO: Mayhaps this should be a Mapping[Repo, RepoResult]
 def run_experiment(
     repos: Sequence[Tuple[Repo, CommitChooser, EnvironmentChooser, Mapping[str, str], Path, Mapping[str, int]]],
-) -> Sequence[RepoResult]:
-    repos = repos[:250]
-    return [
-        get_repo_result(*repo_info)
-        for repo_info in tqdm(repos, unit="repos", leave=False)
-    ]
+) -> Iterable[Sequence[RepoResult]]:
+    results: List[RepoResult] = []
+    for repo_info in tqdm(repos, unit="repos", leave=False):
+        for result in get_repo_result(*repo_info):
+            yield [*results, result]
+        results.append(result)

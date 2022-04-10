@@ -36,7 +36,7 @@ from .html_helpers import (
     small,
 )
 from .repo import Repo
-from .run_experiment import CommitResult, ExecutionProfile, FuncCallProfile, RepoResult
+from .run_experiment import CommitInfo, ExecutionProfile, FuncCallProfile, RepoResult
 
 T = TypeVar("T")
 
@@ -88,7 +88,7 @@ def summarize_func_calls(func_calls: Sequence[FuncCallProfile]) -> html.Tag:
     )
 
 
-executions: Mapping[str, html.TagLike] = {
+execution_labels: Mapping[str, html.TagLike] = {
     "orig": "Unmodified",
     "memo": "Memoized",
 }
@@ -98,8 +98,8 @@ commit_result_headers: Sequence[html.TagLike] = [
     "Warnings",
     "Tests work?",
     html.span()("Memoized output", html.br()(), "matches original?"),
-    *[html.span()(execution, " time") for execution in executions.values()],
-    *[html.span()(execution, " mem") for execution in executions.values()],
+    *[html.span()(execution, " time") for execution in execution_labels.values()],
+    *[html.span()(execution, " mem") for execution in execution_labels.values()],
     "Detailed results",
 ]
 
@@ -111,24 +111,27 @@ def count(it: Iterable[T]) -> int:
     return counter
 
 
-def summarize_commit(repo: Repo, result: CommitResult) -> html.Tag:
-    date_str = result.date.astimezone(datetime.timezone.utc).strftime(
-        "%Y-%m-%d %H:%M:%S UTC"
-    )
-    adds = count(re.finditer(rb"^[+] ", result.diff, flags=re.MULTILINE))
-    subs = count(re.finditer(rb"^[-] ", result.diff, flags=re.MULTILINE))
-    return html_table(
-        [
-            ["Date", disp_date(result.date)],
-            [
-                "Hash",
-                html.a(href=repo.display_url.format(commit=result.commit))(
-                    result.commit[:6]
-                ),
-            ],
-            ["Diff", f"Diff +{adds}/-{subs}"],
-        ]
-    )
+def summarize_commit_str(repo: Repo, commit: str) -> html.Tag:
+    return html.a(href=repo.display_url.format(commit=commit))(commit[:6])
+
+# def summarize_commit(repo: Repo, commit: CommitInfo) -> html.Tag:
+#     date_str = commit.date.astimezone(datetime.timezone.utc).strftime(
+#         "%Y-%m-%d %H:%M:%S UTC"
+#     )
+#     adds = count(re.finditer(rb"^[+] ", commit.diff, flags=re.MULTILINE))
+#     subs = count(re.finditer(rb"^[-] ", commit.diff, flags=re.MULTILINE))
+#     return html_table(
+#         [
+#             ["Date", disp_date(commit.date)],
+#             [
+#                 "Hash",
+#                 html.a(href=repo.display_url.format(commit=commit.commit))(
+#                     commit.commit[:6]
+#                 ),
+#             ],
+#             ["Diff", f"Diff +{adds}/-{subs}"],
+#         ]
+#     )
 
 
 def color_cell(elem: html.TagLike, color_class: str) -> html.Tag:
@@ -148,71 +151,82 @@ def get_process_overhead(prof: ExecutionProfile) -> float:
     )
 
 
-def summarize_commit_result(repo: Repo, result: CommitResult) -> Sequence[html.TagLike]:
+def summarize_commit_result(
+    repo: Repo,
+    commit: str,
+    exes: Mapping[str, Optional[ExecutionProfile]],
+) -> Sequence[html.TagLike]:
     inner_table = html_table(
         [
             [
                 "Status",
                 *[
-                    color_cell("Success", "success")
-                    if prof.success
-                    else color_cell("Error", "error")
-                    for prof in result.executions.values()
+                    color_cell("Success", "success") if exe and exe.success
+                    else color_cell("Error", "error") if exe
+                    else html.span()("")
+                    for exe in exes.values()
                 ],
             ],
             [
                 "Output",
                 *[
-                    highlighted_code("plaintext", prof.output)
-                    for prof in result.executions.values()
+                    highlighted_code("plaintext", exe.output) if exe
+                    else html.span()("")
+                    for exe in exes.values()
                 ],
             ],
             [
                 "Warnings",
                 *[
-                    highlighted_code("plaintext", "\n".join(prof.warnings))
-                    for prof in result.executions.values()
+                    highlighted_code("plaintext", "\n".join(exe.warnings)) if exe
+                    else html.span()("")
+                    for exe in exes.values()
                 ],
             ],
             [
                 "Log",
                 *[
-                    highlighted_code("plaintext", prof.log)
-                    for prof in result.executions.values()
+                    highlighted_code("plaintext", exe.log) if exe
+                    else html.span()("")
+                    for exe in exes.values()
                 ],
             ],
             [
                 "Time (s)",
                 *[
-                    disp_sec(prof.runexec.cputime)
-                    for prof in result.executions.values()
+                    disp_sec(exe.runexec.cputime) if exe
+                    else html.span()("")
+                    for exe in exes.values()
                 ],
             ],
             [
                 "Overhead (s)",
                 *[
-                    disp_sec(get_process_overhead(prof))
-                    for prof in result.executions.values()
+                    disp_sec(get_process_overhead(exe)) if exe
+                    else html.span()("")
+                    for exe in exes.values()
                 ],
             ],
             [
                 "Function calls",
                 *[
-                    collapsed("Show", summarize_func_calls(prof.func_calls))
-                    for prof in result.executions.values()
+                    collapsed("Show", summarize_func_calls(exe.func_calls)) if exe
+                    else html.span()("")
+                    for exe in exes.values()
                 ],
             ],
         ],
-        ["", *[executions[label] for label in result.executions.keys()]],
+        ["", *[execution_labels[label] for label in exes.keys()]],
     )
-    tests_work = any(execution.success for execution in result.executions.values())
+    tests_work = any(exe.success for exe in exes.values() if exe)
     warnings = [
         warning
-        for execution in result.executions.values()
-        for warning in execution.warnings
+        for exe in exes.values()
+        if exe
+        for warning in exe.warnings
     ]
     return [
-        summarize_commit(repo, result),
+        summarize_commit_str(repo, commit),
         collapsed(
             color_cell("Warnings", "error"),
             highlighted_code("plaintext", "\n".join(set(warnings))),
@@ -223,23 +237,21 @@ def summarize_commit_result(repo: Repo, result: CommitResult) -> Sequence[html.T
         if tests_work
         else color_cell("Tests don't work", "error"),
         color_cell("Output matches", "success")
-        if not result_mismatch(result)
+        if not result_mismatch(exes)
         else color_cell("Outputs don't match", "error"),
         *[
             disp_sec(
-                result.executions[execution].runexec.cputime
-                if execution in result.executions
+                exe.runexec.cputime if exe
                 else 0.0
             )
-            for execution in executions
+            for exe in exes.values()
         ],
         *[
             disp_mem(
-                result.executions[execution].runexec.memory
-                if execution in result.executions
+                exe.runexec.memory if exe
                 else 0
             )
-            for execution in executions
+            for exe in exes.values()
         ],
         collapsed("Details", inner_table),
     ]
@@ -290,13 +302,12 @@ def get_nonzero_executions(
     *tags: str,
 ) -> Sequence[Mapping[str, ExecutionProfile]]:
     return [
-        commit_result.executions
-        for commit_result in repo_result.commit_results
-        if all(
-            tag in commit_result.executions
-            and commit_result.executions[tag].runexec.cputime > 0
+        {
+            tag: cast(ExecutionProfile, repo_result.executions[tag][i])
             for tag in tags
-        )
+        }
+        for i in range(len(repo_result.commits))
+        if all(repo_result.executions[tag][i] for tag in tags)
     ]
 
 
@@ -387,52 +398,49 @@ def total_speedup(
     return low, mid, high, N
 
 
-def result_mismatch(commit_result: CommitResult) -> bool:
+def result_mismatch(executions: Mapping[str, Optional[ExecutionProfile]]) -> bool:
     return (
-        "memo" not in commit_result.executions
-        or "orig" not in commit_result.executions
-        or commit_result.executions["memo"].output
-        != commit_result.executions["orig"].output
+        executions["memo"] is not None
+        and executions["orig"] is not None
+        and executions["memo"].output != executions["orig"].output
     )
 
 
 def get_command(repo_result: RepoResult) -> Sequence[str]:
-    if not repo_result.commit_results:
-        return ["true"]
-    first = repo_result.commit_results[0]
-    if "orig" not in first.executions:
-        return ["true"]
-    return first.executions["orig"].command
+    return repo_result.executions["memo"][0].command if repo_result.executions["memo"] and repo_result.executions["memo"][0] is not None else ["true"]
 
 
 def summarize_repo_result(result: RepoResult) -> Sequence[html.Tag]:
     warnings = list(
         set(
             warning
-            for commit_result in result.commit_results
-            for execution in commit_result.executions.values()
-            for warning in execution.warnings
+            for exes in result.executions.values()
+            for exe in exes
+            if exe
+            for warning in exe.warnings
         )
     ) + list(result.warnings)
 
-    if not result.commit_results:
+    if not result.executions:
         status = color_cell("Install failed", "orange")
-    elif not any(
-        commit_result.executions["orig"].success
-        for commit_result in result.commit_results
+    elif not all(
+        execution and execution.success
+        for execution in result.executions["memo"]
     ):
         status = color_cell("Tests don't work", "orange")
     elif len(get_nonzero_executions(result, "memo", "orig")) < 2:
         status = color_cell("Not enough working commits", "orange")
     elif any(
-        any(
-            execution.runexec.termination_reason
-            for execution in commit_result.executions.values()
-        )
-        for commit_result in result.commit_results
+        exe.runexec.termination_reason
+        for exes in result.executions.values()
+        for exe in exes
+        if exe
     ):
         status = color_cell("Limit exceeded", "orange")
-    elif any(map(result_mismatch, result.commit_results)):
+    elif any(map(result_mismatch, [
+            {label: exes[i] for label, exes in result.executions.items()}
+            for i in range(len(result.commits))
+    ])):
         status = color_cell("Result doesn't match", "error")
     elif warnings:
         status = color_cell("Completed with warnings", "success")
@@ -468,8 +476,11 @@ def summarize_repo_result(result: RepoResult) -> Sequence[html.Tag]:
             "Commit results",
             html_table(
                 [
-                    summarize_commit_result(result.repo, commit_result)
-                    for commit_result in result.commit_results
+                    summarize_commit_result(result.repo, result.commits[i], {
+                        label: results[i]
+                        for label, results in result.executions.items()
+                    })
+                    for i in range(len(result.commits))
                 ],
                 commit_result_headers,
             ),
@@ -478,24 +489,27 @@ def summarize_repo_result(result: RepoResult) -> Sequence[html.Tag]:
 
 
 def sort_key(repo_result: RepoResult) -> Any:
-    if not repo_result.commit_results:
+    if not list(exe for exes in repo_result.executions.values() for exe in exes):
         return (0,)
-    elif not any(
-        commit_result.executions["orig"].success
-        for commit_result in repo_result.commit_results
+    elif any(
+        not exe.success
+        for exe in repo_result.executions["orig"]
+        if exe
     ):
         return (1,)
     elif len(get_nonzero_executions(repo_result, "memo", "orig")) < 2:
         return (2,)
     elif any(
-        any(
-            execution.runexec.termination_reason
-            for execution in commit_result.executions.values()
-        )
-        for commit_result in repo_result.commit_results
+        exe.runexec.termination_reason
+        for exes in repo_result.executions.values()
+        for exe in exes
+        if exe
     ):
         return (3,)
-    elif any(map(result_mismatch, repo_result.commit_results)):
+    elif any(map(result_mismatch, [
+            {label: exes[i] for label, exes in repo_result.executions.items()}
+            for i in range(len(repo_result.commits))
+    ])):
         return (-2,)
     else:
         return (4, int("success" in original_time(repo_result).attrib["class"]))
@@ -551,6 +565,8 @@ table, th, td {
 }
 .color {
   display: block;
+}
+.color-nothing {
 }
 .color-success {
   background-color: lightgreen;
