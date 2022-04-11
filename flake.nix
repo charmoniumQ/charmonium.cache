@@ -53,12 +53,12 @@
           ];
           shellHook = ''
             env_hash=$(sha1sum poetry.lock | cut -f1 -d' ')
-            if [ ! -f build/$env_hash ]; then
+            if [ ! -f build/$env_hash.2 ]; then
                 poetry install --remove-untracked
                 if [ ! -d build ]; then
                     mkdir build
                 fi
-                touch build/$env_hash
+                touch build/$env_hash.2
             fi
             export PREPEND_TO_PS1="(${name}) "
             export PYTHONNOUSERSITE=true
