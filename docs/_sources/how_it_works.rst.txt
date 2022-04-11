@@ -111,11 +111,12 @@ change, the cache is invalidated. I use a method similar but superior to
     ClosureVars(nonlocals={}, globals={'bar': <function bar at ...>, 'i': 42}, builtins={}, unbound=set())
 
 To assess if a function has changed, I compare the closure-variables and the
-compiled bytecode (e.g., ``foo.__code__.co_code``). See
-:py:func:`~charmonium.cache.determ_hash` for more details.
+compiled bytecode (e.g., ``foo.__code__.co_code``). See |charmonium.freeze|_ for details.
 
 .. _`Universal Pathlib`: https://github.com/Quansight/universal_pathlib
 .. |pathlib| replace:: ``pathlib``
 .. _`pathlib`: https://docs.python.org/3/library/pathlib.html
 .. |inspect.getclosurevars| replace:: ``inspect.getclosurevars``
 .. _`inspect.getclosurevars`: https://docs.python.org/3/library/inspect.html#inspect.getclosurevars
+.. |charmonium.freeze| replace:: ``charmonium.freeze``
+.. _`charmonium.freeze`: https://github.com/charmoniumQ/charmonium.freeze/blob/main/README.rst

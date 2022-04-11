@@ -82,7 +82,3 @@ Utils
     .. autoclass:: Future
         :members:
         :special-members: __init__
-
-    .. autofunction:: determ_hash
-
-    .. autofunction:: hashable

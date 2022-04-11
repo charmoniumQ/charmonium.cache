@@ -39,19 +39,23 @@ in a decorator. The earliest form of what is now this project was born:
                 store_to_disk(cache_mem)
                 return result
 
+    @cache
+    def do_task1():
+        ...
+
 My project grew more sophisticated. I pulled ``cache`` out into its own class I
-statically typed everything (before `PEP612`_/``ParamSpec`` was a glimmer in Guido's
-eye). Since I was getting more serious about software design, I decided the
-client should be able to use any storage backend, so long as it satisfied a
+statically typed everything (before `PEP612`_/``ParamSpec`` was a glimmer in
+Guido's eye). Since I was getting more serious about software design, I decided
+the client should be able to use any storage backend, so long as it satisfied a
 dict-like interface. Then I wrote an backend for Google Cloud Storage so that I
 could use caching in my distributed system. This version still exists
 `here`_. It worked like:
 
 .. code:: python
 
-    >>> @Cache.decor(DirectoryStore(GSPath.from_url("gs://blah/blah")))
-    >>> def foo():
-    ...     pass
+    @Cache.decor(DirectoryStore(GSPath.from_url("gs://bucket/path/to/cache_dir")))
+    def foo():
+        pass
 
 .. _`PEP612`: https://www.python.org/dev/peps/pep-0612/
 .. _`here`: https://github.com/charmoniumQ/EDGAR-research/blob/master/edgar_code/cache.py

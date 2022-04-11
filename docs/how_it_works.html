@@ -5,10 +5,10 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>How It Works &#8212; charmonium.cache 1.2.1 documentation</title>
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
-    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <title>How It Works &#8212; charmonium.cache 1.2.6 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
     <script src="_static/doctools.js"></script>
@@ -93,7 +93,7 @@ an interface for a variety of storage backends including Amazon S3.</p>
 <p>Some arguments might need to define their own notion of equality for the
 purposes of memoization. These arguments should have a <code class="docutils literal notranslate"><span class="pre">__cache_key__()</span></code>. It
 can return anything that can be made hashable with
-(<a class="reference internal" href="api_reference.html#charmonium.cache.hashable" title="charmonium.cache.hashable"><code class="xref py py-func docutils literal notranslate"><span class="pre">hashable()</span></code></a>). As far as I know, every python object
+(<code class="xref py py-func docutils literal notranslate"><span class="pre">hashable()</span></code>). As far as I know, every python object
 can be made hashable with hashable. If <code class="docutils literal notranslate"><span class="pre">__cache_key__()</span></code> is not found, the
 object itself is used as the key. This yields basic memoization.</p>
 <p>Some arguments represent “versioned resources,” in the sense that old versions
@@ -123,8 +123,7 @@ change, the cache is invalidated. I use a method similar but superior to
 </pre></div>
 </div>
 <p>To assess if a function has changed, I compare the closure-variables and the
-compiled bytecode (e.g., <code class="docutils literal notranslate"><span class="pre">foo.__code__.co_code</span></code>). See
-<a class="reference internal" href="api_reference.html#charmonium.cache.determ_hash" title="charmonium.cache.determ_hash"><code class="xref py py-func docutils literal notranslate"><span class="pre">determ_hash()</span></code></a> for more details.</p>
+compiled bytecode (e.g., <code class="docutils literal notranslate"><span class="pre">foo.__code__.co_code</span></code>). See <a class="reference external" href="https://github.com/charmoniumQ/charmonium.freeze/blob/main/README.rst"><code class="docutils literal notranslate"><span class="pre">charmonium.freeze</span></code></a> for details.</p>
 </div>
 </div>
 </div>
@@ -172,7 +171,7 @@ compiled bytecode (e.g., <code class="docutils literal notranslate"><span class=
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -194,7 +193,7 @@ compiled bytecode (e.g., <code class="docutils literal notranslate"><span class=
       &copy;2021, Samuel Grayson.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.4</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

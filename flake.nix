@@ -52,13 +52,11 @@
             pkgs.nodePackages.pyright
           ];
           shellHook = ''
-            env_hash=$(sha1sum poetry.lock | cut -f1 -d' ')
-            if [ ! -f build/$env_hash.2 ]; then
+            if [ ! -f poetry.lock ] || [ ! -f build/poetry-$(sha1sum poetry.lock | cut -f1 -d' ') ]; then
                 poetry install --remove-untracked
-                if [ ! -d build ]; then
-                    mkdir build
-                fi
-                touch build/$env_hash.2
+                rm -rf build
+                mkdir build
+                touch build/poetry-$(sha1sum poetry.lock | cut -f1 -d' ')
             fi
             export PREPEND_TO_PS1="(${name}) "
             export PYTHONNOUSERSITE=true

@@ -5,10 +5,10 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>charmonium.cache &#8212; charmonium.cache 1.2.1 documentation</title>
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
-    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <title>charmonium.cache &#8212; charmonium.cache 1.2.6 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
     <script src="_static/doctools.js"></script>
@@ -33,28 +33,36 @@
             
   <div class="section" id="charmonium-cache">
 <h1>charmonium.cache<a class="headerlink" href="#charmonium-cache" title="Permalink to this headline">¶</a></h1>
-<ul class="simple">
-<li><p><a class="reference external" href="https://pypi.org/project/charmonium.cache/">PyPI</a></p></li>
-<li><p><a class="reference external" href="https://github.com/charmoniumQ/charmonium.cache">GitHub</a></p></li>
-<li><p><a class="reference external" href="https://charmoniumq.github.io/charmonium.cache/">Docs</a></p></li>
-</ul>
-<p>Provides a decorator for caching a function. Whenever the function is called
-with the same arguments, the result is loaded from the cache instead of
-computed. This cache is <strong>persistent across runs</strong>. If the arguments, source
-code, or enclosing environment have changed, the cache recomputes the data
-transparently (<strong>no need for manual invalidation</strong>).</p>
+<a class="reference external image-reference" href="https://pypi.org/project/charmonium.cache"><img alt="PyPI Package" src="https://img.shields.io/pypi/v/charmonium.cache" /></a>
+<a class="reference external image-reference" href="https://pypi.org/project/charmonium.cache"><img alt="PyPI Downloads" src="https://img.shields.io/pypi/dm/charmonium.cache" /></a>
+<a class="reference external image-reference" href="https://github.com/charmoniumQ/charmonium.cache/blob/main/LICENSE"><img alt="PyPI License" src="https://img.shields.io/pypi/l/charmonium.cache" /></a>
+<a class="reference external image-reference" href="https://pypi.org/project/charmonium.cache"><img alt="Python Versions" src="https://img.shields.io/pypi/pyversions/charmonium.cache" /></a>
+<a class="reference external image-reference" href="https://github.com/charmoniumQ/charmonium.cache"><img alt="GitHub stars" src="https://img.shields.io/github/stars/charmoniumQ/charmonium.cache?style=social" /></a>
+<a class="reference external image-reference" href="https://github.com/charmoniumQ/charmonium.cache/actions/workflows/main.yaml"><img alt="CI status" src="https://github.com/charmoniumQ/charmonium.cache/actions/workflows/main.yaml/badge.svg" /></a>
+<a class="reference external image-reference" href="https://github.com/charmoniumQ/charmonium.cache/commits"><img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/charmoniumQ/charmonium.determ_hash" /></a>
+<a class="reference external image-reference" href="https://libraries.io/pypi/charmonium.cache"><img alt="libraries.io sourcerank" src="https://img.shields.io/librariesio/sourcerank/pypi/charmonium.cache" /></a>
+<a class="reference external image-reference" href="https://charmoniumq.github.io/charmonium.cache/"><img alt="Documentation link" src="https://img.shields.io/badge/docs-yes-success" /></a>
+<a class="reference external image-reference" href="https://mypy.readthedocs.io/en/stable/"><img alt="Checked with Mypy" src="http://www.mypy-lang.org/static/mypy_badge.svg" /></a>
+<a class="reference external image-reference" href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg" /></a>
+<p>Provides a decorator for caching a function between subsequent processes.</p>
+<p>Whenever the function is called with the same arguments, the result is
+loaded from the cache instead of computed. This cache is <strong>persistent
+across runs</strong>. If the arguments, source code, or enclosing environment
+have changed, the cache recomputes the data transparently (<strong>no need
+for manual invalidation</strong>).</p>
 <p>The use case is meant for iterative development, especially on scientific
 experiments. Many times a developer will tweak some of the code but not
 all. Often, reusing intermediate results saves a significant amount of time
 every run.</p>
+<p>See full documentation <a class="reference external" href="https://charmoniumq.github.io/charmonium.cache/">here</a>.</p>
 <div class="section" id="quickstart">
 <h2>Quickstart<a class="headerlink" href="#quickstart" title="Permalink to this headline">¶</a></h2>
 <p>If you don’t have <code class="docutils literal notranslate"><span class="pre">pip</span></code> installed, see the <a class="reference external" href="https://pip.pypa.io/en/latest/installing/">pip install
-guide</a>. Then run:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pip install charmonium.cache
+guide</a>.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pip install charmonium.cache
 </pre></div>
 </div>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">charmonium.cache</span> <span class="kn">import</span> <span class="n">memoize</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">charmonium.cache</span> <span class="kn">import</span> <span class="n">memoize</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nd">@memoize</span><span class="p">()</span>
 <span class="gp">... </span><span class="k">def</span> <span class="nf">square</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
@@ -94,14 +102,14 @@ disk (unlike <a class="reference external" href="https://docs.python.org/3/libra
 network, so that if <em>any</em> machine has computed the function for the same
 source-source and arguments, this value can be reused by <em>any other</em> machine,
 provided your datatype is de/serializable on those platforms.</p></li>
-<li><p><strong>Easy to adopt:</strong> Only requires adding one line (<a class="reference external" href="https://en.wikipedia.org/wiki/Python_syntax_and_semantics#Decorators">decorator</a>) to
+<li><p><strong>Easy to adopt:</strong> Only requires adding one line (<a class="reference external" href="https://docs.python.org/3/glossary.html#term-decorator">decorator</a>) to
 the function definition.</p></li>
 <li><p><strong>Bounded in size:</strong> The cache won’t take up too much space. This
 space is partitioned across all memoized functions according to the
 heuristic.</p></li>
-<li><p><strong>Supports smart heuristics:</strong> Motivated by academic literature, I use cache
-policies that can take into account time-to-recompute and storage-size in
-addition to recency, unlike <a class="reference external" href="https://en.wikipedia.org/wiki/Cache_replacement_policies#Least_recently_used_(LRU)">LRU</a>.</p></li>
+<li><p><strong>Supports smart heuristics:</strong> By default, the library uses state-of-the-art
+cache policies that can take into account time-to-recompute and storage-size
+in addition to recency, more advanced than simple <a class="reference external" href="https://en.wikipedia.org/wiki/Cache_replacement_policies#Least_recently_used_(LRU)">LRU</a>.</p></li>
 <li><p><strong>Overhead aware:</strong> The library measures the time saved versus overhead. It
 warns the user if the overhead of caching is not worth it.</p></li>
 </ol>
@@ -121,9 +129,9 @@ or its input files change, then <code class="docutils literal notranslate"><span
 rerun. Otherwise, the output files (including stderr and stdout) will be
 produced from a prior run. <code class="docutils literal notranslate"><span class="pre">memoize</span></code> uses ptrace to automatically determine
 what inputs you depend on and what outputs you produce.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">memoize</span> <span class="n">command</span> <span class="n">arg1</span> <span class="n">arg2</span>
-<span class="c1"># or</span>
-<span class="n">memoize</span> <span class="o">--</span><span class="n">key</span><span class="o">=</span><span class="n">key</span> <span class="o">--</span> <span class="n">command</span> <span class="n">arg1</span> <span class="n">arg2</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>memoize command arg1 arg2
+# or
+memoize --key=$(date +%Y-%m-%d) -- command arg1 arg2
 </pre></div>
 </div>
 <p>See <a class="reference external" href="https://charmoniumq.github.io/charmonium.cache/cli.html">CLI</a> for more details.</p>
@@ -191,7 +199,7 @@ what inputs you depend on and what outputs you produce.</p>
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -213,7 +221,7 @@ what inputs you depend on and what outputs you produce.</p>
       &copy;2021, Samuel Grayson.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.4</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
