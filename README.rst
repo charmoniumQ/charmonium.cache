@@ -20,6 +20,9 @@ charmonium.cache
 .. image:: https://github.com/charmoniumQ/charmonium.cache/actions/workflows/main.yaml/badge.svg
    :alt: CI status
    :target: https://github.com/charmoniumQ/charmonium.cache/actions/workflows/main.yaml
+.. image:: https://codecov.io/gh/charmoniumQ/charmonium.cache/branch/main/graph/badge.svg?token=JTL4SNMWTP
+   :alt: Code Coverage
+   :target: https://codecov.io/gh/charmoniumQ/charmonium.cache
 .. image:: https://img.shields.io/github/last-commit/charmoniumQ/charmonium.determ_hash
    :alt: GitHub last commit
    :target: https://github.com/charmoniumQ/charmonium.cache/commits

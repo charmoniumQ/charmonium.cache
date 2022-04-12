@@ -20,6 +20,12 @@ jobs:
             $HOME/.cache/pypoetry/
           key: venv-${{ hashFiles('poetry.lock') }}-${{ hashFiles('pyproject.toml') }}
 
+      - run: nix develop --command poetry env info
+
+      - run: nix develop --command poetry config --list
+
+      - run: nix develop --command poetry install
+
       - run: nix develop --command ./script.py test
 
       - run: nix develop --command coverage xml
