@@ -22,6 +22,6 @@ jobs:
 
       - run: nix develop --command ./script.py test
 
-      - run: coverage xml
+      - run: nix develop --command coverage xml
 
       - uses: codecov/codecov-action@v2
