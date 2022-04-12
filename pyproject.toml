@@ -31,11 +31,13 @@ build-backend = "poetry.core.masonry.api"
 profile = "black"
 
 [tool.pytest.ini_options]
-addopts = "--quiet --numprocesses=auto --doctest-modules --doctest-glob='*.rst' --ignore=benchmark"
+addopts = "--quiet --numprocesses=auto --doctest-modules --doctest-glob='*.rst' --ignore=benchmark --cov=charmonium/cache"
 
 [tool.coverage.run]
-branch = true
 data_file = "build/.coverage"
+# Can't use branch at the mmoment:
+# https://github.com/nedbat/coveragepy/issues/512
+# branch = true
 
 [tool.coverage.html]
 directory = "build/htmlcov"
