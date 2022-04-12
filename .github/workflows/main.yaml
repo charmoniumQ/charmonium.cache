@@ -17,14 +17,10 @@ jobs:
           path: |
             build/
             .tox/
-            $HOME/.cache/pypoetry/
+            .venv/
           key: venv-${{ hashFiles('poetry.lock') }}-${{ hashFiles('pyproject.toml') }}
 
-      - run: nix develop --command poetry env info
-
-      - run: nix develop --command poetry config --list
-
-      - run: nix develop --command poetry install
+      - run: nix develop --command poetry config --set virtualenvs.in-project true
 
       - run: nix develop --command ./script.py test
 
