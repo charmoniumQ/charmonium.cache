@@ -86,6 +86,10 @@ class Repo(ABC):
     def info(self, commit: str) -> Tuple[bytes, datetime.datetime]:
         raise NotImplementedError
 
+    @property
+    def top_commit(self) -> str:
+        raise NotImplementedError
+
     dir: Path
     name: str
 
@@ -125,7 +129,7 @@ class GitRepo(Repo):
         ).stdout.strip()
 
     @property
-    def main_branch(self) -> str:
+    def top_commit(self) -> str:
         ref = subprocess.run(
             ["git", "symbolic-ref", "refs/remotes/origin/HEAD"],
             cwd=self.dir,
@@ -154,7 +158,7 @@ class GitRepo(Repo):
                     sys.stdout.buffer.write(e.output)
                 raise e
         else:
-            branch = self.main_branch
+            branch = self.top_commit
             subprocess.run(
                 ["git", "restore", "--", "."],
                 cwd=self.dir,
@@ -279,7 +283,7 @@ class GitHubRepo(GitRepo):
 
 
 class CommitChooser(Protocol):
-    def choose(self, repo: Repo) -> List[str]:
+    def choose(self, repo: Repo, relevant_files: List[Path]) -> List[str]:
         ...
 
 
@@ -289,16 +293,16 @@ class RecentCommitChooser(CommitChooser):
         self.n = n
         self.path = path
 
-    def choose(self, repo: Repo) -> List[str]:
+    def choose(self, repo: Repo, relevant_files: List[Path]) -> List[str]:
         if isinstance(repo, GitRepo):
-            target = repo.main_branch if self.seed is None else self.seed
+            target = repo.top_commit if self.seed is None else self.seed
             subprocess.run(
                 ["git", "checkout", target],
                 cwd=repo.dir,
                 capture_output=True,
                 check=True,
             )
-            cmd = ["git", "log", "--pretty=format:%H", f"-{self.n}", str(self.path)]
+            cmd = ["git", "log", "--pretty=format:%H", f"-{self.n}", *map(str, relevant_files)]
             commits_proc = subprocess.run(
                 cmd,
                 cwd=repo.dir,

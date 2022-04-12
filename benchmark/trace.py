@@ -16,7 +16,7 @@ class Granularity(enum.Enum):
 
 
 @contextlib.contextmanager
-def record_dynamic_trace(granularity: Granularity) -> Generator[Sequence[Tuple[str, str]], None, None]:
+def trace(granularity: Granularity) -> Generator[Sequence[Tuple[str, str]], None, None]:
     old_trace_func = sys.gettrace()
     func_locations: Mapping[Tuple[str, str]] = {}
     frame_list: List[Tuple[str, Optional[int]]] = []
@@ -43,10 +43,10 @@ def record_dynamic_trace(granularity: Granularity) -> Generator[Sequence[Tuple[s
     yield frame_list
     sys.settrace(old_trace_func)
     del frame_list[-1] # contextlib.__exit__
-    del frame_list[-1] # record_dynamic_trace
+    del frame_list[-1] # trace
 
 
-def execute_with_trace(
+def main(
         script: str,
         trace_log: Path,
         granularity: Granularity,
@@ -60,7 +60,7 @@ def execute_with_trace(
         "__package__": None,
         "__cached__": None,
     }
-    with record_dynamic_trace(granularity) as dynamic_trace:
+    with trace(granularity) as dynamic_trace:
         exec(script_bytecode, script_globals)
     trace_log.write_text("\n".join(
         f"{filename}" + (f":{lineno}" if lineno is not None else "")
@@ -82,4 +82,4 @@ if __name__ == "__main__":
     trace_log = Path(args.trace_log)
     granularity = Granularity[args.granularity.upper()]
 
-    execute_with_trace(script, trace_log, granularity, args.args)
+    main(script, trace_log, granularity, args.args)

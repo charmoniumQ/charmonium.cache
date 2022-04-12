@@ -104,6 +104,8 @@ These are the repos I am considering as case-studies, ordered from least likely 
 - https://github.com/charmoniumQ/bollywood-data-analysis
   - Attempts caching already.
 - https://github.com/ILLIXR/illixr-analysis
+- https://github.com/npirzkal/aXe_WFC3_Cookbook
+- https://camb.info/emaildownld.php
 
 Ad:
 Do you have a slow data processing pipeline in Python? I'm trying to speed up iterative development by caching intermediate functions, and I'd like to analyze your code (and hopefully improve it) as a case study. https://forms.gle/2dhsGvbbBbthRFbi7

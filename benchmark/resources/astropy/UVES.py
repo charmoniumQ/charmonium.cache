@@ -18,37 +18,13 @@ from astropy.io import ascii
 from charmonium.determ_hash import determ_hash
 from pathlib import Path
 import os
-import sys
-memoization = bool(int(os.environ.get("CHARMONIUM_CACHE_ENABLE", "0")))
-print(f"{memoization=}", file=sys.stderr)
-if memoization:
-    from charmonium.cache import memoize, FileContents, MemoizedGroup
-    group = MemoizedGroup(size="1Gb")
-    import charmonium.freeze
-    charmonium.freeze.config.ignore_globals.add(("astropy.utils.data", "_tempfilestodel"))
-    charmonium.freeze.config.ignore_globals.add(("astropy.units.core", "_unit_registries"))
-    charmonium.freeze.config.recursion_limit = 50
-else:
-    memoize = lambda **kwargs: (lambda x: x)
-    FileContents = lambda x: x
-    group = None
-
 if "OUTPUT_LOG" in os.environ:
     output_file = open(os.environ["OUTPUT_LOG"], "w+")
 else:
     output_file = None
 
-if True:
-    import logging, os
-    logger = logging.getLogger("charmonium.cache.ops")
-    logger.setLevel(logging.DEBUG)
-    fh = logging.FileHandler("cache.log")
-    fh.setLevel(logging.DEBUG)
-    fh.setFormatter(logging.Formatter("%(message)s"))
-    logger.addHandler(fh)
-    logger.debug("Program %d", os.getpid())
+repeat_factor = 20
 
-@memoize(group=group)
 def cell1():
     working_dir_path = pathlib.Path('~/.astropy/cache/download').expanduser()
     return working_dir_path
@@ -63,6 +39,7 @@ def cell2(working_dir_path):
     filelist = list(globpath.glob('*.fits'))
     filelist.sort()
     return list(map(FileContents, filelist))
+print(cell2, type(cell2))
 
 def cell3(filelist):
     sp = fits.open(filelist[0])
@@ -121,7 +98,7 @@ def read_setup(filename):
 
 @memoize(group=group)
 def cell8(filelist):
-    for _ in range(20):
+    for _ in range(repeat_factor):
         setups = []
         for f in filelist:
             setups.append(read_setup(f))
@@ -129,7 +106,7 @@ def cell8(filelist):
 
 @memoize(group=group)
 def cell9(len_wavelength, filelist):
-    for _ in range(20):
+    for _ in range(repeat_factor):
         flux = np.zeros((len(filelist), len_wavelength))
         date = np.zeros(len(filelist), dtype='U23')
         for (i, fname) in enumerate(filelist):
@@ -270,10 +247,11 @@ def cell31(wcaII, vsini):
     x = w2vsini(wcaII, 393.366 * u.nm, vsini).decompose()
     return x
 
+import xml.etree.ElementTree as ET
 def serialize_fig():
-    plt.savefig("/tmp/fig.svg")
+    plt.savefig("/tmp/fig.raw")
     plt.close()
-    return Path("/tmp/fig.svg").read_bytes()
+    return determ_hash(Path("/tmp/fig.raw").read_bytes())
 
 def cell32(fcaII, x):
     fig = plt.figure()
@@ -311,8 +289,7 @@ def cell35(fdiff):
     fig = plt.figure()
     ax = fig.add_subplot(1, 1, 1)
     im = ax.imshow(fdiff, aspect='auto', origin='lower')
-    plt.savefig("/tmp/fig.png")
-    return Path("/tmp/fig.png").read_bytes()
+    return serialize_fig()
 
 def cell36(fdiff, delta_p, x):
     ind1 = delta_p < 1 * u.dimensionless_unscaled
@@ -348,9 +325,10 @@ def cell37(x, ind1, fdiff, delta_p, ind2):
 
 @memoize(group=group)
 def make_graphs(fcaII, fdiff, delta_p, x):
-    for _ in range(20):
+    # for _ in range(repeat_factor):
+    for _ in range(2):
         cell32_plot = cell32(fcaII, x)
-        print(determ_hash(cell32_plot))
+        print(cell32_plot)
         cell33_plot = cell33(fcaII, x)
         cell35_plot = cell35(fdiff)
         (ind2, ind1), cell36_plot = cell36(fdiff, delta_p, x)
@@ -361,6 +339,7 @@ def make_graphs(fcaII, fdiff, delta_p, x):
 def main():
     working_dir_path = cell1()
     filelist = cell2(working_dir_path)
+    print(cell2.would_hit(working_dir_path))
     (header, wavelength) = cell3(filelist)
     setups = cell8(filelist)
     print("setups", setups)
@@ -406,7 +385,7 @@ def main():
     print("fidff", fdiff)
     graphs = make_graphs(fcaII, fdiff, delta_p, x)
     for i, graph in enumerate(graphs):
-        print("graphs", i, determ_hash(graph))
+        print("graphs", i, graph)
 
 if __name__ == '__main__':
     main()

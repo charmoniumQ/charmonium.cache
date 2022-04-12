@@ -308,3 +308,9 @@ def last_sentinel(iterable: Iterable[Value]) -> Iterator[Tuple[Value, bool]]:
             if not first_time:
                 yield (cast(Value, elem), False)
             elem = next_elem
+
+def count(it: Iterable[Value]) -> int:
+    counter = 0
+    for _ in it:
+        counter += 1
+    return counter

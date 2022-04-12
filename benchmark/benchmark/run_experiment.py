@@ -31,7 +31,7 @@ from tqdm import tqdm
 
 from .environment import Environment, EnvironmentChooser
 from .repo import CommitChooser, Repo
-from .util import combine_cmd, runexec_catch_signals, capture_logs
+from .util import combine_cmd, runexec_catch_signals, capture_logs, count
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -181,27 +181,6 @@ def run_exec_cmd(
         stderr.read_text() + "\n".join(record.getMessage() for record in logs),
     )
 
-
-def run_once(
-    repo: Repo,
-    environment: Environment,
-    key: str,
-    env_vars: Mapping[str, str],
-    script: Path,
-    limits: Mapping[str, int],
-    memoize: bool,
-    trace: bool,
-    tmp_dir: Path,
-) -> ExecutionProfile:
-    cache_dest = manual_cache / repo.name / f"{key}-memoize{int(memoize)}-trace{int(trace)}.pkl"
-    cache_dest.parent.mkdir(exist_ok=True, parents=True)
-    if cache_dest.exists():
-        return cast(ExecutionProfile, pickle.loads(cache_dest.read_bytes()))
-    else:
-        ret = run_once2(repo, environment, env_vars, script, limits, memoize, trace, tmp_dir)
-        cache_dest.write_bytes(pickle.dumps(ret))
-        return ret
-
 def run_once2(
     repo: Repo,
     environment: Environment,
@@ -210,6 +189,7 @@ def run_once2(
     limits: Mapping[str, int],
     memoize: bool,
     trace: bool,
+    trace_imports: bool,
     tmp_dir: Path,
 ) -> ExecutionProfile:
     warnings = []
@@ -218,10 +198,13 @@ def run_once2(
         environment,
         [
             "python",
-            *(["trace.py", str(script), "trace.log", "function"] if trace else [str(script)]),
+            *(
+                [str(ROOT / "trace.py"), str(script), "trace.log", "function"] if trace
+                else [str(ROOT / "trace_imports.py"), str(script), "/dev/stdout"] if trace_imports
+                else [str(script)]),
         ],
         {
-            "CHARMONIUM_CACHE_ENABLE": "1" if memoize else "0",
+            "CHARMONIUM_CACHE_DISABLE": "0" if memoize else "1",
             "CHARMONIUM_CACHE_PERF_LOG": str(perf_log),
             **env_vars,
         },
@@ -263,6 +246,28 @@ def run_once2(
     )
 
 
+def run_once(
+    repo: Repo,
+    environment: Environment,
+    key: str,
+    env_vars: Mapping[str, str],
+    script: Path,
+    limits: Mapping[str, int],
+    memoize: bool,
+    trace: bool,
+    trace_imports: bool,
+    tmp_dir: Path,
+) -> ExecutionProfile:
+    cache_dest = manual_cache / repo.name / f"key={key},memoize={int(memoize)},trace={int(trace)},trace_imports={int(trace_imports)}.pkl"
+    cache_dest.parent.mkdir(exist_ok=True, parents=True)
+    if cache_dest.exists():
+        return cast(ExecutionProfile, pickle.loads(cache_dest.read_bytes()))
+    else:
+        ret = run_once2(repo, environment, env_vars, script, limits, memoize, trace, trace_imports, tmp_dir)
+        cache_dest.write_bytes(pickle.dumps(ret))
+        return ret
+
+
 @dataclass
 class CommitInfo:
     diff: bytes
@@ -278,6 +283,7 @@ class CommitInfo:
         return CommitInfo(diff, date, commit)
 
 
+tmp_dir = ROOT / ".tmp"
 def run_many(
     repo: Repo,
     environment: Environment,
@@ -288,13 +294,22 @@ def run_many(
     memoize: bool,
 ) -> Iterable[ExecutionProfile]:
     repo.clean()
-    tmp_dir = ROOT / ".tmp"
     if tmp_dir.exists():
         shutil.rmtree(tmp_dir)
     tmp_dir.mkdir()
     for commit in tqdm(commits, unit="commit", leave=False):
-        execution = run_once(repo, environment, commit, env_vars, script, limits, memoize, trace=False, tmp_dir=tmp_dir)
+        execution = run_once(repo, environment, commit, env_vars, script, limits, memoize, trace=False, trace_imports=False, tmp_dir=tmp_dir)
         yield execution
+
+
+pyc_suffix = re.compile(r"([^.]*)(?:\.cpython-\d+)?(?:\.pyc)(?:\.\d+)?")
+def unpyc(path: Path) -> Path:
+    parts = list(path.parts)
+    if m := pyc_suffix.match(parts[-1]):
+        parts[-1] = m.group(1) + ".py"
+    if parts[-2] == "__pycache__":
+        del parts[-2]
+    return Path().joinpath(*parts)
 
 
 # @ch_time_block.decor(print_start=False)
@@ -345,12 +360,22 @@ def get_repo_result2(
         yield repo_result
         return
 
-    repo_result.commits = commit_chooser.choose(repo)
+    execution = run_once(repo, environment, repo.top_commit, env_vars, script, limits, memoize=False, trace=False, trace_imports=True, tmp_dir=tmp_dir)
+    if execution.runexec.exitcode != 0:
+        repo_result.warnings.append(execution.output + "\n" + execution.log)
+        yield repo_result
+        return
+
+    relevant_files = list(set([
+        unpyc(Path(line))
+        for line in execution.output.split("\n")
+        if line.startswith("/") and Path(line).is_relative_to(repo.dir)
+    ]))
+    repo_result.commits = commit_chooser.choose(repo, relevant_files)
     repo_result.executions = {
         "memo": [None] * len(repo_result.commits),
         "orig": [None] * len(repo_result.commits),
     }
-
     run_many_args = (repo, environment, repo_result.commits, env_vars, script, limits)
 
     for i, execution in enumerate(run_many(*run_many_args, memoize=True)):
@@ -359,7 +384,7 @@ def get_repo_result2(
         if execution.runexec.termination_reason:
             break
 
-    num_good_commits = i+1
+    num_good_commits = count(filter(bool, repo_result.executions["memo"]))
 
     repo_result.commits = repo_result.commits[:num_good_commits]
     repo_result.executions = {
@@ -389,9 +414,13 @@ def get_repo_result(
         yield cast(RepoResult, pickle.loads(cache_dest.read_bytes()))
     else:
         results_gen = get_repo_result2(repo, commit_chooser, environment_chooser, env_vars, script, limits)
+        last_result = None
         for result in results_gen:
+            last_result = result
             yield result
-        cache_dest.write_bytes(pickle.dumps(result))
+        if last_result is not None:
+            print("Writing back")
+            cache_dest.write_bytes(pickle.dumps(last_result))
 
 
 @dataclass
@@ -409,6 +438,9 @@ def run_experiment(
 ) -> Iterable[Sequence[RepoResult]]:
     results: List[RepoResult] = []
     for repo_info in tqdm(repos, unit="repos", leave=False):
+        last_result = None
         for result in get_repo_result(*repo_info):
+            last_result = result
             yield [*results, result]
-        results.append(result)
+        if last_result is not None:
+            results.append(last_result)

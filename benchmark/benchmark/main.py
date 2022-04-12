@@ -1,7 +1,4 @@
-import asyncio
-
 import typer
-
 from .data3 import get_data
 from .run_experiment import run_experiment
 from .write_summary import write_summary

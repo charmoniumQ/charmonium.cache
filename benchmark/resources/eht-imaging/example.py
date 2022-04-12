@@ -10,13 +10,19 @@ import os
 import sys
 import matplotlib.pyplot as plt
 import numpy as np
+import sys
+import time
+from pathlib import Path
+
+root = Path(os.environ["eht_root"]) if "eht_root" in os.environ else Path()
+if str(root) not in sys.path:
+    sys.path.insert(0, str(root))
 import ehtim as eh
 from   ehtim.calibrating import self_cal as sc
-import time
 
-from pathlib import Path
-memoization = bool(int(os.environ.get("CHARMONIUM_CACHE_ENABLE", "0")))
-print(f"{memoization=}")
+# Begin
+memoization = not bool(int(os.environ.get("CHARMONIUM_CACHE_DISABLE", "0")))
+print(f"{memoization=}", file=sys.stderr)
 if memoization:
     from charmonium.cache import memoize, FileContents, MemoizedGroup
     group = MemoizedGroup(size="10Mb")
@@ -24,8 +30,7 @@ else:
     memoize = lambda **kwargs: (lambda x: x)
     FileContents = lambda x: None
     group = None
-
-root = Path(os.environ["eht_root"]) if "eht_root" in os.environ else Path()
+# End
 
 #from  ehtim.plotting import self_cal as sc
 plt.close('all')

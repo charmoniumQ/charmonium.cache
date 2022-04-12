@@ -407,7 +407,7 @@ def result_mismatch(executions: Mapping[str, Optional[ExecutionProfile]]) -> boo
 
 
 def get_command(repo_result: RepoResult) -> Sequence[str]:
-    return repo_result.executions["memo"][0].command if repo_result.executions["memo"] and repo_result.executions["memo"][0] is not None else ["true"]
+    return repo_result.executions["memo"][0].command if repo_result.executions.get("memo") and repo_result.executions["memo"][0] is not None else ["true"]
 
 
 def summarize_repo_result(result: RepoResult) -> Sequence[html.Tag]:
