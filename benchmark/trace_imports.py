@@ -3,6 +3,7 @@ from pathlib import Path
 import contextlib
 import enum
 import importlib
+import importlib.util
 import sys
 import types
 
@@ -19,7 +20,10 @@ def trace_imports() -> Generator[List[Tuple[FileType, Path]], None, None]:
             if event == "open":
                 path_name = args[0]
                 if isinstance(path_name, str):
-                    files.append((FileType.OPEN, Path(path_name)))
+                    path = Path(path_name)
+                    if not path.is_absolute():
+                        path = Path.cwd() / path
+                    files.append((FileType.OPEN, path))
             elif event == "import":
                 module_name = args[0]
                 assert isinstance(module_name, str), f"{type(module_name)}: {module_name}"

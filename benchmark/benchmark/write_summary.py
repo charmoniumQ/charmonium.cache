@@ -37,6 +37,7 @@ from .html_helpers import (
 )
 from .repo import Repo
 from .run_experiment import CommitInfo, ExecutionProfile, FuncCallProfile, RepoResult
+from .util import unwrap
 
 T = TypeVar("T")
 
@@ -91,6 +92,7 @@ def summarize_func_calls(func_calls: Sequence[FuncCallProfile]) -> html.Tag:
 execution_labels: Mapping[str, html.TagLike] = {
     "orig": "Unmodified",
     "memo": "Memoized",
+    "trace": "Tracing",
 }
 
 commit_result_headers: Sequence[html.TagLike] = [
@@ -99,7 +101,8 @@ commit_result_headers: Sequence[html.TagLike] = [
     "Tests work?",
     html.span()("Memoized output", html.br()(), "matches original?"),
     *[html.span()(execution, " time") for execution in execution_labels.values()],
-    *[html.span()(execution, " mem") for execution in execution_labels.values()],
+    # *[html.span()(execution, " mem") for execution in execution_labels.values()],
+    "Would tracing skip?",
     "Detailed results",
 ]
 
@@ -246,13 +249,14 @@ def summarize_commit_result(
             )
             for exe in exes.values()
         ],
-        *[
-            disp_mem(
-                exe.runexec.memory if exe
-                else 0
-            )
-            for exe in exes.values()
-        ],
+        # *[
+        #     disp_mem(
+        #         exe.runexec.memory if exe
+        #         else 0
+        #     )
+        #     for exe in exes.values()
+        # ],
+        disp_bool(not unwrap(exes["trace"]).trace_rerun) if exes.get("trace") else html.span()(""),
         collapsed("Details", inner_table),
     ]
 

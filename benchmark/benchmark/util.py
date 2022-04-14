@@ -314,3 +314,7 @@ def count(it: Iterable[Value]) -> int:
     for _ in it:
         counter += 1
     return counter
+
+def unwrap(val: Optional[Value]) -> Value:
+    assert val is not None
+    return val

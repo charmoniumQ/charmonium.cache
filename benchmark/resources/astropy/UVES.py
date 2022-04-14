@@ -16,6 +16,10 @@ from astropy.table import Column, Table
 from astropy.io import ascii
 
 from charmonium.determ_hash import determ_hash
+import charmonium.freeze
+charmonium.freeze.config.recursion_limit = 100
+from charmonium.cache import memoize, MemoizedGroup, FileContents
+group = MemoizedGroup(size="1GiB")
 from pathlib import Path
 import os
 if "OUTPUT_LOG" in os.environ:
@@ -39,7 +43,6 @@ def cell2(working_dir_path):
     filelist = list(globpath.glob('*.fits'))
     filelist.sort()
     return list(map(FileContents, filelist))
-print(cell2, type(cell2))
 
 def cell3(filelist):
     sp = fits.open(filelist[0])
@@ -339,7 +342,6 @@ def make_graphs(fcaII, fdiff, delta_p, x):
 def main():
     working_dir_path = cell1()
     filelist = cell2(working_dir_path)
-    print(cell2.would_hit(working_dir_path))
     (header, wavelength) = cell3(filelist)
     setups = cell8(filelist)
     print("setups", setups)

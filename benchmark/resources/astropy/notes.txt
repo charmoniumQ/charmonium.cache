@@ -1,0 +1,3 @@
+conda create --name astropy2 --yes packaging pyerfa pyyaml
+conda run --name astropy2 --no-capture-output pip install --editable .
+conda run --name astropy2 python -c 'import astropy; print(astropy.__file__)'

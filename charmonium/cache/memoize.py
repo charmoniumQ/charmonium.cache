@@ -58,7 +58,7 @@ def memoize(
     real_disable = (
         disable
         if isinstance(disable, bool)
-        else bool(os.environ.get("CHARMONIUM_CACHE_DISABLE", ""))
+        else bool(int(os.environ.get("CHARMONIUM_CACHE_DISABLE", "0")))
     )
 
     if real_disable:
