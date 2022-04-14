@@ -18,9 +18,11 @@ jobs:
             build/
             .tox/
             .venv/
-          key: venv-${{ hashFiles('poetry.lock') }}-${{ hashFiles('pyproject.toml') }}
+          key: venv2-${{ hashFiles('poetry.lock') }}-${{ hashFiles('pyproject.toml') }}
 
       - run: nix develop --command poetry config virtualenvs.in-project true
+
+      - run: ls -ahlt
 
       - run: nix develop --command ./script.py test
 
