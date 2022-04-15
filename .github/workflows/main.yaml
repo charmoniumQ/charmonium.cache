@@ -18,8 +18,7 @@ jobs:
             build/
             .tox/
             .venv/
-            /nix/store
-          key: venv4-${{ hashFiles('poetry.lock') }}-${{ hashFiles('pyproject.toml') }}-${{ hashFiles('flake.nix') }}
+          key: venv5
 
       - run: nix develop --command poetry config virtualenvs.in-project true
 
