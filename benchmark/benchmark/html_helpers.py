@@ -73,8 +73,8 @@ def highlighted_code(lang: str, code: str, width: int = 60) -> html.Tag:
     )
 
 
-def collapsed(summary: html.TagLike, *details: html.TagLike) -> html.Tag:
-    return html.details()(
+def collapsed(summary: html.TagLike, *details: html.TagLike, open: bool = False) -> html.Tag:
+    return html.details(**({"open": ""} if open else {}))(
         html.summary()(summary),
         *details,
     )

@@ -203,7 +203,7 @@ def run_once2(
         environment,
         [
             *(
-                ["coverage", "run", str(script), "--data-file", str(coverage_file)] if trace
+                ["coverage", "run", str(script), "--data-file", str(coverage_file), "--rcfile=/dev/null"] if trace
                 else ["python", str(ROOT / "trace_imports.py"), str(script), str(trace_log)] if trace_imports
                 else ["python", str(script)]
             ),
@@ -249,17 +249,17 @@ def run_once2(
             print(command)
             raise ValueError
         assert coverage_file.exists()
-        subprocess.run(["coverage", "json", "--data-file", coverage_file], cwd=tmp_dir)
         coverage_json = tmp_dir / "coverage.json"
+        subprocess.run(["coverage", "json", "--data-file", str(coverage_file), "-o", str(coverage_json), "--rcfile=/dev/null"], cwd=tmp_dir)
+        coverage_file.unlink()
         coverage_obj = json.loads(coverage_json.read_text())
+        coverage_json.unlink()
         trace_data = []
         for file in sorted(coverage_obj["files"]):
             file_text = Path(file).read_text().split("\n")
             for line in coverage_obj["files"][file]["executed_lines"]:
                 print(file, line)
                 trace_data.append(file_text[line - 1])
-        coverage_json.unlink()
-        coverage_obj.unlink()
 
     if runexec_stats.termination_reason:
         warnings.append(
@@ -426,11 +426,11 @@ def get_repo_result2(
 
     num_good_commits = count(filter(bool, repo_result.executions["memo"]))
 
-    repo_result.commits = repo_result.commits[:num_good_commits]
-    repo_result.executions = {
-        label: executions[:num_good_commits]
-        for label, executions in repo_result.executions.items()
-    }
+    # repo_result.commits = repo_result.commits[:num_good_commits]
+    # repo_result.executions = {
+    #     label: executions[:num_good_commits]
+    #     for label, executions in repo_result.executions.items()
+    # }
 
     if len(repo_result.commits) < 2:
         repo_result.warnings.append(f"Only {len(repo_result.commits)} commit.")

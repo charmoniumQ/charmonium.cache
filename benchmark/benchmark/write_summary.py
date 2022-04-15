@@ -488,6 +488,7 @@ def summarize_repo_result(result: RepoResult) -> Sequence[html.Tag]:
                 ],
                 commit_result_headers,
             ),
+            open=True,
         ),
     ]
 

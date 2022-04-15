@@ -29,6 +29,11 @@ else:
 
 repeat_factor = 20
 
+import charmonium.freeze
+charmonium.freeze.config.ignore_globals.add(("astropy.utils.data", "_tempfilestodel"))
+charmonium.freeze.config.ignore_globals.add(("astropy.units.core", "_unit_registries"))
+charmonium.freeze.config.recursion_limit = 50
+
 def cell1():
     working_dir_path = pathlib.Path('~/.astropy/cache/download').expanduser()
     return working_dir_path
@@ -331,7 +336,6 @@ def make_graphs(fcaII, fdiff, delta_p, x):
     # for _ in range(repeat_factor):
     for _ in range(2):
         cell32_plot = cell32(fcaII, x)
-        print(cell32_plot)
         cell33_plot = cell33(fcaII, x)
         cell35_plot = cell35(fdiff)
         (ind2, ind1), cell36_plot = cell36(fdiff, delta_p, x)

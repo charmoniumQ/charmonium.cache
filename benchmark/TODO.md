@@ -27,13 +27,13 @@
   - Currently astropy includes a `threading.Lock` object which `charmonium.freeze` can't handle.
     - [x] Avoid hashing the object that contains the lock (preferable, if there is a systematic way of doing so) or make an exception for locks.
   - [x] Find a better example for astropy
-- [ ] Run testmon on commits. Indicate the testmon overhead and indicate if testmon thinks the script needs to be rerun. Ideally, I would be able to get partial reuse on intermediate values when testmon thinks the script needs to be rerun.
+- [x] Run testmon on commits. Indicate the testmon overhead and indicate if testmon thinks the script needs to be rerun. Ideally, I would be able to get partial reuse on intermediate values when testmon thinks the script needs to be rerun.
   - However, many of the scripts have a ton of execution time in one critical function. If that function has to be recomputed (it changed syntactically or its predecessor changed semantically), most of the runtime will have to be reexecuted anyway.
-  - [ ] First, run the commits with testmon.
-  - [ ] Then, update the output summary.
+  - [x] Run the commits with testmon.
+  - [x] Update the output summary.
 - [x] Investigate testmon: how does it compare the new source code to the old trace? E.g., does inserting a comment along a taken branch cause an invalidation?
   - Testmon uses the dynamic trace from Coverage.py, but it throws away everything except for the "blocks" graularity. A testmon block is a function or a module. Thus, Testmon uses the dynamic callgraph.
-- [ ] Find which files get covered by execution trace. Filter to commits which change one of those files. I would want to test fewer or no commits that testmon thinks _don't_ change.
+- [x] Find which files get covered by execution trace. Filter to commits which change one of those files. I would want to test fewer or no commits that testmon thinks _don't_ change.
 - [ ] Increase automation for scripts.
   - [ ] Add a disable env var, disable group flag, and disable local flag.
   - [ ] If the function is too quick or too quick compared to overhead and auto disable is set, set local disable.
