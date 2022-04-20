@@ -28,7 +28,8 @@ jobs:
 
       - run: |
           ls -ahlt
-          ls -ahlt .venv
+          poetry config --list
+          [ -d .venv ] && ls -ahlt .venv
           nix develop --command python -c 'import sys; print("\n".join(sys.path))'
           nix develop --command python -m isort --help
 
