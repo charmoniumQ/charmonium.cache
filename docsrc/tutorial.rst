@@ -452,8 +452,4 @@ See :py:class:`~charmonium.cache.Memoized` and
 .. _`time-to-live`: https://en.wikipedia.org/wiki/Time_to_live
 .. _`pure`: https://en.wikipedia.org/wiki/Pure_function
 .. _`Universal Pathlib`: https://github.com/Quansight/universal_pathlib
-.. |hash| replace:: ``hash``
-.. _`hash`: https://docs.python.org/3/library/functions.html?highlight=hash#hash
-.. |charmonium.determ_hash| replace:: ``charmonium.determ_hash``
-.. _`charmonium.determ_hash`: https://github.com/charmoniumQ/charmonium.determ_hash/
 .. _`debugging help in charmonium.freeze`: https://github.com/charmoniumQ/charmonium.freeze/tree/main/README.rst#debugging

@@ -1,0 +1,291 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Frequently Asked Questions &#8212; charmonium.cache 1.2.6 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Tutorial" href="tutorial.html" />
+    <link rel="prev" title="charmonium.cache" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="frequently-asked-questions">
+<h1>Frequently Asked Questions<a class="headerlink" href="#frequently-asked-questions" title="Permalink to this headline">¶</a></h1>
+<section id="does-x-library-do-the-same-thing">
+<h2>Does X library do the same thing?<a class="headerlink" href="#does-x-library-do-the-same-thing" title="Permalink to this headline">¶</a></h2>
+<p>See <a class="reference internal" href="features.html#prior-work"><span class="std std-ref">Prior Work</span></a>.</p>
+<p>In particular, does the library in question know to invalidate when your source
+code changes? What if <code class="docutils literal notranslate"><span class="pre">foo()</span></code> calls <code class="docutils literal notranslate"><span class="pre">bar()</span></code>, <code class="docutils literal notranslate"><span class="pre">foo()</span></code> is cached, and
+<code class="docutils literal notranslate"><span class="pre">bar()</span></code> changes?</p>
+</section>
+<section id="just-use-a-workflow-manager">
+<h2>Just use a workflow manager<a class="headerlink" href="#just-use-a-workflow-manager" title="Permalink to this headline">¶</a></h2>
+<p>Workflow managers help when you need to get a fresh copy of the results, but
+they have a blind spot. lot of engineers practice <em>iterative development</em> where
+small changes are common. Do you have to rerun a long-running task if one line
+changes?</p>
+<p>The real answer is: Use both. Workflow managers decide whether or not to run
+your program. If they decide to run your program, <code class="docutils literal notranslate"><span class="pre">charmonium.cache</span></code> will
+speed that up.</p>
+</section>
+<section id="does-the-cache-detect-changing-something-by-inheritance">
+<h2>Does the cache detect changing something by inheritance?<a class="headerlink" href="#does-the-cache-detect-changing-something-by-inheritance" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">A</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">foo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">1</span>
+<span class="k">class</span> <span class="nc">B</span><span class="p">(</span><span class="n">A</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+<span class="nd">@memoize</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">do_foo</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="n">foo</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">do_foo</span><span class="p">(</span><span class="n">B</span><span class="p">()))</span> <span class="c1"># prints 1</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">...</span>
+
+<span class="k">class</span> <span class="nc">A</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">foo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">2</span>
+
+<span class="o">...</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">do_foo</span><span class="p">(</span><span class="n">B</span><span class="p">()))</span> <span class="c1"># prints 2</span>
+</pre></div>
+</div>
+<p>This works because the library does not use the default language <a class="reference external" href="https://docs.python.org/3/library/functions.html?highlight=hash#hash"><code class="docutils literal notranslate"><span class="pre">hash</span></code></a>. It uses
+a comprehensive <a class="reference external" href="https://github.com/charmoniumQ/charmonium.freeze/"><code class="docutils literal notranslate"><span class="pre">charmonium.freeze</span></code></a>, which takes into account the methods
+attached to an object. Likewise, the cache will detect adding the method in the
+child class.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">...</span>
+
+<span class="k">class</span> <span class="nc">B</span><span class="p">(</span><span class="n">A</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">foo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">3</span>
+
+<span class="o">...</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">do_foo</span><span class="p">(</span><span class="n">B</span><span class="p">()))</span> <span class="c1"># prints 3</span>
+</pre></div>
+</div>
+</section>
+<section id="does-the-cache-know-about-global-variables">
+<h2>Does the cache know about global variables?<a class="headerlink" href="#does-the-cache-know-about-global-variables" title="Permalink to this headline">¶</a></h2>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">charmonium.cache</span> <span class="kn">import</span> <span class="n">memoize</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nd">@memoize</span><span class="p">()</span>
+<span class="gp">... </span><span class="k">def</span> <span class="nf">square</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">return</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">i</span>
+<span class="gp">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">square</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+<span class="go">16</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">i</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">square</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+<span class="go">17</span>
+</pre></div>
+</div>
+<p><a class="reference external" href="https://github.com/charmoniumQ/charmonium.freeze/"><code class="docutils literal notranslate"><span class="pre">charmonium.freeze</span></code></a> knows how to find the closure of the function <code class="docutils literal notranslate"><span class="pre">square</span></code>, which
+includes the global variables it refernces.</p>
+</section>
+<section id="does-the-cache-know-about-reflection">
+<h2>Does the cache know about reflection?<a class="headerlink" href="#does-the-cache-know-about-reflection" title="Permalink to this headline">¶</a></h2>
+<p>The cache is safe with respect to <a class="reference external" href="https://docs.python.org/3/library/functions.html?highlight=getattr#getattr"><code class="docutils literal notranslate"><span class="pre">getattr</span></code></a> reflection. This is because
+<a class="reference external" href="https://github.com/charmoniumQ/charmonium.freeze/"><code class="docutils literal notranslate"><span class="pre">charmonium.freeze</span></code></a> hashes all of the attributes.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">charmonium.cache</span> <span class="kn">import</span> <span class="n">memoize</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nd">@memoize</span><span class="p">()</span>
+<span class="gp">... </span><span class="k">def</span> <span class="nf">get_x</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">)</span>
+<span class="gp">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">Struct</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="k">pass</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">obj</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">obj</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="mi">4</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">get_x</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+<span class="go">4</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">obj</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">get_x</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+<span class="go">5</span>
+</pre></div>
+</div>
+<p>However, the cache doesn’t know about purely string-based reflection, like
+<code class="docutils literal notranslate"><span class="pre">globals()[&quot;variable&quot;]</span></code>. This is a useful escape hatch when you want the cache
+to ignore something.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">charmonium.cache</span> <span class="kn">import</span> <span class="n">memoize</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nd">@memoize</span><span class="p">()</span>
+<span class="gp">... </span><span class="k">def</span> <span class="nf">get_x</span><span class="p">():</span>
+<span class="gp">... </span>    <span class="k">return</span> <span class="nb">globals</span><span class="p">()[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span>
+<span class="gp">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="mi">4</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">get_x</span><span class="p">()</span>
+<span class="go">4</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">get_x</span><span class="p">()</span> <span class="c1"># we get a stale result</span>
+<span class="go">4</span>
+</pre></div>
+</div>
+</section>
+<section id="how-does-the-cache-know-about-source-code-changes-in-a-c-library">
+<h2>How does the cache know about source-code changes in a C library?<a class="headerlink" href="#how-does-the-cache-know-about-source-code-changes-in-a-c-library" title="Permalink to this headline">¶</a></h2>
+<p>It doesn’t. That is one of the shortcomings. However, in practice this is
+probably ok. Most C libraries are not going to be changing frequently (projects
+that use Numpy rarely change Numpy).</p>
+</section>
+<section id="what-about-impure-functions">
+<h2>What about impure functions?<a class="headerlink" href="#what-about-impure-functions" title="Permalink to this headline">¶</a></h2>
+<p>The library does its best to detect <em>language-level impurities</em>: that is,
+modifying global variables. However, there exist <em>environmental impurities</em>:
+<code class="docutils literal notranslate"><span class="pre">open(file).read()</span></code> will be non-deterministic if the underlying file
+changes. This library has a much harder time detecting this, but it should be
+fairly obvious to the user when they write a non-deterministic function. Don’t
+cache those.</p>
+</section>
+<section id="what-about-reading-the-filesystem-or-network">
+<h2>What about reading the filesystem or network?<a class="headerlink" href="#what-about-reading-the-filesystem-or-network" title="Permalink to this headline">¶</a></h2>
+<p>Unfortunately, this library can’t tell if your function reads the filesystem or
+network to get its result. If you still want to cache this function, see
+<a class="reference internal" href="tutorial.html#capturing-filesystem-side-effects"><span class="std std-ref">Capturing Filesystem Side-Effects</span></a>.</p>
+<p>I’m working on a way of detecting this kind of impurity and warning the user, so
+they don’t get blindsided by stale results.</p>
+</section>
+<section id="what-about-random-number-generators">
+<h2>What about random number generators?<a class="headerlink" href="#what-about-random-number-generators" title="Permalink to this headline">¶</a></h2>
+<p>The RNG state for builtin <code class="docutils literal notranslate"><span class="pre">random</span></code> and most other random number generators is
+stored in a module-level global variable, which means the cache will know to
+re-call the function.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">charmonium.cache</span> <span class="kn">import</span> <span class="n">memoize</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">random</span> <span class="kn">import</span> <span class="n">randint</span><span class="p">,</span> <span class="n">seed</span><span class="p">;</span> <span class="n">seed</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nd">@memoize</span><span class="p">()</span>
+<span class="gp">... </span><span class="k">def</span> <span class="nf">foo</span><span class="p">():</span>
+<span class="gp">... </span>    <span class="k">return</span> <span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="gp">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">foo</span><span class="p">()</span>
+<span class="go">4</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">foo</span><span class="p">()</span>
+<span class="go">1</span>
+</pre></div>
+</div>
+</section>
+<section id="i-m-still-not-convinced-this-is-safe-for-my-particular-use-case">
+<h2>I’m still not convinced this is safe for my particular use-case.<a class="headerlink" href="#i-m-still-not-convinced-this-is-safe-for-my-particular-use-case" title="Permalink to this headline">¶</a></h2>
+<p>If you suspect the cache is returning stale results, you can disable it globally
+with <code class="docutils literal notranslate"><span class="pre">export</span> <span class="pre">CHARMONIUM_CACHE_DISABLE=1</span></code>. This makes it easy to tell if this
+library is causing your problem.</p>
+</section>
+<section id="this-library-is-not-invaliding-when-it-should-or-invalidating-when-it-shouldn-t">
+<h2>This library is not invaliding when it should or invalidating when it shouldn’t.<a class="headerlink" href="#this-library-is-not-invaliding-when-it-should-or-invalidating-when-it-shouldn-t" title="Permalink to this headline">¶</a></h2>
+<p>You’ve found a bug. See <a class="reference internal" href="tutorial.html#debugging"><span class="std std-ref">Debugging</span></a> if you want to debug this
+yourself. Please file it on <a class="reference external" href="https://github.com/charmoniumQ/charmonium.cache/issues/new">GitHub</a>, so I know about it.</p>
+</section>
+<section id="isn-t-pickle-insecure">
+<h2>Isn’t Pickle insecure?<a class="headerlink" href="#isn-t-pickle-insecure" title="Permalink to this headline">¶</a></h2>
+<p>This library is un/pickling data that one of your dependent packages wrote. If
+that dependent package was malicious, it could already execute arbitrary code on
+your machine when you included it in your project. Using this library does not
+increase your attack surface. Always vet your dependencies.</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">charmonium.cache</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="features.html">Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api_reference.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">CLI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="how_it_works.html">How It Works</a></li>
+<li class="toctree-l1"><a class="reference internal" href="history.html">History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributors_guide.html">Contributor’s Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authors.html">Authors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="works_cited.html">Works Cited</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">charmonium.cache</a></li>
+      <li>Next: <a href="tutorial.html" title="next chapter">Tutorial</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;1980, Samuel Grayson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/faq.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

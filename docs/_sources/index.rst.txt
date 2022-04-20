@@ -3,6 +3,7 @@
 .. toctree::
    :maxdepth: 1
 
+   faq
    tutorial
    features
    api_reference

@@ -4,7 +4,8 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
     <title>API Reference &#8212; charmonium.cache 1.2.6 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
@@ -32,7 +33,7 @@
 
           <div class="body" role="main">
             
-  <div class="section" id="api-reference">
+  <section id="api-reference">
 <h1>API Reference<a class="headerlink" href="#api-reference" title="Permalink to this headline">¶</a></h1>
 <table class="autosummary longtable docutils align-default">
 <colgroup>
@@ -42,7 +43,7 @@
 <tbody>
 </tbody>
 </table>
-<span class="target" id="module-charmonium.cache"></span><div class="section" id="core">
+<span class="target" id="module-charmonium.cache"></span><section id="core">
 <h2>Core<a class="headerlink" href="#core" title="Permalink to this headline">¶</a></h2>
 <blockquote>
 <div><dl class="py function">
@@ -57,7 +58,7 @@
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><em>Callable</em></a>[[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><em>Callable</em></a>[[&lt;sphinx.util.inspect.TypeAliasForwardRef object at 0x7f83b165e830&gt;], &lt;sphinx.util.inspect.TypeAliasForwardRef object at 0x7f83b165e800&gt;]], <a class="reference internal" href="#charmonium.cache.Memoized" title="charmonium.cache.memoize.Memoized"><em>Memoized</em></a>[&lt;sphinx.util.inspect.TypeAliasForwardRef object at 0x7f83b165c970&gt;, &lt;sphinx.util.inspect.TypeAliasForwardRef object at 0x7f83b165d5a0&gt;]]</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><em>Callable</em></a>[[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><em>Callable</em></a>[[&lt;sphinx.util.inspect.TypeAliasForwardRef object at 0x7f02787faa30&gt;], &lt;sphinx.util.inspect.TypeAliasForwardRef object at 0x7f02787fa850&gt;]], <a class="reference internal" href="#charmonium.cache.Memoized" title="charmonium.cache.memoize.Memoized"><em>Memoized</em></a>[&lt;sphinx.util.inspect.TypeAliasForwardRef object at 0x7f02787fa250&gt;, &lt;sphinx.util.inspect.TypeAliasForwardRef object at 0x7f02787faee0&gt;]]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -146,7 +147,7 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="charmonium.cache.MemoizedGroup">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MemoizedGroup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obj_store=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">replacement_policy='gdsize'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size=KiB(100.0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pickler=&lt;module</span> <span class="pre">'pickle'</span> <span class="pre">from</span> <span class="pre">'/nix/store/c6dwl65z7z9vyadfzp5aqbfv6bi1afnz-python3-3.10.2/lib/python3.10/pickle.py'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lock=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fine_grain_persistence=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fine_grain_eviction=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_system_state=Constant(None)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temporary=False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#charmonium.cache.MemoizedGroup" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MemoizedGroup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obj_store=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">replacement_policy='gdsize'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size=KiB(100.0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pickler=&lt;module</span> <span class="pre">'pickle'</span> <span class="pre">from</span> <span class="pre">'/nix/store/afi0ysqw20yiiw2gr2d28dx40bc4ddf8-python3-3.9.10/lib/python3.9/pickle.py'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lock=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fine_grain_persistence=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fine_grain_eviction=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_system_state=Constant(None)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temporary=False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#charmonium.cache.MemoizedGroup" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>A MemoizedGroup holds the memoization for multiple functions.</p>
 <dl class="field-list simple">
@@ -169,7 +170,7 @@
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="charmonium.cache.MemoizedGroup.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obj_store=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">replacement_policy='gdsize'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size=KiB(100.0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pickler=&lt;module</span> <span class="pre">'pickle'</span> <span class="pre">from</span> <span class="pre">'/nix/store/c6dwl65z7z9vyadfzp5aqbfv6bi1afnz-python3-3.10.2/lib/python3.10/pickle.py'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lock=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fine_grain_persistence=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fine_grain_eviction=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_system_state=Constant(None)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temporary=False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#charmonium.cache.MemoizedGroup.__init__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obj_store=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">replacement_policy='gdsize'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size=KiB(100.0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pickler=&lt;module</span> <span class="pre">'pickle'</span> <span class="pre">from</span> <span class="pre">'/nix/store/afi0ysqw20yiiw2gr2d28dx40bc4ddf8-python3-3.9.10/lib/python3.9/pickle.py'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lock=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fine_grain_persistence=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fine_grain_eviction=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_system_state=Constant(None)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temporary=False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#charmonium.cache.MemoizedGroup.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Construct a memoized group. Use with :py:function:Memoized.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -229,8 +230,8 @@ keep. I recommend calling this before you fork off processes.</p>
 </dd></dl>
 
 </div></blockquote>
-</div>
-<div class="section" id="components">
+</section>
+<section id="components">
 <h2>Components<a class="headerlink" href="#components" title="Permalink to this headline">¶</a></h2>
 <blockquote>
 <div><dl class="py class">
@@ -408,7 +409,7 @@ for fast a versioned resources is changing.</p>
 <dd><p>Select a key, entry pair to evict.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.10)"><em>tuple</em></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><em>Any</em></a>, &lt;sphinx.util.inspect.TypeAliasForwardRef object at 0x7f83b1346bf0&gt;]</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.10)"><em>tuple</em></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><em>Any</em></a>, &lt;sphinx.util.inspect.TypeAliasForwardRef object at 0x7f027857b9d0&gt;]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -503,7 +504,7 @@ for fast a versioned resources is changing.</p>
 <dd><p>Select a key, entry pair to evict.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.10)"><em>tuple</em></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><em>Any</em></a>, &lt;sphinx.util.inspect.TypeAliasForwardRef object at 0x7f83b136f6d0&gt;]</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.10)"><em>tuple</em></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><em>Any</em></a>, &lt;sphinx.util.inspect.TypeAliasForwardRef object at 0x7f02784d1070&gt;]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -671,8 +672,8 @@ writer.</p>
 </dd></dl>
 
 </div></blockquote>
-</div>
-<div class="section" id="helpers">
+</section>
+<section id="helpers">
 <h2>Helpers<a class="headerlink" href="#helpers" title="Permalink to this headline">¶</a></h2>
 <blockquote>
 <div><dl class="py class">
@@ -820,8 +821,8 @@ unexpected results when used with <cite>fine_grain_persistence</cite>.</p>
 </dd></dl>
 
 </div></blockquote>
-</div>
-<div class="section" id="utils">
+</section>
+<section id="utils">
 <h2>Utils<a class="headerlink" href="#utils" title="Permalink to this headline">¶</a></h2>
 <blockquote>
 <div><dl class="py class">
@@ -998,8 +999,8 @@ unexpected results when used with <cite>fine_grain_persistence</cite>.</p>
 </dd></dl>
 
 </div></blockquote>
-</div>
-</div>
+</section>
+</section>
 
 
           </div>
@@ -1019,6 +1020,7 @@ unexpected results when used with <cite>fine_grain_persistence</cite>.</p>
 
 <h3>Navigation</h3>
 <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="faq.html">Frequently Asked Questions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="features.html">Features</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">API Reference</a></li>
@@ -1063,7 +1065,7 @@ unexpected results when used with <cite>fine_grain_persistence</cite>.</p>
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2021, Samuel Grayson.
+      &copy;1980, Samuel Grayson.
       
       |
       Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
