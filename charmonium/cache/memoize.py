@@ -26,7 +26,7 @@ from typing import (
 import attr
 import bitmath
 from charmonium.determ_hash import determ_hash
-from charmonium.freeze import freeze
+from charmonium.freeze import freeze, config
 
 from .index import Index, IndexKeyType
 from .obj_store import DirObjStore, ObjStore
@@ -47,6 +47,9 @@ __version__ = "1.2.6"
 
 BYTE_ORDER: str = "big"
 
+
+config.constant_classes.add(("attr._make", "Attribute"))
+config.constant_classes.add(("typing", "Generic"))
 
 def memoize(
     *,
