@@ -19,7 +19,7 @@ jobs:
             build/
             .tox/
             .venv/
-          key: venv6-${{ hashFiles('poetry.lock') }}
+          key: venv7-${{ hashFiles('poetry.lock') }}
 
       - run: nix develop --command poetry config virtualenvs.in-project true
 
