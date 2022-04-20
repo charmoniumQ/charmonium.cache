@@ -58,7 +58,7 @@ the replacement policy is decent.</p>
 <p>Once you have your candidate, simply add <a class="reference internal" href="api_reference.html#charmonium.cache.memoize" title="charmonium.cache.memoize"><code class="xref py py-func docutils literal notranslate"><span class="pre">memoize()</span></code></a> to
 the line above the function definition. Per-function customizations go inside
 the parens. For example,</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">charmonium.cache</span> <span class="kn">import</span> <span class="n">memoize</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">charmonium.cache</span> <span class="kn">import</span> <span class="n">memoize</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nd">@memoize</span><span class="p">()</span>
 <span class="gp">... </span><span class="k">def</span> <span class="nf">squared</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
 <span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;squaring </span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -73,7 +73,7 @@ the parens. For example,</p>
 </div>
 <p>Group-wide customizations are applied after definition through
 <a class="reference internal" href="api_reference.html#charmonium.cache.MemoizedGroup" title="charmonium.cache.MemoizedGroup"><code class="xref py py-func docutils literal notranslate"><span class="pre">MemoizedGroup()</span></code></a>. For example, size is applied like:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">charmonium.cache</span> <span class="kn">import</span> <span class="n">MemoizedGroup</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">charmonium.cache</span> <span class="kn">import</span> <span class="n">MemoizedGroup</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">squared</span><span class="o">.</span><span class="n">group</span> <span class="o">=</span> <span class="n">MemoizedGroup</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="s2">&quot;100KiB&quot;</span><span class="p">)</span>
 </pre></div>
 </div>

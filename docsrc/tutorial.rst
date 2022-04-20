@@ -32,27 +32,23 @@ Once you have your candidate, simply add :py:func:`~charmonium.cache.memoize` to
 the line above the function definition. Per-function customizations go inside
 the parens. For example,
 
-.. code:: python
-
-    >>> from charmonium.cache import memoize
-    >>> @memoize()
-    ... def squared(x):
-    ...     print(f"squaring {x}")
-    ...     return x**2
-    ... 
-    >>> squared(2)
-    squaring 2
-    4
-    >>> squared(2)
-    4
+>>> from charmonium.cache import memoize
+>>> @memoize()
+... def squared(x):
+...     print(f"squaring {x}")
+...     return x**2
+... 
+>>> squared(2)
+squaring 2
+4
+>>> squared(2)
+4
 
 Group-wide customizations are applied after definition through
 :py:func:`~charmonium.cache.MemoizedGroup`. For example, size is applied like:
 
-.. code:: python
-
-    >>> from charmonium.cache import MemoizedGroup
-    >>> squared.group = MemoizedGroup(size="100KiB")
+>>> from charmonium.cache import MemoizedGroup
+>>> squared.group = MemoizedGroup(size="100KiB")
 
 Extra State
 -----------

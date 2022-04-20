@@ -115,7 +115,8 @@ def test_verbose(caplog: pytest.Caplog) -> None:
             pass
 
 
-def test_composition() -> None:
+def test_composition(caplog: pytest.LogCaptureFixture) -> None:
+    caplog.set_level(logging.DEBUG, logger="charmonium.freeze")
     @memoize(
         group=MemoizedGroup(obj_store=DirObjStore(temp_path()), temporary=True),
     )

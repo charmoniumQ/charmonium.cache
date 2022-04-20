@@ -22,8 +22,38 @@ The real answer is: Use both. Workflow managers decide whether or not to run
 your program. If they decide to run your program, ``charmonium.cache`` will
 speed that up.
 
+Does this work on instance methods?
+-----------------------------------
+
+Yes.
+
+>>> from charmonium.cache import memoize
+>>> class Class:
+...     def __init__(self, y):
+...         self.y = y
+...     @memoize()
+...     def foo(self, x):
+...         print("Recomputing")
+...         return x + self.y
+... 
+>>> obj = Class(3)
+>>> obj.foo(4)
+Recomputing
+7
+>>> obj.foo(4)
+7
+>>> obj.y = 5
+>>> obj.foo(4)
+Recomputing
+9
+
+Just make sure to put the ``@classmethod`` and ``@staticmethod`` *above* the ``@memoize()``, `as usual`_.
+.. _`as usual`: https://stackoverflow.com/a/6208458/1078199
+
 Does the cache detect changing something by inheritance?
 --------------------------------------------------------
+
+Yes.
 
 .. code:: python
 
@@ -70,6 +100,8 @@ child class.
 
 Does the cache know about global variables?
 -------------------------------------------
+
+Yes.
 
 >>> from charmonium.cache import memoize
 >>> i = 0

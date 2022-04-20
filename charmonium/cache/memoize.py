@@ -3,6 +3,7 @@ from __future__ import annotations
 import atexit
 import contextlib
 import datetime
+import functools
 import json
 import logging
 import os
@@ -431,7 +432,7 @@ class Memoized(Generic[FuncParams, FuncReturn]):
         :param pickler: A custom pickler to use with the index. Pickle types must include tuples of picklable types, hashable types, and the arguments (``__cache_key__`` and ``__cache_var__``, if defined).
         """
 
-        # TODO: use functools.wraps
+        # TODO: use functools.wraps()
         self._func = func
         self.name = (
             name
@@ -742,3 +743,25 @@ class Memoized(Generic[FuncParams, FuncReturn]):
                 key,
                 obj_key,
             )
+
+    def __get__(self, instance: Any, instancetype: Type[Any]):
+        """Implement the descriptor protocol to make decorating instance 
+        method possible.
+
+        """
+        # See https://stackoverflow.com/a/5470017/1078199
+        # If we are accessed from the descriptor protocol, we must be a method attached to an object.
+        # Bind self.
+        return BoundMemoized[FuncParams, FuncReturn](self, instance)
+
+
+class BoundMemoized(Generic[FuncParams, FuncReturn]):
+    def __init__(self, memoized: Memoized[FuncParams, FuncReturn], instance: Any) -> None:
+        self.memoized = memoized
+        self.instance = instance
+
+    def __call__(self, *args: FuncParams.args, **kwargs: FuncParams.kwargs) -> FuncReturn:
+        return self.memoized(self.instance, *args, **kwargs)
+
+    def __getattr__(self, attribute: str) -> Any:
+        return getattr(self.memoized, attribute)

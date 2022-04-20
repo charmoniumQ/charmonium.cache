@@ -52,8 +52,34 @@ changes?</p>
 your program. If they decide to run your program, <code class="docutils literal notranslate"><span class="pre">charmonium.cache</span></code> will
 speed that up.</p>
 </section>
+<section id="does-this-work-on-instance-methods">
+<h2>Does this work on instance methods?<a class="headerlink" href="#does-this-work-on-instance-methods" title="Permalink to this headline">¶</a></h2>
+<p>Yes.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">charmonium.cache</span> <span class="kn">import</span> <span class="n">memoize</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">Class</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">y</span>
+<span class="gp">... </span>    <span class="nd">@memoize</span><span class="p">()</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="nf">foo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Recomputing&quot;</span><span class="p">)</span>
+<span class="gp">... </span>        <span class="k">return</span> <span class="n">x</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span>
+<span class="gp">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">obj</span> <span class="o">=</span> <span class="n">Class</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">obj</span><span class="o">.</span><span class="n">foo</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+<span class="go">Recomputing</span>
+<span class="go">7</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">obj</span><span class="o">.</span><span class="n">foo</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+<span class="go">7</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">obj</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">obj</span><span class="o">.</span><span class="n">foo</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+<span class="go">Recomputing</span>
+<span class="go">9</span>
+</pre></div>
+</div>
+</section>
 <section id="does-the-cache-detect-changing-something-by-inheritance">
 <h2>Does the cache detect changing something by inheritance?<a class="headerlink" href="#does-the-cache-detect-changing-something-by-inheritance" title="Permalink to this headline">¶</a></h2>
+<p>Yes.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">A</span><span class="p">:</span>
     <span class="k">def</span> <span class="nf">foo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="mi">1</span>
@@ -96,6 +122,7 @@ child class.</p>
 </section>
 <section id="does-the-cache-know-about-global-variables">
 <h2>Does the cache know about global variables?<a class="headerlink" href="#does-the-cache-know-about-global-variables" title="Permalink to this headline">¶</a></h2>
+<p>Yes.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">charmonium.cache</span> <span class="kn">import</span> <span class="n">memoize</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nd">@memoize</span><span class="p">()</span>
