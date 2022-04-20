@@ -48,6 +48,7 @@ Recomputing
 9
 
 Just make sure to put the ``@classmethod`` and ``@staticmethod`` *above* the ``@memoize()``, `as usual`_.
+
 .. _`as usual`: https://stackoverflow.com/a/6208458/1078199
 
 Does the cache detect changing something by inheritance?
