@@ -12,24 +12,18 @@ jobs:
 
       - uses: actions/checkout@v2
 
-      - uses: actions/cache@v2
-        id: poetry-install-cache
-        with:
-          path: |
-            build/
-            .tox/
-            .venv/
-          key: venv7-${{ hashFiles('poetry.lock') }}
-          restore-keys: venv7-
-          
-
-      - run: nix develop --command poetry config virtualenvs.in-project true
+      # - uses: actions/cache@v2
+      #   id: poetry-install-cache
+      #   with:
+      #     path:
+      #     key: venv8-${{ hashFiles('poetry.lock') }}
+      #     restore-keys: venv8-
 
       - run: nix develop --command poetry install
-        if: steps.poetry-install-cache.output.cache-hit == 'true'
+        # if: steps.poetry-install-cache.output.cache-hit != 'true'
 
       - run: |
-          ls -ahlt
+          ls -ahl
           nix develop --command poetry config --list
           nix develop --command poetry env info
           nix develop --command python -c 'import sys; print("\n".join(sys.path))'
