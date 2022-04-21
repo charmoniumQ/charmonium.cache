@@ -20,18 +20,19 @@ jobs:
             .tox/
             .venv/
           key: venv7-${{ hashFiles('poetry.lock') }}
+          restore-keys: venv7-
+          
 
       - run: nix develop --command poetry config virtualenvs.in-project true
 
       - run: nix develop --command poetry install
+        if: steps.poetry-install-cache.output.cache-hit == 'true'
 
       - run: |
           ls -ahlt
           nix develop --command poetry config --list
           nix develop --command poetry env info
-          [ -d .venv ] && ls -ahlt .venv
           nix develop --command python -c 'import sys; print("\n".join(sys.path))'
-          nix develop --command python -m isort --help
 
       - run: nix develop --command ./script.py test
 
