@@ -16,6 +16,8 @@ jobs:
         id: poetry-install-cache
         with:
           path: |
+            .tox/
+            build/
             ~/.cache/pypoetry/virtualenvs/charmonium.cache-8KsOeDTd-py3.9
           key: venv9-${{ hashFiles('poetry.lock') }}
           restore-keys: venv9-
@@ -25,6 +27,7 @@ jobs:
 
       - run: |
           ls -ahl
+          ls -ahl ~/.cache/pypoetry/virtualenvs/charmonium.cache-8KsOeDTd-py3.9
           nix develop --command poetry config --list
           nix develop --command poetry env info
           nix develop --command python -c 'import sys; print("\n".join(sys.path))'
