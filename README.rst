@@ -23,7 +23,7 @@ charmonium.cache
 .. image:: https://codecov.io/gh/charmoniumQ/charmonium.cache/branch/main/graph/badge.svg?token=JTL4SNMWTP
    :alt: Code Coverage
    :target: https://codecov.io/gh/charmoniumQ/charmonium.cache
-.. image:: https://img.shields.io/github/last-commit/charmoniumQ/charmonium.determ_hash
+.. image:: https://img.shields.io/github/last-commit/charmoniumQ/charmonium.cache
    :alt: GitHub last commit
    :target: https://github.com/charmoniumQ/charmonium.cache/commits
 .. image:: https://img.shields.io/librariesio/sourcerank/pypi/charmonium.cache
