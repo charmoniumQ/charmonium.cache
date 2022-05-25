@@ -217,7 +217,7 @@ python-versions = ">=3.7,<4.0"
 
 [[package]]
 name = "charmonium.cache"
-version = "1.2.8"
+version = "1.2.11"
 description = "Provides a decorator for caching a function between subsequent processes."
 category = "main"
 optional = false
@@ -228,7 +228,7 @@ develop = false
 attrs = "^20.3.0"
 bitmath = "^1.3.3"
 "charmonium.determ-hash" = "^0.2.2"
-"charmonium.freeze" = "^0.5.3"
+"charmonium.freeze" = "^0.5.8"
 fasteners = "^0.16"
 
 [package.source]
@@ -248,8 +248,8 @@ xxhash = ">=2.0.2,<3.0.0"
 
 [[package]]
 name = "charmonium.freeze"
-version = "0.5.4"
-description = "Injectively, deterministically maps objects to hashable, immutable objects"
+version = "0.5.8"
+description = "Injectively, deterministically maps arbitrary objects to hashable values"
 category = "main"
 optional = false
 python-versions = ">=3.8,<4.0"
@@ -918,7 +918,7 @@ python-versions = ">=3.5"
 
 [[package]]
 name = "pyjwt"
-version = "2.3.0"
+version = "2.4.0"
 description = "JSON Web Token implementation in Python"
 category = "dev"
 optional = false
@@ -1629,8 +1629,8 @@ cffi = [
     {file = "charmonium.determ_hash-0.2.2.tar.gz", hash = "sha256:81197d7988afde9014feb33d4df36a214e9d40804c448d9b5ee20e4797199c0f"},
 ]
 "charmonium.freeze" = [
-    {file = "charmonium.freeze-0.5.4-py3-none-any.whl", hash = "sha256:8cce303e4bf08da529f55152808dcaa5f572ecfdd60b3df36ad2d6101bb648f7"},
-    {file = "charmonium.freeze-0.5.4.tar.gz", hash = "sha256:4eb9479e08e51828f6ddfb75933105b2a3ca1e3fcc5bea45d9d5342e6724259f"},
+    {file = "charmonium.freeze-0.5.8-py3-none-any.whl", hash = "sha256:bc40738ab7c7d3b55fda399e2c4b8847d8a17a17d729a25c3258f36419dc905a"},
+    {file = "charmonium.freeze-0.5.8.tar.gz", hash = "sha256:8b4d4eb6ba5046b185ead060abb17f21a9f07ab6ee49579893a41fb46b28529e"},
 ]
 "charmonium.time-block" = [
     {file = "charmonium.time_block-0.3.0-py3-none-any.whl", hash = "sha256:1d2526fd0c7828f0980de6a9f58f2d26a398ad4ad05f6c7e26c9463bb3301c60"},
@@ -2142,8 +2142,8 @@ pygments = [
     {file = "Pygments-2.11.2.tar.gz", hash = "sha256:4e426f72023d88d03b2fa258de560726ce890ff3b630f88c21cbb8b2503b8c6a"},
 ]
 pyjwt = [
-    {file = "PyJWT-2.3.0-py3-none-any.whl", hash = "sha256:e0c4bb8d9f0af0c7f5b1ec4c5036309617d03d56932877f2f7a0beeb5318322f"},
-    {file = "PyJWT-2.3.0.tar.gz", hash = "sha256:b888b4d56f06f6dcd777210c334e69c737be74755d3e5e9ee3fe67dc18a0ee41"},
+    {file = "PyJWT-2.4.0-py3-none-any.whl", hash = "sha256:72d1d253f32dbd4f5c88eaf1fdc62f3a19f676ccbadb9dbc5d07e951b2b26daf"},
+    {file = "PyJWT-2.4.0.tar.gz", hash = "sha256:d42908208c699b3b973cbeb01a969ba6a96c821eefb1c5bfe4c390c01d67abba"},
 ]
 pylint = [
     {file = "pylint-2.12.2-py3-none-any.whl", hash = "sha256:daabda3f7ed9d1c60f52d563b1b854632fd90035bcf01443e234d3dc794e3b74"},
