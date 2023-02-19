@@ -49,6 +49,7 @@
 - [ ] Add function for enabling logs? Add timestamp to freeze and cache ops logs.
 - [ ] Develop custom audit system. `FileContents` emits custom audit events that cancel our the default ones.
 - [ ] Break callgraph into submodule.
+  - [ ] Compare keys before and after function execution. If it changes, function is impure.
   - [ ] Scan for references to non-deterministic functions (time, random, sys, os, path), emit audit event.
   - [ ] Cache callgraph and global var names.
 - [ ] Write hook on [`sys.meta_path`][sys.meta_path]. You should be able to cache every function in the module by `import charmonium.cache.auto`.
@@ -69,3 +70,17 @@
 [parsl comment]: https://github.com/Parsl/parsl/issues/1591#issuecomment-954863242
 [eht-imaging]: https://github.com/achael/eht-imaging
 [astropy]: https://github.com/astropy/astropy
+
+# Conclusion
+
+- Useful to people, but not novel to SEng.
+- Write on JOSS.
+  - Summarize semester of benchmarks.
+  - Use Astropy Jupyter Notebooks.
+  - Does this preclude publishing in the future?
+- Try to get users.
+  - Put into yt, astropy, parsl, Dask.
+- Consider user study.
+- Ultimately shift to a new project.
+  - Possibly GPU acceleration.
+  - Summer

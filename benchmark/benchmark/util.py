@@ -303,7 +303,10 @@ def last_sentinel(iterable: Iterable[Value]) -> Iterator[Tuple[Value, bool]]:
         try:
             next_elem = next(iterator)
         except StopIteration:
-            yield (cast(Value, elem), True)
+            if not first_time:
+                # elem must be populated, yield it.
+                yield (cast(Value, elem), True)
+            return
         else:
             if not first_time:
                 yield (cast(Value, elem), False)

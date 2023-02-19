@@ -17,15 +17,9 @@ from astropy.io import ascii
 
 from charmonium.determ_hash import determ_hash
 import charmonium.freeze
-charmonium.freeze.config.recursion_limit = 100
 from charmonium.cache import memoize, MemoizedGroup, FileContents
 group = MemoizedGroup(size="1GiB")
 from pathlib import Path
-import os
-if "OUTPUT_LOG" in os.environ:
-    output_file = open(os.environ["OUTPUT_LOG"], "w+")
-else:
-    output_file = None
 
 repeat_factor = 20
 
@@ -44,7 +38,6 @@ def cell2(working_dir_path):
     f = tarfile.open(download_file(url, cache=False), mode='r|*')
     f.extractall(path=working_dir_path)
     globpath = working_dir_path / 'UVES'
-    print(globpath)
     filelist = list(globpath.glob('*.fits'))
     filelist.sort()
     return list(map(FileContents, filelist))
@@ -255,7 +248,6 @@ def cell31(wcaII, vsini):
     x = w2vsini(wcaII, 393.366 * u.nm, vsini).decompose()
     return x
 
-import xml.etree.ElementTree as ET
 def serialize_fig():
     plt.savefig("/tmp/fig.raw")
     plt.close()
@@ -342,7 +334,6 @@ def make_graphs(fcaII, fdiff, delta_p, x):
         cell37_plot = cell37(x, ind1, fdiff, delta_p, ind2)
     return [cell33_plot, cell35_plot, cell36_plot, cell37_plot]
 
-@memoize(group=group)
 def main():
     working_dir_path = cell1()
     filelist = cell2(working_dir_path)

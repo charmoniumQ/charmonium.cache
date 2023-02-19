@@ -37,20 +37,20 @@ def get_data() -> Sequence[
         #         "time": 600,
         #         "mem": 2**32,
         #     },
+        # # ),
+        # (
+        #     GitHubRepo("https://github.com/astropy/astropy"),
+        #     RecentCommitChooser(None, n=5),
+        #     StaticEnvironmentChooser(
+        #         CondaEnvironment("astropy", resources / "astropy/environment.yml")
+        #     ),
+        #     {},
+        #     resources / "astropy/UVES.py",
+        #     {
+        #         "time": 80,
+        #         "mem": 2**29,
+        #     },
         # ),
-        (
-            GitHubRepo("https://github.com/astropy/astropy"),
-            RecentCommitChooser(None, n=5),
-            StaticEnvironmentChooser(
-                CondaEnvironment("astropy", resources / "astropy/environment.yml")
-            ),
-            {},
-            resources / "astropy/UVES.py",
-            {
-                "time": 80,
-                "mem": 2**29,
-            },
-        ),
         # (
         #     GitHubRepo("https://github.com/LBJ-Wade/coffea"),
         #     RecentCommitChooser("6ce872671c39d788fc9fe5e981862d4c6f7658f6", n=5),
