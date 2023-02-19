@@ -1,0 +1,354 @@
+[
+	{
+		"id": "http://zotero.org/users/6920954/items/LCUERC7L",
+		"type": "paper-conference",
+		"abstract": "Tao is a system that optimizes the execution of unit tests in large software programs and reduces the programmer wait time from minutes to seconds. Tao is based on two key ideas: First, Tao focuses on efficiency, unlike past work that focused on avoiding false negatives. Tao implements simple and fast function-level dependency tracking that identifies tests to run on a code change; any false negatives missed by this dependency tracking are caught by running the entire test suite on a test server once the code change is committed. Second, to make it easy for programmers to adopt Tao, it incorporates the dependency information into the source code repository. This paper describes an early prototype of Tao and demonstrates that Tao can reduce unit test execution time in two large Python software projects by over 96% while incurring few false negatives.",
+		"collection-title": "APSys '13",
+		"container-title": "Proceedings of the 4th Asia-Pacific Workshop on Systems",
+		"DOI": "10.1145/2500727.2500748",
+		"event-place": "New York, NY, USA",
+		"ISBN": "978-1-4503-2316-1",
+		"note": "interest: 95",
+		"page": "1–6",
+		"publisher": "Association for Computing Machinery",
+		"publisher-place": "New York, NY, USA",
+		"source": "ACM Digital Library",
+		"title": "Optimizing unit test execution in large software programs using dependency analysis",
+		"URL": "https://doi.org/10.1145/2500727.2500748",
+		"author": [
+			{
+				"family": "Kim",
+				"given": "Taesoo"
+			},
+			{
+				"family": "Chandra",
+				"given": "Ramesh"
+			},
+			{
+				"family": "Zeldovich",
+				"given": "Nickolai"
+			}
+		],
+		"accessed": {
+			"date-parts": [
+				[
+					"2022",
+					4,
+					6
+				]
+			]
+		},
+		"issued": {
+			"date-parts": [
+				[
+					"2013",
+					7,
+					29
+				]
+			]
+		}
+	},
+	{
+		"id": "http://zotero.org/users/6920954/items/N8FFHD35",
+		"type": "paper-conference",
+		"abstract": "In this paper, we present a coverage-based regression test selection (RTS) approach and a developed tool for Python. The tool can be used either on a developer's machine or on build servers. A special characteristic of the tool is the attention to easy integration to continuous integration and deployment. To evaluate the performance of the proposed approach, mutation testing is applied to three open-source projects, and the results of the execution of full test suites are compared to the execution of a set of tests selected by the tool. The missed fault rate of the test selection varies between 0-2% at file-level granularity and 16-24% at line-level granularity. The high missed fault rate at the line-level granularity is related to the selected basic mutation approach and the result could be improved with advanced mutation techniques. Depending on the target optimization metric (time or precision) in DevOps/MLOps process the error rate could be acceptable or further improved by using file-level granularity based test selection.",
+		"container-title": "2021 IEEE International Conference on Software Analysis, Evolution and Reengineering (SANER)",
+		"DOI": "10.1109/SANER50967.2021.00077",
+		"event": "2021 IEEE International Conference on Software Analysis, Evolution and Reengineering (SANER)",
+		"note": "ISSN: 1534-5351\ninterest: 94",
+		"page": "618-621",
+		"source": "IEEE Xplore",
+		"title": "Regression Test Selection Tool for Python in Continuous Integration Process",
+		"author": [
+			{
+				"family": "Kauhanen",
+				"given": "Eero"
+			},
+			{
+				"family": "Nurminen",
+				"given": "Jukka K."
+			},
+			{
+				"family": "Mikkonen",
+				"given": "Tommi"
+			},
+			{
+				"family": "Pashkovskiy",
+				"given": "Matvei"
+			}
+		],
+		"issued": {
+			"date-parts": [
+				[
+					"2021",
+					3
+				]
+			]
+		}
+	},
+	{
+		"id": "http://zotero.org/users/6920954/items/R5LZSFAP",
+		"type": "paper-conference",
+		"abstract": "Programmers across a wide range of disciplines (e.g., bioinformatics, neuroscience, econometrics, finance, data mining, information retrieval, machine learning) write scripts to parse, transform, process, and extract insights from data. To speed up iteration times, they split their analyses into stages and write extra code to save the intermediate results of each stage to files so that those results do not have to be re-computed in every subsequent run. As they explore and refine hypotheses, their scripts often create and process lots of intermediate data files. They need to properly manage the myriad of dependencies between their code and data files, or else their analyses will produce incorrect results. To enable programmers to iterate quickly without needing to manage intermediate data files, we added a set of dynamic analyses to the programming language interpreter so that it automatically memoizes (caches) the results of long-running pure function calls to disk, manages dependencies between code and on-disk data, and later re-uses memoized results, rather than re-executing those functions, when guaranteed safe to do so. We created an implementation for Python and show how it enables programmers to iterate faster on their data analysis scripts while writing less code and not having to manage dependencies between their code and datasets.",
+		"collection-title": "ISSTA '11",
+		"container-title": "Proceedings of the 2011 International Symposium on Software Testing and Analysis",
+		"DOI": "10.1145/2001420.2001455",
+		"event-place": "New York, NY, USA",
+		"ISBN": "978-1-4503-0562-4",
+		"page": "287–297",
+		"publisher": "Association for Computing Machinery",
+		"publisher-place": "New York, NY, USA",
+		"source": "ACM Digital Library",
+		"title": "Using automatic persistent memoization to facilitate data analysis scripting",
+		"URL": "https://doi.org/10.1145/2001420.2001455",
+		"author": [
+			{
+				"family": "Guo",
+				"given": "Philip J."
+			},
+			{
+				"family": "Engler",
+				"given": "Dawson"
+			}
+		],
+		"accessed": {
+			"date-parts": [
+				[
+					"2022",
+					5,
+					12
+				]
+			]
+		},
+		"issued": {
+			"date-parts": [
+				[
+					"2011",
+					7,
+					17
+				]
+			]
+		}
+	},
+	{
+		"id": "http://zotero.org/users/6920954/items/484FWSX4",
+		"type": "paper-conference",
+		"abstract": "Quantitative financial analysis requires repeated computations of the same functions with the same arguments when prototyping trading strategies; many of these functions involve resource intensive operations on large matrices. Reducing the number of repeated computations either within a program or across runs of the same program would allow analysts to build and debug trading strategies more quickly. We built a disk memoization library that caches function computations to files to avoid recomputation. Anymemoization solution should be easy to use, minimizing the need for users to think about whether caching is appropriate, while at the same time giving them control over speed, accuracy, and space used for caching. Guo and Engler proposed a similar tool that does automatic memoization by modifying the python interpreter, while the packages Jug and Joblib are distributed computing tools that have memoization options. Our library attempts to maintain the ease of use of the above packages for memoization, but at the same time give a higher degree of control of how caching is done for users who need it. We provide the same basic features as these other libraries, but allow control of how hashing is done, space usage for individual functions and all memoization, refreshing memoization for a specific function, and accuracy checking. This should lead to both increased productivity and speed increases for recomputation. We show that for several financial calculations, including Markowitz Optimization, Fama French, and the Singular Value Decomposition, memoization greatly speeds up recomputation, often by over 99%. We also show that by using xxhash, a non-cryptographic hash function, instead of md5, and avoiding equality checks, our package greatly outperforms joblib, the best current package.",
+		"container-title": "2014 Seventh Workshop on High Performance Computational Finance",
+		"DOI": "10.1109/WHPCF.2014.9",
+		"event": "2014 Seventh Workshop on High Performance Computational Finance",
+		"page": "17-22",
+		"source": "IEEE Xplore",
+		"title": "Speeding up Large-Scale Financial Recomputation with Memoization",
+		"author": [
+			{
+				"family": "Moreno",
+				"given": "Alexander"
+			},
+			{
+				"family": "Balch",
+				"given": "Tucker"
+			}
+		],
+		"issued": {
+			"date-parts": [
+				[
+					"2014",
+					11
+				]
+			]
+		}
+	},
+	{
+		"id": "http://zotero.org/users/6920954/items/MII9DUFS",
+		"type": "paper-conference",
+		"abstract": "High-level programming languages such as Python are increasingly used to provide intuitive interfaces to libraries written in lower-level languages and for assembling applications from various components. This migration towards orchestration rather than implementation, coupled with the growing need for parallel computing (e.g., due to big data and the end of Moore's law), necessitates rethinking how parallelism is expressed in programs. Here, we present Parsl, a parallel scripting library that augments Python with simple, scalable, and flexible constructs for encoding parallelism. These constructs allow Parsl to construct a dynamic dependency graph of components that it can then execute efficiently on one or many processors. Parsl is designed for scalability, with an extensible set of executors tailored to different use cases, such as low-latency, high-throughput, or extreme-scale execution. We show, via experiments on the Blue Waters supercomputer, that Parsl executors can allow Python scripts to execute components with as little as 5 ms of overhead, scale to more than 250000 workers across more than 8000 nodes, and process upward of 1200 tasks per second. Other Parsl features simplify the construction and execution of composite programs by supporting elastic provisioning and scaling of infrastructure, fault-tolerant execution, and integrated wide-area data management. We show that these capabilities satisfy the needs of many-task, interactive, online, and machine learning applications in fields such as biology, cosmology, and materials science.",
+		"collection-title": "HPDC '19",
+		"container-title": "Proceedings of the 28th International Symposium on High-Performance Parallel and Distributed Computing",
+		"DOI": "10.1145/3307681.3325400",
+		"event-place": "New York, NY, USA",
+		"ISBN": "978-1-4503-6670-0",
+		"page": "25–36",
+		"publisher": "Association for Computing Machinery",
+		"publisher-place": "New York, NY, USA",
+		"source": "ACM Digital Library",
+		"title": "Parsl: Pervasive Parallel Programming in Python",
+		"title-short": "Parsl",
+		"URL": "https://doi.org/10.1145/3307681.3325400",
+		"author": [
+			{
+				"family": "Babuji",
+				"given": "Yadu"
+			},
+			{
+				"family": "Woodard",
+				"given": "Anna"
+			},
+			{
+				"family": "Li",
+				"given": "Zhuozhao"
+			},
+			{
+				"family": "Katz",
+				"given": "Daniel S."
+			},
+			{
+				"family": "Clifford",
+				"given": "Ben"
+			},
+			{
+				"family": "Kumar",
+				"given": "Rohan"
+			},
+			{
+				"family": "Lacinski",
+				"given": "Lukasz"
+			},
+			{
+				"family": "Chard",
+				"given": "Ryan"
+			},
+			{
+				"family": "Wozniak",
+				"given": "Justin M."
+			},
+			{
+				"family": "Foster",
+				"given": "Ian"
+			},
+			{
+				"family": "Wilde",
+				"given": "Michael"
+			},
+			{
+				"family": "Chard",
+				"given": "Kyle"
+			}
+		],
+		"accessed": {
+			"date-parts": [
+				[
+					"2022",
+					5,
+					12
+				]
+			]
+		},
+		"issued": {
+			"date-parts": [
+				[
+					"2019",
+					6,
+					17
+				]
+			]
+		}
+	},
+	{
+		"id": "http://zotero.org/users/6920954/items/PU2YPBG2",
+		"type": "report",
+		"abstract": "Data analysis often entails a multitude of heterogeneous steps, from the application of various command line tools to the usage of scripting languages like R or Python for the generation of plots and tables. It is widely recognized that data analyses should ideally be conducted in a reproducible way.&nbsp;Reproducibility enables technical validation and regeneration of results on the original or even new data. However, reproducibility alone is by no means sufficient to deliver an analysis that is of lasting impact (i.e., sustainable) for the field, or even just one research group. We postulate that it is equally important to ensure adaptability and transparency. The former describes the ability to modify the analysis to answer extended or slightly different research questions. The latter describes the ability to understand the analysis in order to judge whether it is not only technically, but methodologically valid. Here, we analyze the properties needed for a data analysis to become reproducible, adaptable, and transparent. We show how the popular workflow management system Snakemake can be used to guarantee this, and how it enables an ergonomic, combined, unified representation of all steps involved in data analysis, ranging from raw data processing, to quality control and fine-grained, interactive exploration and plotting of final results.",
+		"language": "en",
+		"note": "DOI: 10.12688/f1000research.29032.2\ntype: article",
+		"number": "10:33",
+		"publisher": "F1000Research",
+		"source": "f1000research.com",
+		"title": "Sustainable data analysis with Snakemake",
+		"URL": "https://f1000research.com/articles/10-33",
+		"author": [
+			{
+				"family": "Mölder",
+				"given": "Felix"
+			},
+			{
+				"family": "Jablonski",
+				"given": "Kim Philipp"
+			},
+			{
+				"family": "Letcher",
+				"given": "Brice"
+			},
+			{
+				"family": "Hall",
+				"given": "Michael B."
+			},
+			{
+				"family": "Tomkins-Tinch",
+				"given": "Christopher H."
+			},
+			{
+				"family": "Sochat",
+				"given": "Vanessa"
+			},
+			{
+				"family": "Forster",
+				"given": "Jan"
+			},
+			{
+				"family": "Lee",
+				"given": "Soohyun"
+			},
+			{
+				"family": "Twardziok",
+				"given": "Sven O."
+			},
+			{
+				"family": "Kanitz",
+				"given": "Alexander"
+			},
+			{
+				"family": "Wilm",
+				"given": "Andreas"
+			},
+			{
+				"family": "Holtgrewe",
+				"given": "Manuel"
+			},
+			{
+				"family": "Rahmann",
+				"given": "Sven"
+			},
+			{
+				"family": "Nahnsen",
+				"given": "Sven"
+			},
+			{
+				"family": "Köster",
+				"given": "Johannes"
+			}
+		],
+		"accessed": {
+			"date-parts": [
+				[
+					"2022",
+					5,
+					12
+				]
+			]
+		},
+		"issued": {
+			"date-parts": [
+				[
+					"2021",
+					4,
+					19
+				]
+			]
+		}
+	},
+	{
+		"id": "http://zotero.org/users/6920954/items/UCM5XYSP",
+		"type": "webpage",
+		"title": "Memoization and checkpointing — Parsl 1.2.0 documentation",
+		"URL": "https://parsl.readthedocs.io/en/stable/userguide/checkpoints.html#app-equivalence",
+		"accessed": {
+			"date-parts": [
+				[
+					"2022",
+					5,
+					12
+				]
+			]
+		}
+	}
+]

@@ -1,3 +1,11 @@
+- Makefile targets depend on Makefile.
+- FFI
+- C-level I/O
+- OOP
+- Function determinism
+- Functions that modify their arguments
+- Security of unpickle arbitrary data.
+
 Sharing the cache.
 
 `IncPy` can also memoize pure functions across subsequent process invocations. However, `IncPy` has to modify the CPython interpreter in the following ways:
