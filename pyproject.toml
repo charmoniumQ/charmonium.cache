@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "charmonium.cache"
-version = "1.2.14"
+version = "1.2.15"
 description = "Provides a decorator for caching a function between subsequent processes."
 authors = ["Samuel Grayson <sam+dev@samgrayson.me>"]
 license = "MIT"
@@ -70,7 +70,7 @@ color_output = true
 #mypy_path = stubs
 
 [tool.bump2version]
-current_version = "1.2.14"
+current_version = "1.2.15"
 commit = true
 tag = true
 
