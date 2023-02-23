@@ -54,6 +54,8 @@
 - [ ] Break callgraph into submodule.
   - [ ] Scan for references to non-deterministic functions (time, random, sys, os, path), emit audit event.
   - [ ] Cache callgraph and global var names.
+- [ ] Add API for ignoring modules that come from a requirements file or pyproject.toml (based on version instead of contents of module)
+
 
 # Minor release
 - [ ] Write about ambiguity in variable names. By reading the source code, you can't tell if a reference is local or global; a local reference can shadow a global one.
