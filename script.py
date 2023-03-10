@@ -364,11 +364,7 @@ def publish(
                 pyproject["tool"]["poetry"]["version"],
                 version_part.value,
                 "pyproject.toml",
-                *[
-                    script
-                    for package in src_packages
-                    for script in Path(package.replace(".", "/")).glob("**/*.py")
-                ],
+                "charmonium/cache/memoize.py",
             ],
             check=True,
         )
