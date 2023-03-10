@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Contributor’s Guide &#8212; charmonium.cache 1.2.6 documentation</title>
+    <title>Contributor’s Guide &#8212; charmonium.cache 1.2.15 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
@@ -56,14 +56,14 @@ attention to those marked “help wanted”.</p></li>
 where <code class="docutils literal notranslate"><span class="pre">${issue_number}</span></code> is replaced with the number from the
 <a class="reference external" href="https://github.com/charmoniumQ/charmonium.cache/issues">issue tracker</a>. Ensure the test suite works on your machine.</p>
 <blockquote>
-<div><div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pip install poetry
-<span class="gp">$ </span>git clone git@github.com:charmoniumQ/charmonium.cache.git
-<span class="gp">        $ </span><span class="nb">cd</span> charmonium.cache
-<span class="gp">$ </span>git switch -c fix-<span class="si">${</span><span class="nv">issue_number</span><span class="si">}</span>
-<span class="gp">$ </span>poetry shell
-<span class="gp gp-VirtualEnv">(charmonium.cache-venv)</span> <span class="gp">$ </span>poetry install
+<div><div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pip<span class="w"> </span>install<span class="w"> </span>poetry
+<span class="gp">$ </span>git<span class="w"> </span>clone<span class="w"> </span>git@github.com:charmoniumQ/charmonium.cache.git
+<span class="gp">        $ </span><span class="nb">cd</span><span class="w"> </span>charmonium.cache
+<span class="gp">$ </span>git<span class="w"> </span>switch<span class="w"> </span>-c<span class="w"> </span>fix-<span class="si">${</span><span class="nv">issue_number</span><span class="si">}</span>
+<span class="gp">$ </span>poetry<span class="w"> </span>shell
+<span class="gp gp-VirtualEnv">(charmonium.cache-venv)</span> <span class="gp">$ </span>poetry<span class="w"> </span>install
 <span class="gp gp-VirtualEnv">(charmonium.cache-venv)</span> <span class="gp">$ </span>./scripts/test.sh
-<span class="gp gp-VirtualEnv">(charmonium.cache-venv)</span> <span class="gp">$ </span>./scripts/docs.sh <span class="c1"># if desired</span>
+<span class="gp gp-VirtualEnv">(charmonium.cache-venv)</span> <span class="gp">$ </span>./scripts/docs.sh<span class="w"> </span><span class="c1"># if desired</span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -157,7 +157,7 @@ coverage HTML report in your browser.</p></li>
       
       |
       Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
       
       |
       <a href="_sources/contributors_guide.rst.txt"
