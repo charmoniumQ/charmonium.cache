@@ -47,7 +47,7 @@ from .util import (
 
 BYTE_ORDER: str = "big"
 
-__version__ = "1.2.15"
+__version__ = "1.3.0"
 
 freeze_config = copy.deepcopy(global_config)
 freeze_config.use_hash = True
