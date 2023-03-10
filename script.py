@@ -367,7 +367,7 @@ def publish(
                 *[
                     script
                     for package in src_packages
-                    for script in Path(package.replace(".", "/")).glob("**.py")
+                    for script in Path(package.replace(".", "/")).glob("**/*.py")
                 ],
             ],
             check=True,
