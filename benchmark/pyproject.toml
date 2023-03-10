@@ -55,32 +55,16 @@ current_version = "0.1.0"
 commit = true
 tag = true
 
-[tool.tox]
-legacy_tox_ini = """
-[tox]
-envlist = py310
-# Make sure to install the Python versions listed here in the Nix flake.
-isolated_build = True
-
-[testenv]
-whitelist_externals = poetry
-skip_install = true
-commands =
-    poetry install
-    {toxinidir}/script.py per-env-tests
-"""
-
 [tool.poetry.dev-dependencies]
 autoimport = "^0.7.5"
 isort = "^5.10.0"
-black = "^21.10b0"
+black = "^22.3"
 pylint = "^2.11.1"
 mypy = "^0.910"
-pytest = "^6.2.5"
-pytest-xdist = "^2.4.0"
-pytest-cov = "^3.0.0"
+pytest = "^7.2"
+pytest-xdist = "^3.2"
+pytest-cov = "^4.0.0"
 coverage = "^6.1.2"
-tox = "^3.24.4"
 radon = "^5.1.0"
 twine = "^3.5.0"
 proselint = "^0.13.0"
@@ -90,7 +74,7 @@ bump2version = "^1.0.1"
 typer = "^0.4.0"
 termcolor = "^1.1.0"
 typing-extensions = "^4.1.1"
-ipython = "^7.29.0"
+ipython = "^8.10"
 ipdb = "^0.13.9"
 types-setuptools = "^57.4.10"
 types-toml = "^0.10.4"
@@ -104,8 +88,7 @@ pytest-testmon = "^1.3.1"
 types-requests = "^2.27.16"
 
 [tool.poetry.dependencies]
-python = ">=3.8,<3.10"
-# make sure to keep the Python versions here consistent with those tested by Tox (tool.tox.legacy_tox_ini.tox.envlist).
+python = ">=3.8,<4"
 typer = "^0.4.0"
 "charmonium.async-subprocess" = "^0.1.7"
 tqdm = "^4.62.3"

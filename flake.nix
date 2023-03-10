@@ -15,7 +15,6 @@
         default-python = pkgs.python310;
         # Alternative Pythons for Tox
         alternative-pythons = [
-          pkgs.python37
           pkgs.python38
           pkgs.python39
           pkgs.python310
@@ -49,7 +48,6 @@
         packages.${name-shell} = pkgs.mkShell {
           buildInputs = alternative-pythons ++ [
             pkgs.poetry
-            pkgs.nodePackages.pyright
           ];
           shellHook = ''
             if [ ! -f poetry.lock ] || [ ! -f build/poetry-$(sha1sum poetry.lock | cut -f1 -d' ') ]; then
@@ -62,7 +60,7 @@
             export PYTHONNOUSERSITE=true
             export VIRTUAL_ENV=$(poetry env info -p)
             export PATH=$VIRTUAL_ENV/bin:$PATH
-            export LD_LIBRARY_PATH=LD_LIBRARY_PATH=${pkgs.libseccomp.lib}/lib:${pkgs.gcc-unwrapped.lib}/lib:$LD_LIBRARY_PATH
+            #export LD_LIBRARY_PATH=LD_LIBRARY_PATH=${pkgs.libseccomp.lib}/lib:${pkgs.gcc-unwrapped.lib}/lib:$LD_LIBRARY_PATH
           '';
           # TODO: write a check expression (`nix flake check`)
         };

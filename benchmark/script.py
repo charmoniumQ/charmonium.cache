@@ -277,18 +277,6 @@ async def all_tests_inner(interactive: bool) -> None:
         docs_inner(),
         pytest(use_coverage=False, show_slow=False),
     )
-    # Tox already has its own parallelism,
-    # and it shows a nice stateus spinner.
-    # so I'll not `await pretty_run`
-    subprocess.run(
-        ["tox", "--parallel", "auto"],
-        env={
-            **os.environ,
-            "PY_COLORS": "1",
-            "TOX_PARALLEL_NO_SPINNER": "" if interactive else "1",
-        },
-        check=True,
-    )
 
 
 async def pytest(use_coverage: bool, show_slow: bool) -> None:
