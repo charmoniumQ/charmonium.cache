@@ -12,7 +12,7 @@ import threading
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Iterable, Type, TypeVar
 
-import cloudpickle
+import cloudpickle  # type: ignore
 import dask  # type: ignore
 import dask.bag  # type: ignore
 import pytest
@@ -22,7 +22,6 @@ from charmonium.cache.util import temp_path
 
 if TYPE_CHECKING:
     from typing import Protocol
-
 else:
     Protocol = object
 
@@ -74,12 +73,15 @@ def make_overlapping_calls(
     use_metadata_size=True,
 )
 def square(x: int) -> int:
-    (tmp_root / str(random.randint(0, 10000))).write_text(str(x))
+    # pylint: disable=eval-used
+    # We use eval to sneak state in here intentionally
+    (tmp_root / str(eval("__import__('random').randint(0, 10000)"))).write_text(str(x))
     return x**2
 
 
 def square_all(lst: list[int]) -> list[int]:
     return list(map(square, lst))
+
 
 N_PROCS = 5
 N_OVERLAP = 4
@@ -116,33 +118,18 @@ def test_parallelism(ParallelType: Type[Parallel]) -> None:
 
 
 def test_cloudpickle() -> None:
+    """
+    Memoize should be compatible with cloudpickle so that it can be parallelized with dask.
+    """
     if tmp_root.exists():
         shutil.rmtree(tmp_root)
     tmp_root.mkdir(parents=True)
-    # I need to make Memoize compatible with cloudpickle so that it can be parallelized with dask.
     square.group = MemoizedGroup(
         obj_store=DirObjStore(temp_path()), fine_grain_persistence=True, temporary=True
     )
     square(2)
     square2 = cloudpickle.loads(cloudpickle.dumps(square))
     assert square2.would_hit(2)
-
-
-def test_dask_bag() -> None:
-    if tmp_root.exists():
-        shutil.rmtree(tmp_root)
-    tmp_root.mkdir(parents=True)
-    square.group = MemoizedGroup(
-        obj_store=DirObjStore(temp_path()), fine_grain_persistence=True, temporary=True
-    )
-    calls, unique_calls = make_overlapping_calls(N_PROCS, N_OVERLAP)
-    dask.bag.from_sequence(itertools.chain.from_iterable(calls), npartitions=N_PROCS).map(square).compute()  # type: ignore
-    recomputed = [int(log.read_text()) for log in tmp_root.iterdir()]
-    assert len(recomputed) < N_OVERLAP * N_PROCS
-    assert set(recomputed) == unique_calls
-    subprocess.run(["sync", "--file-system", "."], check=True)
-    calls_would_hit = [square.would_hit(x) for x in unique_calls]
-    assert all(calls_would_hit)
 
 
 def test_dask_delayed() -> None:
@@ -153,10 +140,30 @@ def test_dask_delayed() -> None:
         obj_store=DirObjStore(temp_path()), fine_grain_persistence=True, temporary=True
     )
     calls, unique_calls = make_overlapping_calls(N_PROCS, N_OVERLAP)
-    square2 = dask.delayed(square)  # type: ignore
-    results = dask.compute(*[square2(x) for call in calls for x in call])  # type: ignore
+    square2 = dask.delayed(square, traverse=False)
+    results = dask.compute(*[square2(x) for call in calls for x in call])
     recomputed = [int(log.read_text()) for log in tmp_root.iterdir()]
     assert len(recomputed) < N_OVERLAP * N_PROCS
     assert set(recomputed) == unique_calls
     assert all(square.would_hit(x) for x in unique_calls)
-    assert results == tuple([x**2 for call in calls for x in call])
+    assert results == tuple(x**2 for call in calls for x in call)
+
+
+def test_dask_bag() -> None:
+    if tmp_root.exists():
+        shutil.rmtree(tmp_root)
+    tmp_root.mkdir(parents=True)
+    square.group = MemoizedGroup(
+        obj_store=DirObjStore(temp_path()), fine_grain_persistence=True, temporary=True
+    )
+    calls, unique_calls = make_overlapping_calls(N_PROCS, N_OVERLAP)
+    dask.bag.from_sequence(
+        itertools.chain.from_iterable(calls),
+        npartitions=N_PROCS,
+    ).map(square).compute()
+    recomputed = [int(log.read_text()) for log in tmp_root.iterdir()]
+    assert len(recomputed) < N_OVERLAP * N_PROCS
+    assert set(recomputed) == unique_calls
+    subprocess.run(["sync", "--file-system", "."], check=True)
+    calls_would_hit = [square.would_hit(x) for x in unique_calls]
+    assert all(calls_would_hit)

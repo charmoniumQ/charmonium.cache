@@ -35,15 +35,15 @@ from charmonium.async_subprocess import run
 from termcolor import cprint  # type: ignore
 from typing_extensions import ParamSpec
 
-Params = ParamSpec("Parms")
+Params = ParamSpec("Params")
 Return = TypeVar("Return")
 
 
 def coroutine_to_function(
-    coroutine: Callable[Params, Awaitable[Return]]  # type: ignore
-) -> Callable[Params, Return]:  # type: ignore
+    coroutine: Callable[Params, Awaitable[Return]]
+) -> Callable[Params, Return]:
     @wraps(coroutine)
-    def wrapper(*args: Params.args, **kwargs: Params.kwargs) -> Return:  # type: ignore
+    def wrapper(*args: Params.args, **kwargs: Params.kwargs) -> Return:
         return asyncio.run(coroutine(*args, **kwargs))  # type: ignore
 
     return wrapper
@@ -138,8 +138,8 @@ def autoimport_and_isort(path: Path) -> None:
     path.write_text(code)
 
 
-T1 = TypeVar("T1")
-T2 = TypeVar("T2")
+_T1 = TypeVar("_T1")
+_T2 = TypeVar("_T2")
 
 
 @app.command()
@@ -147,7 +147,7 @@ T2 = TypeVar("T2")
 async def fmt(parallel: bool = True) -> None:
     with multiprocessing.Pool() as pool:
         mapper = cast(
-            Callable[[Callable[[T1], T2], Iterable[T1]], Iterable[T2]],
+            Callable[[Callable[[_T1], _T2], Iterable[_T1]], Iterable[_T2]],
             pool.imap_unordered if parallel else map,
         )
         list(mapper(autoimport_and_isort, all_python_files))
@@ -158,18 +158,18 @@ async def fmt(parallel: bool = True) -> None:
 @coroutine_to_function
 async def test() -> None:
     await asyncio.gather(
-        # pretty_run(
-        #     [
-        #         "mypy",
-        #         # "dmypy",
-        #         # "run",
-        #         # "--",
-        #         "--explicit-package-bases",
-        #         "--namespace-packages",
-        #         *all_python_files,
-        #     ],
-        #     env_override={"MYPY_FORCE_COLOR": "1"},
-        # ),
+        pretty_run(
+            [
+                "mypy",
+                # "dmypy",
+                # "run",
+                # "--",
+                "--explicit-package-bases",
+                "--namespace-packages",
+                *all_python_files,
+            ],
+            env_override={"MYPY_FORCE_COLOR": "1"},
+        ),
         pretty_run(
             [
                 "pylint",
@@ -215,16 +215,16 @@ async def test() -> None:
 @coroutine_to_function
 async def per_env_tests() -> None:
     await asyncio.gather(
-        # pretty_run(
-        #     # No daemon
-        #     [
-        #         "mypy",
-        #         "--explicit-package-bases",
-        #         "--namespace-packages",
-        #         *map(str, all_python_files),
-        #     ],
-        #     env_override={"MYPY_FORCE_COLOR": "1"},
-        # ),
+        pretty_run(
+            # No daemon
+            [
+                "mypy",
+                "--explicit-package-bases",
+                "--namespace-packages",
+                *map(str, all_python_files),
+            ],
+            env_override={"MYPY_FORCE_COLOR": "1"},
+        ),
         pytest(use_coverage=False, show_slow=False),
     )
 
@@ -346,12 +346,12 @@ def dct_to_args(dct: Mapping[str, Union[bool, int, float, str]]) -> List[str]:
 def publish(
     version_part: VersionPart,
     verify: bool = True,
-    docs: bool = True,
+    build_docs: bool = True,
     bump: bool = True,
 ) -> None:
     if verify:
         asyncio.run(all_tests_inner(True))
-    elif docs:
+    elif build_docs:
         # verify => all_tests_inner => docs already.
         # This is only need for the case where (not verify and docs).
         asyncio.run(docs_inner())
@@ -365,9 +365,9 @@ def publish(
                 version_part.value,
                 "pyproject.toml",
                 *[
-                    str(Path(package.replace(".", "/")) / "__init__.py")
+                    script
                     for package in src_packages
-                    if (Path(package.replace(".", "/")) / "__init__.py").exists()
+                    for script in Path(package.replace(".", "/")).glob("**.py")
                 ],
             ],
             check=True,

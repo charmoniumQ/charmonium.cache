@@ -1,15 +1,12 @@
 from __future__ import annotations
 
+import dataclasses
 import shutil
-from typing import TYPE_CHECKING, Any, Iterator
-
-import attr
-
-from .pathlike import PathLike, PathLikeFrom, pathlike_from
+from typing import TYPE_CHECKING, Any, Iterator, Union
+from pathlib import Path
 
 if TYPE_CHECKING:
     from typing import Protocol
-
 else:
     Protocol = object
 
@@ -41,8 +38,7 @@ class ObjStore(Protocol):
         ...
 
 
-# pyright thinks attrs has ambiguous overload
-@attr.frozen(init=False)  # type: ignore
+@dataclasses.dataclass
 class DirObjStore(ObjStore):
     """Use a directory in the filesystem as an object-store.
 
@@ -52,20 +48,20 @@ class DirObjStore(ObjStore):
 
     """
 
-    path: PathLike
-    _key_bytes: int
+    path: Path
+    key_bytes: int
 
-    def __determ_hash__(self) -> Any:
-        return (str(self.path), self._key_bytes)
+    def __frozenstate__(self) -> Any:
+        return (str(self.path), self.key_bytes)
 
-    def __init__(self, path: PathLikeFrom, key_bytes: int = 16) -> None:
+    def __init__(self, path: Union[Path, str], key_bytes: int = 16) -> None:
         """
-        :param path: a 'PathLike' object which will be the directory of the object store.
+        :param path: the directory of the object store.
         :param key_bytes: the number of bytes to use as keys
         """
         super().__init__()
-        object.__setattr__(self, "path", pathlike_from(path))
-        object.__setattr__(self, "_key_bytes", key_bytes)
+        self.path = Path(path)
+        self.key_bytes = key_bytes
 
         if self.path.exists():
             if any(
@@ -77,11 +73,11 @@ class DirObjStore(ObjStore):
             self.path.mkdir(parents=True)
 
     def _int2str(self, key: int) -> str:
-        assert key < (1 << (8 * self._key_bytes))
-        return f"{key:0{2*self._key_bytes}x}"
+        assert key < (1 << (8 * self.key_bytes))
+        return f"{key:0{2*self.key_bytes}x}"
 
-    def _is_key(self, path: PathLike) -> bool:
-        return len(path.name) == 2 * self._key_bytes and all(
+    def _is_key(self, path: Path) -> bool:
+        return len(path.name) == 2 * self.key_bytes and all(
             letter in "0123456789abcdef" for letter in path.name
         )
 
@@ -111,8 +107,7 @@ class DirObjStore(ObjStore):
         )
 
     def clear(self) -> None:
-        # print("clear")
         if hasattr(self.path, "rmtree"):
-            self.path.rmtree()  # type: ignore
+            self.path.rmtree()
         else:
             shutil.rmtree(self.path)

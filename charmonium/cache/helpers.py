@@ -5,14 +5,11 @@ import stat
 import zlib
 from typing import Any, Callable, Mapping, Tuple, Union, cast
 
-from charmonium.determ_hash import determ_hash
-
 from .pathlike import PathLike, PathLikeFrom, pathlike_from
 
 FILE_COMPARISONS: Mapping[str, Callable[[PathLike], Any]] = {
     "mtime": lambda p: p.stat()[stat.ST_MTIME],
     "crc32": lambda p: zlib.crc32(p.read_bytes()),
-    "determ_hash": lambda p: determ_hash(p.read_bytes()),
 }
 
 
@@ -43,7 +40,7 @@ class FileContents:
     def __init__(
         self,
         path: PathLikeFrom,
-        comparison: str = "determ_hash",
+        comparison: str = "crc32",
     ) -> None:
         self.path = pathlike_from(path)
         self.comparison = comparison

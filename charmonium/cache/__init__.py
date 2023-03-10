@@ -5,6 +5,7 @@ from .memoize import CacheThrashingWarning as CacheThrashingWarning
 from .memoize import Memoized as Memoized
 from .memoize import MemoizedGroup as MemoizedGroup
 from .memoize import __version__ as __version__
+from .memoize import freeze_config as freeze_config
 from .memoize import memoize as memoize
 from .obj_store import DirObjStore as DirObjStore
 from .obj_store import ObjStore as ObjStore

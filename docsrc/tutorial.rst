@@ -430,10 +430,6 @@ serialization. To cull the cache after every store, set ``memoize(...,
 fine_grain_eviction=True)``. This is useful if the cache would run out of memory
 without an eviction.
 
-By default, the cache only stores a hash of the keys, which is faster and
-smaller. Set ``memoize(..., lossy_compression=False)`` to store the whole keys
-(useful for debugging).
-
 Be aware of ``memoize(..., verbose=True|False)``. If verbose is enabled, the
 cache will emit a report at process-exit saying how much time was saved. This is
 useful to determine if caching is "worth it."

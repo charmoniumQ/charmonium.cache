@@ -1,4 +1,5 @@
 import datetime
+import os
 import time
 from pathlib import Path
 from typing import cast
@@ -59,8 +60,8 @@ def test_filecontents_empty() -> None:
 
 def test_filecontents_add() -> None:
     file2 = FileContents("abc")
-    assert ("123" + file2).__fspath__() == "123abc"
-    assert (file2 + "123").__fspath__() == "abc123"
+    assert os.fspath("123" + file2) == "123abc"  # type: ignore
+    assert os.fspath(file2 + "123") == "abc123"  # type: ignore
 
 
 dt = datetime.timedelta(seconds=0.5)

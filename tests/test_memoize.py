@@ -6,7 +6,7 @@ from typing import Any
 
 import pytest
 
-from charmonium.cache import DirObjStore, MemoizedGroup, memoize
+from charmonium.cache import DirObjStore, MemoizedGroup, freeze_config, memoize
 from charmonium.cache.util import temp_path
 
 # import from __init__ because this is an integration test.
@@ -18,11 +18,10 @@ calls: list[int] = []
     "kwargs,group_kwargs",
     [
         ({"name": "test"}, {}),
-        ({"lossy_compression": False}, {}),
         ({"use_metadata_size": True}, {}),
         ({"use_metadata_size": True, "use_obj_store": False}, {}),
         ({"pickler": pickle}, {}),
-        ({"extra_func_state": lambda func: 3}, {}),  # type: ignore
+        ({"extra_func_state": lambda func: 3}, {}),
         (
             {},
             {"size": 1000},
@@ -34,7 +33,7 @@ calls: list[int] = []
         ({}, {"pickler": pickle}),
         ({}, {"fine_grain_persistence": True}),
         ({}, {"fine_grain_eviction": True}),
-        ({}, {"extra_system_state": lambda: 3}),  # type: ignore
+        ({}, {"extra_system_state": lambda: 3}),
         ({}, {"temporary": False}),
     ],
 )
@@ -59,6 +58,7 @@ def test_memoize(kwargs: dict[str, Any], group_kwargs: dict[str, Any]) -> None:
 
 def test_memoize_impure_closure() -> None:
     i = 0
+
     @memoize(
         group=MemoizedGroup(obj_store=DirObjStore(temp_path()), temporary=True),
     )
@@ -96,8 +96,9 @@ def test_eviction(use_obj_store: bool) -> None:
     assert big_fn.would_hit(3)
 
 
-def test_verbose(caplog: pytest.Caplog) -> None:
+def test_verbose(caplog: pytest.LogCaptureFixture) -> None:
     caplog.set_level(logging.DEBUG, "charmonium.cache.ops")
+
     @memoize(group=MemoizedGroup(obj_store=DirObjStore(temp_path()), temporary=True))
     def square_loud(x: int) -> int:
         return x**2
@@ -111,12 +112,14 @@ def test_verbose(caplog: pytest.Caplog) -> None:
 
         # `not use_obj_store and not use_metadata_size` should trigger warning.
         @memoize(group=square_loud.group, use_metadata_size=False, use_obj_store=False)
-        def foo() -> None:  # type: ignore
+        def foo() -> None:
             pass
 
 
 def test_composition(caplog: pytest.LogCaptureFixture) -> None:
     caplog.set_level(logging.DEBUG, logger="charmonium.freeze")
+    freeze_config.recursion_limit = 15
+
     @memoize(
         group=MemoizedGroup(obj_store=DirObjStore(temp_path()), temporary=True),
     )

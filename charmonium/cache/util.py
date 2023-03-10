@@ -129,7 +129,9 @@ def temp_path(
 ) -> Path:
     # TODO: Remove this function.
     temp_dir = Path(
-        tempfile.TemporaryDirectory(suffix=suffix, prefix=prefix, dir=directory).name # pylint: disable=consider-using-with
+        tempfile.TemporaryDirectory(
+            suffix=suffix, prefix=prefix, dir=directory
+        ).name  # pylint: disable=consider-using-with
     )
     return temp_dir
 

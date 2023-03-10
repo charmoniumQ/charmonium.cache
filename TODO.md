@@ -41,6 +41,8 @@
   - [ ] Record demo, update presentation, link presentation.
 - Detect impurities
   - [ ] Listen for [audit events]; trigger warning and locally disable cache. Add a `assume_pure` flag.
+- [ ] Fix how we handle temporary directories in tests and doctests
+  - [ ] Do I really need `memoize(..., temporary: bool = False)` in tests?
 - [ ] Make it work for instance methods.
 - [ ] Update API doc system.
   - [ ] Spellcheck API docs?
@@ -68,13 +70,12 @@
   - [ ] Update test for eviction. Use caplog to detect eviction.
   - [ ] Write test for cascading delete. Use caplog.
   - [ ] Add tests for would hit.
-  - [ ] Improve test coverage in charmonium.cache, charmonium.determ_hash. See `TODO.md` in those repos.
+  - [x] Improve test coverage in charmonium.cache, charmonium.determ_hash. See `TODO.md` in those repos.
 - [ ] Compare global vars and fn arguments before and after running function. charmonium.cache should be able to emulate the side-effects of impure functions.
   - [ ] Check that this restores the state of `random`.
 - [ ] Use environment variable to specify cache location.
 - [ ] Have an option for `system_wide_cache` that stores the cache directory in a deterministic (not relative to `$PWD`) path.
 - [ ] Do `fsync` before/after load?
-- [ ] Do I really need `memoize(..., temporary: bool = False)` in tests?
 - [ ] Simplify `tests/test_memoize_parallel.py`.
 - [ ] Make `fine_grain*` apply to a `Memoized` level. All benefit from positive externalities.
   - There is an argument against this. A user could puprosefully make a low-frequency call fine-grained but not a high-frequency call. This would reduce contention while still providing a checkpoint wihtin the program.

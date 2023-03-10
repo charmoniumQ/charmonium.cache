@@ -2,8 +2,9 @@ from __future__ import annotations
 
 import atexit
 import contextlib
+import copy
+import dataclasses
 import datetime
-import functools
 import json
 import logging
 import os
@@ -17,17 +18,17 @@ from typing import (
     Callable,
     DefaultDict,
     Generic,
+    Generator,
     Mapping,
     Optional,
     Tuple,
+    Type,
     Union,
     cast,
 )
 
-import attr
-import bitmath
-from charmonium.determ_hash import determ_hash
-from charmonium.freeze import freeze, config
+import bitmath  # type: ignore
+from charmonium.freeze import freeze, global_config
 
 from .index import Index, IndexKeyType
 from .obj_store import DirObjStore, ObjStore
@@ -44,43 +45,50 @@ from .util import (
     none_tuple,
 )
 
-__version__ = "1.2.6"
-
 BYTE_ORDER: str = "big"
 
+__version__ = "1.2.15"
 
-config.constant_classes.add(("attr._make", "Attribute"))
-config.constant_classes.add(("typing", "Generic"))
+freeze_config = copy.deepcopy(global_config)
+freeze_config.use_hash = True
+freeze_config.ignore_classes.update(
+    {
+        ("charmonium.cache.memoize", "Memoized"),
+        ("charmonium.cache.memoize", "MemoizedGroup"),
+    }
+)
+freeze_config.ignore_attributes.update(
+    {
+        ("charmonium.cache.memoize", "Memoized", "group"),
+        ("charmonium.cache.memoize", "Memoized", "_use_obj_store"),
+        ("charmonium.cache.memoize", "Memoized", "_use_metadata_size"),
+        ("charmonium.cache.memoize", "Memoized", "_my_pickler"),
+        ("charmonium.cache.memoize", "Memoized", "_extra_func_state"),
+    }
+)
+
 
 def memoize(
     *,
-    disable: Union[str, bool] = None,
+    disable: Union[str, bool, None] = None,
     **kwargs: Any,
 ) -> Callable[[Callable[FuncParams, FuncReturn]], Memoized[FuncParams, FuncReturn]]:
     """See :py:class:`charmonium.cache.Memoized`."""
-
     real_disable = (
         disable
         if isinstance(disable, bool)
         else bool(int(os.environ.get("CHARMONIUM_CACHE_DISABLE", "0")))
     )
-
     if real_disable:
-        return lambda x: x
+        # TODO: use a multiple dispatch type signature here.
+        # This should just be Callable[FuncParams, FuncReturn]
+        return lambda x: x  # type: ignore
     else:
-
         def actual_memoize(
             func: Callable[FuncParams, FuncReturn]
         ) -> Memoized[FuncParams, FuncReturn]:
-            # pyright doesn't know attrs __init__, hence type ignore
-            return Memoized[FuncParams, FuncReturn](func, **kwargs)  # type: ignore
-
-        # I believe pyright suffers from this fixed mypy bug: https://github.com/python/mypy/issues/1323
-        # Therefore, I have to circumvent the type system.
-        # However, somehow `cast` isn't sufficient.
-        # Therefore, I need type ignore. I don't like it any more than you.
-        # return cast(Memoized[FuncParams, FuncReturn], actual_memoize)
-        return actual_memoize  # type: ignore
+            return Memoized[FuncParams, FuncReturn](func, **kwargs)
+        return actual_memoize
 
 
 DEFAULT_LOCK_PATH = ".cache/.lock"
@@ -100,7 +108,7 @@ if perf_logger_file:
 
 
 @contextlib.contextmanager
-def perf_ctx(event: str, **kwargs: Any) -> None:
+def perf_ctx(event: str, **kwargs: Any) -> Generator[None, None, None]:
     if perf_logger.isEnabledFor(logging.DEBUG):
         start = datetime.datetime.now()
     yield
@@ -116,8 +124,7 @@ def perf_ctx(event: str, **kwargs: Any) -> None:
         )
 
 
-# pyright thinks attrs has ambiguous overload
-@attr.define(init=False)  # type: ignore
+@dataclasses.dataclass
 class MemoizedGroup:
     """A MemoizedGroup holds the memoization for multiple functions."""
 
@@ -127,7 +134,6 @@ class MemoizedGroup:
     _obj_store: ObjStore
     _replacement_policy: ReplacementPolicy
     _size: bitmath.Bitmath
-    _pickler: Pickler
     _index_lock: RWLock
     _memory_lock: Lock
     _fine_grain_persistence: bool
@@ -135,6 +141,7 @@ class MemoizedGroup:
     _index_key: int
     _extra_system_state: Callable[[], Any]
     _version: int
+    _pickler: Pickler
     time_cost: dict[str, datetime.timedelta]
     time_saved: dict[str, datetime.timedelta]
     temporary: bool
@@ -142,7 +149,7 @@ class MemoizedGroup:
     def __getstate__(self) -> Any:
         return {
             slot: getattr(self, slot)
-            for slot in self.__slots__
+            for slot in self.__dict__
             if slot not in {"__weakref__", "_index", "_memory_lock", "_version"}
         }
 
@@ -225,11 +232,11 @@ class MemoizedGroup:
         # TODO: atexit log report
 
     def _deleter(self, item: tuple[Any, Entry]) -> None:
-        # print(f"_deleter {item[0]} {determ_hash(item[0])}")
+        # print(f"_deleter {item[0]} {freeze(item[0], freeze_config)}")
         with self._memory_lock:
             key, entry = item
             if entry.obj_store:
-                obj_key = determ_hash(key)
+                obj_key = cast(int, freeze(key, freeze_config))
                 del self._obj_store[obj_key]
             else:
                 obj_key = None
@@ -325,7 +332,7 @@ class MemoizedGroup:
             while total_size > self._size:
                 key, entry = self._replacement_policy.evict()
                 if entry.obj_store:
-                    obj_key = determ_hash(key)
+                    obj_key = cast(int, freeze(key, freeze_config))
                     assert (
                         obj_key in self._obj_store
                     ), "Replacement policy tried to evict something that wasn't there"
@@ -389,11 +396,10 @@ class CacheThrashingWarning(UserWarning):
     pass
 
 
-# pyright thinks attrs has ambiguous overload
-@attr.define(init=False, slots=False)  # type: ignore
+@dataclasses.dataclass
 class Memoized(Generic[FuncParams, FuncReturn]):
     # pylint: disable=too-many-instance-attributes
-    _func: Callable[FuncParams, FuncReturn]
+    func: Callable[FuncParams, FuncReturn]
 
     group: MemoizedGroup
 
@@ -402,8 +408,6 @@ class Memoized(Generic[FuncParams, FuncReturn]):
     _use_obj_store: bool
 
     _use_metadata_size: bool
-
-    _lossy_compression: bool
 
     _my_pickler: Optional[Pickler]
 
@@ -417,14 +421,12 @@ class Memoized(Generic[FuncParams, FuncReturn]):
         name: Optional[str] = None,
         use_obj_store: bool = True,
         use_metadata_size: bool = False,
-        lossy_compression: bool = True,
         pickler: Optional[Pickler] = None,
         extra_func_state: Callable[[Callable[FuncParams, FuncReturn]], Any] = Constant(None),  # type: ignore
     ) -> None:
         """Construct a memozied function
 
         :param group: see :py:class:`charmonium.cache.MemoizedGroup`.
-        :param lossy_compression: whether to use a hash of the arguments or the actual arguments.
         :param name: A key-to-lookup distinguishing this funciton from others. Defaults to the Python module and name.
         :param extra_func_state: An extra state function. The return-value is a key-to-match after the function name.
         :param use_obj_store: whether the objects should be put behind object store, a layer of indirection.
@@ -433,17 +435,16 @@ class Memoized(Generic[FuncParams, FuncReturn]):
         """
 
         # TODO: use functools.wraps()
-        self._func = func
+        self.func = func
         self.name = (
             name
             if name is not None
-            else f"{self._func.__module__}.{self._func.__qualname__}"
+            else f"{self.func.__module__}.{self.func.__qualname__}"
         )
-        self.__qualname__ = self._func.__qualname__
+        self.__qualname__ = self.func.__qualname__
         self.group = group
         self._use_obj_store = use_obj_store
         self._use_metadata_size = use_metadata_size
-        self._lossy_compression = lossy_compression
         self._my_pickler = pickler
         self._extra_func_state = extra_func_state
 
@@ -457,19 +458,17 @@ class Memoized(Generic[FuncParams, FuncReturn]):
                 UserWarning,
             )
 
-        # functools.update_wrapper(self, self._func)
+        # functools.update_wrapper(self, self.func)
 
     def log_usage_report(self) -> None:
         with self.group._memory_lock:  # pylint: disable=protected-access
             tc = self.group.time_cost[self.name]
             ts = self.group.time_saved[self.name]
         print(
-            "Caching {}: cost {:.1f}s, saved {:.1f}s, net saved {:.1f}s".format(
-                self.name,
-                tc.total_seconds(),
-                ts.total_seconds(),
-                (ts - tc).total_seconds(),
-            ),
+            f"Caching {self.name}: "
+            f"cost {tc.total_seconds():.1f}s, "
+            f"saved {ts.total_seconds():.1f}s, "
+            f"net saved {(ts - tc).total_seconds():.1f}s",
             file=sys.stderr,
         )
 
@@ -501,11 +500,11 @@ class Memoized(Generic[FuncParams, FuncReturn]):
 
         """
         return (
-            self._func,
+            self.func,
             GetAttr[Callable[[], Any]]()(
-                self._func, "__version__", lambda: None, check_callable=True
+                self.func, "__version__", lambda: None, check_callable=True
             )(),
-        ) + none_tuple(self._extra_func_state(self._func))
+        ) + none_tuple(self._extra_func_state(self.func))
 
     @staticmethod
     def _combine_args(
@@ -544,7 +543,7 @@ class Memoized(Generic[FuncParams, FuncReturn]):
     ) -> tuple[Entry, FuncReturn]:
 
         start = datetime.datetime.now()
-        value = self._func(*args, **kwargs)
+        value = self.func(*args, **kwargs)
 
         mid = datetime.datetime.now()
 
@@ -587,8 +586,7 @@ class Memoized(Generic[FuncParams, FuncReturn]):
             )
 
         return (
-            # pyright doesn't know attrs __init__, hence type ignore
-            Entry(  # type: ignore
+            Entry(
                 data_size=data_size,
                 function_time=mid - start,
                 serialization_time=stop - mid,
@@ -600,7 +598,7 @@ class Memoized(Generic[FuncParams, FuncReturn]):
         )
 
     def __getfrozenstate__(self) -> Callable[..., Any]:
-        return self._func
+        return self.func
 
     def __call__(
         self, *args: FuncParams.args, **kwargs: FuncParams.kwargs
@@ -699,22 +697,29 @@ class Memoized(Generic[FuncParams, FuncReturn]):
 
         if ts < tc and tc.total_seconds() > 5:
             warnings.warn(
-                f"Caching {self._func.__qualname__} cost {tc.total_seconds():.1f}s but only saved {ts.total_seconds():.1f}s",
+                f"Caching {self.func.__qualname__} cost {tc.total_seconds():.1f}s but only saved {ts.total_seconds():.1f}s",
                 CacheThrashingWarning,
             )
 
         return value
 
-    def _compress(self, obj: Any) -> Any:
-        if self._lossy_compression:
-            return determ_hash(obj)
-        else:
-            return obj
-
-    def would_hit(
-        self, *args: FuncParams.args, **kwargs: FuncParams.kwargs
-    ) -> bool:
-        return self._would_hit(0, *args, **kwargs)[0]
+    def would_hit(self, *args: FuncParams.args, **kwargs: FuncParams.kwargs) -> bool:
+        call_id = random.randint(0, 2**64 - 1)
+        would_hit, key, obj_key = self._would_hit(call_id, *args, **kwargs)
+        if ops_logger.isEnabledFor(logging.DEBUG):
+            ops_logger.debug(
+                json.dumps(
+                    {
+                        "event": "hit" if would_hit else "miss",
+                        "call_id": call_id,
+                        "name": self.name,
+                        "key": key,
+                        "obj_key": obj_key,
+                        # "args_kwargs": ellipsize(str(args) + " " + str(kwargs), 60),
+                    }
+                )
+            )
+        return would_hit
 
     def _would_hit(
         self, call_id: int, *args: FuncParams.args, **kwargs: FuncParams.kwargs
@@ -727,13 +732,15 @@ class Memoized(Generic[FuncParams, FuncReturn]):
             # We will only hash the potentially large key items that are used exclusively by this Memoized function.
             key = (
                 # Group is a friend class, hence type ignore
-                freeze(self.group._system_state()),  # pylint: disable=protected-access
-                freeze(self.name),
-                self._compress(freeze(self._func_state())),
-                self._compress(freeze(self._args2key(*args, **kwargs))),
-                self._compress(freeze(self._args2ver(*args, **kwargs))),
+                freeze(
+                    self.group._system_state(), freeze_config
+                ),  # pylint: disable=protected-access
+                freeze(self.name, freeze_config),
+                freeze(self._func_state(), freeze_config),
+                freeze(self._args2key(*args, **kwargs), freeze_config),
+                freeze(self._args2ver(*args, **kwargs), freeze_config),
             )
-            obj_key = determ_hash(key)
+            obj_key = cast(int, freeze(key, freeze_config))
         with self.group._memory_lock:
             if self.group._fine_grain_persistence:
                 self.group._index_read()
@@ -744,8 +751,8 @@ class Memoized(Generic[FuncParams, FuncReturn]):
                 obj_key,
             )
 
-    def __get__(self, instance: Any, instancetype: Type[Any]):
-        """Implement the descriptor protocol to make decorating instance 
+    def __get__(self, instance: Any, instancetype: Type[Any]) -> BoundMemoized[FuncParams, FuncReturn]:
+        """Implement the descriptor protocol to make decorating instance
         method possible.
 
         """
@@ -756,11 +763,15 @@ class Memoized(Generic[FuncParams, FuncReturn]):
 
 
 class BoundMemoized(Generic[FuncParams, FuncReturn]):
-    def __init__(self, memoized: Memoized[FuncParams, FuncReturn], instance: Any) -> None:
+    def __init__(
+        self, memoized: Memoized[FuncParams, FuncReturn], instance: Any
+    ) -> None:
         self.memoized = memoized
         self.instance = instance
 
-    def __call__(self, *args: FuncParams.args, **kwargs: FuncParams.kwargs) -> FuncReturn:
+    def __call__(
+        self, *args: FuncParams.args, **kwargs: FuncParams.kwargs
+    ) -> FuncReturn:
         return self.memoized(self.instance, *args, **kwargs)
 
     def __getattr__(self, attribute: str) -> Any:

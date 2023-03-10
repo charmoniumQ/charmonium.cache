@@ -52,7 +52,9 @@ class PathLike(Protocol):
     def __fspath__(self) -> str:
         ...
 
-    name: str
+    @property
+    def name(self) -> str:
+        ...
 
 
 PathLikeFrom = Union[str, PathLike]

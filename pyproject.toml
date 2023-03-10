@@ -31,7 +31,7 @@ build-backend = "poetry.core.masonry.api"
 profile = "black"
 
 [tool.pytest.ini_options]
-addopts = "--quiet --numprocesses=auto --doctest-modules --doctest-glob='*.rst' --ignore=benchmark --cov=charmonium/cache"
+addopts = "--quiet --numprocesses=0 --doctest-glob='*.rst' --doctest-modules --ignore=benchmark --cov=charmonium/cache"
 
 [tool.coverage.run]
 data_file = "build/.coverage"
@@ -98,9 +98,9 @@ cache = "charmonium.cache._cli:main"
 [tool.poetry.dev-dependencies]
 autoimport = "^0.7.5"
 isort = "^5.10.0"
-black = "^21.10b0"
+black = "^22.3.0"
 pylint = "^2.11.1"
-mypy = "^0.910"
+mypy = "^1.1.1"
 pytest = "^6.2.5"
 pytest-xdist = "^2.4.0"
 pytest-cov = "^3.0.0"
@@ -133,8 +133,6 @@ numpy = "^1.20.3"
 # It is too burdensome to rewrite my code with that in mind.
 python = "^3.8"
 bitmath = "^1.3"
-fasteners = ">=0.16,<1"
-attrs = "^20.3"
-"charmonium.determ-hash" = ">=0.2.2,<1"
-"charmonium.freeze" = ">=0.5.8,<1"
+fasteners = ">=0.16,<2"
+"charmonium.freeze" = ">=0.8.1,<2"
 #{git = "https://github.com/charmoniumQ/charmonium.freeze", rev = "main"}

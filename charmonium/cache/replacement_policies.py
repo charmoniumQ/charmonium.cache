@@ -1,15 +1,14 @@
 from __future__ import annotations
 
 import abc
+import dataclasses
 import datetime
-from typing import TYPE_CHECKING, Any, Mapping
+from typing import TYPE_CHECKING, Any, Mapping, cast
 
-import attr
-import bitmath
+import bitmath  # type: ignore
 
 
-# pyright thinks attrs has ambiguous overload
-@attr.define  # type: ignore
+@dataclasses.dataclass
 class Entry:
     value: Any
     data_size: bitmath.Bitmath
@@ -19,7 +18,7 @@ class Entry:
 
 
 # TODO: test that these methods are called at the right time.
-class ReplacementPolicy:  # pylint: disable=no-self-use,unused-argument
+class ReplacementPolicy:  # pylint: disable=unused-argument
     """A replacement policy for a cache"""
 
     @abc.abstractmethod
@@ -81,7 +80,7 @@ class GDSize(ReplacementPolicy):
     def evict(self) -> tuple[Any, Entry]:
         if self._data:
             self.inflation, key, entry = min(
-                [(score, key, entry) for key, (score, entry) in self._data.items()]
+                (score, key, entry) for key, (score, entry) in self._data.items()
             )
             del self._data[key]
             return key, entry
@@ -90,8 +89,9 @@ class GDSize(ReplacementPolicy):
 
     def update(self, other: ReplacementPolicy) -> None:
         if isinstance(other, GDSize) or (
-            type(other).__name__ == type(self).__name__ and not TYPE_CHECKING
+            not TYPE_CHECKING and type(other).__name__ == type(self).__name__
         ):
+            other = cast(GDSize, other)
             # I need the type(other).__name == type(self).__name__ because when this class is de/serialized, Python forgets that it is equal.
             # However, I don't want the type checker to think too hard about it; it should just know isinstance(other, GDSIze), so I add not TYPE_CHECKING.
             self._data.update(other._data)  # pylint: disable=protected-access
@@ -100,6 +100,6 @@ class GDSize(ReplacementPolicy):
             raise TypeError(f"Cannot update a {type(self)} from a {type(other)}")
 
 
-REPLACEMENT_POLICIES: Mapping[str, type[ReplacementPolicy]] = dict(
-    gdsize=GDSize,
-)
+REPLACEMENT_POLICIES: Mapping[str, type[ReplacementPolicy]] = {
+    "gdsize": GDSize,
+}

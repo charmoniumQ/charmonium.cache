@@ -18,7 +18,7 @@ they have a blind spot. lot of engineers practice *iterative development* where
 small changes are common. Do you have to rerun a long-running task if one line
 changes?
 
-The real answer is: Use both. Workflow managers decide whether or not to run
+The better answer is: Use both. Workflow managers decide whether or not to run
 your program. If they decide to run your program, ``charmonium.cache`` will
 speed that up.
 
@@ -210,8 +210,8 @@ If you suspect the cache is returning stale results, you can disable it globally
 with ``export CHARMONIUM_CACHE_DISABLE=1``. This makes it easy to tell if this
 library is causing your problem.
 
-This library is not invaliding when it should or invalidating when it shouldn't.
---------------------------------------------------------------------------------
+This library is not invalidating when it should or invalidating when it shouldn't.
+----------------------------------------------------------------------------------
 
 You've found a bug. See :ref:`Debugging` if you want to debug this
 yourself. Please file it on `GitHub`_, so I know about it.

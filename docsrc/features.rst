@@ -153,11 +153,7 @@ Other features of ``charmonium.cache``:
 - :ref:`Time-to-live (TTL) <Extra State>`: This library supports dropping values
   that are more stale than a certain time.
 
-- :ref:`Lossy or non-lossy key compression <Other Behaviors>`: This cache
-  supports storing a hash of the keys or storing the contents of the
-  keys.
-
-- The whole codebase is staticall typed (including the decorator part `PEP
+- The whole codebase is statically typed (including the decorator part `PEP
   612`_) and these types are exported to clients with `PEP 561`_. Until `mypy`_
   supports PEP 612, I recommend clients use `pyright`_.
 

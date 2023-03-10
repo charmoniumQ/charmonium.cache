@@ -1,11 +1,11 @@
 from __future__ import annotations
 
+import dataclasses
 from pathlib import Path
 from types import TracebackType
 from typing import TYPE_CHECKING, Optional, cast
 
-import attr
-import fasteners
+import fasteners  # type: ignore
 
 from .pathlike import PathLikeFrom, pathlike_from
 
@@ -72,11 +72,11 @@ class NaiveRWLock(RWLock):
 
 
 # pyright thinks attrs has ambiguous overload
-@attr.define  # type: ignore
+@dataclasses.dataclass
 class FileRWLock(RWLock):
     path: PathLikeFrom
 
-    _rw_lock: fasteners.InterProcessReaderWriterLock = attr.ib(init=False)
+    _rw_lock: fasteners.InterProcessReaderWriterLock
 
     def __init__(self, path: PathLikeFrom) -> None:
         """Creates a lockfile at path."""
@@ -86,8 +86,8 @@ class FileRWLock(RWLock):
 
     @property
     def writer(self) -> Lock:
-        return self._rw_lock.write_lock()
+        return cast(Lock, self._rw_lock.write_lock())
 
     @property
     def reader(self) -> Lock:
-        return self._rw_lock.read_lock()
+        return cast(Lock, self._rw_lock.read_lock())
