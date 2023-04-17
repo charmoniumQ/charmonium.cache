@@ -57,6 +57,12 @@
   - [ ] Scan for references to non-deterministic functions (time, random, sys, os, path), emit audit event.
   - [ ] Cache callgraph and global var names.
 - [ ] Add API for ignoring modules that come from a requirements file or pyproject.toml (based on version instead of contents of module)
+- ```
+import wrapt
+class ignore_arg(wrapt.ObjectProxy):
+    def __getfrozenstate__(self):
+        return None
+```
 
 
 # Minor release
@@ -94,3 +100,4 @@
 - [ ] Make working example of caching in S3.
 - [ ] Set up git-changelog.
 - [x] Make `charmonium._time_block` serializable
+- [ ] Make an API like `@code_version("1.0")` in `charmonium.freeze`. This prevents freeze from recursing into the function.
