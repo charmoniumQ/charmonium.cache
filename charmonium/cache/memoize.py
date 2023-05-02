@@ -47,7 +47,7 @@ from .util import (
 
 BYTE_ORDER: str = "big"
 
-__version__ = "1.3.0"
+__version__ = "1.4.0"
 
 DEFAULT_FREEZE_CONFIG = copy.deepcopy(global_config)
 DEFAULT_FREEZE_CONFIG.use_hash = True
