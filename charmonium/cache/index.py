@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import enum
-from typing import Any, Callable, Dict, Generic, Iterable, Optional, TypeVar, cast
+from typing import Any, Callable, Dict, Generic, Iterable, Optional, TypeVar, cast, Union
 
 
 class IndexKeyType(enum.IntEnum):
@@ -11,6 +11,7 @@ class IndexKeyType(enum.IntEnum):
 
 Key = TypeVar("Key")
 Val = TypeVar("Val")
+_T = TypeVar("_T")
 
 
 class Index(Generic[Key, Val]):
@@ -120,6 +121,14 @@ class Index(Generic[Key, Val]):
             return last_level[last_key]
         else:
             raise KeyError(keys)
+
+    def get(self, keys: tuple[Key, ...], default: _T) -> Union[Val, _T]:
+        result = self._get_last_level(keys)
+        if result:
+            last_level, last_key, _ = result
+            return last_level.get(last_key, default)
+        else:
+            return default
 
     def __contains__(self, keys: tuple[Key, ...]) -> bool:
         if len(keys) != len(self.schema):

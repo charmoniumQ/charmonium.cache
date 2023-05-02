@@ -3,10 +3,11 @@ from __future__ import annotations
 import logging
 import pickle
 from typing import Any
+import copy
 
 import pytest
 
-from charmonium.cache import DirObjStore, MemoizedGroup, freeze_config, memoize
+from charmonium.cache import DEFAULT_FREEZE_CONFIG, DirObjStore, MemoizedGroup, memoize
 from charmonium.cache.util import temp_path
 
 # import from __init__ because this is an integration test.
@@ -118,16 +119,17 @@ def test_verbose(caplog: pytest.LogCaptureFixture) -> None:
 
 def test_composition(caplog: pytest.LogCaptureFixture) -> None:
     caplog.set_level(logging.DEBUG, logger="charmonium.freeze")
+    freeze_config = copy.deepcopy(DEFAULT_FREEZE_CONFIG)
     freeze_config.recursion_limit = 15
 
     @memoize(
-        group=MemoizedGroup(obj_store=DirObjStore(temp_path()), temporary=True),
+        group=MemoizedGroup(obj_store=DirObjStore(temp_path()), freeze_config=freeze_config, temporary=True),
     )
     def double(x: int) -> int:
         return x * 2
 
     @memoize(
-        group=MemoizedGroup(obj_store=DirObjStore(temp_path()), temporary=True),
+        group=MemoizedGroup(obj_store=DirObjStore(temp_path()), freeze_config=freeze_config, temporary=True),
     )
     def double_square(x: int) -> int:
         return double(x) ** 2
@@ -149,14 +151,14 @@ def test_read_write_cycle() -> None:
 
     # This will be the different copy.
     double.group._version += 1
-    double.group._index_write()  # pylint: disable=protected-access
+    double.group._index_write(0)  # pylint: disable=protected-access
     double.group._version -= 1
 
     # Call
     double(3)
 
     # Read
-    double.group._index_read()  # pylint: disable=protected-access
+    double.group._index_read(0)  # pylint: disable=protected-access
 
     # Call
     assert double.would_hit(2)

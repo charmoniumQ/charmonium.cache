@@ -2,13 +2,16 @@ from __future__ import annotations
 
 import dataclasses
 import shutil
-from typing import TYPE_CHECKING, Any, Iterator, Union
+from typing import TYPE_CHECKING, Any, Iterator, Union, TypeVar
 from pathlib import Path
 
 if TYPE_CHECKING:
     from typing import Protocol
 else:
     Protocol = object
+
+
+_T = TypeVar("_T")
 
 
 class ObjStore(Protocol):
@@ -25,6 +28,9 @@ class ObjStore(Protocol):
         ...
 
     def __delitem__(self, key: int) -> None:
+        ...
+
+    def get(self, key: int, default: _T) -> Union[bytes | _T]:
         ...
 
     def __contains__(self, key: int) -> bool:
@@ -60,7 +66,7 @@ class DirObjStore(ObjStore):
         :param key_bytes: the number of bytes to use as keys
         """
         super().__init__()
-        self.path = Path(path)
+        self.path = path if isinstance(path, Path) else Path(path)
         self.key_bytes = key_bytes
 
         if self.path.exists():
@@ -95,6 +101,13 @@ class DirObjStore(ObjStore):
         if key in self:
             # print(f"delitem {key}")
             (self.path / self._int2str(key)).unlink()
+
+    def get(self, key: int, default: _T) -> Union[bytes | _T]:
+        path = self.path / self._int2str(key)
+        if not path.exists():
+            return default
+        else:
+            return path.read_bytes()
 
     def __contains__(self, key: int) -> bool:
         return (self.path / self._int2str(key)).exists()

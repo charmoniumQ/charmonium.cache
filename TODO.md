@@ -101,3 +101,7 @@ class ignore_arg(wrapt.ObjectProxy):
 - [ ] Set up git-changelog.
 - [x] Make `charmonium._time_block` serializable
 - [ ] Make an API like `@code_version("1.0")` in `charmonium.freeze`. This prevents freeze from recursing into the function.
+- [ ] Freeze config should be group-wide or fn-specific instead of global.
+- [ ] Write "what makes a good candidate" in `README.rst`
+- [ ] Write about group-level configuration in `README.rst`
+- [ ] Have option for semi-fine grain persistence: Every N seconds, persist.

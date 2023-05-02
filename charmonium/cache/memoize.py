@@ -28,7 +28,7 @@ from typing import (
 )
 
 import bitmath  # type: ignore
-from charmonium.freeze import freeze, global_config
+from charmonium.freeze import freeze, Config as FreezeConfig, global_config
 
 from .index import Index, IndexKeyType
 from .obj_store import DirObjStore, ObjStore
@@ -49,15 +49,15 @@ BYTE_ORDER: str = "big"
 
 __version__ = "1.3.0"
 
-freeze_config = copy.deepcopy(global_config)
-freeze_config.use_hash = True
-freeze_config.ignore_classes.update(
+DEFAULT_FREEZE_CONFIG = copy.deepcopy(global_config)
+DEFAULT_FREEZE_CONFIG.use_hash = True
+DEFAULT_FREEZE_CONFIG.ignore_classes.update(
     {
         ("charmonium.cache.memoize", "Memoized"),
         ("charmonium.cache.memoize", "MemoizedGroup"),
     }
 )
-freeze_config.ignore_attributes.update(
+DEFAULT_FREEZE_CONFIG.ignore_attributes.update(
     {
         ("charmonium.cache.memoize", "Memoized", "group"),
         ("charmonium.cache.memoize", "Memoized", "_use_obj_store"),
@@ -69,26 +69,14 @@ freeze_config.ignore_attributes.update(
 
 
 def memoize(
-    *,
-    disable: Union[str, bool, None] = None,
     **kwargs: Any,
 ) -> Callable[[Callable[FuncParams, FuncReturn]], Memoized[FuncParams, FuncReturn]]:
     """See :py:class:`charmonium.cache.Memoized`."""
-    real_disable = (
-        disable
-        if isinstance(disable, bool)
-        else bool(int(os.environ.get("CHARMONIUM_CACHE_DISABLE", "0")))
-    )
-    if real_disable:
-        # TODO: use a multiple dispatch type signature here.
-        # This should just be Callable[FuncParams, FuncReturn]
-        return lambda x: x  # type: ignore
-    else:
-        def actual_memoize(
-            func: Callable[FuncParams, FuncReturn]
-        ) -> Memoized[FuncParams, FuncReturn]:
-            return Memoized[FuncParams, FuncReturn](func, **kwargs)
-        return actual_memoize
+    def actual_memoize(
+        func: Callable[FuncParams, FuncReturn]
+    ) -> Memoized[FuncParams, FuncReturn]:
+        return Memoized[FuncParams, FuncReturn](func, **kwargs)
+    return actual_memoize
 
 
 DEFAULT_LOCK_PATH = ".cache/.lock"
@@ -108,7 +96,7 @@ if perf_logger_file:
 
 
 @contextlib.contextmanager
-def perf_ctx(event: str, **kwargs: Any) -> Generator[None, None, None]:
+def perf_ctx(event: str, call_id: int) -> Generator[None, None, None]:
     if perf_logger.isEnabledFor(logging.DEBUG):
         start = datetime.datetime.now()
     yield
@@ -118,7 +106,7 @@ def perf_ctx(event: str, **kwargs: Any) -> Generator[None, None, None]:
                 {
                     "event": event,
                     "duration": (datetime.datetime.now() - start).total_seconds(),
-                    **kwargs,
+                    "call_id": call_id,
                 }
             )
         )
@@ -168,7 +156,7 @@ class MemoizedGroup:
         )
         self._version = 0
         self._memory_lock = threading.RLock()
-        self._index_read()
+        self._index_read(0)
 
     def __init__(
         self,
@@ -181,6 +169,7 @@ class MemoizedGroup:
         fine_grain_persistence: bool = False,
         fine_grain_eviction: bool = False,
         extra_system_state: Callable[[], Any] = Constant(None),
+        freeze_config: FreezeConfig = DEFAULT_FREEZE_CONFIG,
         temporary: bool = False,
     ) -> None:
         """Construct a memoized group. Use with :py:function:Memoized.
@@ -193,6 +182,7 @@ class MemoizedGroup:
         :param fine_grain_persistence: De/serialize the index at every access. This is useful if you need to update the cache for multiple simultaneous processes, but it compromises performance in the single-process case.
         :param fine_grain_eviction: Maintain the cache's size through eviction at every access (rather than just the de/serialization points). This is useful if the caches size would not otherwise fit in memory, but it compromises performance if not needed.
         :param extra_system_state: A callable that returns "extra" system state. If the system state changes, the cache is dumped.
+        :param freeze_config: A charmonium.freeze.Config object. This config determines how objects and functions get hashed.
         :param temporary: Whether the cache should be cleared at the end of the process; This is useful for tests.
 
         .. _`bitmath.Bitmath`: https://pypi.org/project/bitmath/
@@ -221,6 +211,8 @@ class MemoizedGroup:
         self._fine_grain_eviction = fine_grain_eviction
         self._extra_system_state = extra_system_state
         self._index_key = 0
+        self._freeze_config = freeze_config
+        assert self._freeze_config.hasher is not None, "Hashing must be enabled in freeze_config"
         self.time_cost = DefaultDict[str, datetime.timedelta](datetime.timedelta)
         self.time_saved = DefaultDict[str, datetime.timedelta](datetime.timedelta)
         self.temporary = temporary
@@ -228,15 +220,14 @@ class MemoizedGroup:
         if self.temporary:
             atexit.register(self._obj_store.clear)
             # atexit handlers are run in the opposite order they are registered.
-        atexit.register(self._index_write)
+        atexit.register(self._index_write, 0)
         # TODO: atexit log report
 
     def _deleter(self, item: tuple[Any, Entry]) -> None:
-        # print(f"_deleter {item[0]} {freeze(item[0], freeze_config)}")
         with self._memory_lock:
             key, entry = item
             if entry.obj_store:
-                obj_key = cast(int, freeze(key, freeze_config))
+                obj_key = cast(int, freeze(key, self._freeze_config))
                 del self._obj_store[obj_key]
             else:
                 obj_key = None
@@ -245,6 +236,8 @@ class MemoizedGroup:
             ops_logger.debug(
                 json.dumps(
                     {
+                        "pid": os.getpid(),
+                        "tid": threading.get_native_id(),
                         "event": "cascading_delete",
                         "key": key,
                         "obj_key": obj_key,
@@ -252,13 +245,13 @@ class MemoizedGroup:
                 )
             )
 
-    def _index_read(self) -> None:
+    def _index_read(self, call_id: int) -> None:
         with self._memory_lock, self._index_lock.reader:
-            self._index_read_nolock()
+            self._index_read_nolock(call_id)
 
-    def _index_read_nolock(self) -> None:
+    def _index_read_nolock(self, call_id: int) -> None:
         current_version = self._version
-        with perf_ctx("index_read"):
+        with perf_ctx("index_read", call_id):
             if self._index_key in self._obj_store:
                 other_version, other_index, other_rp, other_tc, other_ts = cast(
                     Tuple[
@@ -280,16 +273,19 @@ class MemoizedGroup:
             ops_logger.debug(
                 json.dumps(
                     {
+                        "pid": os.getpid(),
+                        "tid": threading.get_native_id(),
                         "event": "index_read",
                         "old_version": current_version,
                         "self._version": self._version,
+                        "call_id": call_id,
                     }
                 )
             )
 
-    def _index_write(self) -> None:
-        with perf_ctx("index_write"), self._memory_lock, self._index_lock.writer:
-            self._index_read_nolock()
+    def _index_write(self, call_id: int) -> None:
+        with perf_ctx("index_write", call_id), self._memory_lock, self._index_lock.writer:
+            self._index_read_nolock(call_id)
             self._evict()
             self._version += 1
             self._obj_store[self._index_key] = self._pickler.dumps(
@@ -305,8 +301,11 @@ class MemoizedGroup:
             ops_logger.debug(
                 json.dumps(
                     {
+                        "pid": os.getpid(),
+                        "tid": threading.get_native_id(),
                         "event": "index_write",
                         "self._version": self._version,
+                        "call_id": call_id,
                     }
                 )
             )
@@ -332,7 +331,7 @@ class MemoizedGroup:
             while total_size > self._size:
                 key, entry = self._replacement_policy.evict()
                 if entry.obj_store:
-                    obj_key = cast(int, freeze(key, freeze_config))
+                    obj_key = cast(int, freeze(key, self._freeze_config))
                     assert (
                         obj_key in self._obj_store
                     ), "Replacement policy tried to evict something that wasn't there"
@@ -344,6 +343,8 @@ class MemoizedGroup:
                     ops_logger.debug(
                         json.dumps(
                             {
+                                "pid": os.getpid(),
+                                "tid": threading.get_native_id(),
                                 "event": "evict",
                                 "key": key,
                                 "obj_key": obj_key,
@@ -379,6 +380,8 @@ class MemoizedGroup:
                         ops_logger.debug(
                             json.dumps(
                                 {
+                                    "pid": os.getpid(),
+                                    "tid": threading.get_native_id(),
                                     "event": "remove_orphan",
                                     "obj_key": obj_key,
                                 }
@@ -553,7 +556,7 @@ class Memoized(Generic[FuncParams, FuncReturn]):
             data_size = bitmath.Byte(len(value_ser))
             # Group is a "friend class", hence pylint disable
 
-            with perf_ctx("obj_store", call_id=call_id):
+            with perf_ctx("obj_store", call_id):
                 self.group._obj_store[  # pylint: disable=protected-access
                     obj_key
                 ] = value_ser
@@ -600,20 +603,38 @@ class Memoized(Generic[FuncParams, FuncReturn]):
     def __getfrozenstate__(self) -> Callable[..., Any]:
         return self.func
 
+    def _try_unpickle(self, value_ser: bytes, call_id: int) -> Tuple[bool, Optional[FuncReturn]]:
+        with perf_ctx("deserialize", call_id):
+            try:
+                value = cast(FuncReturn, self._pickler.loads(value_ser))
+            except (EOFError, pickling.UnpicklingError):
+                return False, None
+            else:
+                return True, value
+
     def __call__(
         self, *args: FuncParams.args, **kwargs: FuncParams.kwargs
     ) -> FuncReturn:
         call_start = datetime.datetime.now()
-
         call_id = random.randint(0, 2**64 - 1)
 
-        would_hit, key, obj_key = self._would_hit(call_id, *args, **kwargs)
+        key, entry, obj_key, value_ser = self._would_hit(call_id, *args, **kwargs)
+
+        hit, value = False, None
+        if entry is not None:
+            if entry.obj_store:
+                if value_ser is not None:
+                    hit, value = self._try_unpickle(value_ser, call_id)
+            else:
+                hit, value = True, cast(FuncReturn, entry.value)
 
         if ops_logger.isEnabledFor(logging.DEBUG):
             ops_logger.debug(
                 json.dumps(
                     {
-                        "event": "hit" if would_hit else "miss",
+                        "pid": os.getpid(),
+                        "tid": threading.get_native_id(),
+                        "event": "hit" if hit else "miss",
                         "call_id": call_id,
                         "name": self.name,
                         "key": key,
@@ -623,35 +644,17 @@ class Memoized(Generic[FuncParams, FuncReturn]):
                 )
             )
 
-        if would_hit:
-
-            # Do the lookup
-            with self.group._memory_lock:
-                entry = self.group._index[key]
-                with perf_ctx("obj_load", call_id=call_id):
-                    value_ser = (
-                        self.group._obj_store[obj_key] if entry.obj_store else None
-                    )
-
-            # Deserialize
-            if entry.obj_store:
-                assert value_ser is not None
-                with perf_ctx("deserialize", call_id=call_id):
-                    value = cast(FuncReturn, self._pickler.loads(value_ser))
-            else:
-                value = cast(FuncReturn, entry.value)
-
-            # Update time_saved
-            with self.group._memory_lock:
-                self.group.time_saved[self.name] += entry.function_time
-                self.group._replacement_policy.access(key, entry)
-        else:
-
+        if not hit:
             # Do the recompute
             entry, value = self._recompute(call_id, obj_key, *args, **kwargs)
 
-            # Do the store
-            with self.group._memory_lock:
+        with self.group._memory_lock:
+            if hit:
+                # Update time_saved
+                self.group.time_saved[self.name] += entry.function_time
+                self.group._replacement_policy.access(key, entry)
+            else:
+                # Do the store
                 if self._use_metadata_size:
                     if not self._use_obj_store:
                         entry.data_size += bitmath.Byte(
@@ -661,17 +664,16 @@ class Memoized(Generic[FuncParams, FuncReturn]):
                 self.group._index[key] = entry
                 self.group._replacement_policy.add(key, entry)
 
-        # Update time_cost
-        with self.group._memory_lock:
+            # Update time_cost
             if self.group._fine_grain_eviction:
                 self.group._evict()
 
             if self.group._fine_grain_persistence:
-                self.group._index_write()
+                self.group._index_write(call_id)
 
             call_stop = datetime.datetime.now()
             time_cost_inevitable = (
-                datetime.timedelta(seconds=0) if would_hit else entry.function_time
+                datetime.timedelta(seconds=0) if hit else entry.function_time
             )
             # time-cost is the overhead of caching, so  it should exclud ethe overhead of the function.
             self.group.time_cost[self.name] += (
@@ -690,7 +692,6 @@ class Memoized(Generic[FuncParams, FuncReturn]):
                         "call_id": call_id,
                         "hit": would_hit,
                         "duration": (call_stop - call_start).total_seconds(),
-                        "obj_key": obj_key,
                     }
                 )
             )
@@ -705,12 +706,15 @@ class Memoized(Generic[FuncParams, FuncReturn]):
 
     def would_hit(self, *args: FuncParams.args, **kwargs: FuncParams.kwargs) -> bool:
         call_id = random.randint(0, 2**64 - 1)
-        would_hit, key, obj_key = self._would_hit(call_id, *args, **kwargs)
+        key, entry, obj_key, value_ser = self._would_hit(call_id, *args, **kwargs)
+        would_hit = entry is not None and (not entry.obj_store or value_ser is not None)
         if ops_logger.isEnabledFor(logging.DEBUG):
             ops_logger.debug(
                 json.dumps(
                     {
-                        "event": "hit" if would_hit else "miss",
+                        "pid": os.getpid(),
+                        "tid": threading.get_native_id(),
+                        "event": "hit" if hit else "miss",
                         "call_id": call_id,
                         "name": self.name,
                         "key": key,
@@ -723,32 +727,32 @@ class Memoized(Generic[FuncParams, FuncReturn]):
 
     def _would_hit(
         self, call_id: int, *args: FuncParams.args, **kwargs: FuncParams.kwargs
-    ) -> Tuple[bool, Tuple[Any, ...], int]:
+    ) -> Tuple[Tuple[Any, ...], Optional[Entry], int, Optional[bytes]]:
         # pylint: disable=protected-access
 
-        with perf_ctx("hash", call_id=call_id):
+        with perf_ctx("hash", call_id):
             # Note that the system state and name or so small already, it isn't worth hashing them.
             # They are also used by other Memoized functions in the same MemoizedGroup.
             # We will only hash the potentially large key items that are used exclusively by this Memoized function.
             key = (
                 # Group is a friend class, hence type ignore
                 freeze(
-                    self.group._system_state(), freeze_config
+                    self.group._system_state(), self.group._freeze_config
                 ),  # pylint: disable=protected-access
-                freeze(self.name, freeze_config),
-                freeze(self._func_state(), freeze_config),
-                freeze(self._args2key(*args, **kwargs), freeze_config),
-                freeze(self._args2ver(*args, **kwargs), freeze_config),
+                freeze(self.name, self.group._freeze_config),
+                freeze(self._func_state(), self.group._freeze_config),
+                freeze(self._args2key(*args, **kwargs), self.group._freeze_config),
+                freeze(self._args2ver(*args, **kwargs), self.group._freeze_config),
             )
-            obj_key = cast(int, freeze(key, freeze_config))
+            obj_key = cast(int, freeze(key, self.group._freeze_config))
         with self.group._memory_lock:
             if self.group._fine_grain_persistence:
-                self.group._index_read()
+                self.group._index_read(call_id)
             return (
-                key in self.group._index
-                and (not self._use_obj_store or obj_key in self.group._obj_store),
                 key,
+                self.group._index.get(key, None),
                 obj_key,
+                self.group._obj_store.get(obj_key, None) if self._use_obj_store else None,
             )
 
     def __get__(self, instance: Any, instancetype: Type[Any]) -> BoundMemoized[FuncParams, FuncReturn]:

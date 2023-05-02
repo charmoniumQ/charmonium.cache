@@ -1,10 +1,13 @@
 from __future__ import annotations
+import copy
 import logging
 from typing import Any, Type, List
 
-from charmonium.cache import DirObjStore, MemoizedGroup, freeze_config, memoize
+from charmonium.cache import DEFAULT_FREEZE_CONFIG, DirObjStore, MemoizedGroup, memoize
 from charmonium.cache.util import temp_path
 
+
+freeze_config = copy.deepcopy(DEFAULT_FREEZE_CONFIG)
 freeze_config.recursion_limit = 20
 
 
@@ -13,9 +16,11 @@ def test_instancemethod() -> None:
         def __init__(self, y: int) -> None:
             self.y = y
 
-        @memoize(
-            group=MemoizedGroup(obj_store=DirObjStore(temp_path()), temporary=True),
-        )
+        @memoize(group=MemoizedGroup(
+            obj_store=DirObjStore(temp_path()),
+            freeze_config=freeze_config,
+            temporary=True,
+        ))
         def method(self, z: int) -> int:
             return self.y + z
 
@@ -25,6 +30,12 @@ def test_instancemethod() -> None:
     obj.y = 4
     assert not obj.method.would_hit(obj, 4)
     assert obj.method(4) == 8  # type: ignore
+    obj = Class(4)
+    assert obj.method.would_hit(obj, 4)
+    assert obj.method(4) == 8  # type: ignore
+    obj = Class(5)
+    assert not obj.method.would_hit(obj, 4)
+    assert obj.method(4) == 9  # type: ignore
 
 
 def test_classmethod() -> None:
@@ -32,9 +43,11 @@ def test_classmethod() -> None:
         x: List[int] = [3]
 
         @classmethod
-        @memoize(
-            group=MemoizedGroup(obj_store=DirObjStore(temp_path()), temporary=True),
-        )
+        @memoize(group=MemoizedGroup(
+            obj_store=DirObjStore(temp_path()),
+            freeze_config=freeze_config,
+            temporary=True,
+        ))
         def method(cls: Type[Class], z: int) -> int:
             return cls.x[-1] + z
 
@@ -48,9 +61,11 @@ def test_classmethod() -> None:
 def test_staticemethod() -> None:
     class Class:
         @staticmethod
-        @memoize(
-            group=MemoizedGroup(obj_store=DirObjStore(temp_path()), temporary=True),
-        )
+        @memoize(group=MemoizedGroup(
+            obj_store=DirObjStore(temp_path()),
+            freeze_config=freeze_config,
+            temporary=True,
+        ))
         def method(z: int) -> int:
             return z + 1
 
