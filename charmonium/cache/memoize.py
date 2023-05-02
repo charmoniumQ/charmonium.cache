@@ -690,7 +690,7 @@ class Memoized(Generic[FuncParams, FuncReturn]):
                         "name": self.name,
                         "event": "outer_function",
                         "call_id": call_id,
-                        "hit": would_hit,
+                        "hit": hit,
                         "duration": (call_stop - call_start).total_seconds(),
                     }
                 )
@@ -714,7 +714,7 @@ class Memoized(Generic[FuncParams, FuncReturn]):
                     {
                         "pid": os.getpid(),
                         "tid": threading.get_native_id(),
-                        "event": "hit" if hit else "miss",
+                        "event": "hit" if would_hit else "miss",
                         "call_id": call_id,
                         "name": self.name,
                         "key": key,

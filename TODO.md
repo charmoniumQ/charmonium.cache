@@ -43,6 +43,7 @@
   - [ ] Listen for [audit events]; trigger warning and locally disable cache. Add a `assume_pure` flag.
 - [ ] Fix how we handle temporary directories in tests and doctests
   - [ ] Do I really need `memoize(..., temporary: bool = False)` in tests?
+  - [ ] Make the doctests in `README.rst` work without having to `rm -rf .cache` by hand.
 - [ ] Make it work for instance methods.
 - [ ] Update API doc system.
   - [ ] Spellcheck API docs?
@@ -63,9 +64,6 @@ class ignore_arg(wrapt.ObjectProxy):
     def __getfrozenstate__(self):
         return None
 ```
-
-
-# Minor release
 - [ ] Write about ambiguity in variable names. By reading the source code, you can't tell if a reference is local or global; a local reference can shadow a global one.
 - [ ] Do writing-to-disk off the critical path, in a thread.
 - [ ] Cache should hit if entry is absent in index but present in obj store ("recover" orphans). In this case, we have the result, but not the metadata. Just create the metadata on the spot and use the computed result.
@@ -101,7 +99,8 @@ class ignore_arg(wrapt.ObjectProxy):
 - [ ] Set up git-changelog.
 - [x] Make `charmonium._time_block` serializable
 - [ ] Make an API like `@code_version("1.0")` in `charmonium.freeze`. This prevents freeze from recursing into the function.
-- [ ] Freeze config should be group-wide or fn-specific instead of global.
-- [ ] Write "what makes a good candidate" in `README.rst`
-- [ ] Write about group-level configuration in `README.rst`
+- [x] Freeze config should be group-wide or fn-specific instead of global.
+- [ ] Improve REAMDE
+  - [ ] Write "what makes a good candidate" in `README.rst`
+  - [ ] Write about group-level configuration in `README.rst`
 - [ ] Have option for semi-fine grain persistence: Every N seconds, persist.

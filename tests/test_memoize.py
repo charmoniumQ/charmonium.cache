@@ -4,6 +4,7 @@ import logging
 import pickle
 from typing import Any
 import copy
+import logging
 
 import pytest
 
@@ -13,6 +14,9 @@ from charmonium.cache.util import temp_path
 # import from __init__ because this is an integration test.
 
 calls: list[int] = []
+
+logging.getLogger("charmonium.cache.perf").setLevel(logging.DEBUG)
+logging.getLogger("charmonium.cache.ops").setLevel(logging.DEBUG)
 
 
 @pytest.mark.parametrize(
