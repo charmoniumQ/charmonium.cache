@@ -607,7 +607,7 @@ class Memoized(Generic[FuncParams, FuncReturn]):
         with perf_ctx("deserialize", call_id):
             try:
                 value = cast(FuncReturn, self._pickler.loads(value_ser))
-            except (EOFError, pickling.UnpicklingError):
+            except (EOFError, pickle.UnpicklingError):
                 return False, None
             else:
                 return True, value
@@ -647,6 +647,11 @@ class Memoized(Generic[FuncParams, FuncReturn]):
         if not hit:
             # Do the recompute
             entry, value = self._recompute(call_id, obj_key, *args, **kwargs)
+        else:
+            # These assertions satisfy the type-checker.
+            # Also probably a good idea.
+            assert entry is not None
+            assert value is not None
 
         with self.group._memory_lock:
             if hit:
@@ -703,6 +708,42 @@ class Memoized(Generic[FuncParams, FuncReturn]):
             )
 
         return value
+
+    def call_if_cached(self, *args: FuncParams.args, **kwargs: FuncParams.kwargs) -> tuple[bool, Optional[FuncReturn]]:
+        """If function(input) hits in the cache, return (True, result), otherwise (False, None).
+
+        This function does not mark the cache entry as accessed, count
+        towards time saved, or write the index, because there is no
+        analagous operation (call_if_cached) for an uncached function.
+
+        That makes it fast.
+
+        """
+
+        call_start = datetime.datetime.now()
+        call_id = random.randint(0, 2**64 - 1)
+        key, entry, obj_key, value_ser = self._would_hit(call_id, *args, **kwargs)
+        hit, value = False, None
+        if entry is not None:
+            if entry.obj_store:
+                if value_ser is not None:
+                    hit, value = self._try_unpickle(value_ser, call_id)
+            else:
+                hit, value = True, cast(FuncReturn, entry.value)
+        call_stop = datetime.datetime.now()
+        if perf_logger.isEnabledFor(logging.DEBUG):
+            perf_logger.debug(
+                json.dumps(
+                    {
+                        "name": self.name,
+                        "event": "outer_function",
+                        "call_id": call_id,
+                        "hit": hit,
+                        "duration": (call_stop - call_start).total_seconds(),
+                    }
+                )
+            )
+        return hit, value
 
     def would_hit(self, *args: FuncParams.args, **kwargs: FuncParams.kwargs) -> bool:
         call_id = random.randint(0, 2**64 - 1)

@@ -104,3 +104,4 @@ class ignore_arg(wrapt.ObjectProxy):
   - [ ] Write "what makes a good candidate" in `README.rst`
   - [ ] Write about group-level configuration in `README.rst`
 - [ ] Have option for semi-fine grain persistence: Every N seconds, persist.
+- [ ] Support async locks.
