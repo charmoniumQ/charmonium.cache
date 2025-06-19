@@ -75,14 +75,14 @@ class GDSize(ReplacementPolicy):
     def invalidate(
         self, key: Any, entry: Any
     ) -> None:  # pylint: disable=unused-argument
-        del self._data[key]
+        self._data.pop(key, None)
 
     def evict(self) -> tuple[Any, Entry]:
         if self._data:
             self.inflation, key, entry = min(
                 (score, key, entry) for key, (score, entry) in self._data.items()
             )
-            del self._data[key]
+            self._data.pop(key, None)
             return key, entry
         else:
             raise ValueError("No data left to evict")

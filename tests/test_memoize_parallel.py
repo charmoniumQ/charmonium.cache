@@ -91,7 +91,6 @@ N_PROCS = 5
 N_OVERLAP = 4
 
 
-@pytest.mark.xfail(reason="something with filesystem consistency")
 @pytest.mark.parametrize("ParallelType", [multiprocessing.Process, threading.Thread])
 def test_parallelism(ParallelType: Type[Parallel]) -> None:
     if tmp_root.exists():
@@ -154,7 +153,6 @@ def test_dask_delayed() -> None:
     assert results == tuple(x**2 for call in calls for x in call)
 
 
-@pytest.mark.xfail(reason="something with filesystem consistency")
 def test_dask_bag() -> None:
     if tmp_root.exists():
         shutil.rmtree(tmp_root)

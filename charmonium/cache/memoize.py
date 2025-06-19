@@ -156,7 +156,7 @@ class MemoizedGroup:
         )
         self._version = 0
         self._memory_lock = threading.RLock()
-        self._index_read(0)
+        self._index_read(random.randint(0, 2**64 - 1))
 
     def __init__(
         self,
@@ -245,6 +245,24 @@ class MemoizedGroup:
                 )
             )
 
+    def refresh(self) -> None:
+        """Refresh the this cache from storage
+
+        Note: This happens automatically at function import-time if
+        fine_grain_persistence is enabled, after function call.
+
+        """
+        self._index_read(random.randint(0, 2**64 - 1))
+
+    def commit(self) -> None:
+        """Save this cache into storage.
+
+        Note: This happens automatically at function import-time if
+        fine_grain_persistence is enabled, after function call.
+
+        """
+        self._index_write(random.randint(0, 2**64 - 1))
+
     def _index_read(self, call_id: int) -> None:
         with self._memory_lock, self._index_lock.reader:
             self._index_read_nolock(call_id)
@@ -263,6 +281,7 @@ class MemoizedGroup:
                     ],
                     self._pickler.loads(self._obj_store[self._index_key]),
                 )
+                # TODO: catch the case where this is unpicklable or does not exist.
                 if other_version > current_version:
                     self._version = other_version
                     self._index.update(other_index)
@@ -286,7 +305,7 @@ class MemoizedGroup:
     def _index_write(self, call_id: int) -> None:
         with perf_ctx("index_write", call_id), self._memory_lock, self._index_lock.writer:
             self._index_read_nolock(call_id)
-            self._evict()
+            self._evict(call_id)
             self._version += 1
             self._obj_store[self._index_key] = self._pickler.dumps(
                 (
@@ -320,7 +339,17 @@ class MemoizedGroup:
         with self._memory_lock:
             return (__version__,) + none_tuple(self._extra_system_state())
 
-    def _evict(self) -> None:
+    def evict(self) -> None:
+        """If the size of the cache is greater than ``self._size``, use ``self._replacement_policy``.
+
+        Note: this is automatically triggered automatically either
+        when the function gets called or atexit, depending on the
+        group-level options.
+
+        """
+        self._evict(random.randint(0, 2**64 - 1))
+
+    def _evict(self, call_id: int) -> None:
         with self._memory_lock:
             total_size: bitmath.Bitmath = bitmath.Byte(0)
 
@@ -350,6 +379,7 @@ class MemoizedGroup:
                                 "obj_key": obj_key,
                                 "entry.data_size": entry.data_size.bytes,
                                 "new_total_size": (total_size - entry.data_size).bytes,
+                                "call_id": call_id,
                             }
                         )
                     )
@@ -627,6 +657,7 @@ class Memoized(Generic[FuncParams, FuncReturn]):
                     hit, value = self._try_unpickle(value_ser, call_id)
             else:
                 hit, value = True, cast(FuncReturn, entry.value)
+        # TODO: allow a hit if entry is None but value_ser is not.
 
         if ops_logger.isEnabledFor(logging.DEBUG):
             ops_logger.debug(
@@ -671,7 +702,7 @@ class Memoized(Generic[FuncParams, FuncReturn]):
 
             # Update time_cost
             if self.group._fine_grain_eviction:
-                self.group._evict()
+                self.group._evict(call_id)
 
             if self.group._fine_grain_persistence:
                 self.group._index_write(call_id)
@@ -766,6 +797,17 @@ class Memoized(Generic[FuncParams, FuncReturn]):
             )
         return would_hit
 
+    def clear_entry(
+            self,
+            *args: FuncParams.args,
+            **kwargs: FuncParams.kwargs,
+    ) -> None:
+        call_id = random.randint(0, 2**64 - 1)
+        key, entry, obj_key, value_ser = self._would_hit(call_id, *args, **kwargs)
+        if entry is not None:
+            self.group._deleter((key, entry))
+        assert not self.would_hit(*args, **kwargs)
+
     def _would_hit(
         self, call_id: int, *args: FuncParams.args, **kwargs: FuncParams.kwargs
     ) -> Tuple[Tuple[Any, ...], Optional[Entry], int, Optional[bytes]]:
@@ -789,12 +831,14 @@ class Memoized(Generic[FuncParams, FuncReturn]):
         with self.group._memory_lock:
             if self.group._fine_grain_persistence:
                 self.group._index_read(call_id)
-            return (
-                key,
-                self.group._index.get(key, None),
-                obj_key,
-                self.group._obj_store.get(obj_key, None) if self._use_obj_store else None,
-            )
+            entry = self.group._index.get(key, None)
+        value_ser = self.group._obj_store.get(obj_key, None) if self._use_obj_store else None
+        return (
+            key,
+            entry,
+            obj_key,
+            value_ser,
+        )
 
     def __get__(self, instance: Any, instancetype: Type[Any]) -> BoundMemoized[FuncParams, FuncReturn]:
         """Implement the descriptor protocol to make decorating instance

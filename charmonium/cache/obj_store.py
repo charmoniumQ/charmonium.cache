@@ -93,22 +93,23 @@ class DirObjStore(ObjStore):
 
     def __getitem__(self, key: int) -> bytes:
         path = self.path / self._int2str(key)
-        if not path.exists():
-            raise KeyError(key)
-        else:
+        try:
             return path.read_bytes()
+        except FileNotFoundError:
+            raise KeyError(key)
 
     def __delitem__(self, key: int) -> None:
-        if key in self:
-            # print(f"delitem {key}")
+        try:
             (self.path / self._int2str(key)).unlink()
+        except FileNotFoundError:
+            pass
 
     def get(self, key: int, default: _T) -> Union[bytes | _T]:
         path = self.path / self._int2str(key)
-        if not path.exists():
-            return default
-        else:
+        try:
             return path.read_bytes()
+        except FileNotFoundError:
+            return default
 
     def __contains__(self, key: int) -> bool:
         return (self.path / self._int2str(key)).exists()
