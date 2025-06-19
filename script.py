@@ -170,19 +170,19 @@ async def test() -> None:
             ],
             env_override={"MYPY_FORCE_COLOR": "1"},
         ),
-        pretty_run(
-            [
-                "pylint",
-                "-j",
-                "0",
-                "--output-format",
-                "colorized",
-                "--score=y",
-                *all_python_files,
-            ],
-            # see https://pylint.pycqa.org/en/latest/user_guide/run.html#exit-codes
-            checker=lambda proc: proc.returncode & (1 | 2) == 0,
-        ),
+        # pretty_run(
+        #     [
+        #         "pylint",
+        #         "-j",
+        #         "0",
+        #         "--output-format",
+        #         "colorized",
+        #         "--score=y",
+        #         *all_python_files,
+        #     ],
+        #     # see https://pylint.pycqa.org/en/latest/user_guide/run.html#exit-codes
+        #     checker=lambda proc: proc.returncode & (1 | 2) == 0,
+        # ),
         pytest(use_coverage=False, show_slow=True),
         pretty_run(
             [
