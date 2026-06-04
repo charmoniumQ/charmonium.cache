@@ -361,10 +361,10 @@ class MemoizedGroup:
                 key, entry = self._replacement_policy.evict()
                 if entry.obj_store:
                     obj_key = cast(int, freeze(key, self._freeze_config))
-                    assert (
-                        obj_key in self._obj_store
-                    ), "Replacement policy tried to evict something that wasn't there"
-                    del self._obj_store[obj_key]
+                    if obj_key in self._obj_store:
+                        del self._obj_store[obj_key]
+                    else:
+                        warnings.warn("Replacement policy tried to evict a key that wasn't in the obj store")
                 else:
                     obj_key = None
                 total_size -= entry.data_size
@@ -383,7 +383,10 @@ class MemoizedGroup:
                             }
                         )
                     )
-                del self._index[key]
+                if key in self._index:
+                    del self._index[key]
+                else:
+                    warnings.warn("Replacement policy tried to evict a key that wasn't in the index")
 
     def remove_orphans(self) -> None:
         """Remove data in the objstore that are not referenced by the index.

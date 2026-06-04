@@ -4,13 +4,16 @@
       url = "github:numtide/flake-utils";
     };
     nixpkgs = {
-      url = "github:NixOS/nixpkgs";
+      url = "github:NixOS/nixpkgs?ref=nixos-24.11";
     };
     poetry2nix = {
       url = "github:nix-community/poetry2nix";
       inputs = {
         nixpkgs = {
           follows = "nixpkgs";
+        };
+        flake-utils = {
+          follows = "flake-utils";
         };
       };
     };
@@ -46,7 +49,7 @@
           charmonium-freeze = [ "poetry" ];
           tox = [ "hatchling" "hatch-vcs" ];
           bump2version = [ "setuptools" ];
-          gitchangelog = [ "setuptools" "d2to1" ];
+          gitchangelog = [ "setuptools" ];
           mando = [ "setuptools" ];
           proselint = [ "poetry" ];
           deptry = [ "poetry" ];

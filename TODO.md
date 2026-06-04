@@ -35,20 +35,14 @@
 # Requested changes to Charmonium.freeze
 - [x] Make it work for instance methods.
 - [x] Make `charmonium._time_block` serializable
-- [ ] Add API for ignoring modules that come from a requirements file or pyproject.toml (based on version instead of contents of module)
-  - This is quite difficult because there is no differences between checking the call graph and checking the closed-over variables.
-  - Could also just assume they are pure.
-  - ```
-import wrapt
-class ignore_arg(wrapt.ObjectProxy):
-    def __getfrozenstate__(self):
-        return None
-```
+- [ ] Add an option to assume purity with exceptions or assume non-purity with exceptions.
+- [ ] Add support for caching async functions.
+- [ ] Add support for caching a generator. When the function recomputes, it should stream values out, while also storing them in a list, and once the stream is finished, store the list.
+- [ ] Add support for caching list -> list functions.
+- [ ] Make it easier to add performance logging.
 - [ ] Make sure adding a loghandler doesn't invalidate cache.
 - [ ] Make an API like `@code_version("1.0")` in `charmonium.freeze`. This prevents freeze from recursing into the function.
 - [ ] Make a CLI to query the current freeze value of the code. This should be able to be passed as an arg to `@code_version` as above.
-- [ ] Make all packages in stdlib be assumed constant.
-  - This may not be valid if stdlib has state, e.g. `random`.
 - [ ] Break callgraph into submodule.
   - [ ] Scan for references to non-deterministic functions (time, random, sys, os, path), emit audit event.
   - [ ] Cache callgraph and global var names.
@@ -60,10 +54,8 @@ class ignore_arg(wrapt.ObjectProxy):
   - Add API for deleting one entry from cache
   - Call if would be cache hit, else return None
   - Tests!
-- [ ] Add helper for caching a stream. When the function recomputes, it should stream values out, while also storing them in a list, and once the stream is finished, store the list.
 - [ ] Cache should hit if entry is absent in index but present in obj store ("recover" orphans). In this case, we have the result, but not the metadata. Just create the metadata on the spot and use the computed result.
 - [ ] Updating the entry atime only needs to be done if fine_grained_evictions. Notably, fine_grain_persistence should not need a write_lock on the index.
-- [ ] Make an Azure lock.
 - Make resistant to errors.
   - [x] Add `commit()`. Users can call `commit()` to write the cache index before doing a risky operation or an operation that would invite reuse across processes.
   - [ ] Use`sys.excepthook` to write the cache index before crashing.
